@@ -1,7 +1,7 @@
 
-include(../../../CMakeMacros.txt)
+include(${CMAKE_SOURCE_DIR}/CMakeMacros.txt)
 
-set(SS2DFolders "Projects/SpaceShooter2D")
-addProject("SpaceShooter2D" SS2DFolders)
+set(folders "")
+addProject("SpaceShooter2D" folders)
 
 
