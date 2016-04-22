@@ -45,6 +45,7 @@ public:
 	String ToString();
 
 	static List<Movement> ParseFrom(String);
+	String Name() const;
 	static String Name(int type);
 
 	/// Adds level speed and sets ship speed accordingly.

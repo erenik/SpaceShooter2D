@@ -112,23 +112,75 @@ void Level::Cleanup()
 	for (int i = 0; i < ships.Size(); ++i)
 	{
 		Ship * ship = ships[i];
-		if (ship->destroyed)
+		if (ship->destroyed || !ship->spawned)
+		{
+			ships.RemoveItem(ship); // Remove it. Remove links to spawn-group too.
+			delete ship;
 			continue;
+		}
 		if (!ship->spawned)
 			continue;
 		if (!ship->entity)
 			continue;
+		// any with fucked up position? remove it.
+		if (ship->entity->worldPosition.x != ship->entity->worldPosition.x)
+		{
+			std::cout<<"Fuuucked up";
+			PrintEntityData(ship->entity);
+			// Remove?
+			ship->Despawn(false);
+			continue;
+		}
 		// Check if it should de-spawn.
 		if (ship->despawnOutsideFrame && ship->entity->worldPosition[0] < despawnPositionLeft && ship->parent == NULL)
 		{
 			ship->Despawn(false);
 		}
 	}
-
 }
 
 void Level::Process(int timeInMs)
 {
+
+	/// Check for suspected buggy ships.
+	static int second = 0;
+	second += timeInMs;
+	if (second >500)
+	{
+		second = 0;
+		List<Ship*> spookyShips;
+		int playerColliding = 0,
+			enemyCategory = 0;
+		
+		int formations[Formation::FORMATIONS];
+		memset(formations, 0, sizeof(int) * Formation::FORMATIONS);
+		for (int i = 0; i < ships.Size(); ++i)
+		{
+			Ship * ship = ships[i];
+			if (ship->entity)
+			{
+				if (!ship->entity->registeredForPhysics)
+				{
+					spookyShips.AddItem(ship);
+					++formations[ship->spawnGroup->formation];
+				}
+			}
+			if (!ship->entity)
+				continue;
+			if (ship->entity->physics->collisionFilter | CC_ALL_PLAYER)
+				++playerColliding;
+			if (ship->entity->physics->collisionCategory | CC_ALL_ENEMY)
+				++enemyCategory;
+		}
+		std::cout<<"\nSpooky ships found: "<<spookyShips.Size()<<" playerFilter: "<<playerColliding<<" enemyCategory: "<<enemyCategory<<" out of "<<ships.Size()<<" ships.";
+		for (int i = 0; i < Formation::FORMATIONS; ++i)
+		{
+			if (formations[i] > 0)
+				std::cout<<"\n in formation "<<i<<": "<<formations[i];
+		}
+	}
+
+
 	activeLevel = this;
 
 	removeInvuln = levelEntity->worldPosition[0] + playingFieldHalfSize[0] + playingFieldPadding + 1.f;

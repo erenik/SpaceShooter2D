@@ -6,11 +6,12 @@
 #include "Message/FileEvent.h"
 #include "MovementPattern.h"
 
-#include "SpaceShooter2D/SpaceShooter2D.h"
+#include "SpaceShooter2D.h"
 #include "Base/WeaponScript.h"
 
 #include "Application/Application.h"
 #include "StateManager.h"
+#include "Level/SpawnGroup.h"
 
 #include "Physics/Messages/CollisionCallback.h"
 #include "Window/AppWindow.h"
@@ -26,7 +27,7 @@
 #include "Render/RenderPass.h"
 
 #include "Message/MathMessage.h"
-#include "SpaceShooter2D/Base/Gear.h"
+#include "Base/Gear.h"
 
 #include "Input/InputManager.h"
 
@@ -278,6 +279,26 @@ void OnPlayerInvulnerabilityUpdated()
 	
 }
 
+void PrintEntityData(Entity * entity)
+{
+	std::cout<<"\n\nEntity name: "<<entity->name
+		<<"\nPosition: "<<entity->worldPosition
+		<<" CC: "<<entity->physics->collisionCategory<<" CF: "<<entity->physics->collisionFilter
+		<<" Type: "<<(entity->physics->type == PhysicsType::DYNAMIC? "Dynamic" : (entity->physics->type == PhysicsType::KINEMATIC? "Kinematic" : "Static"))
+		<<"\nCollission enabled: "<<(entity->physics->collisionsEnabled? "Yes" : "No")<<", Physical radius: "<<entity->physics->physicalRadius
+		<<", NoCollissionResolutions: "<<(entity->physics->noCollisionResolutions? "Yes" : "No");
+	ShipProperty * sp = (ShipProperty*) entity->GetProperty(ShipProperty::ID());
+	if (sp)
+	{
+		const Ship * ship = sp->GetShip();
+		std::cout<<"\nSleeping: "<<(sp->sleeping? "Yes" : "No")
+			<<", HP: "<<ship->hp<<", Allied: "<<(ship->allied? "Yes" : "No")
+			<<"\nLastCollission: "<<ship->lastShipCollision.Seconds()<<", CollisionDmgCooldown: "<<ship->collisionDamageCooldown.Seconds()
+			<<"\nMovement pattern: "<<ship->spawnGroup->mp.name<<" CurrMove: "<<ship->movements[ship->currentMovement].Name()
+			<<"\nSGFormation: "<<Formation::GetName(ship->spawnGroup->formation)<<" SGAmount: "<<ship->spawnGroup->number;
+	}
+}
+
 /// Callback function that will be triggered via the MessageManager when messages are processed.
 void SpaceShooter2D::ProcessMessage(Message * message)
 {
@@ -287,6 +308,17 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 	level.ProcessMessage(message);
 	switch(message->type)
 	{
+		case MessageType::RAYCAST: 
+		{
+			Raycast * rayc = (Raycast*) message;
+			std::cout<<"\nRaycast hit "<<rayc->isecs.Size()<<" entities/intersections.";
+			for (int i = 0; i < rayc->isecs.Size(); ++i)
+			{
+				Intersection isec = rayc->isecs[i];
+				PrintEntityData(isec.entity);
+			}
+			break;
+		}
 		case MessageType::FILE_EVENT:
 		{
 			FileEvent * fv = (FileEvent *) message;
@@ -398,6 +430,10 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 			{
 				playerInvulnerability = !playerInvulnerability;
 				OnPlayerInvulnerabilityUpdated();
+			}
+			if (msg == "ReloadWeapon")
+			{
+				playerShip->activeWeapon->QueueReload();
 			}
 			if (msg == "Continue")
 			{
@@ -900,12 +936,6 @@ void SpaceShooter2D::Render(GraphicsState * graphicsState)
 	}
 }
 
-// Update ui
-void SpaceShooter2D::OnScoreUpdated()
-{
-
-}
-
 /// o.o
 Entity * SpaceShooter2D::OnShipDestroyed(Ship * ship)
 {
@@ -1249,6 +1279,17 @@ void SpaceShooter2D::OpenMainMenu()
 		NewGame();
 	}
 }
+
+void SpaceShooter2D::MouseClick(AppWindow * appWindow, bool down, int x, int y, UIElement * elementClicked)
+{
+	if (down)
+	{
+		Ray ray; 
+		appWindow->GetRayFromScreenCoordinates(x,y, ray);
+		PhysicsMan.QueueMessage(new PMRaycast(ray));
+	}
+}
+
 
 /// Where the ship will be re-fitted and new gear bought.
 void SpaceShooter2D::EnterShipWorkshop()

@@ -2,8 +2,8 @@
 /// 2015-01-21
 /// Projectile.
 
-#include "SpaceShooter2D/SpaceShooter2D.h"
-#include "SpaceShooter2D/Properties/ProjectileProperty.h"
+#include "SpaceShooter2D.h"
+#include "Properties/ProjectileProperty.h"
 
 ProjectileProperty::ProjectileProperty(const Weapon & weaponThatSpawnedIt, Entity * owner, bool enemy)
 : EntityProperty("ProjProp", ID(), owner), weapon(weaponThatSpawnedIt), enemy(enemy)
@@ -26,14 +26,20 @@ void ProjectileProperty::OnCollision(Collision & data)
 //	Destroy();
 }
 
-void ProjectileProperty::Destroy()
+void ProjectileProperty::Remove()
 {
-	if (sleeping)
-		return;
 	// Remove self.
 	sleeping = true;
 	MapMan.DeleteEntity(owner);
 	projectileEntities.Remove(owner);
+}
+
+void ProjectileProperty::Destroy()
+{
+	if (sleeping)
+		return;
+
+	Remove();
 
 	// Check distance to player.
 //	Vector3f vectorDistance = (player1->position - atPosition);
@@ -89,6 +95,16 @@ void ProjectileProperty::Process(int timeInMs)
 	if (paused)
 		return;
 	timeAliveMs += timeInMs;
+	if (timeAliveMs > weapon.lifeTimeMs)
+	{
+		if (weapon.explosionRadius > 0.001)
+		{
+			Destroy();
+			return;
+		}
+		Remove();
+		return;
+	}
 	if (weapon.type == LASER_BURST)
 	{
 		if (nextWobbleMs == 0 || nextWobbleMs < timeAliveMs)

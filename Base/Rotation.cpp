@@ -4,7 +4,7 @@
 
 #include "Rotation.h"
 
-#include "SpaceShooter2D/SpaceShooter2D.h"
+#include "SpaceShooter2D.h"
 #include "File/LogFile.h"
 
 String Rotation::ToString()

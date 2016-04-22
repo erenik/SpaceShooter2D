@@ -2,6 +2,9 @@
 /// 2016-02-25
 /// Movement pattern class batching up movement, rotation, etc. for easing level generation.
 
+#ifndef MOVEMENT_PATTERN_H
+#define MOVEMENT_PATTERN_H
+
 #include "Base/Movement.h"
 #include "Base/Rotation.h"
 
@@ -18,3 +21,5 @@ public:
 	Vector2f spawnOffset;
 
 };
+
+#endif

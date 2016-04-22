@@ -3,7 +3,7 @@
 /// Integrator
 
 #include "SSIntegrator.h"
-#include "SpaceShooter2D/SpaceShooter2D.h"
+#include "SpaceShooter2D.h"
 
 extern Entity * playerEntity;
 

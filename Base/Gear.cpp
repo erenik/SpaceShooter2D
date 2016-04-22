@@ -2,7 +2,7 @@
 /// 2015-02-06
 /// o.o
 
-#include "SpaceShooter2D/Base/Gear.h"
+#include "Gear.h"
 #include "File/File.h"
 #include "String/StringUtil.h"
 

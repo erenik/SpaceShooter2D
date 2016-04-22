@@ -60,8 +60,8 @@
 #include "Physics/SpaceShooterCR.h"
 #include "Game/GameVariableManager.h"
 
-#include "SpaceShooter2D/Properties/ShipProperty.h"
-#include "SpaceShooter2D/Properties/ProjectileProperty.h"
+#include "Properties/ShipProperty.h"
+#include "Properties/ProjectileProperty.h"
 
 // Collision categories.
 #define CC_PLAYER		1 
@@ -117,6 +117,8 @@ int DiffCost(String toUpgrade);
 
 /// In WeaponScriptEditing.cpp
 void ProcessMessageWSS(Message * message);
+/// Before killing 'em.
+void PrintEntityData(Entity * entity);
 
 class SpaceShooter2D : public AppState 
 {
@@ -189,6 +191,12 @@ public:
 	/// Resets all the above.
 	void ResetLevelStats();
 // private:
+
+	/** Handles a mouse click.
+		Argument true indicate that the button was pressed, while false indicates that it was just released.
+		Default arguments for x and y indicate that they should not be refreshed.
+	*/
+	virtual void MouseClick(AppWindow * appWindow, bool down, int x, int y, UIElement * elementClicked);
 
 	/// Starts a new game. Calls LoadLevel
 	void NewGame();

@@ -19,6 +19,7 @@ public:
 	// Static version.
 	static int ID();
 
+	const Ship * GetShip() const {return ship;};
 	void Remove();
 	// Reset sleep.
 	void OnSpawn();

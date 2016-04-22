@@ -78,12 +78,10 @@ void GenerateLevel (String arguments)
 		}
 
 		//Select movement pattern
-		MovementPattern mp = MovementPattern::movementPatterns[selector.Randi(MovementPattern::movementPatterns.Size())];
-		sg->movements = mp.movements;
-		std::cout<<std::endl<<mp.name;
+		sg->mp = MovementPattern::movementPatterns[selector.Randi(MovementPattern::movementPatterns.Size())];
+		std::cout<<"\n"<<sg->mp.name;
 		
 		//Select Rotation pattern
-		sg->rotations = mp.rotations;
 		// When it spawns
 		sg->spawnTime = spawnTime;
 		// Pick a ship
@@ -109,7 +107,7 @@ void GenerateLevel (String arguments)
 		float randomAmountY = playingFieldSize.y - sg->size.y;
 		sg->position = Vector2f(playingFieldHalfSize.x+5.f, selector.Randf(randomAmountY) - randomAmountY * 0.5f);
 		/// Add to position offsets if requested by the movement pattern
-		sg->position += mp.spawnOffset;
+		sg->position += sg->mp.spawnOffset;
 
 
 		// Cooldown between formation spawns

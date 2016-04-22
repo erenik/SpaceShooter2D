@@ -5,7 +5,7 @@
 #ifndef PROJ_PROP_H
 #define PROJ_PROP_H
 
-#include "SpaceShooter2D/Base/Weapon.h"
+#include "Base/Weapon.h"
 #include "Entity/EntityProperty.h"
 #include "Time/Time.h"
 
@@ -19,7 +19,8 @@ public:
 	/// If reacting to collisions...
 	virtual void OnCollision(Collision & data);
 
-	void Destroy();
+	void Remove();	/// Removes entity.
+	void Destroy();	/// Creates GFX for explosions, detonates for missiles
 
 	// Fall asleep.. unregistering it from physics, graphics, etc.
 	void SleepThread();

@@ -5,7 +5,7 @@
 #ifndef EXPLOSION_H
 #define EXPLOSION_H
 
-#include "SpaceShooter2D/Base/Weapon.h"
+#include "Base/Weapon.h"
 
 class Ship;
 

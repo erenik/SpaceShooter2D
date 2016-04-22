@@ -5,8 +5,9 @@
 #ifndef SPAWN_GROUP_H
 #define SPAWN_GROUP_H
 
-#include "SpaceShooter2D/Base/Ship.h"
+#include "Base/Ship.h"
 #include "Time/Time.h"
+#include "MovementPattern.h"
 
 /// Types. Default LINE_X?
 namespace Formation {
@@ -32,6 +33,7 @@ enum {
 
 class SpawnGroup 
 {
+	friend class Ship;
 public:
 	SpawnGroup();
 	virtual ~SpawnGroup();
@@ -68,8 +70,7 @@ public:
 	int number;
 	// See enum above.
 	int formation;
-	List<Movement> movements;
-	List<Rotation> rotations;
+	MovementPattern mp;
 	void ParseFormation(String fromString);
 	/// Usually just 1 or 2 sizes are used (X,Y)
 	Vector3f size;

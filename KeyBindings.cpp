@@ -2,7 +2,7 @@
 /// 2015-03-04
 /// Handling of it. SpaceShooter2D is getting too long for my taste to contain more...
 
-#include "SpaceShooter2D/SpaceShooter2D.h"
+#include "SpaceShooter2D.h"
 
 #include "Input/Action.h"
 #include "Input/InputManager.h"
@@ -17,6 +17,7 @@ void SpaceShooter2D::CreateDefaultBindings()
 	BINDING(Action::CreateStartStopAction("MoveShipDown"), KEY::S);
 	BINDING(Action::CreateStartStopAction("MoveShipLeft"), KEY::A);
 	BINDING(Action::CreateStartStopAction("MoveShipRight"), KEY::D);
+	BINDING(Action::FromString("ReloadWeapon"), KEY::R);
 	BINDING(Action::FromString("ToggleWeaponScript"), KEY::E);
 	BINDING(Action::FromString("ActivateSkill"), KEY::Q);
 	BINDING(Action::FromString("ResetCamera"), KEY::HOME);

@@ -204,10 +204,10 @@ void SpawnGroup::PrepareForSpawning(SpawnGroup * parent)
 	switch(formation)
 	{
 		case Formation::V_X:
-			offsetPerSpawn.x = size.x / ((float)floor((number) / 2.0 + 0.5) - 1);
+			offsetPerSpawn.x = size.x / MaximumFloat(((float)floor((number) / 2.0 + 0.5) - 1), 1);
 			break;
 		case Formation::V_Y:
-			offsetPerSpawn.y = size.y / ((float)floor((number) / 2.0 + 0.5) - 1);
+			offsetPerSpawn.y = size.y / MaximumFloat(((float)floor((number) / 2.0 + 0.5) - 1), 1);
 			break;
 		case Formation::X:
 		{
@@ -319,6 +319,7 @@ void SpawnGroup::PrepareForSpawning(SpawnGroup * parent)
 		/// Add group position offset (if any)
 		position += this->position;
 
+		assert(position.x == position.x);
 		std::cout<<"\nSpawning ship @ x"<<position.x<<" y"<<position.y;
 
 		/// Add current position offset to it.
@@ -337,6 +338,11 @@ end:
 	if (parent)
 		parent->ships.Add(ships);
 	assert(ships.Size());
+	/// Re-link all ships to point spawngroup to the current one.
+	for (int i = 0; i < ships.Size(); ++i)
+	{
+		ships[i]->spawnGroup = this;
+	}
 }
 
 void SpawnGroup::AddShipAtPosition(ConstVec3fr position)
@@ -349,19 +355,18 @@ void SpawnGroup::AddShipAtPosition(ConstVec3fr position)
 	}
 	Ship * ship = newShip;
 	ship->RandomizeWeaponCooldowns();
-	ship->spawnGroup = this;
 	/// Apply spawn group properties.
 	ship->shoot &= shoot;
 	ship->speed *= relativeSpeed;
 	ship->position = position;
 	/// ....
-	if(movements.Size())
+	if(mp.movements.Size())
 	{
-		ship->movements = movements;
+		ship->movements = mp.movements;
 	}
-	if(rotations.Size())
+	if(mp.rotations.Size())
 	{
-		ship->rotations = rotations;
+		ship->rotations = mp.rotations;
 	}
 	ships.AddItem(ship);
 }

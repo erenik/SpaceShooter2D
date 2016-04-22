@@ -9,7 +9,7 @@
 #include "MathLib.h"
 #include "Movement.h"
 #include "Rotation.h"
-#include "SpaceShooter2D/Base/Gear.h"
+#include "Base/Gear.h"
 
 class Script;
 class Entity;

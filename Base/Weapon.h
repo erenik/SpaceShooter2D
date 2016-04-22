@@ -83,6 +83,7 @@ public:
 	/// Called to update the various states of the weapon, such as reload time, making lightning arcs jump, etc.
 	void Process(Ship * ship, int timeInMs);
 	void ProcessLightning(Ship * ship, bool initial = false);
+	void QueueReload();
 	/// Based on ship.
 	Vector3f WorldPosition(Entity * basedOnShipEntity);
 	Vector3f location;
@@ -93,6 +94,7 @@ public:
 	/// Delay in milliseconds between bounces for lightning
 	int arcDelay;
 	int maxBounces; /// Used to make lightning end prematurely.
+	Ship * nextTarget; // For lightning
 	int currCooldownMs; /// Used instead of flyTime.
 	float stability;
 	String name;
@@ -101,7 +103,10 @@ public:
 	int type; // mainly for player-based weapons.
 	int level; // Also mainly for player-based weapons.
 	/// -1 = Infinite, >= 0 = Finite
+	bool reloading;
+	int shotsLeft;
 	int ammunition;
+	int lifeTimeMs;
 	int numberOfProjectiles; // Per 'firing'
 	int distribution; // Default CONE?
 	float linearDamping; // Applied for slowing bullets (Ion Flak).

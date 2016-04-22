@@ -10,10 +10,10 @@
 
 #include "File/LogFile.h"
 #include "Game/GameVariable.h"
-#include "SpaceShooter2D/Level/SpawnGroup.h"
+#include "Level/SpawnGroup.h"
 #include "WeaponScript.h"
-#include "SpaceShooter2D/SpaceShooterScript.h"
-#include "../Properties/ShipProperty.h"
+#include "SpaceShooterScript.h"
+#include "Properties/ShipProperty.h"
 
 int Ship::shipIDEnumerator = 0;
 
@@ -76,7 +76,8 @@ Ship::~Ship()
 	weapons.ClearAndDelete();
 	if (spawnGroup)
 	{
-		assert(false);
+		spawnGroup->ships.RemoveItem(this);
+		spawnGroup = 0;
 	}
 	if (entity)
 	{
@@ -271,7 +272,7 @@ void Ship::Despawn(bool doExplodeEffectsForChildren)
 	// Delete entity first.
 	Entity * tmp = entity;
 	entity = 0;
-	std::cout<<"\nDeleting entity "+tmp->name;
+//	std::cout<<"\nDeleting entity "+tmp->name;
 	MapMan.DeleteEntity(tmp);
 	/// Waaaat.
 	shipEntities.RemoveItem(tmp);

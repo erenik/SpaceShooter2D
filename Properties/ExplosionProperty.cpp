@@ -2,8 +2,8 @@
 /// 2015-01-21
 /// Projectile.
 
-#include "SpaceShooter2D/SpaceShooter2D.h"
-#include "SpaceShooter2D/Properties/ExplosionProperty.h"
+#include "SpaceShooter2D.h"
+#include "Properties/ExplosionProperty.h"
 #include "PhysicsLib/EstimatorFloat.h"
 
 ExplosionProperty::ExplosionProperty(const Weapon & weaponThatSpawnedIt, Entity * owner)

@@ -46,7 +46,9 @@ Weapon::Weapon()
 	explosionRadius = 0;
 	penetration = 0;
 	burst = false;
+	reloading = false;
 	aim = false;
+	shotsLeft = 0;
 	estimatePosition = false;
 	projectilePath = STRAIGHT;
 	burstStart = Time(TimeType::MILLISECONDS_NO_CALENDER, 0);
@@ -60,6 +62,7 @@ Weapon::Weapon()
 	burstRounds = 3;
 	burstRoundsShot = 0;
 	burstRoundDelay = Time(TimeType::MILLISECONDS_NO_CALENDER, 50);
+	lifeTimeMs = 3000;
 }
 
 bool Weapon::Get(String byName, Weapon * weapon)
@@ -151,6 +154,8 @@ bool Weapon::LoadTypes(String fromFile)
 				weapon.cooldown = Time::Milliseconds((int) value.ParseFloat());
 			else if (column == "Penetration")
 				weapon.penetration = value.ParseFloat();
+			else if (column == "lifeTimeMs")
+				weapon.lifeTimeMs = value.ParseInt();
 			else if (column == "Burst")
 				weapon.burst = value.ParseBool();
 			else if (column == "Burst details")
@@ -297,19 +302,16 @@ void Weapon::Shoot(Ship * ship)
 	if (burst)
 	{
 		/// Mid-burst?
-		if (burstRoundsShot < burstRounds)
+		if (shotsLeft)
 		{
-			// Check time between burst rounds.
-			++burstRoundsShot;
+			--shotsLeft;
 			// Set next cooldown to be the burst delay.
 			currCooldownMs = (int) burstRoundDelay.Milliseconds();
 		}
 		/// End of burst.
 		else {
-			burstStart = flyTime;
-			++burstRoundsShot;
+			reloading = true;
 			currCooldownMs = (int) cooldown.Milliseconds();
-			burstRoundsShot = 0;
 		}
 	}
 	else
@@ -415,6 +417,14 @@ void Weapon::Shoot(Ship * ship)
 	QueueAudio(new AMPlaySFX("sfx/"+shootSFX+".wav", 1.f + numberOfProjectiles * 0.01f));
 }
 
+void Weapon::QueueReload()
+{
+	if (!burst)
+		return;
+	reloading = true;
+	currCooldownMs = cooldown.Milliseconds();
+}
+
 /// Called to update the various states of the weapon, such as reload time, making lightning arcs jump, etc.
 void Weapon::Process(Ship * ship, int timeInMs)
 {
@@ -422,9 +432,19 @@ void Weapon::Process(Ship * ship, int timeInMs)
 		return;
 	weaponWorldPosition = WorldPosition(ship->entity);
 
+
+	if (shotsLeft <= 0 && !reloading)
+	{
+		QueueReload();
+	}
+
 	currCooldownMs -= timeInMs;
-	if (currCooldownMs < 0)
+	if (currCooldownMs < 0 && reloading)
+	{
+		reloading = false;
 		currCooldownMs = 0;
+		shotsLeft = this->burstRounds;
+	}
 	switch(type)
 	{
 		case LIGHTNING:
@@ -458,6 +478,7 @@ void Weapon::ProcessLightning(Ship * owner, bool initial /* = true*/)
 		arc->arcTime = flyTime;
 		arc->maxBounces = maxBounces;
 		arcs.AddItem(arc);
+		nextTarget = 0;
 		shipsStruckThisArc.Clear();
 	}
 	// Proceed all arcs which have already begun.
@@ -470,42 +491,53 @@ void Weapon::ProcessLightning(Ship * owner, bool initial /* = true*/)
 		if (arc->arcFinished)
 			continue;
 		arcingAllDone = false;
+
+		// Find next entity.
+		if (nextTarget == 0)
+		{
+			List<float> distances;
+			List<Ship*> possibleTargets = spaceShooter->level.GetShipsAtPoint(arc->position, maxRange, distances);
+			if (!initial)
+				std::cout<<"\nPossible targets: "<<possibleTargets.Size();
+			possibleTargets.RemoveUnsorted(shipsStruckThisArc);
+			if (!initial)
+				std::cout<<" - shipsAlreadyStruck("<<shipsStruckThisArc.Size()<<") = "<<possibleTargets.Size();
+			if (possibleTargets.Size() == 0)
+			{
+				/// Unable to Arc, set the child to a bad number?
+				arc->arcFinished = true;
+				arcingAllDone = true;
+				continue;
+			}
+			// Grab first one which hasn't already been struck?
+			Ship * target = possibleTargets[0];
+			// Recalculate distance since list was unsorted earlier...
+			float distance = (target->entity->worldPosition - arc->position).Length();
+			/// Grab closest one.
+			for (int j = 1; j < possibleTargets.Size(); ++j)
+			{
+				Ship * t2 = possibleTargets[j];
+				float d2 = (t2->entity->worldPosition - arc->position).Length();
+				if (d2 < distance)
+				{
+					target = t2;
+					distance = d2;
+				}
+			}
+			if (distance > arc->maxRange)
+			{
+				arc->arcFinished = true;
+				arcingAllDone = true;
+				continue;
+			}
+			nextTarget = target;
+		}
+		/// Wait some time before each bounce too.
 		if ((flyTime - arc->arcTime).Milliseconds() < arcDelay)
 			continue;
 
-		// Find next entity.
-		List<float> distances;
-		List<Ship*> possibleTargets = spaceShooter->level.GetShipsAtPoint(arc->position, maxRange, distances);
-		std::cout<<"\nPossible targets: "<<possibleTargets.Size();
-		possibleTargets.RemoveUnsorted(shipsStruckThisArc);
-		std::cout<<" - shipsAlreadyStruck("<<shipsStruckThisArc.Size()<<") = "<<possibleTargets.Size();
-		if (possibleTargets.Size() == 0)
-		{
-			/// Unable to Arc, set the child to a bad number?
-			arc->arcFinished = true;
-			continue;
-		}
-		// Grab first one which hasn't already been struck?
-		Ship * target = possibleTargets[0];
-		// Recalculate distance since list was unsorted earlier...
+		Ship * target = nextTarget;
 		float distance = (target->entity->worldPosition - arc->position).Length();
-		/// Grab closest one.
-		for (int j = 1; j < possibleTargets.Size(); ++j)
-		{
-			Ship * t2 = possibleTargets[j];
-			float d2 = (t2->entity->worldPosition - arc->position).Length();
-			if (d2 < distance)
-			{
-				target = t2;
-				distance = d2;
-			}
-		}
-		if (distance > arc->maxRange)
-		{
-			arc->arcFinished = true;
-			continue;
-		}
-
 		LightningArc * newArc = new LightningArc();
 		newArc->position = target->entity->worldPosition;
 		newArc->maxRange = arc->maxRange - distance;
@@ -547,5 +579,10 @@ void Weapon::ProcessLightning(Ship * owner, bool initial /* = true*/)
 			--i;
 			delete arc;
 		}
+		nextTarget = 0;
+	}
+	if (initial && arcingAllDone)
+	{
+		currCooldownMs = 0;
 	}
 }

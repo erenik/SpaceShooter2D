@@ -2,7 +2,7 @@
 /// 2015-01-21
 /// Ship property
 
-#include "SpaceShooter2D/Properties/ShipProperty.h"
+#include "Properties/ShipProperty.h"
 #include "ExplosionProperty.h"
 #include "Entity/Entity.h"
 
@@ -21,7 +21,7 @@
 #include "Input/InputManager.h"
 #include "Window/AppWindowManager.h"
 
-#include "SpaceShooter2D/SpaceShooter2D.h"
+#include "SpaceShooter2D.h"
 
 ShipProperty::ShipProperty(Ship * ship, Entity * owner)
 : EntityProperty("ShipProperty", ID(), owner), ship(ship)

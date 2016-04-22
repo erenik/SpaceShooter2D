@@ -2,11 +2,14 @@
 /// 2015-02-07
 /// All code pertaining to updating UI... to separate it from the rest.
 
-#include "SpaceShooter2D/SpaceShooter2D.h"
+#include "SpaceShooter2D.h"
 #include "File/SaveFile.h"
 #include "Application/Application.h"
 
 #include "Window/AppWindow.h"
+
+#undef TEXT
+
 #include "UI/UILists.h"
 #include "UI/UIUtil.h"
 #include "UI/UIInputs.h"
@@ -146,13 +149,29 @@ void SpaceShooter2D::UpdateHUDGearedWeapons()
 		QueueGraphics(new GMSetUIb(child->name, GMUI::HOVERABLE, true));
 
 		/// Clear and add associated picture and cooldown-overlay on top.
-
 		QueueGraphics(new GMClearUI(child->name));
+
 		UIElement * cooldownOverlay = new UIElement();
 		cooldownOverlay->name = "WeaponCooldownOverlay"+String(i);
 		cooldownOverlay->textureSource = "img/ui/Cooldown_37.png";
 		QueueGraphics(new GMAddUI(cooldownOverlay, child->name));
+
+		// If weapon begs question of ammo (bursts).
+		if (weapon->burst)
+		{
+			UIElement * ammunition = new UIElement();
+			ammunition->name = "WeaponAmmunitionOverlay"+String(i);
+			ammunition->textureSource = "0x0000";
+			ammunition->text = "inf";
+			QueueGraphics(new GMAddUI(ammunition, child->name));
+		}
 	}
+}
+
+// Update ui
+void SpaceShooter2D::OnScoreUpdated()
+{
+	GraphicsMan.QueueMessage(new GMSetUIi("Scorei", GMUI::INTEGER_INPUT, LevelScore()->iValue));
 }
 
 void SpaceShooter2D::UpdateUIPlayerHP(bool force)
@@ -160,7 +179,7 @@ void SpaceShooter2D::UpdateUIPlayerHP(bool force)
 	static int lastHP;
 	if (lastHP == playerShip->hp && !force)
 		return;
-	lastHP = playerShip->hp;
+	lastHP = (int)playerShip->hp;
 	GraphicsMan.QueueMessage(new GMSetUIi("HP", GMUI::INTEGER_INPUT, (int)playerShip->hp));	
 }
 void SpaceShooter2D::UpdateUIPlayerShield(bool force)
@@ -168,7 +187,7 @@ void SpaceShooter2D::UpdateUIPlayerShield(bool force)
 	static int lastShield;
 	if (lastShield == playerShip->shieldValue && !force)
 		return;
-	lastShield = playerShip->shieldValue;
+	lastShield = (int)playerShip->shieldValue;
 	GraphicsMan.QueueMessage(new GMSetUIi("Shield", GMUI::INTEGER_INPUT, (int)playerShip->shieldValue));
 }
 
@@ -179,10 +198,10 @@ void SpaceShooter2D::UpdateCooldowns()
 	{
 		// Check cooldown.
 		Weapon * weapon = weapons[i];
-		float timeTilNextShotMs = weapon->currCooldownMs;
+		float timeTilNextShotMs = (float) weapon->currCooldownMs;
 //		if (weapon->burst)
 	//		timeTilNextShotMs = (flyTime - weapon->burstStart).Milliseconds();
-		float maxCooldown = weapon->cooldown.Milliseconds();
+		float maxCooldown = (float) weapon->cooldown.Milliseconds();
 		float ratioReady = (1 - timeTilNextShotMs / maxCooldown) * 100.f;
 		// Change texture accordingly.
 		List<int> avail(0, 12, 25, 37);
@@ -196,6 +215,14 @@ void SpaceShooter2D::UpdateCooldowns()
 			good = av;
 		}
 		QueueGraphics(new GMSetUIs("WeaponCooldownOverlay"+String(i), GMUI::TEXTURE_SOURCE, "img/ui/Cooldown_"+String(good)+".png"));
+		if (weapon->burst)
+		{
+			int shotsLeft = weapon->shotsLeft;
+			if (weapon->reloading)
+				shotsLeft = 0;
+//			int target = GMUI::TEXT;
+			QueueGraphics(new GMSetUIs("WeaponAmmunitionOverlay"+String(i), GMUI::TEXT, String(shotsLeft)));
+		}
 	}
 }
 
@@ -630,7 +657,7 @@ void SpaceShooter2D::OpenJumpDialog()
 }
 
 
-#include "SpaceShooter2D/Level/SpawnGroup.h"
+#include "Level/SpawnGroup.h"
 AppWindow * spawnWindow = 0;
 UserInterface * spawnUI = 0;
 

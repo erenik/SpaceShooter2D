@@ -3,7 +3,7 @@
 /// Movement for AIs.
 
 #include "Movement.h"
-#include "SpaceShooter2D/SpaceShooter2D.h"
+#include "SpaceShooter2D.h"
 
 #include "File/LogFile.h"
 
@@ -177,6 +177,11 @@ List<Variable> Movement::GetTypesAsVariables()
 }
 
 
+String Movement::Name() const
+{
+	return Name(type);
+}
+
 String Movement::Name(int type)
 {
 	switch(type)
@@ -337,6 +342,10 @@ void Movement::SetWindowSpeed(Vector2f desiredAppearedSpeed)
 	Vector2f totalSpeed = desiredAppearedSpeed;
 	if (totalSpeed.LengthSquared())
 		totalSpeed += spaceShooter->level.BaseVelocity();
+	if (totalSpeed.x != totalSpeed.x || totalSpeed.y != totalSpeed.y)
+	{
+		std::cout<<"\nCaught setting bad speeds!";
+	}
 	QueuePhysics(new PMSetEntity(shipEntity, PT_VELOCITY, totalSpeed));
 }
 
