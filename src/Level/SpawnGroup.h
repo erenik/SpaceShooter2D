@@ -92,7 +92,7 @@ private:
 	bool preparedForSpawning;
 	List<Ship*> ships;
 	// ?!
-//	Entity * SpawnShip(ConstVec3fr atPosition);
+//	EntitySharedPtr SpawnShip(ConstVec3fr atPosition);
 	void AddShipAtPosition(ConstVec3fr position);
 };
 

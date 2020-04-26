@@ -350,7 +350,7 @@ void SpawnGroup::AddShipAtPosition(ConstVec3fr position)
 	Ship * newShip = Ship::New(shipType);
 	if (!newShip)
 	{
-		LogMain("SpawnGroup::SpawnShip: Unable to create ship of type: "+shipType, ERROR | CAUSE_ASSERTION_ERROR);
+		LogMain("SpawnGroup::SpawnShip: Unable to create ship of type: "+shipType, CAUSE_ASSERTION_ERROR);
 		return;
 	}
 	Ship * ship = newShip;
@@ -373,7 +373,7 @@ void SpawnGroup::AddShipAtPosition(ConstVec3fr position)
 
 
 // ?!
-/*Entity * SpawnGroup::SpawnShip(ConstVec3fr atPosition)
+/*EntitySharedPtr SpawnGroup::SpawnShip(ConstVec3fr atPosition)
 {
 }*/
 

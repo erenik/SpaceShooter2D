@@ -96,13 +96,13 @@ extern Vector3f frustumMin, frustumMax;
 
 extern Ship * playerShip;
 /// The level entity, around which the playing field and camera are based upon.
-extern Entity * levelEntity;
+extern EntitySharedPtr levelEntity;
 extern Vector2f playingFieldSize;
 extern Vector2f playingFieldHalfSize;
 extern float playingFieldPadding;
 /// All ships, including player.
-extern List<Entity*> shipEntities;
-extern List<Entity*> projectileEntities;
+extern List< std::shared_ptr<Entity> > shipEntities;
+extern List< std::shared_ptr<Entity> > projectileEntities;
 extern String playerName;
 extern bool paused;
 extern String onDeath; // What happens when the player dies?
@@ -118,7 +118,7 @@ int DiffCost(String toUpgrade);
 /// In WeaponScriptEditing.cpp
 void ProcessMessageWSS(Message * message);
 /// Before killing 'em.
-void PrintEntityData(Entity * entity);
+void PrintEntityData(EntitySharedPtr entity);
 
 class SpaceShooter2D : public AppState 
 {
@@ -133,7 +133,7 @@ public:
 	void OnExit(AppState * nextState);
 	
 	/// Searches among actively spawned ships.
-	Ship * GetShip(Entity * forEntity);
+	Ship * GetShip(EntitySharedPtr forEntity);
 	Ship * GetShipByID(int id);
 
 	/// Creates the user interface for this state
@@ -178,7 +178,7 @@ public:
 	void ShowLevelStats();
 	void LoadDefaultName();
 	/// o.o
-	Entity * OnShipDestroyed(Ship * ship);
+	EntitySharedPtr OnShipDestroyed(Ship * ship);
 
 
 	String GetLevelVarName(String level, String name);

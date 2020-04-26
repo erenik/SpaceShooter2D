@@ -448,7 +448,7 @@ void Movement::MoveToLocation()
 void Movement::Circle()
 {
 	// Go towards target.
-	Entity * target = playerShip->entity;
+	EntitySharedPtr target = playerShip->entity;
 	if (!target)
 	{
 		SetDirection(Vector3f());

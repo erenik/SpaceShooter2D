@@ -6,8 +6,8 @@
 #define ROTATION_H
 
 class Ship;
-class Entity;
 
+#include "Entity/Entity.h"
 #include "String/AEString.h"
 #include "MathLib.h"
 
@@ -47,7 +47,7 @@ private:
 	/// Radian-direction last iteration. Used together with ships maxRadiansPerSecond and the time passed to dictate new direction.
 	Angle lastFacingAngle;
 	Ship * ship;
-	Entity * entity;
+	EntitySharedPtr entity;
 //	Vector3f targetPosition;
 };
 

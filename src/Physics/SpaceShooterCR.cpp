@@ -22,8 +22,8 @@ bool SpaceShooterCR::ResolveCollision(Collision & c)
 	/// Wall? just reflect velocity so we're not going into the wall anymore.
 	if (c.staticEntities.Size() || c.kinematicEntities.Size())
 	{
-		Entity * dynamic = c.dynamicEntities[0],
-			* staticEntity;
+		EntitySharedPtr dynamic = c.dynamicEntities[0],
+			staticEntity;
 		if (c.staticEntities.Size())
 			staticEntity = c.staticEntities[0];
 		else

@@ -8,6 +8,7 @@
 #include "String/AEString.h"
 #include "MathLib.h"
 #include "Time/Time.h"
+#include "Entity/Entity.h"
 
 class Ship;
 class Weapon;
@@ -56,8 +57,8 @@ public:
 	LightningArc();
 	int damage;
 	Vector3f position;
-	Entity * graphicalEntity;
-	Entity * targetEntity;
+	EntitySharedPtr graphicalEntity;
+	EntitySharedPtr targetEntity;
 	bool struckEntity;
 	bool arcFinished; // When time expires or range has been reached.
 	float maxRange;
@@ -85,7 +86,7 @@ public:
 	void ProcessLightning(Ship * ship, bool initial = false);
 	void QueueReload();
 	/// Based on ship.
-	Vector3f WorldPosition(Entity * basedOnShipEntity);
+	Vector3f WorldPosition(EntitySharedPtr basedOnShipEntity);
 	Vector3f location;
 
 	List<LightningArc*> arcs;

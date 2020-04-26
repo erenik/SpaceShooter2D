@@ -181,6 +181,8 @@ void SpaceShooter2D::UpdateUIPlayerHP(bool force)
 		return;
 	lastHP = (int)playerShip->hp;
 	GraphicsMan.QueueMessage(new GMSetUIi("HP", GMUI::INTEGER_INPUT, (int)playerShip->hp));	
+	float redRatio = playerShip->hp / (float) playerShip->maxHP;
+	GraphicsMan.QueueMessage(new GMSetUIv4f("HP", GMUI::TEXT_COLOR, Vector4f(1.0f, 1 - redRatio, 1 - redRatio, 1.0f)));
 }
 void SpaceShooter2D::UpdateUIPlayerShield(bool force)
 {
@@ -444,12 +446,14 @@ void MoreStats(String upgrade, String inElement)
 	else if (playerLevel > 0)
 		str = "Equipped. Current level.";
 	UILabel * label = BasicLabel(str);
+	Vector4f color;
 	if (cost > 0)
-		label->textColor = Vector4f(1,1,0,1);
+		color = Vector4f(1,1,0,1);
 	else if (cost < 0)
-		label->textColor = Vector4f(0,1,1,1);
+		color = Vector4f(0,1,1,1);
 	else if (cost == 0)
-		label->textColor = Vector4f(0,1,0,1);
+		color = Vector4f(0,1,0,1);
+	label->text.color = color;
 	tmpElements.AddItem(label);
 	QueueGraphics(new GMAddUI(tmpElements, inElement));
 	tmpElements.Clear();
@@ -651,7 +655,7 @@ void SpaceShooter2D::OpenJumpDialog()
 	}
 	else {
 		jumpDialog->input->BeginInput(); // Make its input active straight away.
-		QueueGraphics(new GMPushUI(jumpDialog, MainWindow()->ui));
+		QueueGraphics(GMPushUI::ToUI(jumpDialog, MainWindow()->ui));
 	}
 		// Close it afterwards.
 }

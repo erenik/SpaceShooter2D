@@ -35,9 +35,9 @@ public:
 	/// Call on spawning.
 	void RandomizeWeaponCooldowns();
 	/// Spawns at local position according to window/player area, creating entities, registering for movement, etc. Returns it and all children spawned with it.
-	List<Entity*> Spawn(ConstVec3fr atLocalPosition, Ship * parent);
+	List< std::shared_ptr<Entity> > Spawn(ConstVec3fr atLocalPosition, Ship * parent);
 	/// Handles spawning of children as needed.
-	List<Entity*> SpawnChildren();
+	List< std::shared_ptr<Entity> > SpawnChildren();
 	void Despawn(bool doExplodeEffectsForChildren);
 	void ExplodeEffects();
 	/// Checks current movement. Will only return true if movement is target based and destination is within threshold.
@@ -181,7 +181,7 @@ public:
 	int score; 
 
 	// Default false
-	Entity * entity;
+	EntitySharedPtr entity;
 	// Data details.
 	// Spawn position.
 	Vector3f position;

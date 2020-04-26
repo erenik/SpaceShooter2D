@@ -16,7 +16,7 @@ void SpaceShooter2D::UpdateRenderArrows()
 	for (int i = 0; i < shipEntities.Size(); ++i)
 	{	
 		// Grab the position
-		Entity * e = shipEntities[i];
+		EntitySharedPtr e = shipEntities[i];
 		Vector2f pos = e->worldPosition;
 		// Check if outside boundary.
 		if (pos > minField && pos < maxField)
@@ -38,11 +38,11 @@ void SpaceShooter2D::RenderInLevel(GraphicsState * graphicsState)
 	Vector2f maxField = levelEntity->worldPosition + playingFieldHalfSize + Vector2f(1,1);
 
 	// Load default shader?
-	ShadeMan.SetActiveShader(NULL);
+	ShadeMan.SetActiveShader(NULL, *graphicsState);
 	glMatrixMode(GL_PROJECTION);
-	glLoadMatrixd(graphicsState->projectionMatrixD.getPointer());
+	glLoadMatrixd(GraphicsThreadGraphicsState->projectionMatrixD.getPointer());
 	glMatrixMode(GL_MODELVIEW);
-	Matrix4d modelView = graphicsState->viewMatrixD * graphicsState->modelMatrixD;
+	Matrix4d modelView = GraphicsThreadGraphicsState->viewMatrixD * GraphicsThreadGraphicsState->modelMatrixD;
 	glLoadMatrixd(modelView.getPointer());
 	// Enable blending
 	glEnable(GL_BLEND);	
@@ -50,7 +50,7 @@ void SpaceShooter2D::RenderInLevel(GraphicsState * graphicsState)
 	float z = -4;
 	glDisable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	graphicsState->currentTexture = NULL;
+	GraphicsThreadGraphicsState->currentTexture = NULL;
 	// Disable lighting
 	glDisable(GL_LIGHTING);
 	glDisable(GL_COLOR_MATERIAL);

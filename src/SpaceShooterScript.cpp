@@ -25,7 +25,7 @@ void SpaceShooterScript::EvaluateLine(String & line)
 		List<String> args = line.Tokenize(",()");
 		// Do charge until done.
 		String target = args[1];
-		Entity * targetEntity = 0;
+		EntitySharedPtr targetEntity = 0;
 		if (target == "self")
 			targetEntity = this->entity;
 		lineFinished = false;
@@ -67,7 +67,7 @@ void SpaceShooterScript::EvaluateLine(String & line)
 		List<String> args = line.Tokenize(",()");
 		// Do charge until done.
 		String target = args[1];
-		Entity * targetEntity = 0;
+		EntitySharedPtr targetEntity = 0;
 		if (target == "self")
 			targetEntity = this->entity;
 		lineFinished = false;
@@ -118,7 +118,7 @@ void SpaceShooterScript::EvaluateLine(String & line)
 		List<String> args = line.Tokenize(",()");
 		// Do charge until done.
 		String target = args[1];
-		Entity * targetEntity = 0;
+		EntitySharedPtr targetEntity = 0;
 		if (target == "self")
 			targetEntity = this->entity;
 		if (targetEntity == 0)

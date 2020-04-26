@@ -6,7 +6,7 @@
 #include "Properties/ExplosionProperty.h"
 #include "PhysicsLib/EstimatorFloat.h"
 
-ExplosionProperty::ExplosionProperty(const Weapon & weaponThatSpawnedIt, Entity * owner)
+ExplosionProperty::ExplosionProperty(const Weapon & weaponThatSpawnedIt, EntitySharedPtr owner)
 : EntityProperty("ProjProp", ID(), owner), weapon(weaponThatSpawnedIt)
 {
 	sleeping = false;

@@ -101,7 +101,7 @@ void Ship::RandomizeWeaponCooldowns()
 	}
 }
 
-List<Entity*> Ship::Spawn(ConstVec3fr atLocalPosition, Ship * in_parent)
+List< std::shared_ptr<Entity> > Ship::Spawn(ConstVec3fr atLocalPosition, Ship * in_parent)
 {	
 
 	std::cout<<"\nPossible kills: "<<++spaceShooter->LevelPossibleKills()->iValue;
@@ -124,7 +124,7 @@ List<Entity*> Ship::Spawn(ConstVec3fr atLocalPosition, Ship * in_parent)
 		parent->children.AddItem(this);
 	}
 
-	Entity * entity = EntityMan.CreateEntity(name, GetModel(), TexMan.GetTextureByColor(Color(0,255,0,255)));
+	EntitySharedPtr entity = EntityMan.CreateEntity(name, GetModel(), TexMan.GetTextureByColor(Color(0,255,0,255)));
 	entity->localPosition = atPosition;
 	
 	PhysicsProperty * pp = new PhysicsProperty();
@@ -170,7 +170,7 @@ List<Entity*> Ship::Spawn(ConstVec3fr atLocalPosition, Ship * in_parent)
 	this->StartMovement();
 
 	/// Spawn children if applicable.
-	List<Entity*> children = SpawnChildren();
+	List< std::shared_ptr<Entity> > children = SpawnChildren();
 	/// Set up parenting.
 	if (parent)
 	{
@@ -181,7 +181,7 @@ List<Entity*> Ship::Spawn(ConstVec3fr atLocalPosition, Ship * in_parent)
 	/// IF final aprent, register for rendering, etc.
 	else 
 	{
-		List<Entity*> all = children + entity;
+		List< std::shared_ptr<Entity> > all = children + entity;
 		shipEntities.Add(all);
 		MapMan.AddEntities(all);
 		/// Recalculate matrix and all children matrices.
@@ -205,7 +205,7 @@ List<Entity*> Ship::Spawn(ConstVec3fr atLocalPosition, Ship * in_parent)
 }
 
 /// Handles spawning of children as needed.
-List<Entity*> Ship::SpawnChildren()
+List< std::shared_ptr<Entity> > Ship::SpawnChildren()
 {
 	/// Translate strings.
 	List<String> childStrings;
@@ -224,14 +224,14 @@ List<Entity*> Ship::SpawnChildren()
 			}
 		}
 	}
-	List<Entity*> childrenSpawned;
+	List< std::shared_ptr<Entity> > childrenSpawned;
 	for (int i = 0; i < childStrings.Size(); ++i)
 	{
 		String str = childStrings[i];
 		Ship * newShip = Ship::New(str);
 		if (!newShip)
 		{
-			LogMain("Ship::SpawnChildren: Unable to create ship of type: "+str, ERROR | CAUSE_ASSERTION_ERROR);
+			LogMain("Ship::SpawnChildren: Unable to create ship of type: "+str, CAUSE_ASSERTION_ERROR);
 			continue;
 		}
 		if (enemy)
@@ -270,7 +270,7 @@ void Ship::Despawn(bool doExplodeEffectsForChildren)
 	spawned = false;
 
 	// Delete entity first.
-	Entity * tmp = entity;
+	EntitySharedPtr tmp = entity;
 	entity = 0;
 //	std::cout<<"\nDeleting entity "+tmp->name;
 	MapMan.DeleteEntity(tmp);
@@ -374,7 +374,7 @@ void Ship::ProcessAI(int timeInMs)
 	if (!canMove)
 		return;
 	// Move?
-	Entity * shipEntity = entity;
+	EntitySharedPtr shipEntity = entity;
 	Movement & move = movements[currentMovement];
 	move.OnFrame(timeInMs);
 	// Increase time spent in this state accordingly.
@@ -523,7 +523,7 @@ bool Ship::Damage(float amount, bool ignoreShield)
 	if (allied && playerInvulnerability)
 		return false;
 	if (!enemy)
-		LogMain("Player took "+String((int)amount)+" damage!", INFO);
+		LogMain("Player took "+String((int)amount)+" damage!", DEBUG);
 	if (spawnInvulnerability)
 	{
 	//	std::cout<<"\nInvulnnnn!";

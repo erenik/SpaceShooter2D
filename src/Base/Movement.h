@@ -6,8 +6,8 @@
 #define MOVEMENT_H
 
 class Ship;
-class Entity;
 
+#include "Entity/Entity.h"
 #include "String/AEString.h"
 #include "MathLib.h"
 #include "MathLib/Variable.h"
@@ -89,7 +89,7 @@ private:
 	void Circle();
 
 	Ship * ship;
-	Entity * shipEntity;
+	EntitySharedPtr shipEntity;
 };
 
 #endif

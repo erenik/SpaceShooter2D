@@ -5,7 +5,7 @@
 #include "SSIntegrator.h"
 #include "SpaceShooter2D.h"
 
-extern Entity * playerEntity;
+extern EntitySharedPtr playerEntity;
 
 SSIntegrator::SSIntegrator(float zPlane)
 {
@@ -13,7 +13,7 @@ SSIntegrator::SSIntegrator(float zPlane)
 }
 
 
-void SSIntegrator::IntegrateDynamicEntities(List<Entity*> & dynamicEntities, float timeInSeconds)
+void SSIntegrator::IntegrateDynamicEntities(List< std::shared_ptr<Entity> > & dynamicEntities, float timeInSeconds)
 {
 	if (levelEntity)
 	{
@@ -25,7 +25,7 @@ void SSIntegrator::IntegrateDynamicEntities(List<Entity*> & dynamicEntities, flo
 	timer.Start();
 	for (int i = 0; i < dynamicEntities.Size(); ++i)
 	{
-		Entity * dynamicEntity = dynamicEntities[i];
+		EntitySharedPtr dynamicEntity = dynamicEntities[i];
 		IntegrateVelocity(dynamicEntity, timeInSeconds);
 		/// Apply bounding for player in other manner...
 		/// Check if player
@@ -60,11 +60,11 @@ void SSIntegrator::IntegrateDynamicEntities(List<Entity*> & dynamicEntities, flo
 /** All entities sent here should be fully kinematic! 
 	If not subclassed, the standard IntegrateEntities is called.
 */
-void SSIntegrator::IntegrateKinematicEntities(List<Entity*> & kinematicEntities, float timeInSeconds)
+void SSIntegrator::IntegrateKinematicEntities(List< std::shared_ptr<Entity> > & kinematicEntities, float timeInSeconds)
 {
 	for (int i = 0; i < kinematicEntities.Size(); ++i)
 	{
-		Entity * kinematicEntity = kinematicEntities[i];
+		EntitySharedPtr kinematicEntity = kinematicEntities[i];
 		IntegrateVelocity(kinematicEntity, timeInSeconds);
 	}
 	RecalculateMatrices(kinematicEntities);
@@ -73,7 +73,7 @@ void SSIntegrator::IntegrateKinematicEntities(List<Entity*> & kinematicEntities,
 float velocitySmoothingLast = 0.f;
 float smoothingFactor = 0.f;
 
-void SSIntegrator::IntegrateVelocity(Entity * forEntity, float timeInSeconds)
+void SSIntegrator::IntegrateVelocity(EntitySharedPtr forEntity, float timeInSeconds)
 {
 	PhysicsProperty * pp = forEntity->physics;
 	if (pp->paused)

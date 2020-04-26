@@ -44,7 +44,7 @@ List<Weapon> Weapon::types;
 List<Ship*> Ship::types;
 
 /// 4 entities constitude the blackness.
-List<Entity*> blacknessEntities;
+List< std::shared_ptr<Entity> > blacknessEntities;
 
 bool shipDataLoaded = false;
 
@@ -63,13 +63,13 @@ void SetApplicationDefaults()
 SpaceShooter2D * spaceShooter = 0;
 Ship * playerShip = 0;
 /// The level entity, around which the playing field and camera are based upon.
-Entity * levelEntity = NULL;
+EntitySharedPtr levelEntity = NULL;
 Vector2f playingFieldSize;
 Vector2f playingFieldHalfSize;
 float playingFieldPadding;
 /// All ships, including player.
-List<Entity*> shipEntities;
-List<Entity*> projectileEntities;
+List< std::shared_ptr<Entity> > shipEntities;
+List< std::shared_ptr<Entity> > projectileEntities;
 String playerName;
 /// o.o
 Time startDate;
@@ -239,7 +239,7 @@ void SpaceShooter2D::OnExit(AppState * nextState)
 }
 
 /// Searches among actively spawned ships.
-Ship * SpaceShooter2D::GetShip(Entity * forEntity)
+Ship * SpaceShooter2D::GetShip(EntitySharedPtr forEntity)
 {
 	for (int i = 0; i < level.ships.Size(); ++i)
 	{
@@ -279,7 +279,7 @@ void OnPlayerInvulnerabilityUpdated()
 	
 }
 
-void PrintEntityData(Entity * entity)
+void PrintEntityData(EntitySharedPtr entity)
 {
 	std::cout<<"\n\nEntity name: "<<entity->name
 		<<"\nPosition: "<<entity->worldPosition
@@ -377,14 +377,14 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 		{
 
 			CollisionCallback * cc = (CollisionCallback*) message;
-			Entity * one = cc->one;
-			Entity * two = cc->two;
+			EntitySharedPtr one = cc->one;
+			EntitySharedPtr two = cc->two;
 #define SHIP 0
 #define PROJ 1
 //			std::cout<<"\nColCal: "<<cc->one->name<<" & "<<cc->two->name;
 
-			Entity * shipEntity1 = NULL;
-			Entity * other = NULL;
+			EntitySharedPtr shipEntity1 = NULL;
+			EntitySharedPtr other = NULL;
 			int oneType = (one == playerShip->entity || shipEntities.Exists(one)) ? SHIP : PROJ;
 			int twoType = (two == playerShip->entity || shipEntities.Exists(two)) ? SHIP : PROJ;
 			int types[5] = {0,0,0,0,0};
@@ -597,7 +597,7 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 				// Shoot.
 				Color color = Vector4f(0.8f,0.7f,0.1f,1.f);
 				Texture * tex = TexMan.GetTextureByColor(color);
-				Entity * projectileEntity = EntityMan.CreateEntity(name + " Projectile", ModelMan.GetModel("sphere.obj"), tex);
+				EntitySharedPtr projectileEntity = EntityMan.CreateEntity(name + " Projectile", ModelMan.GetModel("sphere.obj"), tex);
 				Weapon weapon;
 				weapon.damage = 750;
 				ProjectileProperty * projProp = new ProjectileProperty(weapon, projectileEntity, true);
@@ -937,10 +937,10 @@ void SpaceShooter2D::Render(GraphicsState * graphicsState)
 }
 
 /// o.o
-Entity * SpaceShooter2D::OnShipDestroyed(Ship * ship)
+EntitySharedPtr SpaceShooter2D::OnShipDestroyed(Ship * ship)
 {
 		// Explode
-//	Entity * explosionEntity = spaceShooter->NewExplosion(owner->position, ship);
+//	EntitySharedPtr explosionEntity = spaceShooter->NewExplosion(owner->position, ship);
 //	game->explosions.Add(explosionEntity);
 	return NULL;
 }
@@ -1191,7 +1191,7 @@ void SpaceShooter2D::LoadLevel(String fromSource)
 		/// Add blackness to track the level entity.
 		for (int i = 0; i < 4; ++i)
 		{
-			Entity * blackness = EntityMan.CreateEntity("Blackness"+String(i), ModelMan.GetModel("sprite.obj"), TexMan.GetTexture("0x0A"));
+			EntitySharedPtr blackness = EntityMan.CreateEntity("Blackness"+String(i), ModelMan.GetModel("sprite.obj"), TexMan.GetTexture("0x0A"));
 			float scale = 50.f;
 			float halfScale = scale * 0.5f;
 			blackness->scale = scale * Vector3f(1,1,1);
@@ -1367,7 +1367,7 @@ void SpaceShooter2D::UpdatePlayerVelocity()
 	totalVec.Normalize();
 	totalVec *= playerShip->Speed();
 	totalVec *= playerShip->movementDisabled? 0 : 1;
-	totalVec += level.BaseVelocity();
+	//totalVec += level.BaseVelocity();
 
 	// Set player speed.
 	if (playerShip->entity)

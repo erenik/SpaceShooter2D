@@ -10,7 +10,7 @@
 class ExplosionProperty : public EntityProperty 
 {
 public:
-	ExplosionProperty(const Weapon & weaponThatSpawnedIt, Entity * owner);
+	ExplosionProperty(const Weapon & weaponThatSpawnedIt, EntitySharedPtr owner);
 	// Static version.
 	static int ID();
 	/// Based on radius

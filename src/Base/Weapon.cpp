@@ -236,7 +236,7 @@ bool Weapon::LoadTypes(String fromFile)
 				--i;
 			}
 		}
-		LogMain("Weapon loaded: "+weapon.name, INFO);
+		LogMain("Weapon loaded: "+weapon.name, DEBUG);
 		types.Add(weapon);
 	}
 	return true;
@@ -251,7 +251,7 @@ void Weapon::Aim(Ship * ship)
 	if (!aim)
 		return;
 
-	Entity * target = NULL;
+	EntitySharedPtr target = NULL;
 	// Aim.
 	if (ship->allied)
 	{
@@ -263,7 +263,7 @@ void Weapon::Aim(Ship * ship)
 	}
 	if (target == NULL)
 		return;
-	Entity * shipEntity = ship->entity;
+	EntitySharedPtr shipEntity = ship->entity;
 	// Estimate position upon impact?
 	Vector3f targetPos = target->worldPosition;
 	Vector3f toTarget = targetPos - weaponWorldPosition;
@@ -282,7 +282,7 @@ void Weapon::Aim(Ship * ship)
 }
 
 /// Based on ship.
-Vector3f Weapon::WorldPosition(Entity * basedOnShipEntity)
+Vector3f Weapon::WorldPosition(EntitySharedPtr basedOnShipEntity)
 {
 	Vector3f worldPos = basedOnShipEntity->transformationMatrix * location;
 	worldPos.z = 0;
@@ -328,7 +328,7 @@ void Weapon::Shoot(Ship * ship)
 
 	for (int i = 0; i < numberOfProjectiles; ++i)
 	{
-		Entity * shipEntity = ship->entity;
+		EntitySharedPtr shipEntity = ship->entity;
 		Color color;
 		if (ship->allied)
 			color = Vector4f(1.f, 0.5f, .1f, 1.f);
@@ -346,7 +346,7 @@ void Weapon::Shoot(Ship * ship)
 			flakMultiplier = shootRand.Randf(1.f) + 1.f;
 			flakDividendMultiplier = 1 / flakMultiplier;
 		}
-		Entity * projectileEntity = EntityMan.CreateEntity(name + " Projectile", model, tex);
+		EntitySharedPtr projectileEntity = EntityMan.CreateEntity(name + " Projectile", model, tex);
 		ProjectileProperty * projProp = new ProjectileProperty(*this, projectileEntity, ship->enemy);
 		projProp->weapon.damage *= flakMultiplier;
 		projectileEntity->properties.Add(projProp);
@@ -555,7 +555,7 @@ void Weapon::ProcessLightning(Ship * owner, bool initial /* = true*/)
 		std::cout<<"\nThunderstruck! "<<target->entity->worldPosition;
 		target->Damage((int)arc->damage, false);
 		/// Span up a nice graphical entity to represent the bolt
-		Entity * entity = EntityMan.CreateEntity("BoldPart", ModelMan.GetModel("cube.obj"), TexMan.GetTexture("0x00FFFF"));
+		EntitySharedPtr entity = EntityMan.CreateEntity("BoldPart", ModelMan.GetModel("cube.obj"), TexMan.GetTexture("0x00FFFF"));
 		entity->localPosition = (arc->position + newArc->position) * 0.5f;
 		/// Rotate it accordingly.
 		Vector3f direction = newArc->position - arc->position;

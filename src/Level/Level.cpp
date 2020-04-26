@@ -57,6 +57,12 @@ void Level::OnEnter()
 	{
 		AudioMan.QueueMessage(new AMPlay(AudioType::BGM, music, 1.f));
 	}
+
+	// Set Ambient lighting and some star lighting?
+	LogMain("Entering level, updating Lighting", INFO);
+	Lighting lighting = Lighting();
+	lighting.SetAmbient(1.0, 1.0, 1.0, 1.0);
+	QueueGraphics(new GMSetLighting(lighting));
 }
 
 // Used for player and camera. Based on millisecondsPerPixel.
@@ -66,9 +72,9 @@ Vector3f Level::BaseVelocity()
 }
 
 /// Creates player entity within this level. (used for spawning)
-Entity * Level::AddPlayer(Ship * playerShip, ConstVec3fr atPosition)
+EntitySharedPtr Level::AddPlayer(Ship * playerShip, ConstVec3fr atPosition)
 {	
-	Entity * entity = playerShip->Spawn(atPosition, 0);
+	EntitySharedPtr entity = playerShip->Spawn(atPosition, 0);
 	return entity;
 }
 
@@ -92,7 +98,7 @@ void Level::Cleanup()
 	/// Remove projectiles which have been passed by.
 	for (int i = 0; i < projectileEntities.Size(); ++i)
 	{
-		Entity * proj = projectileEntities[i];
+		EntitySharedPtr proj = projectileEntities[i];
 		ProjectileProperty * pp = (ProjectileProperty*) proj->GetProperty(ProjectileProperty::ID());
 		if (pp->sleeping || 
 				(proj->worldPosition[0] < despawnPositionLeft ||
@@ -484,17 +490,17 @@ bool Level::LevelCleared()
 	return false;
 }
 
-Entity * Level::ClosestTarget(bool ally, ConstVec3fr position)
+EntitySharedPtr Level::ClosestTarget(bool ally, ConstVec3fr position)
 {
 	if (!ally)
 	{
 		return playerShip->entity;
 	}
-	Entity * closest = NULL;
+	EntitySharedPtr closest = NULL;
 	float closestDist = 100000.f;
 	for (int i = 0; i < shipEntities.Size(); ++i)
 	{
-		Entity * e = shipEntities[i];
+		EntitySharedPtr e = shipEntities[i];
 		float dist = (e->worldPosition - position).LengthSquared();
 		if (dist < closestDist)
 		{
@@ -508,9 +514,9 @@ Entity * Level::ClosestTarget(bool ally, ConstVec3fr position)
 #include "PhysicsLib/EstimatorFloat.h"
 
 /// o.o'
-void Level::Explode(Weapon & weapon, Entity * causingEntity, bool enemy)
+void Level::Explode(Weapon & weapon, EntitySharedPtr causingEntity, bool enemy)
 {
-	Entity * explosionEntity = EntityMan.CreateEntity("ExplosionEntity", ModelMan.GetModel("Sphere"), 0 /*TexMan.GetTexture("0xFFFF")*/);
+	EntitySharedPtr explosionEntity = EntityMan.CreateEntity("ExplosionEntity", ModelMan.GetModel("Sphere"), 0 /*TexMan.GetTexture("0xFFFF")*/);
 	ExplosionProperty * explosionProperty = new ExplosionProperty(weapon, explosionEntity);
 	explosionEntity->properties.AddItem(explosionProperty);
 	explosionProperty->weapon = weapon;
@@ -554,7 +560,7 @@ List<Ship*> Level::GetShipsAtPoint(ConstVec3fr position, float maxRadius, List<f
 		if (ship->entity == 0)
 			continue;
 		float dist = (ship->entity->worldPosition - position).Length();
-		float radius = ship->entity->radius;
+		float radius = ship->entity->Radius();
 		float distMinRadius = dist - radius;
 		if (distMinRadius > maxDist)
 			continue;

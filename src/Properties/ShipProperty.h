@@ -15,7 +15,7 @@ class ShipProperty : public EntityProperty
 	friend class Ship;
 public:
 	/// Reference to the game and this property's owner.
-	ShipProperty(Ship * ship, Entity * owner);
+	ShipProperty(Ship * ship, EntitySharedPtr owner);
 	// Static version.
 	static int ID();
 
@@ -29,7 +29,7 @@ public:
 	virtual void OnCollision(Collision & data);
 
 	/// If reacting to collisions...
-	virtual void OnCollision(Entity * withEntity);
+	virtual void OnCollision(EntitySharedPtr withEntity);
 
 	// Since enemies go from right to left..
 	bool IsAllied();

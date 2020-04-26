@@ -8,13 +8,13 @@
 #include "PhysicsLib/Physics.h"
 
 /// Brute-force method. Does not rely on other structures that require further updates. All entities are present in the list.
-int SpaceShooterCD::DetectCollisions(List<Entity*> & entities, List<Collision> & collisions)
+int SpaceShooterCD::DetectCollisions(List< std::shared_ptr<Entity> > & entities, List<Collision> & collisions)
 {
 	int numCol = 0;
 	List<EntityPair> pairs;
 	for (int i = 0; i < entities.Size(); ++i)
 	{
-		Entity * entity = entities[i];
+		EntitySharedPtr entity = entities[i];
 		if (!entity->physics->collisionsEnabled)
 			continue;
 		// Must be at least one dynamic entity to get a collision.
@@ -27,7 +27,7 @@ int SpaceShooterCD::DetectCollisions(List<Entity*> & entities, List<Collision> &
 		// Inner loop with entities to compare this entity to.
 		for (int j = 0; j < entities.Size(); ++j)
 		{
-			Entity * entity2 = entities[j];
+			EntitySharedPtr entity2 = entities[j];
 			EntityPair pair;
 			pair.one = entity;
 			pair.two = entity2;
@@ -46,7 +46,7 @@ int SpaceShooterCD::DetectCollisions(List<EntityPair> & pairs, List<Collision> &
 	for (int i = 0; i < pairs.Size(); ++i)
 	{
 		EntityPair & pair = pairs[i];
-		Entity * entity = pair.one, * entity2 = pair.two;
+		EntitySharedPtr entity = pair.one, entity2 = pair.two;
 		/// Check filter.
 		int valid = entity->physics->collisionFilter & entity2->physics->collisionCategory;
 		if (!valid)
@@ -84,7 +84,7 @@ int SpaceShooterCD::DetectCollisions(List<EntityPair> & pairs, List<Collision> &
 }
 
 /// Detects collisions between two entities. Method used is based on physics-shape. Sub-class to override it.
-int SpaceShooterCD::DetectCollisions(Entity * one, Entity * two, List<Collision> & collisions)
+int SpaceShooterCD::DetectCollisions(EntitySharedPtr one, EntitySharedPtr two, List<Collision> & collisions)
 {
 	if (SpheresColliding(one->worldPosition, two->worldPosition, one->physics->physicalRadius + two->physics->physicalRadius))
 	{

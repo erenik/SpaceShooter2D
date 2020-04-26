@@ -23,7 +23,7 @@
 
 #include "SpaceShooter2D.h"
 
-ShipProperty::ShipProperty(Ship * ship, Entity * owner)
+ShipProperty::ShipProperty(Ship * ship, EntitySharedPtr owner)
 : EntityProperty("ShipProperty", ID(), owner), ship(ship)
 {
 	shouldDelete = false;
@@ -79,7 +79,7 @@ void ShipProperty::Process(int timeInMs)
 void ShipProperty::OnCollision(Collision & data)
 {
 	// Check what we are colliding with.
-	Entity * other = 0;
+	EntitySharedPtr other = 0;
 	if (data.one == owner)
 		other = data.two;
 	else if (data.two == owner)
@@ -88,7 +88,7 @@ void ShipProperty::OnCollision(Collision & data)
 
 Random penetrationRand;
 /// If reacting to collisions...
-void ShipProperty::OnCollision(Entity * withEntity)
+void ShipProperty::OnCollision(EntitySharedPtr withEntity)
 {
 //	std::cout<<"\nShipProperty::OnCollision for entity "<<owner->name;
 	if (sleeping)
@@ -96,7 +96,7 @@ void ShipProperty::OnCollision(Entity * withEntity)
 //		std::cout<<"\nSleeping, skipping stuffs";
 		return;
 	}
-	Entity * other = withEntity;
+	EntitySharedPtr other = withEntity;
 
 	ShipProperty * sspp = (ShipProperty *) other->GetProperty(ShipProperty::ID());
 	// Player-player collision? Sleep 'em both.

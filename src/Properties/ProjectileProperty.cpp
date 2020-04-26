@@ -5,7 +5,7 @@
 #include "SpaceShooter2D.h"
 #include "Properties/ProjectileProperty.h"
 
-ProjectileProperty::ProjectileProperty(const Weapon & weaponThatSpawnedIt, Entity * owner, bool enemy)
+ProjectileProperty::ProjectileProperty(const Weapon & weaponThatSpawnedIt, EntitySharedPtr owner, bool enemy)
 : EntityProperty("ProjProp", ID(), owner), weapon(weaponThatSpawnedIt), enemy(enemy)
 {
 	sleeping = false;
@@ -153,7 +153,7 @@ void ProjectileProperty::Process(int timeInMs)
 		// Adjust velocity towards it by the given factor, per second.
 		// 1.0 will change velocity entirely to look at the enemy.
 		// Values above 1.0 will try and compensate for target velocity and not just current position?
-		Entity * closestTarget = spaceShooter->level.ClosestTarget(!enemy, owner->worldPosition);
+		EntitySharedPtr closestTarget = spaceShooter->level.ClosestTarget(!enemy, owner->worldPosition);
 		if (!closestTarget)
 			return;
 		Vector3f toTarget = closestTarget->worldPosition - owner->worldPosition;

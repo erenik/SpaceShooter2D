@@ -24,12 +24,12 @@ namespace LevelLoader
 	{ 
 		if (group) {
 			lastGroup = group; 
-			LogMain("Setting spawn time to group from "+group->spawnTime.ToString("m:S.n")+" to "+spawnTimes[0].ToString("m:S.n"), INFO);
+			LogMain("Setting spawn time to group from "+group->spawnTime.ToString("m:S.n")+" to "+spawnTimes[0].ToString("m:S.n"), DEBUG);
 			group->spawnTime = spawnTimes[0]; // Set spawn time if not already done so.
 			if (group->name.Length() == 0)
 				group->name = group->spawnTime.ToString("m:S.n");
 			loadLevel->spawnGroups.AddItem(group);
-			LogMain("SpawnGroup "+String(loadLevel->spawnGroups.Size()+1)+" added "+group->name+"\t"+group->spawnTime.ToString("m:S.n"), INFO);
+			LogMain("SpawnGroup "+String(loadLevel->spawnGroups.Size()+1)+" added "+group->name+"\t"+group->spawnTime.ToString("m:S.n"), DEBUG);
 		} 
 		for (int p = 1; p < spawnTimes.Size(); ++p)
 		{
@@ -38,7 +38,7 @@ namespace LevelLoader
 			newGroup->spawnTime = spawnTimes[p];
 			newGroup->name = lastGroup->name + "_"+String(p+1);
 			loadLevel->spawnGroups.AddItem(newGroup);
-			LogMain("SpawnGroup "+String(loadLevel->spawnGroups.Size()+1)+" added "+newGroup->name+"\t"+newGroup->spawnTime.ToString("m:S.n"), INFO);
+			LogMain("SpawnGroup "+String(loadLevel->spawnGroups.Size()+1)+" added "+newGroup->name+"\t"+newGroup->spawnTime.ToString("m:S.n"), DEBUG);
 		}
 		spawnTimes.Clear();
 		group = NULL;

@@ -153,7 +153,7 @@ void Rotation::OnEnter(Ship * forShip)
 
 void Rotation::OnFrame(int timeInMs)
 {
-	Entity * targetEntity = NULL;
+	EntitySharedPtr targetEntity = NULL;
 	switch(type)
 	{
 		case Rotation::NONE:

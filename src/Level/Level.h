@@ -52,7 +52,7 @@ public:
 	// Used for player and camera. Based on millisecondsPerPixel.
 	Vector3f BaseVelocity();
 	/// Creates player entity within this level. (used for spawning)
-	Entity * AddPlayer(Ship * playerShip, ConstVec3fr atPosition = Vector3f(-50.f, 10.f, 0));
+	EntitySharedPtr AddPlayer(Ship * playerShip, ConstVec3fr atPosition = Vector3f(-50.f, 10.f, 0));
 	void SetupCamera();
 	/// o.o
 	void Process(int timeInMs);
@@ -61,9 +61,9 @@ public:
 	void SetTime(Time newTime);
 	/// enable respawing on shit again.
 	void OnLevelTimeAdjusted();
-	Entity * ClosestTarget(bool ally, ConstVec3fr position);
+	EntitySharedPtr ClosestTarget(bool ally, ConstVec3fr position);
 	/// o.o'
-	void Explode(Weapon & weapon, Entity * causingEntity, bool enemy);
+	void Explode(Weapon & weapon, EntitySharedPtr causingEntity, bool enemy);
 	/// Returns ships close enough to given point. Returns distance to them too. Checks only to center of ship, not edges.
 	List<Ship*> GetShipsAtPoint(ConstVec3fr position, float maxRadius, List<float> & distances); 
 
