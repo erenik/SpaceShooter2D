@@ -4,6 +4,7 @@
 
 #include "SSIntegrator.h"
 #include "SpaceShooter2D.h"
+#include "PlayingLevel.h"
 
 extern EntitySharedPtr playerEntity;
 
@@ -15,6 +16,8 @@ SSIntegrator::SSIntegrator(float zPlane)
 
 void SSIntegrator::IntegrateDynamicEntities(List< std::shared_ptr<Entity> > & dynamicEntities, float timeInSeconds)
 {
+	EntitySharedPtr levelEntity = LevelEntity();
+	auto playingFieldHalfSize = PlayingLevel::playingFieldHalfSize;
 	if (levelEntity)
 	{
 		frameMin = levelEntity->worldPosition - playingFieldHalfSize;
@@ -31,7 +34,7 @@ void SSIntegrator::IntegrateDynamicEntities(List< std::shared_ptr<Entity> > & dy
 		/// Check if player
 //		ShipProperty * sp = (ShipProperty*) dynamicEntity->GetProperty(shipID);
 		// If so, limit to inside the radiusiusius
-		if (dynamicEntity == playerShip->entity)
+		if (dynamicEntity == PlayerShipEntity())
 		{
 	//		std::cout<<"\nShip property: "<<sp<<" ID "<<sp->GetID()<<" allied: "<<sp->ship->allied;
 			/// Adjusting local position may not help ensuring entity is within bounds for child entities.

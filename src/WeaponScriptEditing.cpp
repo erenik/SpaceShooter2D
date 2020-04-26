@@ -8,6 +8,7 @@
 #include "UI/UILists.h"
 #include "UI/UIInputs.h"
 #include "Message/MathMessage.h"
+#include "PlayingLevel.h"
 
 List<UIElement*> tmp;
 String existingScripts = "lScripts",
@@ -40,6 +41,10 @@ void UpdateEditScriptUI()
 	// Fetch active script?
 	if (editScript)
 	{
+		PlayingLevel& pl = PlayingLevelRef();
+		auto playerShip = pl.playerShip;
+		auto levelEntity = pl.levelEntity;
+
 		/// Default equip it to the ship too?
 		playerShip->weaponScript = editScript;
 

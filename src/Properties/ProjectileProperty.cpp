@@ -4,6 +4,7 @@
 
 #include "SpaceShooter2D.h"
 #include "Properties/ProjectileProperty.h"
+#include "PlayingLevel.h"
 
 ProjectileProperty::ProjectileProperty(const Weapon & weaponThatSpawnedIt, EntitySharedPtr owner, bool enemy)
 : EntityProperty("ProjProp", ID(), owner), weapon(weaponThatSpawnedIt), enemy(enemy)
@@ -28,17 +29,19 @@ void ProjectileProperty::OnCollision(Collision & data)
 
 void ProjectileProperty::Remove()
 {
+	PlayingLevel& pl = PlayingLevelRef();
 	// Remove self.
 	sleeping = true;
 	MapMan.DeleteEntity(owner);
-	projectileEntities.Remove(owner);
+	pl.projectileEntities.Remove(owner);
 }
 
 void ProjectileProperty::Destroy()
 {
 	if (sleeping)
 		return;
-
+	PlayingLevel& pl = PlayingLevelRef();
+	
 	Remove();
 
 	// Check distance to player.
@@ -65,7 +68,7 @@ void ProjectileProperty::Destroy()
 		tmpEmitter->SetScale(0.15f);
 		tmpEmitter->SetColor(color);
 		tmpEmitter->SetRatioRandomVelocity(1.f);
-		Graphics.QueueMessage(new GMAttachParticleEmitter(tmpEmitter, sparks));
+		Graphics.QueueMessage(new GMAttachParticleEmitter(tmpEmitter, pl.sparks));
 	}
 	else /// Sparks for all physically based projectiles with friction against targets.
 	{	
@@ -78,7 +81,7 @@ void ProjectileProperty::Destroy()
 		tmpEmitter->SetScale(0.1f);
 		tmpEmitter->SetColor(color);
 		tmpEmitter->SetRatioRandomVelocity(1.f);
-		Graphics.QueueMessage(new GMAttachParticleEmitter(tmpEmitter, sparks));
+		Graphics.QueueMessage(new GMAttachParticleEmitter(tmpEmitter, pl.sparks));
 	}
 
 //	float volume = distanceModifierToVolume * explosionSFXVolume;
@@ -92,7 +95,8 @@ void ProjectileProperty::Process(int timeInMs)
 {
 	if (sleeping)
 		return;
-	if (paused)
+	PlayingLevel& pl = PlayingLevelRef();
+	if (pl.paused)
 		return;
 	timeAliveMs += timeInMs;
 	if (timeAliveMs > weapon.lifeTimeMs)
@@ -153,7 +157,7 @@ void ProjectileProperty::Process(int timeInMs)
 		// Adjust velocity towards it by the given factor, per second.
 		// 1.0 will change velocity entirely to look at the enemy.
 		// Values above 1.0 will try and compensate for target velocity and not just current position?
-		EntitySharedPtr closestTarget = spaceShooter->level.ClosestTarget(!enemy, owner->worldPosition);
+		EntitySharedPtr closestTarget = spaceShooter->level.ClosestTarget(PlayingLevelRef(), !enemy, owner->worldPosition);
 		if (!closestTarget)
 			return;
 		Vector3f toTarget = closestTarget->worldPosition - owner->worldPosition;

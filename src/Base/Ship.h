@@ -11,6 +11,7 @@
 #include "Rotation.h"
 #include "Base/Gear.h"
 
+class PlayingLevel;
 class Script;
 class Entity;
 class Model;
@@ -35,16 +36,16 @@ public:
 	/// Call on spawning.
 	void RandomizeWeaponCooldowns();
 	/// Spawns at local position according to window/player area, creating entities, registering for movement, etc. Returns it and all children spawned with it.
-	List< std::shared_ptr<Entity> > Spawn(ConstVec3fr atLocalPosition, Ship * parent);
+	List< std::shared_ptr<Entity> > Spawn(ConstVec3fr atLocalPosition, Ship * parent, PlayingLevel & playingLevel);
 	/// Handles spawning of children as needed.
-	List< std::shared_ptr<Entity> > SpawnChildren();
-	void Despawn(bool doExplodeEffectsForChildren);
-	void ExplodeEffects();
+	List< std::shared_ptr<Entity> > SpawnChildren(PlayingLevel& playingLevel);
+	void Despawn(PlayingLevel& playingLevel, bool doExplodeEffectsForChildren);
+	void ExplodeEffects(PlayingLevel& playingLevel);
 	/// Checks current movement. Will only return true if movement is target based and destination is within threshold.
 	bool ArrivedAtDestination();
-	void Process(int timeInMs);
-	void ProcessAI(int timeInMs);
-	void ProcessWeapons(int timeInMs);
+	void Process(PlayingLevel& playingLevel, int timeInMs);
+	void ProcessAI(PlayingLevel& playingLevel, int timeInMs);
+	void ProcessWeapons(PlayingLevel& playingLevel, int timeInMs);
 
 	/// Disables weapon in this and children ships.
 	void DisableWeapon(String weaponName);
@@ -56,13 +57,13 @@ public:
 	Model * GetModel();
 	/// o.o
 	void DisableMovement();
-	void OnSpeedUpdated();
+	void OnSpeedUpdated(PlayingLevel& playingLevel);
 	void SetProjectileSpeedBonus(float newBonus); // Sets new bonus, updates weapons if needed.
 	void SetWeaponCooldownBonus(float newBonus); // Sets new bonus, updates weapons if needed.
-	void Damage(Weapon & usingWeapon);
+	void Damage(PlayingLevel& playingLevel, Weapon & usingWeapon);
 	/// Returns true if destroyed -> shouldn't touch any more.
-	bool Damage(float amount, bool ignoreShield);
-	void Destroy();
+	bool Damage(PlayingLevel& playingLevel, float amount, bool ignoreShield);
+	void Destroy(PlayingLevel& playingLevel);
 	// Load ship-types.
 	static bool LoadTypes(String file);
 	/// E.g. "Straight(10), MoveTo(X Y 5 20, 5)"
@@ -70,8 +71,8 @@ public:
 	/// E.g. "DoveDir(3), RotateToFace(player, 5)"
 	void ParseRotation(String fromString);
 	/// Sets movement. Clears any other existing movements.
-	void SetMovement(Movement & movement);
-	void SetSpeed(float speed);
+	void SetMovement(PlayingLevel& playingLevel, Movement & movement);
+	void SetSpeed(PlayingLevel& playingLevel, float speed);
 	/// Creates new ship of specified type.
 	static Ship * New(String shipByName);
 
@@ -95,7 +96,7 @@ public:
 	bool SwitchToWeapon(int index);
 
 	/// Calls OnEnter for the initial movement pattern.
-	void StartMovement();
+	void StartMovement(PlayingLevel& playingLevel);
 
 	/// For player ship.
 	void SetWeaponLevel(int weaponType, int level);

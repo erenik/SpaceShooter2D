@@ -4,7 +4,7 @@
 
 #include "Movement.h"
 #include "SpaceShooter2D.h"
-
+#include "PlayingLevel.h"
 #include "File/LogFile.h"
 
 String Movement::ToString()
@@ -199,7 +199,7 @@ String Movement::Name(int type)
 }
 
 // Upon entering this movement pattern.
-void Movement::OnEnter(Ship * ship)
+void Movement::OnEnter(PlayingLevel& playingLevel, Ship * ship)
 {
 	timeInCurrentMovement = 0;
 	// Reset stuff.
@@ -225,14 +225,14 @@ void Movement::OnEnter(Ship * ship)
 			break;
 		}
 		case Movement::MOVE_TO:
-			MoveToLocation();
+			MoveToLocation(playingLevel);
 			break;
 		case Movement::MOVE_DIR:
 			SetDirection(vec);
 			break;
 		case Movement::CIRCLE:
 		{
-			Circle();
+			Circle(playingLevel);
 			break;
 		}
 		case Movement::UP_N_DOWN:
@@ -251,18 +251,18 @@ void Movement::OnEnter(Ship * ship)
 }
 
 /// Called on scripted updates or otherwise when adjusted.
-void Movement::OnSpeedUpdated()
+void Movement::OnSpeedUpdated(PlayingLevel& playingLevel)
 {
 	// Do stuff..
 	// Just call Start for now?
 	if (ship)
-		OnEnter(ship);
+		OnEnter(playingLevel, ship);
 	else
 		assert(false);
 }
 
 // Called every frame.
-void Movement::OnFrame(int timeInMs)
+void Movement::OnFrame(PlayingLevel& playingLevel, int timeInMs)
 {
 	timeInCurrentMovement += timeInMs;
 	switch(type)
@@ -289,10 +289,10 @@ void Movement::OnFrame(int timeInMs)
 			break;
 		}
 		case Movement::MOVE_TO:
-			MoveToLocation();
+			MoveToLocation(playingLevel);
 			break;
 		case Movement::CIRCLE:
-			Circle();
+			Circle(playingLevel);
 			break;
 		case Movement::UP_N_DOWN:
 		{
@@ -349,7 +349,7 @@ void Movement::SetWindowSpeed(Vector2f desiredAppearedSpeed)
 	QueuePhysics(new PMSetEntity(shipEntity, PT_VELOCITY, totalSpeed));
 }
 
-void Movement::MoveToLocation()
+void Movement::MoveToLocation(PlayingLevel & playingLevel)
 {
 	Vector3f pos;
 	bool isPosition = false;
@@ -359,7 +359,7 @@ void Movement::MoveToLocation()
 		case Location::VECTOR:
 		{
 			// Adjust movement vector?
-			pos = levelEntity->worldPosition + vec;
+			pos = playingLevel.levelEntity->worldPosition + vec;
 			isPosition = true;
 			break;
 		}
@@ -418,13 +418,13 @@ void Movement::MoveToLocation()
 			break;
 		}
 		case Location::CENTER: 
-			pos = levelEntity->worldPosition;
+			pos = playingLevel.levelEntity->worldPosition;
 			isPosition = true;
 			break;
 		case Location::PLAYER:
-			if (playerShip->entity)
+			if (playingLevel.playerShip->entity)
 			{
-				pos = playerShip->entity->worldPosition;
+				pos = playingLevel.playerShip->entity->worldPosition;
 				isPosition = true;
 			}
 			else {
@@ -445,10 +445,10 @@ void Movement::MoveToLocation()
 }
 
 
-void Movement::Circle()
+void Movement::Circle(PlayingLevel & playingLevel)
 {
 	// Go towards target.
-	EntitySharedPtr target = playerShip->entity;
+	EntitySharedPtr target = playingLevel.playerShip->entity;
 	if (!target)
 	{
 		SetDirection(Vector3f());

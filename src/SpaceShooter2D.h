@@ -1,7 +1,7 @@
 /// Emil Hedemalm
 /// 2015-01-20
 /// Space shooter.
-/// For the Karl-Emil SpaceShooter project, mainly 2014-2015/
+/// For the SpaceShooter project
 
 #include "AppStates/AppState.h"
 
@@ -84,32 +84,9 @@ class SpaceShooterCR;
 class SpaceShooterCD;
 class GameVariable;
 
-/// Time in current level, from 0 when starting. Measured in milliseconds.
-extern Time levelTime, flyTime;
-// extern int64 nowMs;
-extern int timeElapsedMs;
-/// Particle system for sparks/explosion-ish effects.
-extern Sparks * sparks;
-
-/// These will hopefully always be in AABB axes.
-extern Vector3f frustumMin, frustumMax;
-
-extern Ship * playerShip;
-/// The level entity, around which the playing field and camera are based upon.
-extern EntitySharedPtr levelEntity;
-extern Vector2f playingFieldSize;
-extern Vector2f playingFieldHalfSize;
-extern float playingFieldPadding;
-/// All ships, including player.
-extern List< std::shared_ptr<Entity> > shipEntities;
-extern List< std::shared_ptr<Entity> > projectileEntities;
-extern String playerName;
-extern bool paused;
-extern String onDeath; // What happens when the player dies?
-
 // Macros
-#define leftEdge (levelEntity->worldPosition.x - playingFieldHalfSize.x)
-#define rightEdge (levelEntity->worldPosition.x + playingFieldHalfSize.x)
+#define leftEdge (playingLevel.levelEntity->worldPosition.x - playingLevel.playingFieldHalfSize.x)
+#define rightEdge (playingLevel.levelEntity->worldPosition.x + playingLevel.playingFieldHalfSize.x)
 
 Vector2i WeaponTypeLevelFromString(String str); // For shop/UI-interaction.
 String WeaponTypeLevelToString(int type, int level);
@@ -119,6 +96,26 @@ int DiffCost(String toUpgrade);
 void ProcessMessageWSS(Message * message);
 /// Before killing 'em.
 void PrintEntityData(EntitySharedPtr entity);
+
+
+enum SSGameMode {
+	START_UP,
+	MAIN_MENU,
+	EDITING_OPTIONS,
+	NEW_GAME,
+	IN_LOBBY,
+	IN_HANGAR,
+	IN_WORKSHOP,
+	EDIT_WEAPON_SWITCH_SCRIPTS,
+	BUYING_GEAR,
+	LOAD_SAVES,
+	PLAYING_LEVEL,
+	GAME_OVER,
+	LEVEL_CLEARED,
+	SHOWING_LEVEL_STATS,
+};
+
+String SSGameModeString(SSGameMode);
 
 class SpaceShooter2D : public AppState 
 {
@@ -205,8 +202,6 @@ public:
 	void Resume();
 	void TogglePause();
 	
-	/// Loads target level. The source and separate .txt description have the same name, just different file-endings, e.g. "Level 1.png" and "Level 1.txt"
-	void LoadLevel(String levelSource = "CurrentStageLevel");
 	void GameOver();
 	void OnLevelCleared();
 
@@ -216,8 +211,6 @@ public:
 	void EnterShipWorkshop();
 	/// Returns a list of save-files.
 	void OpenLoadScreen();
-	// Bring up the in-game menu.
-	void OpenInGameMenu();
 	
 	
 	/// Saves current progress.
@@ -228,22 +221,7 @@ public:
 	void UpdatePlayerVelocity();
 	void ResetCamera();	
 
-	enum {
-		MAIN_MENU,
-		EDITING_OPTIONS,
-		NEW_GAME,
-		IN_LOBBY,
-		IN_HANGAR,
-		IN_WORKSHOP,
-		EDIT_WEAPON_SWITCH_SCRIPTS,
-		BUYING_GEAR,
-		LOAD_SAVES,
-		PLAYING_LEVEL,
-		GAME_OVER,
-		LEVEL_CLEARED,
-		SHOWING_LEVEL_STATS,
-	};
-	int mode;
+	SSGameMode mode;
 	SSIntegrator * integrator;
 	SpaceShooterCR * cr;
 	SpaceShooterCD * cd;
@@ -253,7 +231,7 @@ public:
 	String levelSource;
 
 	/// o.o
-	GameVariable * currentLevel,
+	static GameVariable * currentLevel,
 		* currentStage,
 		* score,
 		* money,
@@ -266,11 +244,14 @@ public:
 	void SetPlayingFieldSize(Vector2f newSize);
 	
 	/// Saves previousMode
-	void SetMode(int newMode, bool updateUI = true);
+	void SetMode(SSGameMode newMode, bool updateUI = true);
 	/// o.o
-	int previousMode;
+	SSGameMode previousMode;
 	/// 0 by default.
 	int gearCategory;
+
+	static Time startDate;
+	static String levelToLoad;
 private:
 	
 	void RenderInLevel(GraphicsState * graphicsState);

@@ -12,6 +12,8 @@ class Ship;
 #include "MathLib.h"
 #include "MathLib/Variable.h"
 
+class PlayingLevel;
+
 namespace Location {
 	enum {
 		VECTOR,
@@ -34,11 +36,11 @@ public:
 	/// For scripting.
 	static List<Variable> GetTypesAsVariables();
 	// Upon entering this movement pattern.
-	void OnEnter(Ship * ship);
+	void OnEnter(PlayingLevel& playingLevel, Ship * ship);
 	/// Called on scripted updates or otherwise when adjusted.
-	void OnSpeedUpdated();
+	void OnSpeedUpdated(PlayingLevel& playingLevel);
 	// Called every frame.
-	void OnFrame(int timeInMs);
+	void OnFrame(PlayingLevel& playingLevel, int timeInMs);
 	// Upon exiting this movement pattern.
 	void OnEnd();
 
@@ -85,8 +87,8 @@ public:
 private:
 	/// Sets movement speed to target normalized direction.
 	void SetDirection(Vector2f dir);
-	void MoveToLocation();
-	void Circle();
+	void MoveToLocation(PlayingLevel& playingLevel);
+	void Circle(PlayingLevel& playingLevel);
 
 	Ship * ship;
 	EntitySharedPtr shipEntity;

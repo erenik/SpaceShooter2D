@@ -22,6 +22,7 @@
 #include "Window/AppWindowManager.h"
 
 #include "SpaceShooter2D.h"
+#include "PlayingLevel.h"
 
 ShipProperty::ShipProperty(Ship * ship, EntitySharedPtr owner)
 : EntityProperty("ShipProperty", ID(), owner), ship(ship)
@@ -58,7 +59,7 @@ void ShipProperty::Process(int timeInMs)
 {
 	if (sleeping)
 		return;
-	if (paused)
+	if (PlayingLevel::paused)
 		return;
 
 	/// o.o
@@ -72,7 +73,7 @@ void ShipProperty::Process(int timeInMs)
 		}
 	}
 	// Move?
-	ship->Process(timeInMs);
+	ship->Process(PlayingLevelRef(), timeInMs);
 }
 	
 /// If reacting to collisions...
@@ -112,7 +113,7 @@ void ShipProperty::OnCollision(EntitySharedPtr withEntity)
 				if (s == "RemoveThis")
 				{
 					ship->hp = 0;
-					ship->Despawn(false);
+					ship->Despawn(PlayingLevelRef(), false);
 					return;
 				}
 				else 
@@ -123,21 +124,22 @@ void ShipProperty::OnCollision(EntitySharedPtr withEntity)
 		}
 
 
+		PlayingLevel& pl = PlayingLevelRef();
 
 //		std::cout<<"\nCollision with ship! o.o";
 		if (sspp->sleeping)
 			return;
 		// Check collision damage cooldown for if we should apply damage.
-		if (ship->lastShipCollision < flyTime - ship->collisionDamageCooldown)
+		if (ship->lastShipCollision < pl.flyTime - ship->collisionDamageCooldown)
 		{
-			if (!ship->Damage(sspp->ship->collideDamage, true))
-				ship->lastShipCollision = flyTime;
+			if (!ship->Damage(pl, sspp->ship->collideDamage, true))
+				ship->lastShipCollision = pl.flyTime;
 		}
 		// Same for the other ship.
-		if (ship && sspp->ship->lastShipCollision < flyTime - sspp->ship->collisionDamageCooldown)
+		if (ship && sspp->ship->lastShipCollision < pl.flyTime - sspp->ship->collisionDamageCooldown)
 		{
-			if (!sspp->ship->Damage(ship->collideDamage, false))
-				sspp->ship->lastShipCollision = flyTime;
+			if (!sspp->ship->Damage(pl, ship->collideDamage, false))
+				sspp->ship->lastShipCollision = pl.flyTime;
 		}
 
 		// Add a temporary emitter to the particle system to add some sparks to the collision
@@ -162,7 +164,7 @@ void ShipProperty::OnCollision(EntitySharedPtr withEntity)
 		tmpEmitter->SetScale(0.05f);
 		tmpEmitter->SetParticleLifeTime(1.5f);
 		tmpEmitter->SetColor(Vector4f(1.f, 0.5f, 0.1f, 1.f));
-		Graphics.QueueMessage(new GMAttachParticleEmitter(tmpEmitter, sparks));
+		Graphics.QueueMessage(new GMAttachParticleEmitter(tmpEmitter, pl.sparks));
 		return;
 	}
 
@@ -174,7 +176,7 @@ void ShipProperty::OnCollision(EntitySharedPtr withEntity)
 			// Take damage? D:
 			if (pp->penetratedTargets.Size())
 				; // std::cout<<"\nPenetrator damaing again: "<<pp->penetratedTargets.Size();
-			ship->Damage(pp->weapon);
+			ship->Damage(PlayingLevelRef(), pp->weapon);
 			// Check penetration rate.
 			if (penetrationRand.Randf() > pp->weapon.penetration)
 			{
@@ -197,7 +199,7 @@ void ShipProperty::OnCollision(EntitySharedPtr withEntity)
 	{
 		if (exp->ShouldDamage(ship))
 		{
-			ship->Damage(exp->CurrentDamage(), false);
+			ship->Damage(PlayingLevelRef(), exp->CurrentDamage(), false);
 			exp->damagedTargets.AddItem(ship);
 		}
 	}

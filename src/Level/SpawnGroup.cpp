@@ -9,6 +9,7 @@
 #include "TextureManager.h"
 #include "Model/ModelManager.h"
 #include "File/LogFile.h"
+#include "PlayingLevel.h"
 
 String Formation::GetName(int forFormationType)
 {
@@ -85,7 +86,7 @@ Random spawnGroupRand;
 	Returns true if it has finished spawning. 
 	Call again until it returns true each iteration (required for some formations).
 */
-bool SpawnGroup::Spawn()
+bool SpawnGroup::Spawn(PlayingLevel& playingLevel)
 {
 	/// Prepare spawning.
 	if (!preparedForSpawning)
@@ -97,7 +98,7 @@ bool SpawnGroup::Spawn()
 		for (int i = 0; i < ships.Size(); ++i)
 		{
 			Ship * ship = ships[i];
-			ship->Spawn(ship->position, 0);
+			ship->Spawn(ship->position, 0, playingLevel);
 			activeLevel->ships.AddItem(ship);
 			++spawned;
 			ships.RemoveItem(ship);
@@ -108,13 +109,13 @@ bool SpawnGroup::Spawn()
 	/// Spawn one at a time?
 	else
 	{
-		if (lastSpawn.Seconds() == 0 || (levelTime - lastSpawn).Milliseconds() > spawnIntervalMsBetweenEachShipInFormation)
+		if (lastSpawn.Seconds() == 0 || (playingLevel.levelTime - lastSpawn).Milliseconds() > spawnIntervalMsBetweenEachShipInFormation)
 		{
 			Ship * ship = ships[0];
-			ship->Spawn(ship->position, 0);
+			ship->Spawn(ship->position, 0, playingLevel);
 			activeLevel->ships.AddItem(ship);
 			ships.RemoveIndex(0, ListOption::RETAIN_ORDER);
-			lastSpawn = levelTime;
+			lastSpawn = playingLevel.levelTime;
 		}
 		// Spawn one ata  time.
 		if (ships.Size() == 0)

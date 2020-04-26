@@ -15,6 +15,7 @@
 #include "UI/UIInputs.h"
 #include "UI/UIButtons.h"
 #include "Text/TextManager.h"
+#include "PlayingLevel.h"
 
 #include "Window/AppWindowManager.h"
 
@@ -31,12 +32,12 @@ void UpdateWeaponScriptUI();
 void SpaceShooter2D::UpdateUI()
 {
 	/// Pop stuff.
-	List<String> uis("gui/MainMenu.gui", "gui/HUD.gui", "gui/Hangar.gui", "gui/Workshop.gui");
-	uis.AddItem("gui/WeaponScripts.gui");
-	for (int i = 0; i < uis.Size(); ++i)
-	{
-		PopUI(uis[i]);
-	}
+//	List<String> uis("gui/MainMenu.gui", "gui/HUD.gui", "gui/Hangar.gui", "gui/Workshop.gui");
+//	uis.AddItem("gui/WeaponScripts.gui");
+	//for (int i = 0; i < uis.Size(); ++i)
+	//{
+	//	PopUI(uis[i]);
+	//}
 	String toPush;	
 	// Reveal specifics?
 	switch(mode)
@@ -129,10 +130,13 @@ void SpaceShooter2D::UpdateHUDGearedWeapons()
 		RequeueHUDUpdate();
 		return;
 	}
+
+	PlayingLevel& pl = PlayingLevelRef();
+
 	// Fetch children.
 	assert(activeWeapon);
 	List<UIElement*> children = activeWeapon->GetChildren();
-	List<Weapon*> & weapons = playerShip->weapons;
+	List<Weapon*> & weapons = pl.playerShip->weapons;
 	for (int i = 0; i < children.Size(); ++i)
 	{
 		UIElement * child = children[i];
@@ -176,26 +180,29 @@ void SpaceShooter2D::OnScoreUpdated()
 
 void SpaceShooter2D::UpdateUIPlayerHP(bool force)
 {
+	PlayingLevel& pl = PlayingLevelRef();
 	static int lastHP;
-	if (lastHP == playerShip->hp && !force)
+	if (lastHP == pl.playerShip->hp && !force)
 		return;
-	lastHP = (int)playerShip->hp;
-	GraphicsMan.QueueMessage(new GMSetUIi("HP", GMUI::INTEGER_INPUT, (int)playerShip->hp));	
-	float redRatio = playerShip->hp / (float) playerShip->maxHP;
+	lastHP = (int)pl.playerShip->hp;
+	GraphicsMan.QueueMessage(new GMSetUIi("HP", GMUI::INTEGER_INPUT, (int)pl.playerShip->hp));
+	float redRatio = pl.playerShip->hp / (float)pl.playerShip->maxHP;
 	GraphicsMan.QueueMessage(new GMSetUIv4f("HP", GMUI::TEXT_COLOR, Vector4f(1.0f, 1 - redRatio, 1 - redRatio, 1.0f)));
 }
 void SpaceShooter2D::UpdateUIPlayerShield(bool force)
 {
+	PlayingLevel& pl = PlayingLevelRef();
 	static int lastShield;
-	if (lastShield == playerShip->shieldValue && !force)
+	if (lastShield == pl.playerShip->shieldValue && !force)
 		return;
-	lastShield = (int)playerShip->shieldValue;
-	GraphicsMan.QueueMessage(new GMSetUIi("Shield", GMUI::INTEGER_INPUT, (int)playerShip->shieldValue));
+	lastShield = (int)pl.playerShip->shieldValue;
+	GraphicsMan.QueueMessage(new GMSetUIi("Shield", GMUI::INTEGER_INPUT, (int)pl.playerShip->shieldValue));
 }
 
 void SpaceShooter2D::UpdateCooldowns()
 {
-	List<Weapon*> & weapons = playerShip->weapons;
+	PlayingLevel& pl = PlayingLevelRef();
+	List<Weapon*> & weapons = pl.playerShip->weapons;
 	for (int i = 0; i < weapons.Size(); ++i)
 	{
 		// Check cooldown.
@@ -230,8 +237,9 @@ void SpaceShooter2D::UpdateCooldowns()
 
 void SpaceShooter2D::UpdateHUDSkill()
 {
-	QueueGraphics(new GMSetUIs("Skill", GMUI::TEXT, playerShip->skillName));
-	QueueGraphics(new GMSetUIs("Skill", GMUI::TEXTURE_SOURCE, playerShip->activeSkill != NO_SKILL? "0x00FF00FF" : "0x44AA"));		
+	PlayingLevel& pl = PlayingLevelRef();
+	QueueGraphics(new GMSetUIs("Skill", GMUI::TEXT, pl.playerShip->skillName));
+	QueueGraphics(new GMSetUIs("Skill", GMUI::TEXTURE_SOURCE, pl.playerShip->activeSkill != NO_SKILL? "0x00FF00FF" : "0x44AA"));
 }
 
 void SpaceShooter2D::LoadDefaultName()
@@ -253,6 +261,7 @@ void SpaceShooter2D::ShowLevelStats()
 
 void SpaceShooter2D::UpdateUpgradesLists()
 {
+	PlayingLevel& pl = PlayingLevelRef();
 	QueueGraphics(new GMClearUI("lWeaponCategories"));
 	/// Fill with column lists for each weapon.
 	List<UIElement*> cls;
@@ -278,7 +287,7 @@ void SpaceShooter2D::UpdateUpgradesLists()
 			bn->onHover = "SetHoverUpgrade:"+bn->name;
 			bn->activationMessage = "ActiveUpgrade:"+bn->name;
 			bn->sizeRatioY = 0.6f;
-			if (playerShip->weapons[i]->level > j)
+			if (pl.playerShip->weapons[i]->level > j)
 				bn->textureSource = "0x00FF00AA";
 			else
 				bn->textureSource = "0x44AA";
@@ -297,6 +306,8 @@ void SpaceShooter2D::UpdateUpgradesMoney()
 
 void SpaceShooter2D::UpdateUpgradeStatesInList()
 {
+
+	PlayingLevel& pl = PlayingLevelRef();
 	// Does not create, merely modifies.
 	for (int i = 0; i < WeaponType::MAX_TYPES; ++i)
 	{
@@ -308,7 +319,7 @@ void SpaceShooter2D::UpdateUpgradeStatesInList()
 			textureSource = "ui/SpaceShooterUpgrade_White";//textureSource = "0xFFFF00AA";
 			if (j == 0)
 			{
-				if (playerShip->weapons[i]->level > 0)
+				if (pl.playerShip->weapons[i]->level > 0)
 				{
 	//				textureSource = "ui/SpaceShooterUpgrade_White";//textureSource = "0xFFFF00AA";
 					color = Vector4f(1,1,0,1);
@@ -322,7 +333,7 @@ void SpaceShooter2D::UpdateUpgradeStatesInList()
 			}
 			else 
 			{
-				if (playerShip->weapons[i]->level >= j)
+				if (pl.playerShip->weapons[i]->level >= j)
 //					color = Vector4f(0,1,0,1);
 					color = Color(102, 255, 0, 255);
 				//	textureSource = "ui/SpaceShooterGreenUpgrade.png";
@@ -355,6 +366,10 @@ UILabel * BasicLabel(int textID)
 
 void FillBasicInfo(String upgrade, String inElement)
 {
+
+	PlayingLevel& pl = PlayingLevelRef();
+	auto playerShip = pl.playerShip;
+
 	QueueGraphics(new GMClearUI(inElement));
 	// Show basic info
 	Vector2i tl = WeaponTypeLevelFromString(upgrade);
@@ -426,6 +441,8 @@ void FillBasicInfo(String upgrade, String inElement)
 
 void MoreStats(String upgrade, String inElement)
 {
+	PlayingLevel& pl = PlayingLevelRef();
+	auto playerShip = pl.playerShip;
 	QueueGraphics(new GMClearUI(inElement));
 	// Show basic info
 	Vector2i tl = WeaponTypeLevelFromString(upgrade);
@@ -660,43 +677,4 @@ void SpaceShooter2D::OpenJumpDialog()
 		// Close it afterwards.
 }
 
-
-#include "Level/SpawnGroup.h"
-AppWindow * spawnWindow = 0;
-UserInterface * spawnUI = 0;
-
-void OpenSpawnWindow()
-{
-	if (!spawnWindow)
-	{
-		spawnWindow = WindowMan.NewWindow("SpawnWindow", "Spawn Window");
-		spawnWindow->SetRequestedSize(Vector2i(400,300));
-		spawnWindow->Create();
-		UserInterface * ui = spawnUI = spawnWindow->CreateUI();
-		ui->Load("gui/SpawnWindow.gui");
-	}
-	spawnWindow->Show();
-	/// Update lists inside.
-	List<String> shipTypes;
-	for (int i = 0; i < Ship::types.Size(); ++i)
-	{
-		Ship * type = Ship::types[i];
-		if (type->allied)
-			continue;
-		shipTypes.AddItem(type->name);
-	}
-	QueueGraphics(new GMSetUIContents(spawnUI, "ShipTypeToSpawn", shipTypes));
-	List<String> spawnFormations;
-	for (int i = 0; i < Formation::FORMATIONS; ++i)
-	{
-		spawnFormations.AddItem(Formation::GetName(i));
-	}
-	QueueGraphics(new GMSetUIContents(spawnUI, "SpawnFormation", spawnFormations));
-}
-
-void CloseSpawnWindow()
-{
-	if (spawnWindow)
-		spawnWindow->Close();
-}
 

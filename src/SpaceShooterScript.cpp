@@ -9,6 +9,7 @@
 #include "File/LogFile.h"
 #include "Game/GameVariableManager.h"
 #include "Game/GameVariable.h"
+#include "PlayingLevel.h"
 
 SpaceShooterScript::SpaceShooterScript()
 {
@@ -17,6 +18,10 @@ SpaceShooterScript::SpaceShooterScript()
 
 void SpaceShooterScript::EvaluateLine(String & line)
 {
+	PlayingLevel& pl = PlayingLevelRef();
+	auto playerShip = pl.playerShip;
+	auto levelEntity = pl.levelEntity;
+
 	/// Default line processed once?
 	lineProcessed = true;
 	if (line.StartsWith("Charge"))
@@ -33,7 +38,7 @@ void SpaceShooterScript::EvaluateLine(String & line)
 			return;
 		
 		/// Update speed based on progression.
-		float distance = (targetEntity->worldPosition.x - (levelEntity->worldPosition.x - playingFieldHalfSize.x)) / playingFieldSize.x;
+		float distance = (targetEntity->worldPosition.x - (levelEntity->worldPosition.x - pl.playingFieldHalfSize.x)) / pl.playingFieldSize.x;
 	//	std::cout<<"\nDistance "<<distance;
 		ClampFloat(distance, -1.f, 1.f);
 		Ship * ship = spaceShooter->GetShip(targetEntity);
@@ -45,12 +50,12 @@ void SpaceShooterScript::EvaluateLine(String & line)
 			/// Enter charging movement if not already there.
 			Movement move(Movement::MOVE_TO);
 			move.location = Location::LEFT_EDGE; 
-			ship->SetMovement(move);
+			ship->SetMovement(pl, move);
 			sssState = 1;
 		}
 		/// Update speed.
 		else
-			ship->OnSpeedUpdated();
+			ship->OnSpeedUpdated(pl);
 		
 		// Mark as complete when we are at the left side.
 		if (distance < 0)
@@ -58,7 +63,7 @@ void SpaceShooterScript::EvaluateLine(String & line)
 			lineProcessed = true;
 			lineFinished = true;
 			sssState = 0;
-			ship->SetSpeed(0);
+			ship->SetSpeed(pl, 0);
 		}
 	}
 	else if (line.StartsWith("Return"))
@@ -75,8 +80,8 @@ void SpaceShooterScript::EvaluateLine(String & line)
 			return;
 		
 		/// Update speed based on progression.
-		float targetX = playingFieldHalfSize.x - 5.f;
-		float distance = ((levelEntity->worldPosition.x + targetX) - targetEntity->worldPosition.x) / playingFieldSize.x;
+		float targetX = pl.playingFieldHalfSize.x - 5.f;
+		float distance = ((levelEntity->worldPosition.x + targetX) - targetEntity->worldPosition.x) / pl.playingFieldSize.x;
 	//	std::cout<<"\nDistance "<<distance;
 //		ClampFloat(distance, -1.f, 1.f);
 		Ship * ship = spaceShooter->GetShip(targetEntity);
@@ -88,7 +93,7 @@ void SpaceShooterScript::EvaluateLine(String & line)
 			Movement move(Movement::MOVE_TO);
 			move.location = Location::VECTOR;
 			move.vec = Vector2f(targetX, 0); // Compared to center 0,0 of screen.
-			ship->SetMovement(move);
+			ship->SetMovement(pl, move);
 			sssState = 1;
 		}		
 		// Mark as complete when we are at the left side.
@@ -97,7 +102,7 @@ void SpaceShooterScript::EvaluateLine(String & line)
 			lineProcessed = true;
 			lineFinished = true;
 			sssState = 0;
-			ship->SetSpeed(0);
+			ship->SetSpeed(pl, 0);
 		}
 	}
 	else if (line.StartsWith("SetSpeed"))
@@ -110,7 +115,7 @@ void SpaceShooterScript::EvaluateLine(String & line)
 		if (target == "self")
 			ship = spaceShooter->GetShip(this->entity);
 		float speed = args[2].ParseFloat();
-		ship->SetSpeed(speed);
+		ship->SetSpeed(pl, speed);
 		lineFinished = true;
 	}
 /*	else if (line.StartsWith("DisableWeapon"))
@@ -142,6 +147,10 @@ void SpaceShooterScript::EvaluateFunction(String function, List<String> argument
 SpaceShooterEvaluator spaceShooterEvaluator;
 bool SpaceShooterEvaluator::EvaluateFunction(String byName, List<String> arguments, ExpressionResult & result)
 {
+	PlayingLevel& pl = PlayingLevelRef();
+	auto playerShip = pl.playerShip;
+	auto levelEntity = pl.levelEntity;
+
 	String name = byName;
 	#define GRAB_SHIP int id = arguments[0].ParseInt();\
 		Ship * ship = spaceShooter->GetShipByID(id);\
@@ -172,7 +181,7 @@ bool SpaceShooterEvaluator::EvaluateFunction(String byName, List<String> argumen
 		if (!ship)
 			result = ExpressionResult::Error("Bad ship id");
 		else
-			result = ExpressionResult::Integral(ship->entity->worldPosition.y - levelEntity->worldPosition.y);
+			result = ExpressionResult::Integral(ship->entity->worldPosition.y - pl.levelEntity->worldPosition.y);
 		return true;
 	}
 	else if (name == "PositionX")
@@ -181,7 +190,7 @@ bool SpaceShooterEvaluator::EvaluateFunction(String byName, List<String> argumen
 		if (!ship)
 			result = ExpressionResult::Error("Bad ship id");
 		else
-			result = ExpressionResult::Integral(ship->entity->worldPosition.x - levelEntity->worldPosition.x);
+			result = ExpressionResult::Integral(ship->entity->worldPosition.x - pl.levelEntity->worldPosition.x);
 		return true;
 	}
 	else if (name == "DisableWeapon")
@@ -212,7 +221,7 @@ bool SpaceShooterEvaluator::EvaluateFunction(String byName, List<String> argumen
 		Movement move(pattern);
 		move.vec = Vector2f(arguments[2].ParseFloat(), arguments[3].ParseFloat());
 		move.vec.Normalize();
-		ship->SetMovement(move);
+		ship->SetMovement(pl, move);
 		result = ExpressionResult::Boolean(true);
 		return true;
 	}
@@ -254,7 +263,7 @@ bool SpaceShooterEvaluator::EvaluateFunction(String byName, List<String> argumen
 	else if (name == "CreateTimer")
 	{
 		// Store current TimeMs as a variable with that name?
-		GameVars.CreateTime(arguments[0], levelTime);
+		GameVars.CreateTime(arguments[0], pl.levelTime);
 		result = ExpressionResult::Boolean(true);
 		return true;
 	}
@@ -263,7 +272,7 @@ bool SpaceShooterEvaluator::EvaluateFunction(String byName, List<String> argumen
 		GameVar * var = GameVars.GetTime(arguments[0]);
 		if (!var)
 			result = ExpressionResult::Boolean(false);
-		result = ExpressionResult::Integral((levelTime - var->timeValue).Milliseconds());
+		result = ExpressionResult::Integral((pl.levelTime - var->timeValue).Milliseconds());
 		return true;
 	}
 	else if (name == "ResetTimer")
@@ -271,7 +280,7 @@ bool SpaceShooterEvaluator::EvaluateFunction(String byName, List<String> argumen
 		GameVar * var = GameVars.GetTime(arguments[0]);
 		if (!var)
 			result = ExpressionResult::Boolean(false);
-		var->timeValue = levelTime;
+		var->timeValue = pl.levelTime;
 		result = ExpressionResult::Boolean(true);
 		return true;		
 	}

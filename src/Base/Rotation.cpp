@@ -6,6 +6,7 @@
 
 #include "SpaceShooter2D.h"
 #include "File/LogFile.h"
+#include "PlayingLevel.h"
 
 String Rotation::ToString()
 {
@@ -151,7 +152,7 @@ void Rotation::OnEnter(Ship * forShip)
 	}
 }
 
-void Rotation::OnFrame(int timeInMs)
+void Rotation::OnFrame(PlayingLevel& playingLevel, int timeInMs)
 {
 	EntitySharedPtr targetEntity = NULL;
 	switch(type)
@@ -166,7 +167,7 @@ void Rotation::OnFrame(int timeInMs)
 			target.SetComparisonMode(String::NOT_CASE_SENSITIVE);
 			if (target == "Player")
 			{
-				targetEntity = playerShip->entity;
+				targetEntity = playingLevel.playerShip->entity;
 				if (targetEntity)
 					RotateToFace(targetEntity->worldPosition);
 			}

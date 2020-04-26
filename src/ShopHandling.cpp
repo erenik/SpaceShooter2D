@@ -3,6 +3,7 @@
 /// Handling of shop-purchase-selling code
 
 #include "SpaceShooter2D.h"
+#include "PlayingLevel.h"
 
 // For shop/UI-interaction.
 Vector2i WeaponTypeLevelFromString(String str)
@@ -20,6 +21,10 @@ String WeaponTypeLevelToString(int type, int level)
 
 int DiffCost(String toUpgrade)
 {
+	PlayingLevel& pl = PlayingLevelRef();
+	auto playerShip = pl.playerShip;
+	auto levelEntity = pl.levelEntity;
+
 	bool selling = false;
 	bool buying = false;
 	// Check weapon type and level.
@@ -65,6 +70,10 @@ int DiffCost(String toUpgrade)
 
 void SpaceShooter2D::BuySellToUpgrade(String upgrade)
 {
+	PlayingLevel& pl = PlayingLevelRef();
+	auto playerShip = pl.playerShip;
+	auto levelEntity = pl.levelEntity;
+
 	Vector2i typeLevel = WeaponTypeLevelFromString(upgrade);
 	int type = typeLevel.x, level = typeLevel.y;
 	// Calculate diffs to buy/sell.

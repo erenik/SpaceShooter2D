@@ -7,6 +7,7 @@
 #include "Text/TextManager.h"
 #include "LevelMessage.h"
 #include "File/LogFile.h"
+#include "PlayingLevel.h"
 
 #define SET_GROUP_DEFAULTS { group->pausesGameTime = spawnGroupsPauseGameTime; }
 
@@ -92,14 +93,11 @@ using namespace LevelLoader;
 */
 
 /// Deletes all ships, spawngroups, resets variables to defaults.
-void Level::Clear()
+void Level::Clear(PlayingLevel& playingLevel)
 {
 	this->endCriteria = Level::NEVER;
 	this->RemoveRemainingSpawnGroups();
-	this->RemoveExistingEnemies();
-	// Reset player cooldowns if needed.
-	if (playerShip)
-		playerShip->RandomizeWeaponCooldowns();
+	this->RemoveExistingEnemies(playingLevel);
 }
 
 bool Level::FinishedSpawning()
@@ -116,8 +114,7 @@ bool Level::FinishedSpawning()
 bool Level::Load(String fromSource)
 {
 	// Clear old stuff
-	Clear();
-	levelTime.intervals = 0;
+	Clear(PlayingLevelRef());
 	LevelLoader::loadLevel = this;
 	group = NULL;
 	lastGroup = NULL;
@@ -140,7 +137,6 @@ bool Level::Load(String fromSource)
 	endCriteria = Level::NO_MORE_ENEMIES;
 
 	millisecondsPerPixel = 250;
-	flyTime = levelTime = Time(TimeType::MILLISECONDS_NO_CALENDER, 0); // reset lvl time.
 
 	String sourceTxt = source;
 	music = source+".ogg";

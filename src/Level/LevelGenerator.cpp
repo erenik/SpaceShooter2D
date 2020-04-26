@@ -11,16 +11,14 @@ bool isSling = false;
 AETime levelDuration(TimeType::MILLISECONDS_NO_CALENDER);
 
 
-void GenerateLevel (String arguments)
+void GenerateLevel (PlayingLevel & playingLevel, String arguments, Vector2f playingFieldSize)
 {
 	Level & level = spaceShooter -> level;
-	level.Clear();
+	level.Clear(playingLevel);
 	
 	level.endCriteria = Level::NO_MORE_ENEMIES;
 
 	List<String> args = arguments.Tokenize(" ,");
-	/// Reset level-time?
-	levelTime = AETime(TimeType::MILLISECONDS_NO_CALENDER, 0);
 	
 	if(args.Size() > 1)
 	{
@@ -105,6 +103,7 @@ void GenerateLevel (String arguments)
 		/// Default spawn on right side of field, and spawn location.
 		// Randomize Y
 		float randomAmountY = playingFieldSize.y - sg->size.y;
+		Vector2f playingFieldHalfSize = playingFieldSize / 2;
 		sg->position = Vector2f(playingFieldHalfSize.x+5.f, selector.Randf(randomAmountY) - randomAmountY * 0.5f);
 		/// Add to position offsets if requested by the movement pattern
 		sg->position += sg->mp.spawnOffset;

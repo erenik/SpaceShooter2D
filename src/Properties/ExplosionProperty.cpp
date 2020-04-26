@@ -5,6 +5,7 @@
 #include "SpaceShooter2D.h"
 #include "Properties/ExplosionProperty.h"
 #include "PhysicsLib/EstimatorFloat.h"
+#include "PlayingLevel.h"
 
 ExplosionProperty::ExplosionProperty(const Weapon & weaponThatSpawnedIt, EntitySharedPtr owner)
 : EntityProperty("ProjProp", ID(), owner), weapon(weaponThatSpawnedIt)
@@ -42,7 +43,7 @@ void ExplosionProperty::Process(int timeInMs)
 {
 	if (sleeping)
 		return;
-	if (paused)
+	if (PlayingLevel::IsPaused())
 		return;
 	timeAliveMs += timeInMs;
 	if (timeAliveMs > duration)

@@ -11,6 +11,8 @@ class Ship;
 #include "String/AEString.h"
 #include "MathLib.h"
 
+class PlayingLevel;
+
 class Rotation
 {
 public:
@@ -30,7 +32,7 @@ public:
 	static List<Rotation> ParseFrom(String);
 
 	void OnEnter(Ship * ship);
-	void OnFrame(int timeInMs);
+	void OnFrame(PlayingLevel& playingLevel, int timeInMs);
 
 
 	// See enum above.

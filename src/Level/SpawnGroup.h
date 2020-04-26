@@ -43,7 +43,7 @@ public:
 		Returns true if it has finished spawning. 
 		Call again until it returns true each iteration (required for some formations).
 	*/	
-	bool Spawn();
+	bool Spawn(PlayingLevel& playingLevel);
 	/// To avoid spawning later.
 	void SetFinishedSpawning();
 	void SetDefeated();

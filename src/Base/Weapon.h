@@ -10,6 +10,7 @@
 #include "Time/Time.h"
 #include "Entity/Entity.h"
 
+class PlayingLevel;
 class Ship;
 class Weapon;
 class Entity;
@@ -78,12 +79,12 @@ public:
 	static Weapon * Get(int type, int level); 
 	static bool LoadTypes(String fromFile);
 	/// Moves the aim of this weapon turrent.
-	void Aim(Ship * ship);
+	void Aim(PlayingLevel& playingLevel, Ship * ship);
 	/// Shoots using previously calculated aim.
-	void Shoot(Ship * ship);
+	void Shoot(PlayingLevel& playingLevel, Ship * ship);
 	/// Called to update the various states of the weapon, such as reload time, making lightning arcs jump, etc.
-	void Process(Ship * ship, int timeInMs);
-	void ProcessLightning(Ship * ship, bool initial = false);
+	void Process(PlayingLevel& playingLevel, Ship * ship, int timeInMs);
+	void ProcessLightning(PlayingLevel& playingLevel, Ship * ship, bool initial = false);
 	void QueueReload();
 	/// Based on ship.
 	Vector3f WorldPosition(EntitySharedPtr basedOnShipEntity);

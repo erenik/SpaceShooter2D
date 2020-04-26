@@ -14,6 +14,7 @@
 
 #include "Entity/EntityManager.h"
 #include "Entity/Entity.h"
+#include "PlayingLevel.h"
 
 WeaponSet::WeaponSet()
 {
@@ -245,7 +246,7 @@ bool Weapon::LoadTypes(String fromFile)
 Random shootRand;
 
 /// Moves the aim of this weapon turrent.
-void Weapon::Aim(Ship * ship)
+void Weapon::Aim(PlayingLevel& playingLevel, Ship * ship)
 {
 	// If no aim, just align it with the ship?
 	if (!aim)
@@ -259,7 +260,7 @@ void Weapon::Aim(Ship * ship)
 	}
 	else 
 	{
-		target = playerShip->entity;
+		target = playingLevel.playerShip->entity;
 	}
 	if (target == NULL)
 		return;
@@ -291,7 +292,7 @@ Vector3f Weapon::WorldPosition(EntitySharedPtr basedOnShipEntity)
 }
 
 /// Shoots using previously calculated aim.
-void Weapon::Shoot(Ship * ship)
+void Weapon::Shoot(PlayingLevel& playingLevel, Ship * ship)
 {
 	if (!enabled)
 		return;
@@ -321,7 +322,7 @@ void Weapon::Shoot(Ship * ship)
 	if (type ==	LIGHTNING)
 	{
 		/// Create a lightning storm...!
-		ProcessLightning(ship, true);
+		ProcessLightning(playingLevel, ship, true);
 //		lastShot = flyTime;
 		return;
 	}
@@ -410,7 +411,7 @@ void Weapon::Shoot(Ship * ship)
 
 		// Add to map.
 		MapMan.AddEntity(projectileEntity);
-		projectileEntities.Add(projectileEntity);
+		playingLevel.projectileEntities.Add(projectileEntity);
 	//	lastShot = flyTime;
 	}
 	// Play sfx
@@ -426,7 +427,7 @@ void Weapon::QueueReload()
 }
 
 /// Called to update the various states of the weapon, such as reload time, making lightning arcs jump, etc.
-void Weapon::Process(Ship * ship, int timeInMs)
+void Weapon::Process(PlayingLevel& playingLevel, Ship * ship, int timeInMs)
 {
 	if (!enabled)
 		return;
@@ -449,7 +450,7 @@ void Weapon::Process(Ship * ship, int timeInMs)
 	{
 		case LIGHTNING:
 			if (arcs.Size())
-				ProcessLightning(ship);
+				ProcessLightning(playingLevel, ship);
 			break;
 		case HEAT_WAVE:
 //			ProcessHeatwave();
@@ -466,7 +467,7 @@ LightningArc::LightningArc()
 	maxBounces = -1;
 }
 
-void Weapon::ProcessLightning(Ship * owner, bool initial /* = true*/)
+void Weapon::ProcessLightning(PlayingLevel& playingLevel, Ship * owner, bool initial /* = true*/)
 {
 	if (initial)
 	{
@@ -475,7 +476,7 @@ void Weapon::ProcessLightning(Ship * owner, bool initial /* = true*/)
 		arc->position = owner->entity->worldPosition;
 		arc->maxRange = maxRange;
 		arc->damage = (int) damage;
-		arc->arcTime = flyTime;
+		arc->arcTime = playingLevel.flyTime;
 		arc->maxBounces = maxBounces;
 		arcs.AddItem(arc);
 		nextTarget = 0;
@@ -533,7 +534,7 @@ void Weapon::ProcessLightning(Ship * owner, bool initial /* = true*/)
 			nextTarget = target;
 		}
 		/// Wait some time before each bounce too.
-		if ((flyTime - arc->arcTime).Milliseconds() < arcDelay)
+		if ((playingLevel.flyTime - arc->arcTime).Milliseconds() < arcDelay)
 			continue;
 
 		Ship * target = nextTarget;
@@ -547,13 +548,13 @@ void Weapon::ProcessLightning(Ship * owner, bool initial /* = true*/)
 			newArc->arcFinished = true;
 		arc->child = newArc;
 		arc->arcFinished = true;
-		newArc->arcTime = flyTime;
+		newArc->arcTime = playingLevel.flyTime;
 		arcs.AddItem(newArc);
 		// Pew-pew it!
 		shipsStruckThisArc.AddItem(target);
 		assert(shipsStruckThisArc.Duplicates() == 0);
 		std::cout<<"\nThunderstruck! "<<target->entity->worldPosition;
-		target->Damage((int)arc->damage, false);
+		target->Damage(playingLevel, (int)arc->damage, false);
 		/// Span up a nice graphical entity to represent the bolt
 		EntitySharedPtr entity = EntityMan.CreateEntity("BoldPart", ModelMan.GetModel("cube.obj"), TexMan.GetTexture("0x00FFFF"));
 		entity->localPosition = (arc->position + newArc->position) * 0.5f;
@@ -571,7 +572,7 @@ void Weapon::ProcessLightning(Ship * owner, bool initial /* = true*/)
 	for (int i = 0; i < arcs.Size(); ++i)
 	{
 		LightningArc * arc = arcs[i];
-		if ((flyTime - arc->arcTime).Milliseconds() > arcDelay * 2)
+		if ((playingLevel.flyTime - arc->arcTime).Milliseconds() > arcDelay * 2)
 		{
 			if (arc->graphicalEntity)
 				MapMan.DeleteEntity(arc->graphicalEntity);

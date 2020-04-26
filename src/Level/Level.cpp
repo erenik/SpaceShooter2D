@@ -11,6 +11,7 @@
 #include "Message/MathMessage.h"
 #include "StateManager.h"
 #include "../Properties/ExplosionProperty.h"
+#include "PlayingLevel.h"
 
 #define SPAWNED_ENEMIES_LOG "SpawnedEnemies.srl"
 
@@ -72,9 +73,9 @@ Vector3f Level::BaseVelocity()
 }
 
 /// Creates player entity within this level. (used for spawning)
-EntitySharedPtr Level::AddPlayer(Ship * playerShip, ConstVec3fr atPosition)
+EntitySharedPtr Level::AddPlayer(PlayingLevel& playingLevel, Ship * playerShip, ConstVec3fr atPosition)
 {	
-	EntitySharedPtr entity = playerShip->Spawn(atPosition, 0);
+	EntitySharedPtr entity = playerShip->Spawn(atPosition, 0, playingLevel);
 	return entity;
 }
 
@@ -92,60 +93,7 @@ void Level::SetupCamera()
 	GraphicsMan.QueueMessage(new GMSetCamera(levelCamera));
 }
 
-
-void Level::Cleanup()
-{
-	/// Remove projectiles which have been passed by.
-	for (int i = 0; i < projectileEntities.Size(); ++i)
-	{
-		EntitySharedPtr proj = projectileEntities[i];
-		ProjectileProperty * pp = (ProjectileProperty*) proj->GetProperty(ProjectileProperty::ID());
-		if (pp->sleeping || 
-				(proj->worldPosition[0] < despawnPositionLeft ||
-				proj->worldPosition[0] > spawnPositionRight ||
-				proj->worldPosition[1] < -1.f ||
-				proj->worldPosition[1] > playingFieldSize[1] + 2.f
-				)
-			)
-		{
-			MapMan.DeleteEntity(proj);
-			projectileEntities.Remove(proj);
-			--i;
-		}
-	}
-
-	/// Clean ships.
-	for (int i = 0; i < ships.Size(); ++i)
-	{
-		Ship * ship = ships[i];
-		if (ship->destroyed || !ship->spawned)
-		{
-			ships.RemoveItem(ship); // Remove it. Remove links to spawn-group too.
-			delete ship;
-			continue;
-		}
-		if (!ship->spawned)
-			continue;
-		if (!ship->entity)
-			continue;
-		// any with fucked up position? remove it.
-		if (ship->entity->worldPosition.x != ship->entity->worldPosition.x)
-		{
-			std::cout<<"Fuuucked up";
-			PrintEntityData(ship->entity);
-			// Remove?
-			ship->Despawn(false);
-			continue;
-		}
-		// Check if it should de-spawn.
-		if (ship->despawnOutsideFrame && ship->entity->worldPosition[0] < despawnPositionLeft && ship->parent == NULL)
-		{
-			ship->Despawn(false);
-		}
-	}
-}
-
-void Level::Process(int timeInMs)
+void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 {
 
 	/// Check for suspected buggy ships.
@@ -189,23 +137,23 @@ void Level::Process(int timeInMs)
 
 	activeLevel = this;
 
-	removeInvuln = levelEntity->worldPosition[0] + playingFieldHalfSize[0] + playingFieldPadding + 1.f;
+	removeInvuln = playingLevel.levelEntity->worldPosition[0] + playingLevel.playingFieldHalfSize[0] + playingLevel.playingFieldPadding + 1.f;
 	spawnPositionRight = removeInvuln + 15.f;
-	despawnPositionLeft = levelEntity->worldPosition[0] - playingFieldHalfSize[0] - 1.f;
+	despawnPositionLeft = playingLevel.levelEntity->worldPosition[0] - playingLevel.playingFieldHalfSize[0] - 1.f;
 
 	// Check for game over.
-	if (playerShip->hp <= 0)
+	if (playingLevel.playerShip->hp <= 0)
 	{
 		LogMain("Game over! Player HP 0", INFO);
 		// Game OVER!
-		if (onDeath.Length() == 0)
+		if (playingLevel.onDeath.Length() == 0)
 			spaceShooter->GameOver();
-		else if (onDeath.StartsWith("RespawnAt"))
+		else if (playingLevel.onDeath.StartsWith("RespawnAt"))
 		{
-			playerShip->hp = (float)playerShip->maxHP;
-			this->AddPlayer(playerShip, Vector3f(levelEntity->worldPosition.x, 10.f, 0));
+			playingLevel.playerShip->hp = (float)playingLevel.playerShip->maxHP;
+			this->AddPlayer(playingLevel, playingLevel.playerShip, Vector3f(playingLevel.levelEntity->worldPosition.x, 10.f, 0));
 			// Reset level-time.
-			String timeStr = onDeath.Tokenize("()")[1];
+			String timeStr = playingLevel.onDeath.Tokenize("()")[1];
 			levelTime.ParseFrom(timeStr);
 			OnLevelTimeAdjusted();
 		}
@@ -217,7 +165,7 @@ void Level::Process(int timeInMs)
 	flyTime.AddMs(timeInMs);
 
 	/// Clearing the level
-	if (LevelCleared())
+	if (LevelCleared(playingLevel))
 	{
 		spaceShooter->OnLevelCleared();
 		return; // No more processing if cleared?
@@ -318,7 +266,7 @@ void Level::Process(int timeInMs)
 			if (msToSpawn < 0) 
 			{
 				defeatedAllEnemies = false;
-				sg->Spawn();
+				sg->Spawn(playingLevel);
 				if (sg->pausesGameTime)
 					gameTimePaused = true;
 			}
@@ -370,7 +318,7 @@ void Level::ProcessMessage(Message * message)
 		{
  			if (msg.StartsWith("GenerateLevel"))
 			{
-				GenerateLevel(msg);
+				GenerateLevel(PlayingLevelRef(), msg);
 			}
 			if (msg == "ListPhysicalEntities")
 			{
@@ -400,7 +348,7 @@ void Level::ProcessMessage(Message * message)
 			{
 				File::ClearFile(SPAWNED_ENEMIES_LOG);
 				// Disable game-over/dying/winning
-				Clear();
+				Clear(PlayingLevelRef());
 				levelTime.intervals = 0;
 			}
 			else if (msg.StartsWith("ShipTypeToSpawn:"))
@@ -422,7 +370,7 @@ void Level::ProcessMessage(Message * message)
 					String str = sg.GetLevelCreationString(flyTime);
 					File::AppendToFile(SPAWNED_ENEMIES_LOG, str);
 					LogMain(str, INFO);
-					sg.Spawn();
+					sg.Spawn(PlayingLevelRef());
 				}
 				storedTestGroups.Clear();
 			}
@@ -465,7 +413,7 @@ void Level::OnLevelTimeAdjusted()
 
 
 // Check spawn groups.
-bool Level::LevelCleared()
+bool Level::LevelCleared(PlayingLevel& playingLevel)
 {
 //	ferewr
 	switch(endCriteria)
@@ -475,7 +423,7 @@ bool Level::LevelCleared()
 		case NO_MORE_ENEMIES:
 			if (levelTime.Seconds() < 3)
 				return false;
-			if (shipEntities.Size() > this->PlayerShips().Size())
+			if (playingLevel.shipEntities.Size() > this->PlayerShips(playingLevel).Size())
 				return false;
 			if (!FinishedSpawning())
 				return false;
@@ -490,17 +438,17 @@ bool Level::LevelCleared()
 	return false;
 }
 
-EntitySharedPtr Level::ClosestTarget(bool ally, ConstVec3fr position)
+EntitySharedPtr Level::ClosestTarget(PlayingLevel & playingLevel, bool ally, ConstVec3fr position)
 {
 	if (!ally)
 	{
-		return playerShip->entity;
+		return playingLevel.playerShip->entity;
 	}
 	EntitySharedPtr closest = NULL;
 	float closestDist = 100000.f;
-	for (int i = 0; i < shipEntities.Size(); ++i)
+	for (int i = 0; i < playingLevel.shipEntities.Size(); ++i)
 	{
-		EntitySharedPtr e = shipEntities[i];
+		EntitySharedPtr e = playingLevel.shipEntities[i];
 		float dist = (e->worldPosition - position).LengthSquared();
 		if (dist < closestDist)
 		{
@@ -579,14 +527,14 @@ void Level::RemoveRemainingSpawnGroups()
 	}
 }
 
-void Level::RemoveExistingEnemies()
+void Level::RemoveExistingEnemies(PlayingLevel& playingLevel)
 {
 	String lg;
 	for (int i = 0; i < ships.Size(); ++i)
 	{
 		Ship * ship = ships[i];
 		lg += ship->name+" ";
-		ship->Despawn(false);
+		ship->Despawn(playingLevel, false);
 	}
 	LogMain("Deleting entities "+lg, INFO);
 
@@ -615,9 +563,9 @@ void Level::JumpToTime(String timeString)
 	OnLevelTimeAdjusted();
 }
 
-List<Ship*> Level::PlayerShips()
+List<Ship*> Level::PlayerShips(PlayingLevel& playingLevel)
 {
 	List<Ship*> playerShips;
-	playerShips.AddItem(playerShip);
+	playerShips.AddItem(playingLevel.playerShip);
 	return playerShips;
 }
