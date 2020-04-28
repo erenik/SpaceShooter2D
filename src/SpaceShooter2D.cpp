@@ -13,7 +13,6 @@
 #include "StateManager.h"
 #include "Level/SpawnGroup.h"
 
-#include "Physics/Messages/CollisionCallback.h"
 #include "Window/AppWindow.h"
 #include "Viewport.h"
 
@@ -36,9 +35,9 @@
 bool paused = false;
 
 List<Weapon> Weapon::types;
-List<Ship*> Ship::types;
+List<ShipPtr> Ship::types;
 
-bool shipDataLoaded = false;
+Time SpaceShooter2D::startDate;
 
 /// If true, queues up messages so the player automatically starts a new game with the default name and difficulty.
 bool introTest = false;
@@ -54,7 +53,7 @@ void SetApplicationDefaults()
 // Global variables.
 SpaceShooter2D * spaceShooter = nullptr;
 PlayingLevel* playingLevel = nullptr;
-Ship * playerShip = 0;
+
 /// The level entity, around which the playing field and camera are based upon.
 EntitySharedPtr levelEntity = NULL;
 float playingFieldPadding;
@@ -88,11 +87,11 @@ void RegisterStates()
 	StateMan.QueueState(spaceShooter);
 }
 
+bool SpaceShooter2D::shipDataLoaded = false;
+
 SpaceShooter2D::SpaceShooter2D()
 {
-//	playerShip = new Ship();
 	levelCamera = NULL;
-	SetPlayingFieldSize(Vector2f(30,20));
 	levelEntity = NULL;
 	playingFieldPadding = 1.f;
 	gearCategory = 0;
@@ -104,8 +103,7 @@ SpaceShooter2D::SpaceShooter2D()
 
 SpaceShooter2D::~SpaceShooter2D()
 {
-	Ship::types.ClearAndDelete();
-	delete playerShip;
+	Ship::types.Clear();
 }
 
 /// Function when entering this state, providing a pointer to the previous StateMan.
@@ -172,8 +170,6 @@ void SpaceShooter2D::OnEnter(AppState * previousState)
 	TextMan.LoadFromDir();
 	TextMan.SetLanguage("English");
 
-	NewPlayer();
-
 	// Run OnEnter.ini start script if such a file exists.
 	Script * script = new Script();
 	script->Load("OnEnter.ini");
@@ -205,31 +201,6 @@ void SpaceShooter2D::OnExit(AppState * nextState)
 {
 }
 
-/// Searches among actively spawned ships.
-Ship * SpaceShooter2D::GetShip(EntitySharedPtr forEntity)
-{
-	for (int i = 0; i < level.ships.Size(); ++i)
-	{
-		Ship * ship = level.ships[i];
-		if (ship->entity == forEntity)
-			return ship;
-	}
-	return 0;
-}
-
-Ship * SpaceShooter2D::GetShipByID(int id)
-{
-	for (int i = 0; i < level.ships.Size(); ++i)
-	{
-		Ship * ship = level.ships[i];
-		if (ship->ID() == id)
-			return ship;
-	}
-	if (id == playerShip->ID())
-		return playerShip;
-	return 0;
-}
-
 /// Creates the user interface for this state
 void SpaceShooter2D::CreateUserInterface()
 {
@@ -257,7 +228,7 @@ void PrintEntityData(EntitySharedPtr entity)
 	ShipProperty * sp = (ShipProperty*) entity->GetProperty(ShipProperty::ID());
 	if (sp)
 	{
-		const Ship * ship = sp->GetShip();
+		const ShipPtr ship = sp->GetShip();
 		std::cout<<"\nSleeping: "<<(sp->sleeping? "Yes" : "No")
 			<<", HP: "<<ship->hp<<", Allied: "<<(ship->allied? "Yes" : "No")
 			<<"\nLastCollission: "<<ship->lastShipCollision.Seconds()<<", CollisionDmgCooldown: "<<ship->collisionDamageCooldown.Seconds()
@@ -272,7 +243,6 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 	String msg = message->msg;
 	if (mode == SSGameMode::EDIT_WEAPON_SWITCH_SCRIPTS)
 		ProcessMessageWSS(message);
-	level.ProcessMessage(message);
 	switch(message->type)
 	{
 		case MessageType::RAYCAST: 
@@ -334,44 +304,9 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 			{
 				QueueAudio(new AMSet(AT_MASTER_VOLUME, im->value * 0.01f));
 			}
-			else if (msg == "SetActiveWeapon")
-			{
-				playerShip->SwitchToWeapon(im->value);
-			}
 			break;
 		}
-		case MessageType::COLLISSION_CALLBACK:
-		{
 
-			CollisionCallback * cc = (CollisionCallback*) message;
-			EntitySharedPtr one = cc->one;
-			EntitySharedPtr two = cc->two;
-#define SHIP 0
-#define PROJ 1
-//			std::cout<<"\nColCal: "<<cc->one->name<<" & "<<cc->two->name;
-
-			EntitySharedPtr shipEntity1 = NULL;
-			EntitySharedPtr other = NULL;
-			int oneType = (one == playerShip->entity || shipEntities.Exists(one)) ? SHIP : PROJ;
-			int twoType = (two == playerShip->entity || shipEntities.Exists(two)) ? SHIP : PROJ;
-			int types[5] = {0,0,0,0,0};
-			++types[oneType];
-			++types[twoType];
-		//	std::cout<<"\nCollision between "<<one->name<<" and "<<two->name;
-			if (oneType == SHIP)
-			{
-				ShipProperty * shipProp = (ShipProperty*)one->GetProperty(ShipProperty::ID());
-				if (shipProp)
-					shipProp->OnCollision(two);
-			}
-			else if (twoType == SHIP)
-			{
-				ShipProperty * shipProp = (ShipProperty*)two->GetProperty(ShipProperty::ID());
-				if (shipProp)
-					shipProp->OnCollision(one);
-			}
-			break;
-		}
 		case MessageType::ON_UI_ELEMENT_HOVER:
 		{
 			if (msg.StartsWith("SetHoverUpgrade:"))
@@ -398,12 +333,6 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 				playerInvulnerability = !playerInvulnerability;
 				OnPlayerInvulnerabilityUpdated();
 			}
-			if (msg == "ReloadWeapon")
-			{
-				if (playerShip->activeWeapon == nullptr)
-					return;
-				playerShip->activeWeapon->QueueReload();
-			}
 			if (msg == "GoToHangar")
 			{
 				SetMode(IN_HANGAR);
@@ -416,103 +345,7 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 			{
 				SetMode(IN_WORKSHOP);
 			}
-			if (msg == "ActivateSkill")
-			{
-				playerShip->ActivateSkill();
-			}
-//			std::cout<<"\n"<<msg;
-			if (msg == "TutorialBaseGun")
-			{
-				playerShip->weapons.Clear(); // Clear old wepaons.
-				playerShip->SetWeaponLevel(WeaponType::TYPE_0, 1);
-				playerShip->activeWeapon = playerShip->weapons[0];
-				UpdateHUDGearedWeapons();
-			}
-			if (msg == "TutorialLevel1Weapons")
-			{
-				playerShip->SetWeaponLevel(WeaponType::TYPE_0, 1);
-				playerShip->SetWeaponLevel(WeaponType::TYPE_1, 1);
-				playerShip->SetWeaponLevel(WeaponType::TYPE_2, 1);
-				UpdateHUDGearedWeapons();
-			}
-			if (msg == "TutorialLevel3Weapons")
-			{
-				playerShip->SetWeaponLevel(WeaponType::TYPE_0, 3);
-				playerShip->SetWeaponLevel(WeaponType::TYPE_1, 3);
-				playerShip->SetWeaponLevel(WeaponType::TYPE_2, 3);			
-				UpdateHUDGearedWeapons();
-			}
-			if (msg.StartsWith("DecreaseWeaponLevel:"))
-			{
-				List<String> parts = msg.Tokenize(":");
-				int weaponIndex = parts[1].ParseInt();
-				Weapon * weap = playerShip->GetWeapon(WeaponType::TYPE_0 + weaponIndex);
-				int currLevel = weap->level;
-				playerShip->SetWeaponLevel(WeaponType::TYPE_0 + weaponIndex, currLevel-1);				
-				std::cout<<"\nWeapon "<<weap->type<<" set to level "<<weap->level<<": "<<weap->name;
-			}
-			if (msg.StartsWith("IncreaseWeaponLevel:"))
-			{
-				List<String> parts = msg.Tokenize(":");
-				int weaponIndex = parts[1].ParseInt();
-				Weapon * weap = playerShip->GetWeapon(WeaponType::TYPE_0 + weaponIndex);
-				int currLevel = weap->level;
-				playerShip->SetWeaponLevel(WeaponType::TYPE_0 + weaponIndex, currLevel+1);
-				std::cout<<"\nWeapon "<<weap->type<<" set to level "<<weap->level<<": "<<weap->name;
-			}
-			else if (msg == "AllTheWeapons")
-			{
-				for (int i = 0; i < WeaponType::MAX_TYPES; ++i)
-				{
-					if (playerShip->weapons[i]->level <= 0)
-						playerShip->SetWeaponLevel(i, 1);
-					UpdateHUDGearedWeapons();
-				}
-			}
-			if (msg == "ToggleWeaponScript")
-			{
-				if (playerShip->weaponScript == 0)
-					playerShip->weaponScript = WeaponScript::LastEdited();
-				playerShip->weaponScriptActive = !playerShip->weaponScriptActive;
-			}
-			if (msg == "ActivateWeaponScript")
-			{
-				playerShip->weaponScriptActive = true;
-				if (playerShip->weaponScript == 0)
-					playerShip->weaponScript = WeaponScript::LastEdited();
-			}
-			if (msg == "DeactivateWeaponScript")
-			{
-				playerShip->weaponScriptActive = false;
-				if (!InputMan.KeyPressed(KEY::SPACE))
-					playerShip->shoot = false;
-			}
-			if (msg.StartsWith("SetSkill"))
-			{
-				String skill = msg.Tokenize(":")[1];
-				if (skill == "AttackFrenzy")
-					playerShip->skill = ATTACK_FRENZY;
-				if (skill == "SpeedBoost")
-					playerShip->skill = SPEED_BOOST;
-				if (skill == "PowerShield")
-					playerShip->skill = POWER_SHIELD;
-				playerShip->skillName = skill;
-				UpdateHUDSkill();
-			}
-			if (msg == "TutorialSkillCooldowns")
-			{
-				playerShip->skillCooldownMultiplier = 0.1f;
-			}
-			if (msg == "DisablePlayerMovement")
-			{
-				playerShip->movementDisabled = true;
-				UpdatePlayerVelocity();
-			}
-			if (msg == "EnablePlayerMovement")
-			{
-				playerShip->movementDisabled = false;
-				UpdatePlayerVelocity();
-			}
+
 			if (msg.StartsWith("SetOnDeath:"))
 			{
 				onDeath = msg - "SetOnDeath:";
@@ -531,61 +364,13 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 				Pause();
 				OpenJumpDialog();
 			}
-			if (msg == "SpawnTutorialBomb")
-			{
-				// Shoot.
-				Color color = Vector4f(0.8f,0.7f,0.1f,1.f);
-				Texture * tex = TexMan.GetTextureByColor(color);
-				EntitySharedPtr projectileEntity = EntityMan.CreateEntity(name + " Projectile", ModelMan.GetModel("sphere.obj"), tex);
-				Weapon weapon;
-				weapon.damage = 750;
-				ProjectileProperty * projProp = new ProjectileProperty(weapon, projectileEntity, true);
-				projectileEntity->properties.Add(projProp);
-				// Set scale and position.
-				projectileEntity->localPosition = playerShip->entity->worldPosition + Vector3f(30,0,0);
-				projectileEntity->SetScale(Vector3f(1,1,1) * 0.5f);
-				projProp->color = color;
-				projectileEntity->RecalculateMatrix();
-				projProp->onCollisionMessage = "ResumeGameTime";
-				// pew
-				Vector3f dir(-1.f,0,0);
-				Vector3f vel = dir * 5.f;
-				PhysicsProperty * pp = projectileEntity->physics = new PhysicsProperty();
-				pp->type = PhysicsType::DYNAMIC;
-				pp->velocity = vel;
-				pp->collisionCallback = true;	
-				pp->maxCallbacks = 1;
-				// Set collision category and filter.
-				pp->collisionCategory = CC_ENEMY_PROJ;
-				pp->collisionFilter = CC_PLAYER;
-				// Add to map.
-				MapMan.AddEntity(projectileEntity);
-				projectileEntities.Add(projectileEntity);
-			}
-			if (msg == "UpdateHUDGearedWeapons")
-				UpdateHUDGearedWeapons();
-			else if (msg.StartsWith("Weapon:"))
-			{
-				int weaponIndex = msg.Tokenize(":")[1].ParseInt();
-				weaponIndex -= 1;
-				if (weaponIndex < 0)
-					weaponIndex = 9;
-				playerShip->SwitchToWeapon(weaponIndex);
-			}
-			else if (msg == "StartShooting")
-			{
-				playerShip->shoot = true;
-			}
+
 			else if (msg == "Reload OnEnter")
 			{
 				// Run OnEnter.ini start script if such a file exists.
 				Script * script = new Script();
 				script->Load("OnEnter.ini");
 				ScriptMan.PlayScript(script);
-			}
-			else if (msg == "StopShooting")
-			{
-				playerShip->shoot = false;
 			}
 			else if (msg.Contains("AutoSave"))
 			{
@@ -632,14 +417,12 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 			else if (msg == "OpenMainMenu" || msg == "Back" ||
 				msg == "GoToMainMenu")
 				OpenMainMenu();
+			else if (msg == "OpenNewGameMenu")
+				SetMode(NEW_GAME, false);
 			else if (msg == "LoadDefaultName")
-			{
 				LoadDefaultName();
-			}
 			else if (msg == "GoToPreviousMode")
-			{
 				SetMode(previousMode);
-			}
 			else if (msg == "OpenOptionsScreen")
 			{
 				SetMode(EDITING_OPTIONS);
@@ -674,6 +457,8 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 			}
 			else if (msg.StartsWith("BuyGear:"))
 			{
+				LogMain("Reimplement", INFO);
+				/*
 				String name = msg;
 				name.Remove("BuyGear:");
 				Gear gear = Gear::Get(name);
@@ -696,6 +481,7 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 				
 				// Auto-save.
 				MesMan.QueueMessages("AutoSave(silent)");
+				*/
 			}
 			else if (msg.Contains("ExitToMainMenu"))
 			{
@@ -723,20 +509,6 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 			{
 				ResetCamera();
 			}
-			if (msg.Contains("StartMoveShip"))
-			{
-				String dirStr = msg - "StartMoveShip";
-				int dir = Direction::Get(dirStr);
-				movementDirections.Add(dir);
-				UpdatePlayerVelocity();
-			}
-			else if (msg.Contains("StopMoveShip"))
-			{
-				String dirStr = msg - "StopMoveShip";
-				int dir = Direction::Get(dirStr);
-				while(movementDirections.Remove(dir));
-				UpdatePlayerVelocity();
-			}
 			break;
 		}
 	}
@@ -749,23 +521,8 @@ void SpaceShooter2D::KeyPressed(int keyCode, bool downBefore)
 }
 
 
-/// Called from the render-thread for every viewport/AppWindow, after the main rendering-pipeline has done its job.
-void SpaceShooter2D::Render(GraphicsState * graphicsState)
-{
-	switch(mode)
-	{
-		case PLAYING_LEVEL:	
-			if (!levelEntity)
-				return;
-			RenderInLevel(graphicsState);
-			break;
-		default:
-			return;
-	}
-}
-
 /// o.o
-EntitySharedPtr SpaceShooter2D::OnShipDestroyed(Ship * ship)
+EntitySharedPtr SpaceShooter2D::OnShipDestroyed(ShipPtr ship)
 {
 		// Explode
 //	EntitySharedPtr explosionEntity = spaceShooter->NewExplosion(owner->position, ship);
@@ -850,8 +607,6 @@ void SpaceShooter2D::NewGame()
 	PopUI("NewGame");
 	PopUI("MainMenu");
 		
-	// Create player.
-	NewPlayer();
 	startDate = Time::Now();
 
 	// Reset scores.
@@ -863,30 +618,6 @@ void SpaceShooter2D::NewGame()
 	StateMan.QueueState(playingLevel);
 }
 
-/// o.o
-void SpaceShooter2D::NewPlayer()
-{
-	if (!shipDataLoaded)
-		LoadShipData();
-
-	SAFE_DELETE(playerShip);
-	// Reset player-ship.
-	if (playerShip == 0)
-	{
-		playerShip = Ship::New("Default");
-		playerShip->enemy = false;
-		playerShip->allied = true;
-	}
-	playerShip->weapon = Gear::StartingWeapon();
-	playerShip->armor = Gear::StartingArmor();
-	playerShip->shield = Gear::StartingShield();
-	playerShip->UpdateStatsFromGear();
-
-	for (int i = 0; i < WeaponType::MAX_TYPES; ++i)
-	{
-		playerShip->SetWeaponLevel(i, 0);
-	}
-}
 
 
 void SpaceShooter2D::Pause()
@@ -1022,27 +753,6 @@ bool SpaceShooter2D::LoadGame(String saveName)
 }
 
 
-
-void SpaceShooter2D::UpdatePlayerVelocity()
-{
-	Vector3f totalVec;
-	for (int i = 0; i < movementDirections.Size(); ++i)
-	{
-		Vector3f vec = Direction::GetVector(movementDirections[i]);
-		totalVec += vec;
-	}
-	totalVec.Normalize();
-	totalVec *= playerShip->Speed();
-	totalVec *= playerShip->movementDisabled? 0 : 1;
-	//totalVec += level.BaseVelocity();
-
-	// Set player speed.
-	if (playerShip->entity)
-	{
-		PhysicsMan.QueueMessage(new PMSetEntity(playerShip->entity, PT_VELOCITY, totalVec));
-	}
-}
-
 void SpaceShooter2D::ResetCamera()
 {
 	levelCamera->projectionType = Camera::ORTHOGONAL;
@@ -1065,11 +775,6 @@ void SpaceShooter2D::SetMode(SSGameMode newMode, bool updateUI)
 	}
 	LogMain("Entering game mode: " + SSGameModeString(newMode) + ", previously: " + SSGameModeString(mode), INFO);
 	mode = newMode;
-	switch (mode) {
-	case SSGameMode::PLAYING_LEVEL:
-		StateMan.QueueState(playingLevel);
-		return;
-	}
 	// Update UI automagically?
 	if (updateUI)
 		UpdateUI();

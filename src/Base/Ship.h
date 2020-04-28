@@ -27,16 +27,23 @@ enum
 	POWER_SHIELD,
 };
 
-class Ship 
+#define ShipPtr std::shared_ptr<Ship>
+
+class alignas(16) Ship
 {
-public:
+private:
 	Ship();
+public:
+	static ShipPtr NewShip();
+	static ShipPtr NewShip(Ship & ref);
 	~Ship();
+	std::weak_ptr<Ship> selfPtr;
+	ShipPtr GetSharedPtr();
 
 	/// Call on spawning.
 	void RandomizeWeaponCooldowns();
 	/// Spawns at local position according to window/player area, creating entities, registering for movement, etc. Returns it and all children spawned with it.
-	List< std::shared_ptr<Entity> > Spawn(ConstVec3fr atLocalPosition, Ship * parent, PlayingLevel & playingLevel);
+	List< std::shared_ptr<Entity> > Spawn(ConstVec3fr atLocalPosition, ShipPtr parent, PlayingLevel & playingLevel);
 	/// Handles spawning of children as needed.
 	List< std::shared_ptr<Entity> > SpawnChildren(PlayingLevel& playingLevel);
 	void Despawn(PlayingLevel& playingLevel, bool doExplodeEffectsForChildren);
@@ -52,7 +59,7 @@ public:
 	bool DisableWeaponsByID(int id);
 	bool DisableAllWeapons();
 	bool EnableWeaponsByID(int id);
-	void SetWeaponCooldownByID(int id, int newcooldown);
+	void SetWeaponCooldownByID(int id, AETime newcooldown);
 	/// Prepends the source with '/obj/Ships/' and appends '.obj'. Uses default 'Ship.obj' if needed.
 	Model * GetModel();
 	/// o.o
@@ -74,7 +81,7 @@ public:
 	void SetMovement(PlayingLevel& playingLevel, Movement & movement);
 	void SetSpeed(PlayingLevel& playingLevel, float speed);
 	/// Creates new ship of specified type.
-	static Ship * New(String shipByName);
+	static ShipPtr New(String shipByName);
 
 	/// Main script to play.
 	String scriptSource;
@@ -116,9 +123,9 @@ public:
 	String physicsModel;
 
 	SpawnGroup * spawnGroup;
-	Ship * parent;
+	ShipPtr parent;
 	ShipProperty * shipProperty;
-	List<Ship*> children;
+	List<ShipPtr> children;
 	// Bools
 	bool canMove;
 	bool movementDisabled; // temporarily.
@@ -187,7 +194,7 @@ public:
 	// Spawn position.
 	Vector3f position;
 	/// As loaded.
-	static List<Ship*>  types;
+	static List<ShipPtr>  types;
 
 	/// Used by player, mainly.
 	Gear weapon, shield, armor;

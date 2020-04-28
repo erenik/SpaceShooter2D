@@ -3,6 +3,7 @@
 #include "../SpaceShooter2D.h"
 #include "SpawnGroup.h"
 #include "../MovementPattern.h"
+#include "PlayingLevel.h"
 
 int difficulty = 1;
 int defaultDelay = 0;
@@ -11,8 +12,9 @@ bool isSling = false;
 AETime levelDuration(TimeType::MILLISECONDS_NO_CALENDER);
 
 
-void GenerateLevel (PlayingLevel & playingLevel, String arguments, Vector2f playingFieldSize)
+void GenerateLevel (PlayingLevel & playingLevel, String arguments)
 {
+	Vector2f playingFieldSize = playingLevel.playingFieldSize;
 	Level & level = spaceShooter -> level;
 	level.Clear(playingLevel);
 	
@@ -38,7 +40,7 @@ void GenerateLevel (PlayingLevel & playingLevel, String arguments, Vector2f play
 	List<String> relevantShips;
 	for(int q = 0; q<Ship::types.Size(); q++)
 	{
-		Ship * shipType = Ship::types[q];
+		ShipPtr shipType = Ship::types[q];
 		
 		//Catch unwanted bosses and skip them
 		if(shipType->boss) 

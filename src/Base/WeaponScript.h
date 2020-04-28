@@ -13,7 +13,7 @@ public:
 	ScriptAction();
 	ScriptAction(int type);
 	void Nullify();
-	void OnEnter(Ship * forShip);
+	void OnEnter(ShipPtr forShip);
 
 	static ScriptAction SwitchWeapon(int toWeaponIndex, int durationToHoldMs);
 	static String GetStringForType(int type);
@@ -36,7 +36,7 @@ class WeaponScript
 public:
 	WeaponScript();
 	static void CreateDefault();
-	void Process(Ship * forShip, int timeInMs);
+	void Process(ShipPtr forShip, int timeInMs);
 	static WeaponScript * LastEdited();
 	int timeInCurrentActionMs;
 	String name;

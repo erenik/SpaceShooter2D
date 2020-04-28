@@ -6,6 +6,7 @@
 #define MOVEMENT_H
 
 class Ship;
+#define ShipPtr std::shared_ptr<Ship>
 
 #include "Entity/Entity.h"
 #include "String/AEString.h"
@@ -36,7 +37,7 @@ public:
 	/// For scripting.
 	static List<Variable> GetTypesAsVariables();
 	// Upon entering this movement pattern.
-	void OnEnter(PlayingLevel& playingLevel, Ship * ship);
+	void OnEnter(PlayingLevel& playingLevel, ShipPtr ship);
 	/// Called on scripted updates or otherwise when adjusted.
 	void OnSpeedUpdated(PlayingLevel& playingLevel);
 	// Called every frame.
@@ -90,7 +91,7 @@ private:
 	void MoveToLocation(PlayingLevel& playingLevel);
 	void Circle(PlayingLevel& playingLevel);
 
-	Ship * ship;
+	ShipPtr ship;
 	EntitySharedPtr shipEntity;
 };
 

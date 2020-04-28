@@ -6,6 +6,7 @@
 #define ROTATION_H
 
 class Ship;
+#define ShipPtr std::shared_ptr<Ship>
 
 #include "Entity/Entity.h"
 #include "String/AEString.h"
@@ -31,7 +32,7 @@ public:
 	static String Name(int type);
 	static List<Rotation> ParseFrom(String);
 
-	void OnEnter(Ship * ship);
+	void OnEnter(ShipPtr ship);
 	void OnFrame(PlayingLevel& playingLevel, int timeInMs);
 
 
@@ -48,7 +49,7 @@ private:
 	void RotateToFaceDirection(const Vector3f & direction);
 	/// Radian-direction last iteration. Used together with ships maxRadiansPerSecond and the time passed to dictate new direction.
 	Angle lastFacingAngle;
-	Ship * ship;
+	ShipPtr ship;
 	EntitySharedPtr entity;
 //	Vector3f targetPosition;
 };

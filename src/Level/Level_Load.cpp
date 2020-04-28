@@ -129,7 +129,7 @@ bool Level::Load(String fromSource)
 	defeatedAllEnemies = true;
 	gameTimePaused = false;
 	/// Clear old stuff.
-	ships.ClearAndDelete();
+	ships.Clear();
 	spawnGroups.ClearAndDelete();
 	messages.ClearAndDelete();
 

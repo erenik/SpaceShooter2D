@@ -2,6 +2,7 @@
 /// 2015-01-20
 /// Space shooter.
 /// For the SpaceShooter project
+#pragma once
 
 #include "AppStates/AppState.h"
 
@@ -129,10 +130,6 @@ public:
 	/// Function when leaving this state, providing a pointer to the next StateMan.
 	void OnExit(AppState * nextState);
 	
-	/// Searches among actively spawned ships.
-	Ship * GetShip(EntitySharedPtr forEntity);
-	Ship * GetShipByID(int id);
-
 	/// Creates the user interface for this state
 	virtual void CreateUserInterface();
 
@@ -144,22 +141,13 @@ public:
 	/// Creates default key-bindings for the state.
 	virtual void CreateDefaultBindings();
 
-	/// Yerrr.
-	virtual void UpdateRenderArrows();
-	/// Called from the render-thread for every viewport/AppWindow, after the main rendering-pipeline has done its job.
-	virtual void Render(GraphicsState * graphicsState);
-
 	/// Loads .csv's and data so as to know default gear and ships.
 	void LoadShipData();
 	/// UI stuffs. All implemented in UIHandling.cpp
-	void UpdateUI();
+	virtual void UpdateUI();
 	void UpdateGearList();
 	/// Update UI parts
-	void UpdateHUDGearedWeapons();
-	void UpdateUIPlayerHP(bool force);
-	void UpdateUIPlayerShield(bool force);
 	void UpdateHUDSkill();
-	void UpdateCooldowns();
 	void UpdateUpgradesLists();
 	void UpdateUpgradeStatesInList(); // Updates colors n stuff based on level
 	void UpdateHoverUpgrade(String upgrade, bool force = false);
@@ -172,10 +160,9 @@ public:
 	void OpenJumpDialog();
 	/// Update ui
 	void OnScoreUpdated();
-	void ShowLevelStats();
 	void LoadDefaultName();
 	/// o.o
-	EntitySharedPtr OnShipDestroyed(Ship * ship);
+	EntitySharedPtr OnShipDestroyed(ShipPtr ship);
 
 
 	String GetLevelVarName(String level, String name);
@@ -197,7 +184,6 @@ public:
 
 	/// Starts a new game. Calls LoadLevel
 	void NewGame();
-	void NewPlayer();
 	void Pause();
 	void Resume();
 	void TogglePause();
@@ -218,7 +204,6 @@ public:
 	/// Loads progress from target save.
 	bool LoadGame(String save);
 
-	void UpdatePlayerVelocity();
 	void ResetCamera();	
 
 	SSGameMode mode;
@@ -239,9 +224,6 @@ public:
 		* playerName,
 		* gameStartDate,
 		* difficulty;
-
-	/// Default 30x20
-	void SetPlayingFieldSize(Vector2f newSize);
 	
 	/// Saves previousMode
 	void SetMode(SSGameMode newMode, bool updateUI = true);
@@ -252,10 +234,12 @@ public:
 
 	static Time startDate;
 	static String levelToLoad;
+
+protected:
+	static bool shipDataLoaded;
+
 private:
 	
-	void RenderInLevel(GraphicsState * graphicsState);
-
 	/// Called each app frame to remove projectiles and ships outside the relevant area.
 //	void Cleanup();
 	void OnPauseStateUpdated();

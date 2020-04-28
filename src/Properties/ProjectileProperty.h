@@ -30,7 +30,7 @@ public:
 	virtual void Process(int timeInMs);
 	virtual void ProcessMessage(Message * message);
 
-	bool ShouldDamage(Ship * ship);
+	bool ShouldDamage(ShipPtr ship);
 
 	/// Resets sleep-flag, among other things
 	void OnSpawn();
@@ -41,7 +41,7 @@ public:
 	Weapon weapon;
 	float distanceTraveled;
 
-	List<Ship*> penetratedTargets;
+	List<ShipPtr> penetratedTargets;
 	/// If not currently active (available for re-use).
 	bool sleeping;
 

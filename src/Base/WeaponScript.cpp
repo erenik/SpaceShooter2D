@@ -47,7 +47,7 @@ void ScriptAction::Nullify()
 }
 
 
-void ScriptAction::OnEnter(Ship * forShip)
+void ScriptAction::OnEnter(ShipPtr forShip)
 {
 	if (type == SWITCH_TO_WEAPON)
 	{
@@ -76,7 +76,7 @@ void WeaponScript::CreateDefault()
 	weaponScripts.AddItem(weaponScript);
 }
 
-void WeaponScript::Process(Ship * forShip, int timeInMs)
+void WeaponScript::Process(ShipPtr forShip, int timeInMs)
 {
 	assert(actions.Size());
 	timeInCurrentActionMs += timeInMs;

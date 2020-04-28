@@ -203,7 +203,7 @@ void ProjectileProperty::ProcessMessage(Message * message)
 	}
 }
 
-bool ProjectileProperty::ShouldDamage(Ship * ship)
+bool ProjectileProperty::ShouldDamage(ShipPtr ship)
 {
 	if (penetratedTargets.Exists(ship))
 		return false;

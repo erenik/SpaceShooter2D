@@ -246,7 +246,7 @@ bool Weapon::LoadTypes(String fromFile)
 Random shootRand;
 
 /// Moves the aim of this weapon turrent.
-void Weapon::Aim(PlayingLevel& playingLevel, Ship * ship)
+void Weapon::Aim(PlayingLevel& playingLevel, ShipPtr ship)
 {
 	// If no aim, just align it with the ship?
 	if (!aim)
@@ -292,7 +292,7 @@ Vector3f Weapon::WorldPosition(EntitySharedPtr basedOnShipEntity)
 }
 
 /// Shoots using previously calculated aim.
-void Weapon::Shoot(PlayingLevel& playingLevel, Ship * ship)
+void Weapon::Shoot(PlayingLevel& playingLevel, ShipPtr ship)
 {
 	if (!enabled)
 		return;
@@ -427,7 +427,7 @@ void Weapon::QueueReload()
 }
 
 /// Called to update the various states of the weapon, such as reload time, making lightning arcs jump, etc.
-void Weapon::Process(PlayingLevel& playingLevel, Ship * ship, int timeInMs)
+void Weapon::Process(PlayingLevel& playingLevel, ShipPtr ship, int timeInMs)
 {
 	if (!enabled)
 		return;
@@ -467,7 +467,7 @@ LightningArc::LightningArc()
 	maxBounces = -1;
 }
 
-void Weapon::ProcessLightning(PlayingLevel& playingLevel, Ship * owner, bool initial /* = true*/)
+void Weapon::ProcessLightning(PlayingLevel& playingLevel, ShipPtr owner, bool initial /* = true*/)
 {
 	if (initial)
 	{
@@ -497,7 +497,7 @@ void Weapon::ProcessLightning(PlayingLevel& playingLevel, Ship * owner, bool ini
 		if (nextTarget == 0)
 		{
 			List<float> distances;
-			List<Ship*> possibleTargets = spaceShooter->level.GetShipsAtPoint(arc->position, maxRange, distances);
+			List<ShipPtr> possibleTargets = spaceShooter->level.GetShipsAtPoint(arc->position, maxRange, distances);
 			if (!initial)
 				std::cout<<"\nPossible targets: "<<possibleTargets.Size();
 			possibleTargets.RemoveUnsorted(shipsStruckThisArc);
@@ -511,13 +511,13 @@ void Weapon::ProcessLightning(PlayingLevel& playingLevel, Ship * owner, bool ini
 				continue;
 			}
 			// Grab first one which hasn't already been struck?
-			Ship * target = possibleTargets[0];
+			ShipPtr target = possibleTargets[0];
 			// Recalculate distance since list was unsorted earlier...
 			float distance = (target->entity->worldPosition - arc->position).Length();
 			/// Grab closest one.
 			for (int j = 1; j < possibleTargets.Size(); ++j)
 			{
-				Ship * t2 = possibleTargets[j];
+				ShipPtr t2 = possibleTargets[j];
 				float d2 = (t2->entity->worldPosition - arc->position).Length();
 				if (d2 < distance)
 				{
@@ -537,7 +537,7 @@ void Weapon::ProcessLightning(PlayingLevel& playingLevel, Ship * owner, bool ini
 		if ((playingLevel.flyTime - arc->arcTime).Milliseconds() < arcDelay)
 			continue;
 
-		Ship * target = nextTarget;
+		ShipPtr target = nextTarget;
 		float distance = (target->entity->worldPosition - arc->position).Length();
 		LightningArc * newArc = new LightningArc();
 		newArc->position = target->entity->worldPosition;

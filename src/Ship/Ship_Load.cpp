@@ -43,7 +43,7 @@ bool Ship::LoadTypes(String file)
 		}
 		// If not, now loop through the words, parsing them according to the column name.
 		// First create the new spell to load the data into!
-		Ship * ship = new Ship();
+		ShipPtr ship = Ship::NewShip();
 		for (int k = 0; k < values.Size(); ++k)
 		{
 			String column;
@@ -150,7 +150,7 @@ bool Ship::LoadTypes(String file)
 		// Check for pre-existing ship of same name, remove it if so.
 		for (int i = 0; i < types.Size(); ++i)
 		{
-			Ship * type = types[i];
+			ShipPtr type = types[i];
 			if (type->name == ship->name)
 			{
 				types.RemoveIndex(i);

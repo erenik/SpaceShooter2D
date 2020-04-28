@@ -41,7 +41,7 @@ void SpaceShooterScript::EvaluateLine(String & line)
 		float distance = (targetEntity->worldPosition.x - (levelEntity->worldPosition.x - pl.playingFieldHalfSize.x)) / pl.playingFieldSize.x;
 	//	std::cout<<"\nDistance "<<distance;
 		ClampFloat(distance, -1.f, 1.f);
-		Ship * ship = spaceShooter->GetShip(targetEntity);
+		ShipPtr ship = pl.GetShip(targetEntity);
 		int minSpeed = args[2].ParseFloat(), maxSpeed = args[3].ParseFloat();
 		ship->speed = minSpeed + (1 - distance) * (maxSpeed - minSpeed);
 		/// Set initial speed.
@@ -84,7 +84,7 @@ void SpaceShooterScript::EvaluateLine(String & line)
 		float distance = ((levelEntity->worldPosition.x + targetX) - targetEntity->worldPosition.x) / pl.playingFieldSize.x;
 	//	std::cout<<"\nDistance "<<distance;
 //		ClampFloat(distance, -1.f, 1.f);
-		Ship * ship = spaceShooter->GetShip(targetEntity);
+		ShipPtr ship = pl.GetShip(targetEntity);
 		/// Set initial speed.
 		if (sssState != 1)
 		{
@@ -111,9 +111,9 @@ void SpaceShooterScript::EvaluateLine(String & line)
 		List<String> args = line.Tokenize(",()");
 		String target = args[1]; target.RemoveSurroundingWhitespaces();
 		int id = target.ParseInt();
-		Ship * ship = spaceShooter->GetShipByID(id);
+		ShipPtr ship = pl.GetShipByID(id);
 		if (target == "self")
-			ship = spaceShooter->GetShip(this->entity);
+			ship = pl.GetShip(this->entity);
 		float speed = args[2].ParseFloat();
 		ship->SetSpeed(pl, speed);
 		lineFinished = true;
@@ -129,7 +129,7 @@ void SpaceShooterScript::EvaluateLine(String & line)
 		if (targetEntity == 0)
 			return;		
 		String weaponName = args[2];
-		Ship * ship = spaceShooter->GetShip(targetEntity);
+		ShipPtr ship = spaceShooter->GetShip(targetEntity);
 		ship->DisableWeapon(weaponName);
 		lineProcessed = lineFinished = true;
 	}
@@ -153,7 +153,7 @@ bool SpaceShooterEvaluator::EvaluateFunction(String byName, List<String> argumen
 
 	String name = byName;
 	#define GRAB_SHIP int id = arguments[0].ParseInt();\
-		Ship * ship = spaceShooter->GetShipByID(id);\
+		ShipPtr ship = pl.GetShipByID(id);\
 		if (!ship){\
 			result = ExpressionResult::Integral(0);\
 			result.text = "Unable to find ship with id "+String(id);\
@@ -256,7 +256,7 @@ bool SpaceShooterEvaluator::EvaluateFunction(String byName, List<String> argumen
 	else if (name == "SetWeaponCooldown")
 	{
 		GRAB_SHIP;
-		ship->SetWeaponCooldownByID(arguments[1].ParseInt(), arguments[2].ParseFloat());
+		ship->SetWeaponCooldownByID(arguments[1].ParseInt(), AETime(TimeType::MILLISECONDS_NO_CALENDER, arguments[2].ParseFloat()));
 		result = ExpressionResult::Boolean(true);
 		return true;
 	}

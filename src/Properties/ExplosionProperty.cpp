@@ -71,7 +71,7 @@ float ExplosionProperty::CurrentDamage()
 	std::cout<<"\nCurrent Damage: "<<currDmg<<" total: "<<totalDamageInflicted;
 	return currDmg;
 }
-bool ExplosionProperty::ShouldDamage(Ship * ship)
+bool ExplosionProperty::ShouldDamage(ShipPtr ship)
 {
 	if (damagedTargets.Exists(ship))
 		return false;

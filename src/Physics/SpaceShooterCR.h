@@ -1,6 +1,7 @@
 /// Emil Hedemalm
 /// 2014-07-25
 /// Custom integrator for Space shooter type games.
+#pragma once
 
 #include "Physics/CollisionResolver.h"
 

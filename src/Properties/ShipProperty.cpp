@@ -24,7 +24,7 @@
 #include "SpaceShooter2D.h"
 #include "PlayingLevel.h"
 
-ShipProperty::ShipProperty(Ship * ship, EntitySharedPtr owner)
+ShipProperty::ShipProperty(ShipPtr ship, EntitySharedPtr owner)
 : EntityProperty("ShipProperty", ID(), owner), ship(ship)
 {
 	shouldDelete = false;

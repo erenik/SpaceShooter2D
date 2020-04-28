@@ -21,11 +21,6 @@
 
 void LoadOptions();
 
-extern bool inGameMenuOpened;
-
-
-void OpenSpawnWindow();
-void CloseSpawnWindow();
 void UpdateWeaponScriptUI();
 
 /// Updates ui depending on mode.
@@ -54,7 +49,6 @@ void SpaceShooter2D::UpdateUI()
 		case IN_WORKSHOP: toPush = "gui/Workshop.gui"; break;
 		case EDIT_WEAPON_SWITCH_SCRIPTS: toPush = "gui/WeaponScripts.gui"; break;
 		case BUYING_GEAR: toPush = "gui/Shop.gui"; break;
-		case SHOWING_LEVEL_STATS: toPush = "gui/LevelStats.gui"; break;
 		default:
 			assert(false);
 //			uis.Add("MainMenu");
@@ -67,23 +61,11 @@ void SpaceShooter2D::UpdateUI()
 	{
 		case NEW_GAME:  LoadDefaultName(); break;
 		case EDITING_OPTIONS: LoadOptions(); break;
-		case PLAYING_LEVEL: 
-			UpdateHUDGearedWeapons();
-			UpdateUIPlayerHP(true); 
-			UpdateUIPlayerShield(true);
-			if (inGameMenuOpened)
-				MesMan.ProcessMessage("PushUI(gui/InGameMenu.gui)");
-			else
-				MesMan.ProcessMessage("PopUI(gui/InGameMenu.gui)");
-			break;
 		case LOAD_SAVES: 
 			OpenLoadScreen(); 
 			break;
 		case BUYING_GEAR: 
 			UpdateGearList(); 
-			break;
-		case SHOWING_LEVEL_STATS: 
-			ShowLevelStats(); 
 			break;
 		case IN_WORKSHOP:
 			UpdateUpgradesLists();
@@ -92,10 +74,6 @@ void SpaceShooter2D::UpdateUI()
 			UpdateWeaponScriptUI();
 			break;
 	};
-	if (mode == PLAYING_LEVEL)
-		OpenSpawnWindow();
-	else
-		CloseSpawnWindow();
 }
 
 void LoadOptions()
@@ -103,136 +81,11 @@ void LoadOptions()
 	// Load settings.
 }
 
-void RequeueHUDUpdate()
-{
-	/// Queue an update for later?
-	Message * msg = new Message("UpdateHUDGearedWeapons");
-	msg->timeToProcess = Time::Now() + Time::Milliseconds(1000);
-	MesMan.QueueDelayedMessage(msg);
-}
-
-/// Update UI
-void SpaceShooter2D::UpdateHUDGearedWeapons()
-{
-	if (this->mode != PLAYING_LEVEL)
-		return;
-	MutexHandle mh(uiMutex);
-	// Fetch the names of the checkboxes.
-	UserInterface * ui = MainWindow()->ui;
-	if (!ui)
-	{
-		RequeueHUDUpdate();
-		return;
-	}
-	UIElement * activeWeapon = ui->GetElementByName("ActiveWeapon");
-	if (!activeWeapon)
-	{
-		RequeueHUDUpdate();
-		return;
-	}
-
-	PlayingLevel& pl = PlayingLevelRef();
-
-	// Fetch children.
-	assert(activeWeapon);
-	List<UIElement*> children = activeWeapon->GetChildren();
-	List<Weapon*> & weapons = pl.playerShip->weapons;
-	for (int i = 0; i < children.Size(); ++i)
-	{
-		UIElement * child = children[i];
-		if (i >= weapons.Size())
-		{
-			QueueGraphics(new GMSetUIs(child->name, GMUI::TEXT, "."));
-			QueueGraphics(new GMSetUIb(child->name, GMUI::ACTIVATABLE, false));
-			QueueGraphics(new GMSetUIb(child->name, GMUI::HOVERABLE, false));
-			continue;
-		}
-		Weapon * weapon = weapons[i];
-		QueueGraphics(new GMSetUIs(child->name, GMUI::TEXT, weapon->name));
-		QueueGraphics(new GMSetUIb(child->name, GMUI::ACTIVATABLE, true));
-		QueueGraphics(new GMSetUIb(child->name, GMUI::HOVERABLE, true));
-
-		/// Clear and add associated picture and cooldown-overlay on top.
-		QueueGraphics(new GMClearUI(child->name));
-
-		UIElement * cooldownOverlay = new UIElement();
-		cooldownOverlay->name = "WeaponCooldownOverlay"+String(i);
-		cooldownOverlay->textureSource = "img/ui/Cooldown_37.png";
-		QueueGraphics(new GMAddUI(cooldownOverlay, child->name));
-
-		// If weapon begs question of ammo (bursts).
-		if (weapon->burst)
-		{
-			UIElement * ammunition = new UIElement();
-			ammunition->name = "WeaponAmmunitionOverlay"+String(i);
-			ammunition->textureSource = "0x0000";
-			ammunition->text = "inf";
-			QueueGraphics(new GMAddUI(ammunition, child->name));
-		}
-	}
-}
 
 // Update ui
 void SpaceShooter2D::OnScoreUpdated()
 {
 	GraphicsMan.QueueMessage(new GMSetUIi("Scorei", GMUI::INTEGER_INPUT, LevelScore()->iValue));
-}
-
-void SpaceShooter2D::UpdateUIPlayerHP(bool force)
-{
-	PlayingLevel& pl = PlayingLevelRef();
-	static int lastHP;
-	if (lastHP == pl.playerShip->hp && !force)
-		return;
-	lastHP = (int)pl.playerShip->hp;
-	GraphicsMan.QueueMessage(new GMSetUIi("HP", GMUI::INTEGER_INPUT, (int)pl.playerShip->hp));
-	float redRatio = pl.playerShip->hp / (float)pl.playerShip->maxHP;
-	GraphicsMan.QueueMessage(new GMSetUIv4f("HP", GMUI::TEXT_COLOR, Vector4f(1.0f, 1 - redRatio, 1 - redRatio, 1.0f)));
-}
-void SpaceShooter2D::UpdateUIPlayerShield(bool force)
-{
-	PlayingLevel& pl = PlayingLevelRef();
-	static int lastShield;
-	if (lastShield == pl.playerShip->shieldValue && !force)
-		return;
-	lastShield = (int)pl.playerShip->shieldValue;
-	GraphicsMan.QueueMessage(new GMSetUIi("Shield", GMUI::INTEGER_INPUT, (int)pl.playerShip->shieldValue));
-}
-
-void SpaceShooter2D::UpdateCooldowns()
-{
-	PlayingLevel& pl = PlayingLevelRef();
-	List<Weapon*> & weapons = pl.playerShip->weapons;
-	for (int i = 0; i < weapons.Size(); ++i)
-	{
-		// Check cooldown.
-		Weapon * weapon = weapons[i];
-		float timeTilNextShotMs = (float) weapon->currCooldownMs;
-//		if (weapon->burst)
-	//		timeTilNextShotMs = (flyTime - weapon->burstStart).Milliseconds();
-		float maxCooldown = (float) weapon->cooldown.Milliseconds();
-		float ratioReady = (1 - timeTilNextShotMs / maxCooldown) * 100.f;
-		// Change texture accordingly.
-		List<int> avail(0, 12, 25, 37);
-		avail.Add(50, 62, 75, 87, 100);
-		int good = 0;
-		for (int j = 0; j < avail.Size(); ++j)
-		{
-			int av = avail[j];
-			if (ratioReady < av)
-				break;
-			good = av;
-		}
-		QueueGraphics(new GMSetUIs("WeaponCooldownOverlay"+String(i), GMUI::TEXTURE_SOURCE, "img/ui/Cooldown_"+String(good)+".png"));
-		if (weapon->burst)
-		{
-			int shotsLeft = weapon->shotsLeft;
-			if (weapon->reloading)
-				shotsLeft = 0;
-//			int target = GMUI::TEXT;
-			QueueGraphics(new GMSetUIs("WeaponAmmunitionOverlay"+String(i), GMUI::TEXT, String(shotsLeft)));
-		}
-	}
 }
 
 void SpaceShooter2D::UpdateHUDSkill()
@@ -244,19 +97,8 @@ void SpaceShooter2D::UpdateHUDSkill()
 
 void SpaceShooter2D::LoadDefaultName()
 {
-	SetMode(NEW_GAME, false);
 	GraphicsMan.QueueMessage(new GMSetUIs("PlayerName", GMUI::STRING_INPUT_TEXT, playerName->strValue));
 	GraphicsMan.QueueMessage(new GMSetUIi("Difficulty", GMUI::INTEGER_INPUT, difficulty->iValue));
-}
-
-void SpaceShooter2D::ShowLevelStats()
-{
-	std::cout<<"\n Kills : "<<LevelKills()->ToString()<<" of possible: "<<LevelPossibleKills()->ToString();
-	mode = SHOWING_LEVEL_STATS;
-	GraphicsMan.QueueMessage(new GMSetUIs("LevelKills", GMUI::TEXT, LevelKills()->ToString()));
-	QueueGraphics(new GMSetUIs("TotalKillsPossible", GMUI::TEXT, LevelPossibleKills()->ToString()));
-	GraphicsMan.QueueMessage(new GMSetUIs("LevelScore", GMUI::TEXT, LevelScore()->ToString()));
-	GraphicsMan.QueueMessage(new GMSetUIs("ScoreTotal", GMUI::TEXT, score->ToString()));
 }
 
 void SpaceShooter2D::UpdateUpgradesLists()
@@ -273,7 +115,7 @@ void SpaceShooter2D::UpdateUpgradesLists()
 		cls.AddItem(cl);
 		UILabel * label = new UILabel(TextMan.GetText(i+10));
 		label->sizeRatioX = 0.4f;
-		cl->AddChild(label);
+		cl->AddChild(nullptr, label);
 
 		for (int j = 0; j < 10; ++j)
 		{
@@ -292,7 +134,7 @@ void SpaceShooter2D::UpdateUpgradesLists()
 			else
 				bn->textureSource = "0x44AA";
 			bn->sizeRatioX = 0.05f;
-			cl->AddChild(bn);
+			cl->AddChild(nullptr, bn);
 		}
 	}
 	QueueGraphics(new GMAddUI(cls, "lWeaponCategories"));
@@ -390,7 +232,7 @@ void FillBasicInfo(String upgrade, String inElement)
 			tmpElements.AddItem(BasicLabel("Unequip?"));
 		else
 			tmpElements.AddItem(BasicLabel("Level 0."));
-		l1->AddChildren(tmpElements);
+		l1->AddChildren(nullptr, tmpElements);
 		tmpElements.Clear();
 	}
 	else // Weapon exists.
@@ -399,7 +241,7 @@ void FillBasicInfo(String upgrade, String inElement)
 		tmpElements.AddItem(BasicLabel("Price: "+String(weapon->cost)));
 		tmpElements.AddItem(BasicLabel("Cooldown: "+String(weapon->cooldown.Milliseconds())));
 		tmpElements.AddItem(BasicLabel("Damage: "+String(weapon->damage, 1)));
-		l1->AddChildren(tmpElements);
+		l1->AddChildren(nullptr, tmpElements);
 		tmpElements.Clear();
 		// Depending on type, add extra statistics too that might be interesting? ^^
 		switch(type)
@@ -432,7 +274,7 @@ void FillBasicInfo(String upgrade, String inElement)
 				tmpElements.AddItem(BasicLabel("Stability: "+String(weapon->stability,2)));
 				break;			
 		};
-		l2->AddChildren(tmpElements);
+		l2->AddChildren(nullptr, tmpElements);
 		tmpElements.Clear();
 	}
 	QueueGraphics(new GMAddUI(elements, inElement));
@@ -530,7 +372,7 @@ void SpaceShooter2D::OpenLoadScreen()
 		label->sizeRatioY = 0.5f;
 		label->hoverable = false;
 		label->textureSource = "NULL";
-		list->AddChild(label);
+		list->AddChild(nullptr, label);
 
 		list->highlightOnHover = true;
 		list->sizeRatioX = 0.33f;
@@ -601,7 +443,7 @@ void SpaceShooter2D::UpdateGearList()
 		UILabel * label = new UILabel(gear.name);
 		label->sizeRatioX = 0.3f;
 		label->hoverable = false;
-		list->AddChild(label);
+		list->AddChild(nullptr, label);
 		// Add stats?
 		switch(gearCategory)
 		{
@@ -616,11 +458,11 @@ void SpaceShooter2D::UpdateGearList()
 				label = new UILabel("Max Shield: "+String(gear.maxShield));
 				label->hoverable = false;
 				label->sizeRatioX = 0.2f;
-				list->AddChild(label);
+				list->AddChild(nullptr, label);
 				label = new UILabel("Regen: "+String(gear.shieldRegen));
 				label->hoverable = false;
 				label->sizeRatioX = 0.1f;
-				list->AddChild(label);
+				list->AddChild(nullptr, label);
 				break;
 			}
 			// Armors
@@ -629,15 +471,15 @@ void SpaceShooter2D::UpdateGearList()
 				label = new UILabel("Max HP: "+String(gear.maxHP));
 				label->hoverable = false;
 				label->sizeRatioX = 0.15f;
-				list->AddChild(label);
+				list->AddChild(nullptr, label);
 				label = new UILabel("Toughness: "+String(gear.toughness));
 				label->hoverable = false;
 				label->sizeRatioX = 0.1f;
-				list->AddChild(label);
+				list->AddChild(nullptr, label);
 				label = new UILabel("Reactivity: "+String(gear.reactivity));
 				label->hoverable = false;
 				label->sizeRatioX = 0.1f;
-				list->AddChild(label);
+				list->AddChild(nullptr, label);
 				break;		
 			}
 		}
@@ -645,7 +487,7 @@ void SpaceShooter2D::UpdateGearList()
 		label = new UILabel(String(gear.price));
 		label->hoverable = false;
 		label->sizeRatioX = 0.2f;
-		list->AddChild(label);
+		list->AddChild(nullptr, label);
 
 		// Add buy button
 		toAdd.Add(list);
@@ -665,7 +507,7 @@ void SpaceShooter2D::OpenJumpDialog()
 		jumpDialog->onTrigger += "PopUI(JumpTo)&ResumeGame";
 		jumpDialog->sizeRatioX = 0.5;
 		jumpDialog->sizeRatioY = 0.1;
-		jumpDialog->CreateChildren();
+		jumpDialog->CreateChildren(nullptr);
 		jumpDialog->input->BeginInput(); // Make its input active straight away.
 		// Add it to the main UI.
 		QueueGraphics(new GMAddUI(jumpDialog, "root"));

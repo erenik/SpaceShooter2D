@@ -199,7 +199,7 @@ String Movement::Name(int type)
 }
 
 // Upon entering this movement pattern.
-void Movement::OnEnter(PlayingLevel& playingLevel, Ship * ship)
+void Movement::OnEnter(PlayingLevel& playingLevel, ShipPtr ship)
 {
 	timeInCurrentMovement = 0;
 	// Reset stuff.

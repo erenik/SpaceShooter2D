@@ -50,12 +50,14 @@ public:
 	// Used for player and camera. Based on millisecondsPerPixel.
 	Vector3f BaseVelocity();
 	/// Creates player entity within this level. (used for spawning)
-	EntitySharedPtr AddPlayer(PlayingLevel& playingLevel, Ship * playerShip, ConstVec3fr atPosition = Vector3f(-50.f, 10.f, 0));
+	EntitySharedPtr AddPlayer(PlayingLevel& playingLevel, ShipPtr playerShip, ConstVec3fr atPosition = Vector3f(-50.f, 10.f, 0));
 	void SetupCamera();
 	/// o.o
 	void Process(PlayingLevel& playingLevel, int timeInMs);
 	void ProcessMessage(Message * message);
 	void ProceedMessage();
+	// Dialogue, tutorials
+	void ProcessLevelMessages(); 
 	void SetTime(Time newTime);
 	/// enable respawing on shit again.
 	void OnLevelTimeAdjusted();
@@ -63,13 +65,13 @@ public:
 	/// o.o'
 	void Explode(Weapon & weapon, EntitySharedPtr causingEntity, bool enemy);
 	/// Returns ships close enough to given point. Returns distance to them too. Checks only to center of ship, not edges.
-	List<Ship*> GetShipsAtPoint(ConstVec3fr position, float maxRadius, List<float> & distances); 
+	List<ShipPtr> GetShipsAtPoint(ConstVec3fr position, float maxRadius, List<float> & distances);
 
 	void RemoveRemainingSpawnGroups();
 	void RemoveExistingEnemies(PlayingLevel& playingLevel);
 
 	/// Yes.
-	List<Ship*> PlayerShips(PlayingLevel& playingLevel);
+	List<ShipPtr> PlayerShips(PlayingLevel& playingLevel);
 
 	/// In format mm:ss.ms
 	void JumpToTime(String timeString);
@@ -77,7 +79,7 @@ public:
 	String source;
 
 	/// Enemy ships within.
-	List<Ship*> enemyShips, alliedShips, ships;
+	List<ShipPtr> enemyShips, alliedShips, ships;
 
 	/// Default.. 20.0. Dictates movable region in Y, at least.
 	float height;

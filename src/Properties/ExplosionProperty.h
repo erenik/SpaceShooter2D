@@ -27,7 +27,7 @@ public:
 	virtual void Process(int timeInMs);
 	virtual void ProcessMessage(Message * message);
 
-	bool ShouldDamage(Ship * ship);
+	bool ShouldDamage(ShipPtr ship);
 
 	/// Resets sleep-flag, among other things
 	void OnSpawn();
@@ -39,7 +39,7 @@ public:
 	Weapon weapon;
 	Vector3f position;
 	float currentRadius;
-	List<Ship*> affectedShips; // Only affect a ship once.
+	List<ShipPtr> affectedShips; // Only affect a ship once.
 	Time startTime;
 
 
@@ -47,7 +47,7 @@ public:
 	bool player;
 	bool enemy;
 
-	List<Ship*> damagedTargets;
+	List<ShipPtr> damagedTargets;
 	/// If not currently active (available for re-use).
 	bool sleeping;
 

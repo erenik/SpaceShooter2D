@@ -104,12 +104,12 @@ void UpdateEditActionUI()
 		case ScriptAction::SWITCH_TO_WEAPON:
 			UIIntegerInput * ii = new UIIntegerInput("Weapon type", "SetWeaponIndex");
 			ii->sizeRatioY = 0.1f;
-			ii->CreateChildren();
+			ii->CreateChildren(nullptr);
 			ii->SetValue(action->weaponIndex);
 			tmp.AddItem(ii);
 			ii = new UIIntegerInput("Milliseconds", "SetMilliseconds");
 			ii->sizeRatioY = 0.1f;
-			ii->CreateChildren();
+			ii->CreateChildren(nullptr);
 			ii->SetValue(action->durationMs);
 			tmp.AddItem(ii);
 			break;

@@ -38,6 +38,8 @@ public:
 	SpawnGroup();
 	virtual ~SpawnGroup();
 	void Reset();
+	void RemoveThis(Ship* sp);
+
 	/** Spawns ze entities. 
 		True if spawning sub-part of an aggregate formation-type. 
 		Returns true if it has finished spawning. 
@@ -53,11 +55,11 @@ public:
 	void PrepareForSpawning(SpawnGroup * parent = 0);
 
 	/// Living ships
-	List<Ship*> LivingShips() { return ships; };
+	List<ShipPtr> LivingShips() { return ships; };
 	/// Query, compares active ships vs. spawned amount
 	bool DefeatedOrDespawned();
-	void OnShipDestroyed(Ship * ship);
-	void OnShipDespawned(Ship * ship);
+	void OnShipDestroyed(ShipPtr ship);
+	void OnShipDespawned(ShipPtr ship);
 	/// Creates string (sequence of lines) required to create this specific SpawnGroup in e.g. a level file.
 	String GetLevelCreationString(Time t);
 	/// o.o
@@ -90,7 +92,7 @@ private:
 	int spawned, defeated; // num spawned and defeated?
 	AETime lastSpawn;
 	bool preparedForSpawning;
-	List<Ship*> ships;
+	List<ShipPtr> ships;
 	// ?!
 //	EntitySharedPtr SpawnShip(ConstVec3fr atPosition);
 	void AddShipAtPosition(ConstVec3fr position);

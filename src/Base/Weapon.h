@@ -12,6 +12,7 @@
 
 class PlayingLevel;
 class Ship;
+#define ShipPtr std::shared_ptr<Ship>
 class Weapon;
 class Entity;
 
@@ -79,24 +80,24 @@ public:
 	static Weapon * Get(int type, int level); 
 	static bool LoadTypes(String fromFile);
 	/// Moves the aim of this weapon turrent.
-	void Aim(PlayingLevel& playingLevel, Ship * ship);
+	void Aim(PlayingLevel& playingLevel, ShipPtr ship);
 	/// Shoots using previously calculated aim.
-	void Shoot(PlayingLevel& playingLevel, Ship * ship);
+	void Shoot(PlayingLevel& playingLevel, ShipPtr ship);
 	/// Called to update the various states of the weapon, such as reload time, making lightning arcs jump, etc.
-	void Process(PlayingLevel& playingLevel, Ship * ship, int timeInMs);
-	void ProcessLightning(PlayingLevel& playingLevel, Ship * ship, bool initial = false);
+	void Process(PlayingLevel& playingLevel, ShipPtr ship, int timeInMs);
+	void ProcessLightning(PlayingLevel& playingLevel, ShipPtr ship, bool initial = false);
 	void QueueReload();
 	/// Based on ship.
 	Vector3f WorldPosition(EntitySharedPtr basedOnShipEntity);
 	Vector3f location;
 
 	List<LightningArc*> arcs;
-	List<Ship*> shipsStruckThisArc; /// For skipping
+	List<ShipPtr> shipsStruckThisArc; /// For skipping
 
 	/// Delay in milliseconds between bounces for lightning
 	int arcDelay;
 	int maxBounces; /// Used to make lightning end prematurely.
-	Ship * nextTarget; // For lightning
+	ShipPtr nextTarget; // For lightning
 	int currCooldownMs; /// Used instead of flyTime.
 	float stability;
 	String name;

@@ -59,7 +59,7 @@ SpawnGroup::~SpawnGroup()
 //	ships.ClearAndDelete();
 	for (int i = 0; i < ships.Size(); ++i)
 	{
-		Ship * s = ships[i];
+		ShipPtr s = ships[i];
 		s->spawnGroup = 0;
 	}
 }
@@ -77,6 +77,13 @@ void SpawnGroup::Reset()
 	shipsDefeatedOrDespawned = 0;
 	shipsDespawned = shipsDefeated = 0;
 	spawnTime = Time(TimeType::MILLISECONDS_NO_CALENDER);
+}
+
+void SpawnGroup::RemoveThis(Ship* sp) {
+	for (int i = 0; i < ships.Size(); ++i) {
+		if (ships[i].get() == sp)
+			ships.RemoveIndex(i);
+	}
 }
 
 
@@ -97,7 +104,7 @@ bool SpawnGroup::Spawn(PlayingLevel& playingLevel)
 	{
 		for (int i = 0; i < ships.Size(); ++i)
 		{
-			Ship * ship = ships[i];
+			ShipPtr ship = ships[i];
 			ship->Spawn(ship->position, 0, playingLevel);
 			activeLevel->ships.AddItem(ship);
 			++spawned;
@@ -111,7 +118,7 @@ bool SpawnGroup::Spawn(PlayingLevel& playingLevel)
 	{
 		if (lastSpawn.Seconds() == 0 || (playingLevel.levelTime - lastSpawn).Milliseconds() > spawnIntervalMsBetweenEachShipInFormation)
 		{
-			Ship * ship = ships[0];
+			ShipPtr ship = ships[0];
 			ship->Spawn(ship->position, 0, playingLevel);
 			activeLevel->ships.AddItem(ship);
 			ships.RemoveIndex(0, ListOption::RETAIN_ORDER);
@@ -348,13 +355,13 @@ end:
 
 void SpawnGroup::AddShipAtPosition(ConstVec3fr position)
 {
-	Ship * newShip = Ship::New(shipType);
+	ShipPtr newShip = Ship::New(shipType);
 	if (!newShip)
 	{
 		LogMain("SpawnGroup::SpawnShip: Unable to create ship of type: "+shipType, CAUSE_ASSERTION_ERROR);
 		return;
 	}
-	Ship * ship = newShip;
+	ShipPtr ship = newShip;
 	ship->RandomizeWeaponCooldowns();
 	/// Apply spawn group properties.
 	ship->shoot &= shoot;
@@ -390,14 +397,14 @@ void SpawnGroup::SetDefeated()
 	shipsDefeatedOrDespawned = shipsDefeated = spawned;
 	for (int i = 0; i < ships.Size(); ++i)
 	{
-		Ship * s = ships[i];
+		ShipPtr s = ships[i];
 		s->spawnGroup = 0;
 	}
 	// Destroy ships!
-	ships.ClearAndDelete();
+	ships.Clear();
 }
 
-void SpawnGroup::OnShipDestroyed(Ship * ship)
+void SpawnGroup::OnShipDestroyed(ShipPtr ship)
 {
 	++shipsDefeated;
 	++shipsDefeatedOrDespawned;
@@ -411,7 +418,7 @@ void SpawnGroup::OnShipDestroyed(Ship * ship)
 	}
 }
 
-void SpawnGroup::OnShipDespawned(Ship * ship)
+void SpawnGroup::OnShipDespawned(ShipPtr ship)
 {
 	++shipsDespawned;
 	++shipsDefeatedOrDespawned;

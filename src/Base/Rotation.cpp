@@ -125,7 +125,7 @@ String Rotation::Name(int type)
 	return String();
 }
 
-void Rotation::OnEnter(Ship * forShip)
+void Rotation::OnEnter(ShipPtr forShip)
 {
 	this->ship = forShip;
 	this->entity = ship->entity;

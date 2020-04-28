@@ -15,11 +15,11 @@ class ShipProperty : public EntityProperty
 	friend class Ship;
 public:
 	/// Reference to the game and this property's owner.
-	ShipProperty(Ship * ship, EntitySharedPtr owner);
+	ShipProperty(ShipPtr ship, EntitySharedPtr owner);
 	// Static version.
 	static int ID();
 
-	const Ship * GetShip() const {return ship;};
+	const ShipPtr GetShip() const {return ship;};
 	void Remove();
 	// Reset sleep.
 	void OnSpawn();
@@ -39,18 +39,18 @@ public:
 	bool shouldDelete;
 
 	/// o.o
-//	void LoadDataFrom(Ship * ship);
+//	void LoadDataFrom(ShipPtr ship);
 
 
 	// False by default. If true will use default behaviour of following the mouse.
 	bool useMouseInput;
 
 	/// o.o
-//	Ship * ship;
+//	ShipPtr ship;
 
 private:
 	
-	Ship * ship;
+	ShipPtr ship;
 
 	bool spawnInvulnerability; // Default true at start.
 	long millisecondsPassedSinceLastFire;	

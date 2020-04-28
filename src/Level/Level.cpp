@@ -12,6 +12,7 @@
 #include "StateManager.h"
 #include "../Properties/ExplosionProperty.h"
 #include "PlayingLevel.h"
+#include "OS/OSThread.h"
 
 #define SPAWNED_ENEMIES_LOG "SpawnedEnemies.srl"
 
@@ -24,8 +25,8 @@ float despawnPositionLeft = 0;
 
 Level * activeLevel = NULL;
 
-Time levelTime; // Time used in level-scripting. Will be paused arbitrarily to allow for easy scripting.
-Time flyTime; // The actual player-felt time. 
+Time levelTime = Time(TimeType::MILLISECONDS_NO_CALENDER); // Time used in level-scripting. Will be paused arbitrarily to allow for easy scripting.
+Time flyTime = Time(TimeType::MILLISECONDS_NO_CALENDER); // The actual player-felt time. 
 bool gameTimePaused = false;
 bool defeatedAllEnemies = true;
 bool failedToSurvive = false;
@@ -46,8 +47,8 @@ Level::~Level()
 {
 	spawnGroups.ClearAndDelete();
 	messages.ClearAndDelete();
-	enemyShips.ClearAndDelete();
-	alliedShips.ClearAndDelete();
+	enemyShips.Clear();
+	alliedShips.Clear();
 }
 
 /// Starts BGM, starts clocks/timers if any, etc.
@@ -73,7 +74,7 @@ Vector3f Level::BaseVelocity()
 }
 
 /// Creates player entity within this level. (used for spawning)
-EntitySharedPtr Level::AddPlayer(PlayingLevel& playingLevel, Ship * playerShip, ConstVec3fr atPosition)
+EntitySharedPtr Level::AddPlayer(PlayingLevel& playingLevel, ShipPtr playerShip, ConstVec3fr atPosition)
 {	
 	EntitySharedPtr entity = playerShip->Spawn(atPosition, 0, playingLevel);
 	return entity;
@@ -102,7 +103,7 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 	if (second >500)
 	{
 		second = 0;
-		List<Ship*> spookyShips;
+		List<ShipPtr> spookyShips;
 		int playerColliding = 0,
 			enemyCategory = 0;
 		
@@ -110,7 +111,7 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 		memset(formations, 0, sizeof(int) * Formation::FORMATIONS);
 		for (int i = 0; i < ships.Size(); ++i)
 		{
-			Ship * ship = ships[i];
+			ShipPtr ship = ships[i];
 			if (ship->entity)
 			{
 				if (!ship->entity->registeredForPhysics)
@@ -126,7 +127,8 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 			if (ship->entity->physics->collisionCategory | CC_ALL_ENEMY)
 				++enemyCategory;
 		}
-		std::cout<<"\nSpooky ships found: "<<spookyShips.Size()<<" playerFilter: "<<playerColliding<<" enemyCategory: "<<enemyCategory<<" out of "<<ships.Size()<<" ships.";
+		if (spookyShips.Size() > 0)
+			LogMain(String("Spooky ships found: ")+spookyShips.Size()+" playerFilter: "+playerColliding+" enemyCategory: "+enemyCategory+" out of "+ships.Size()+" ships.", INFO);
 		for (int i = 0; i < Formation::FORMATIONS; ++i)
 		{
 			if (formations[i] > 0)
@@ -164,14 +166,19 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 
 	flyTime.AddMs(timeInMs);
 
+	ProcessLevelMessages();
+
 	/// Clearing the level
 	if (LevelCleared(playingLevel))
 	{
 		spaceShooter->OnLevelCleared();
 		return; // No more processing if cleared?
 	}
-	if (gameTimePaused)
+	if (gameTimePaused) {
+		LogMain("Game time is paused", INFO);
+		ThreadSleep(100);
 		return;
+	}
 	else
 	{
 		levelTime.AddMs(timeInMs);
@@ -192,10 +199,10 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 		}
 		/// Apply damage to nearby ships (if any)
 		List<float> distances;
-		List<Ship*> relShips = GetShipsAtPoint(exp->position, exp->currentRadius, distances);
+		List<ShipPtr> relShips = GetShipsAtPoint(exp->position, exp->currentRadius, distances);
 		for (int j = 0; j < relShips.Size(); ++j)
 		{
-			Ship * ship = relShips[j];
+			ShipPtr ship = relShips[j];
 			if (exp->affectedShips.Exists(ship))
 				continue;
 			float amount = exp->weapon.damage;
@@ -218,33 +225,6 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 		}
 	}
 	*/
-
-	/// Check messages.
-	if (messages.Size())
-	{
-		for (int i = 0; i < messages.Size(); ++i)
-		{
-			LevelMessage * lm = messages[i];
-			if (lm->hidden)
-				continue;
-			if (lm->startTime < levelTime && !lm->displayed)
-			{
-				if (activeLevelMessage)
-					continue;
-				if (lm->Display())
-					activeLevelMessage = lm;
-			}
-			if (lm->displayed && lm->stopTime < levelTime)
-			{
-				// Retain sorting.
-				lm->Hide();
-				if (activeLevelMessage == lm)
-				{
-					activeLevelMessage = 0;
-				}
-			}
-		}
-	}
 
 	/// Check spawn-groups to spawn.
 	if (spawnGroups.Size())
@@ -269,6 +249,36 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 				sg->Spawn(playingLevel);
 				if (sg->pausesGameTime)
 					gameTimePaused = true;
+			}
+		}
+	}
+}
+
+// Dialogue, tutorials
+void Level::ProcessLevelMessages() {
+	/// Check messages.
+	if (messages.Size())
+	{
+		for (int i = 0; i < messages.Size(); ++i)
+		{
+			LevelMessage* lm = messages[i];
+			if (lm->hidden)
+				continue;
+			if (lm->startTime < levelTime && !lm->displayed)
+			{
+				if (activeLevelMessage)
+					continue;
+				if (lm->Display())
+					activeLevelMessage = lm;
+			}
+			if (lm->displayed && lm->stopTime < levelTime)
+			{
+				// Retain sorting.
+				lm->Hide();
+				if (activeLevelMessage == lm)
+				{
+					activeLevelMessage = 0;
+				}
 			}
 		}
 	}
@@ -495,14 +505,14 @@ void Level::Explode(Weapon & weapon, EntitySharedPtr causingEntity, bool enemy)
 	MapMan.AddEntity(explosionEntity, false, true);
 }
 
-List<Ship*> Level::GetShipsAtPoint(ConstVec3fr position, float maxRadius, List<float> & distances)
+List<ShipPtr> Level::GetShipsAtPoint(ConstVec3fr position, float maxRadius, List<float> & distances)
 {
-	List<Ship*> relevantShips;
+	List<ShipPtr> relevantShips;
 	distances.Clear();
 	float maxDist = maxRadius;
 	for (int i = 0; i < ships.Size(); ++i)
 	{
-		Ship * ship = ships[i];
+		ShipPtr ship = ships[i];
 		if (ship->destroyed || !ship->spawned)
 			continue;
 		if (ship->entity == 0)
@@ -532,7 +542,7 @@ void Level::RemoveExistingEnemies(PlayingLevel& playingLevel)
 	String lg;
 	for (int i = 0; i < ships.Size(); ++i)
 	{
-		Ship * ship = ships[i];
+		ShipPtr ship = ships[i];
 		lg += ship->name+" ";
 		ship->Despawn(playingLevel, false);
 	}
@@ -541,10 +551,10 @@ void Level::RemoveExistingEnemies(PlayingLevel& playingLevel)
 	Sleep(50);
 	for (int i = 0; i < ships.Size(); ++i)
 	{
-		Ship * s = ships[i];
+		ShipPtr s = ships[i];
 		s->spawnGroup = 0;
 	}
-	ships.ClearAndDelete();
+	ships.Clear();
 }
 
 void Level::JumpToTime(String timeString)
@@ -563,9 +573,9 @@ void Level::JumpToTime(String timeString)
 	OnLevelTimeAdjusted();
 }
 
-List<Ship*> Level::PlayerShips(PlayingLevel& playingLevel)
+List<ShipPtr> Level::PlayerShips(PlayingLevel& playingLevel)
 {
-	List<Ship*> playerShips;
+	List<ShipPtr> playerShips;
 	playerShips.AddItem(playingLevel.playerShip);
 	return playerShips;
 }
