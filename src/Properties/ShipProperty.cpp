@@ -164,7 +164,7 @@ void ShipProperty::OnCollision(EntitySharedPtr withEntity)
 		tmpEmitter->SetScale(0.05f);
 		tmpEmitter->SetParticleLifeTime(1.5f);
 		tmpEmitter->SetColor(Vector4f(1.f, 0.5f, 0.1f, 1.f));
-		Graphics.QueueMessage(new GMAttachParticleEmitter(tmpEmitter, pl.sparks));
+		Graphics.QueueMessage(new GMAttachParticleEmitter(std::shared_ptr<ParticleEmitter>(tmpEmitter), std::weak_ptr<ParticleSystem>(pl.sparks)));
 		return;
 	}
 

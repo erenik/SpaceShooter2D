@@ -1,0 +1,88 @@
+// Main UI when starting up.
+
+defaultTexture	0x2244
+defaultTexture	0x2244
+defaultTextColor	1 1 1 1
+
+// Make root active
+root
+name WorkshopScreen
+texture NULL
+exitable true
+onExit GoToHangar
+
+parent WorkshopScreen
+label	lMenuName
+text	"Workshop"
+sizeRatioXY 0.5 0.15
+alignmentXY 0.5 0.95
+
+IntegerLabel WorkshopMoney
+text "Munny: "
+sizeRatioXY 0.5 0.08
+alignmentXY 0.5 0.84
+
+list lGeneralInfo
+sizeRatioXY 0.25 0.2
+alignmentXY 0.125 0.9
+list lWeaponCategories
+padding 0.01
+sizeRatioXY 0.5 0.8
+alignmentXY 0.25 0.4
+ColumnList Skills
+sizeRatioXY 0.5 0.1
+alignmentXY 0.25 0.05
+label PreviewArea
+textColor 0x55FFFF22
+texture 0xFF15
+sizeRatioXY 0.5 0.3
+alignmentXY 0.75 0.15
+list lMenuButtons
+sizeRatioXY 0.25 0.2
+alignmentXY 0.875 0.9
+list Stats
+sizeRatioXY 0.5 0.5
+alignmentXY 0.75 0.55
+
+parent Stats
+defaultSizeRatioXY 1 0.5
+element SelectedStats
+list MoreStats
+
+/////////////////////////////////////////////////
+defaultSizeRatioXY 0.33 1
+parent Skills 
+label "Skills"
+
+parent SelectedStats
+defaultSizeRatioXY 1 0.2
+label lSelectedStats
+text "Selected stats"
+
+parent MoreStats
+label lHoverStats
+text "Hover stats"
+
+parent lWeaponCategories
+defaultSizeRatioXY 1 0.1
+label "Weapon 1"
+
+parent lGeneralInfo
+defaultSizeRatioXY 1 0.2
+label ShipName
+text "Shippie"
+label Score
+label Lives
+label Credits
+
+parent lMenuButtons
+defaultSizeRatioXY 1 0.2
+button "Armor/Shield upgrades"
+button GoToEditWeaponSwitchScripts
+text "Weapon switch scripts"
+button "Save/Load game"
+button "Stage select"
+button "Quit to start menu"
+
+
+

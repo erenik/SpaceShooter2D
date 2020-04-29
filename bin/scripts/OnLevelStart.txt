@@ -1,0 +1,7 @@
+
+DisplayCenterText	Level $-L
+Wait(2000)
+ClearCenterText
+
+
+

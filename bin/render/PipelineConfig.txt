@@ -1,0 +1,9 @@
+
+
+LoadPipeline FixedPipelinePhong
+LoadPipeline FixedPipelineNormals
+LoadPipeline FixedPipelineDiffuse
+LoadPipeline SideScroller_Flat
+LoadPipeline SideScroller_Ambient
+
+UsePipeline FixedPipelinePhong

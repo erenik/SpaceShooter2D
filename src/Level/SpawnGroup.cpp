@@ -11,37 +11,37 @@
 #include "File/LogFile.h"
 #include "PlayingLevel.h"
 
-String Formation::GetName(int forFormationType)
+String GetName(Formation forFormationType)
 {
 	switch(forFormationType)
 	{
-		case BAD_FORMATION: return "BAD_FORMATION";
-		case LINE_X: return "LINE_X";
-		case DOUBLE_LINE_X: return "DOUBLE_LINE_X";
-		case LINE_Y: return "LINE_Y";
-		case LINE_XY: return "LINE_XY";
-		case X: return "X";
-		case SQUARE: return "SQUARE";
-		case CIRCLE: return "CIRCLE";
-		case HALF_CIRCLE_LEFT: return "HALF_CIRCLE_LEFT";
-		case HALF_CIRCLE_RIGHT: return "HALF_CIRCLE_RIGHT";
-		case V_X: return "V_X";
-		case V_Y: return "V_Y";
-		case SWARM_BOX_XY: return "SWARM_BOX_XY";
-		default:
-			assert(false);
+	case Formation::BAD_FORMATION: return "BAD_FORMATION";
+	case Formation::LINE_X: return "LINE_X";
+	case Formation::DOUBLE_LINE_X: return "DOUBLE_LINE_X";
+	case Formation::LINE_Y: return "LINE_Y";
+	case Formation::LINE_XY: return "LINE_XY";
+	case Formation::X: return "X";
+	case Formation::SQUARE: return "SQUARE";
+	case Formation::CIRCLE: return "CIRCLE";
+	case Formation::HALF_CIRCLE_LEFT: return "HALF_CIRCLE_LEFT";
+	case Formation::HALF_CIRCLE_RIGHT: return "HALF_CIRCLE_RIGHT";
+	case Formation::V_X: return "V_X";
+	case Formation::V_Y: return "V_Y";
+	case Formation::SWARM_BOX_XY: return "SWARM_BOX_XY";
+	default:
+		assert(false);
 	}
 }
 
-int Formation::GetByName(String name)
+Formation GetFormationByName(String name)
 {
-	for (int i = 0; i < Formation::FORMATIONS; ++i)
+	for (int i = 0; i < (int) Formation::FORMATIONS; ++i)
 	{
-		String n = GetName(i);
+		String n = GetName(Formation(i));
 		if (n == name)
-			return i;
+			return Formation(i);
 	}
-	return 0;
+	return Formation::BAD_FORMATION;
 }
 
 
@@ -146,12 +146,11 @@ void SpawnGroup::PrepareForSpawning(SpawnGroup * parent)
 {
 	List<Vector3f> positions;
 	Vector3f offsetPerSpawn;
-	assert(ships.Size() == 0);
 	ships.Clear();
 	if (!parent)
 		LogMain("Spawning spawn group at time: "+String(spawnTime.ToString("m:S.n")), INFO);
 
-	std::cout<<"\nSpawning formation: "<<Formation::GetName(formation);
+	std::cout<<"\nSpawning formation: "<<GetName(formation);
 
 	/// Initial adjustments, or sub-group spawning.
 	switch(formation)
@@ -328,7 +327,7 @@ void SpawnGroup::PrepareForSpawning(SpawnGroup * parent)
 		position += this->position;
 
 		assert(position.x == position.x);
-		std::cout<<"\nSpawning ship @ x"<<position.x<<" y"<<position.y;
+		LogMain(String("Spawning ship @ x")+ String(position.x)+" y"+position.y, INFO);
 
 		/// Add current position offset to it.
 //		position += Vector3f(spawnPositionRight, activeLevel->height * 0.5f, 0); 
@@ -438,7 +437,7 @@ String SpawnGroup::GetLevelCreationString(Time t)
 	if (name.Length())
 		str += "\nName "+name;
 	str += "\nShipType "+shipType;
-	str += "\nFormation "+Formation::GetName(formation);
+	str += "\nFormation "+GetName(formation);
 	str += "\nNumber "+String(number);
 	str += "\nSize xy "+String(size.x)+" "+String(size.y);
 	str += "\nPosition xy "+String(position.x)+" "+String(position.y);
@@ -450,15 +449,7 @@ String SpawnGroup::GetLevelCreationString(Time t)
 
 void SpawnGroup::ParseFormation(String fromString)
 {
-	for (int i = 0; i < Formation::FORMATIONS; ++i)
-	{
-		String name = Formation::GetName(i);
-		if (fromString == name)
-		{
-			formation = i;
-			return;
-		}
-	}
+	formation = GetFormationByName(fromString);
 }
 
 

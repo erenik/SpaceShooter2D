@@ -653,7 +653,7 @@ void Ship::ExplodeEffects(PlayingLevel& playingLevel)
 	Vector4f color =  Vector4f(1,0.5f,0.1f,1.f);// entity->diffuseMap->averageColor;
 	color.w *= 0.5f;
 	tmpEmitter->SetColor(color);
-	GraphicsMan.QueueMessage(new GMAttachParticleEmitter(tmpEmitter, playingLevel.sparks));
+	GraphicsMan.QueueMessage(new GMAttachParticleEmitter(tmpEmitter->GetSharedPtr(), playingLevel.sparks->GetSharedPtr()));
 	/// SFX
 	QueueAudio(new AMPlaySFX("sfx/Ship Death.wav"));
 }
@@ -750,6 +750,10 @@ ShipPtr Ship::New(String shipByName)
 /// Returns speed, accounting for active skills, weights, etc.
 float Ship::Speed()
 {
+	if (speed == 0) {
+		LogMain("Speed 0 for ship. Is this correct? For ship type: " + type + ", name: " + name, WARNING);
+		speed = 1;
+	}
 	if (activeSkill == SPEED_BOOST)
 		return speed * 1.75f;
 	return speed;
@@ -826,7 +830,7 @@ void Ship::SetWeaponLevel(int weaponType, int level)
 				*weapon = *targetWeapon;
 				weapon->level = 0;
 				weapon->name = "";
-				weapon->cooldown = Time(TimeType::MILLISECONDS_NO_CALENDER, 4000000);
+				weapon->cooldown = Time(TimeType::MILLISECONDS_NO_CALENDER, 400);
 			}
 		}
 		return;

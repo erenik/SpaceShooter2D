@@ -440,12 +440,16 @@ void Weapon::Process(PlayingLevel& playingLevel, ShipPtr ship, int timeInMs)
 	}
 
 	currCooldownMs -= timeInMs;
-	if (currCooldownMs < 0 && reloading)
-	{
-		reloading = false;
+	if (currCooldownMs < 0) {
 		currCooldownMs = 0;
-		shotsLeft = this->burstRounds;
+		if (reloading)
+		{
+			reloading = false;
+			shotsLeft = this->burstRounds;
+		}
 	}
+
+
 	switch(type)
 	{
 		case LIGHTNING:

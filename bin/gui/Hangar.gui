@@ -1,0 +1,25 @@
+// Main UI when starting up.
+
+defaultTexture	0x2244
+defaultTextColor	1 1 1 1
+
+// Make root active
+root
+name HangarScreen
+texture NULL
+exitable false
+
+
+parent HangarScreen
+list lHangar
+
+parent lHangar
+
+defaultSizeRatioXY 1 0.2
+button Continue
+button Workshop
+onActivate GoToWorkshop
+button bMainMenu
+text 	"Main Menu"
+onActivate GoToMainMenu
+

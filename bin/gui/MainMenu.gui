@@ -1,0 +1,56 @@
+// Main UI when starting up.
+
+defaultTexture	0x2244
+defaultTextColor	1 1 1 1
+
+// Make root active
+root
+name 		MainMenuScreen
+removeOnPop true
+texture 	NULL
+exitable 	false
+
+parent MainMenuScreen
+
+label title
+text "Space Shooter"
+sizeRatioXY 0.8 0.2
+alignmentXY 0.5 0.9
+textAlignment center
+
+list lMainMenu
+sizeRatioXY 0.3 0.8
+alignmentXY	0.5 0.3
+padding 0.025
+
+// To be abused.. everywhere :3
+label	CenterText
+alignmentXY	0.5 0.3
+sizeRatioXY 1 0.5
+textSizeRatio 0.2
+text	""
+texture NULL
+hoverable false
+
+parent lMainMenu
+defaultSizeRatioY 0.15
+
+defaultTexture	0x4444
+
+button NewGameButton
+text	"New game"
+onActivate OpenNewGameMenu&PushUI(gui/NewGame.gui)&LoadDefaultName
+
+button LoadGameButton
+text	"Load game"
+onActivate PushUI(gui/LoadScreen.gui)&OpenLoadScreen
+
+button OptionsButton
+text "Options"
+onActivate OpenOptionsScreen
+
+button QuitButton
+text "Quit"
+onActivate	QuitApplication
+
+

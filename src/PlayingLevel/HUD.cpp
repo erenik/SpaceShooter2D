@@ -11,11 +11,19 @@
 #include "Window/AppWindow.h"
 #include "PlayingLevel.h"
 #include "UI/UIUtil.h"
+#include "Input/InputManager.h"
 
 HUD HUD::hud = HUD();
 
 HUD* HUD::Get() {
 	return &hud;
+}
+
+void HUD::Show() {
+	String toPush = "gui/HUD.gui";
+	PushUI(toPush);
+	// By default remove hover from any UI element. Select weapons with 1-9 keys.
+	QueueGraphics(new GMSetHoverUI(nullptr));
 }
 
 void HUD::UpdateUI() {
@@ -135,8 +143,12 @@ void HUD::UpdateCooldowns()
 	List<Weapon*>& weapons = pl.playerShip->weapons;
 	for (int i = 0; i < weapons.Size(); ++i)
 	{
-		// Check cooldown.
 		Weapon* weapon = weapons[i];
+		if (weapon->currCooldownMs == weapon->previousUIUpdateCooldownMs)
+			continue;
+		// Update it here.
+		weapon->previousUIUpdateCooldownMs = weapon->currCooldownMs;
+
 		float timeTilNextShotMs = (float)weapon->currCooldownMs;
 		//		if (weapon->burst)
 			//		timeTilNextShotMs = (flyTime - weapon->burstStart).Milliseconds();
@@ -192,11 +204,13 @@ void HUD::OpenInGameMenu()
 {
 	inGameMenuOpened = true;
 	PushUI(inGameMenuGui);
+	InputMan.ForceNavigateUI(true);
 }
 
 void HUD::CloseInGameMenu()
 {
 	PopUI(inGameMenuGui);
+	InputMan.ForceNavigateUI(false);
 }
 
 

@@ -1,0 +1,9 @@
+
+// Display some text!
+Wait(1000)
+DisplayCenterText	Game over
+Wait(2000)
+ClearCenterText
+ReloadLevel
+
+EndScript

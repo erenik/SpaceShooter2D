@@ -135,6 +135,10 @@ public:
 
 	/// Callback function that will be triggered via the MessageManager when messages are processed.
 	virtual void ProcessMessage(Message * message);
+
+	// Process messages which can be sent from any game state really.
+	virtual void ProcessGeneralMessage(Message* message);
+
 	/// Callback from the Input-manager, query it for additional information as needed.
 	virtual void KeyPressed(int keyCode, bool downBefore);
 
@@ -211,7 +215,7 @@ public:
 	SpaceShooterCR * cr;
 	SpaceShooterCD * cd;
 	Level level;
-	List<int> movementDirections;
+	List<Direction> movementDirections;
 
 	String levelSource;
 
@@ -234,12 +238,15 @@ public:
 
 	static Time startDate;
 	static String levelToLoad;
+	static bool paused;
 
 protected:
 	static bool shipDataLoaded;
 
 private:
 	
+	bool firstTimeEntering = true;
+
 	/// Called each app frame to remove projectiles and ships outside the relevant area.
 //	void Cleanup();
 	void OnPauseStateUpdated();

@@ -1,0 +1,36 @@
+RenderConfig
+
+// Pipeline featuring our first shadow-mapping pass...! o.o
+Name	SkyBox
+
+// Fixed or Multi-pass.
+Multi-pass
+
+// Or SkySphere, both work
+RenderPass SkyBox
+Shader	AtmosphericScatteringSkyBox
+SkyPass	true
+Input	SkyBox
+Output Default
+
+// Default entity-pass.
+RenderPass Entities
+Shader	PhongShadows // Ambient, diffuse and specular shading
+Camera 	Default 
+Input	SolidEntities
+Output	Default
+
+EndParse
+
+
+
+
+
+
+
+
+
+
+
+
+

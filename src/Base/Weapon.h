@@ -98,7 +98,8 @@ public:
 	int arcDelay;
 	int maxBounces; /// Used to make lightning end prematurely.
 	ShipPtr nextTarget; // For lightning
-	int currCooldownMs; /// Used instead of flyTime.
+	int currCooldownMs = 0; /// Used instead of flyTime.
+	int previousUIUpdateCooldownMs = 0;
 	float stability;
 	String name;
 	bool enabled; // default true.

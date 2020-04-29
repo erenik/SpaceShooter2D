@@ -11,7 +11,7 @@
 class MovementPattern
 {
 public:
-	static void Load();
+	static void LoadPatterns(String fromPath);
 	static List<MovementPattern> movementPatterns;
 	List<Movement> movements;
 	List<Rotation> rotations;

@@ -1,0 +1,24 @@
+;Name (revisable);MaxHP Add (revisable);%reduction to damagetype (hugely revisable, by adding different equations, would lead to different costs also);Cost (revisable);Description
+Projectile Armor;;;;;
+1;Basic Projectile Armor;50;0%;Free (available from start, always equipped);Metal plating of a ship hull exterior
+2;Standard Projectile Armor;25;5%;10;
+3;Advanced Projetile Armor;25;5%;12;
+4;Superior Projectile Armor;25;7%;15;
+5;Alien Projectile Armor;25;7%;19;
+6;Hybrid Projectile Armor;30;8%;24;
+7;;30;9%;31;
+8;;40;10%;38;
+9;;50;11%;47;
+10;;50;13%;60;
+;;;;;
+Energy Armor;;;;;
+1;;45;0%;Free (available from start, always equipped);
+2;;20;6%;10;
+3;;20;6%;12;
+4;;20;8%;15;
+5;;20;8%;19;
+6;;25;9%;24;
+7;;25;10%;31;
+8;;35;11%;38;
+9;;45;11%;47;
+10;;45;15%;60;

@@ -1,0 +1,9 @@
+Type;Name;Weapons;Movement pattern;Speed;Rotation Pattern;Rotation Speed;Has Shield;Shield Value;Shield Regen Rate;Hit Points;Abilties;Ability Cooldown;Graphic Model;Other;Collide damage;Max rotation per second;Score;Difficulty
+;Fighter;EMachine gun I;Straight(inf);5;None;1;No;n/a;n/a;10;n/a;n/a;Ships/V-Fighter;n/a;5;30;1;1
+;Bomber;EBomber I;Straight(inf);4;None;1;No;n/a;n/a;18;n/a;n/a;Ships/Bomber;n/a;5;30;1;1
+;BigFighter;EBF Aim gun I,EBF Burst gun I;MoveTo(xy 5 0,15), Straight(inf);20;None;1;No;n/a;n/a;250;n/a;n/a;Ships/BigFighter;n/a;5;30;1;90
+;FighterLv1;FighterLv1Gun;Straight(inf);10;None;1;No;n/a;n/a;10;n/a;n/a;Ships/V-Fighter;n/a;5;30;1;90
+;Fighter2Lv1;Fighter2Lv1Gun;Straight(inf);10;None;1;No;n/a;n/a;15;n/a;n/a;Ships/V-Fighter;n/a;5;30;1;90
+;BomberLv1;BomberLv1Gun;Straight(inf);10;None;1;No;n/a;n/a;20;n/a;n/a;Ships/Bomber;n/a;5;30;1;90
+;FighterLv1Slow;FighterLv1Gun;Straight(inf);1;None;1;No;n/a;n/a;10;n/a;n/a;Ships/V-Fighter;n/a;5;30;1;90
+;BomberLv1Slow;BomberLv1Gun;Straight(inf);1;None;1;No;n/a;n/a;20;n/a;n/a;Ships/Bomber;n/a;5;30;1;90

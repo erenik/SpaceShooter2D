@@ -1,0 +1,24 @@
+Image Number	Type	Name	Weapons	Weapon Locations	Movement pattern	Speed	Has Shield	Shield Value	Shield Regen Rate	Hit Points	Graphic Model	Collide damage	RelativePosition	Children	Script	Physics Model
+1		Boss1_HookR	Hook	Xyz 7.4 0 -3	n/a	n/a	No	n/a	n/a	500	Bosses/Boss1_HookR	50				GraphicModel
+2		Boss1_HookL	Hook	Xyz -7.4 0 -3	n/a	n/a	No	n/a	n/a	500	Bosses/Boss1_HookL	50				GraphicModel
+3		Boss1_Big_Antenna_R	Big_Antenna	Xyz 4 0 -4.8	n/a	n/a	No	n/a	n/a	400	Bosses/Boss1_Mandible1R	30				GraphicModel
+4		Boss1_Big_Antenna_L	Big_Antenna	Xyz -4 0 -4.8	n/a	n/a	No	n/a	n/a	400	Bosses/Boss1_Mandible1L	30				GraphicModel
+5		Boss1_Medium_Antenna_R	Medium_Antenna	Xz 2.5 -4	n/a	n/a	No	n/a	n/a	300	Bosses/Boss1_Mandible2R	20				GraphicModel
+6		Boss1_Medium_Antenna_L	Medium_Antenna	Xz -2.5 -4	n/a	n/a	No	n/a	n/a	300	Bosses/Boss1_Mandible2L	20				GraphicModel
+7		Boss1_Small_Antenna_R	Small_Antenna	Xz 1.2 -3	n/a	n/a	No	n/a	n/a	200	Bosses/Boss1_Mandible3R	10				GraphicModel
+8																GraphicModel
+9		Boss1_Small_Antenna_L	Small_Antenna	Xz -1.2 -3	n/a		No			200	Bosses/Boss1_Mandible3L	10				GraphicModel
+10		Boss1	Head;H-Weapon;B-Weapon	z -1.5; z 0.56; z 5	n/a		Yes	150	1	5000	Bosses/Boss1_Head	70		Boss1_*	scripts/Bosses/Boss 1.txt	GraphicModel
+11		Boss1_Leg1R	Leg	Xz 5 3.75	n/a	n/a	No	n/a	n/a	450	Bosses/Boss1_Leg1R	30				GraphicModel
+12		Boss1_Leg2R	Leg	Xz 5 5.87	n/a	n/a	No	n/a	n/a	450	Bosses/Boss1_Leg2R	30				GraphicModel
+13		Boss1_Leg3R	Leg	Xz 5 8	n/a	n/a	No	n/a	n/a	450	Bosses/Boss1_Leg3R	30				GraphicModel
+14		Boss1_Leg4R	Leg	Xz 5 9.7	n/a	n/a	No	n/a	n/a	450	Bosses/Boss1_Leg4R	30				GraphicModel
+15		Boss1_Leg1L	Leg	Xz -5 3.75	n/a	n/a	No	n/a	n/a	450	Bosses/Boss1_Leg1L	30				GraphicModel
+16		Boss1_Leg2L	Leg	Xz -5 5.87	n/a	n/a	No	n/a	n/a	450	Bosses/Boss1_Leg2L	30				GraphicModel
+17		Boss1_Leg3L	Leg	Xz -5 8	n/a	n/a	No	n/a	n/a	450	Bosses/Boss1_Leg3L	30				GraphicModel
+18		Boss1_Leg4L	Leg	Xz -5 9.7	n/a	n/a	No	n/a	n/a	450	Bosses/Boss1_Leg4L	30				GraphicModel
+19		Head_Weapon	H-Weapon		n/a	n/a	No	n/a	n/a	20000	n/a	n/a				GraphicModel
+20		Body_Weapon	B-Weapon		n/a	n/a	No	n/a	n/a	3500	n/a	n/a				GraphicModel
+21		Boss1_StingerR	Stinger	Xz 1.1 10.7	n/a	n/a	No	n/a	n/a	1500	Bosses/Boss1_StingerR	150				GraphicModel
+22		Boss1_StingerL	Stinger	Xz -1.1 10.7	n/a	n/a	No	n/a	n/a	1500	Bosses/Boss1_StingerL	150				GraphicModel
+23		Boss1_Body	n/a		n/a	n/a	No	n/a	n/a	20000	Bosses/Boss1_Body	20				GraphicModel

@@ -1,0 +1,10 @@
+Type	Level	Weapon Name	ShootSFX	HitSFX	Cooldown	Burst	Burst details	Angle	Projectile Path	Projectile Speed	Damage	Abilities	Ability Trigger	Projectile Scale	Projectile Shape	HomingFactor	Penetration	Explosion Radius
+800	1	Hook			5000	No		Aim	Straight	1	20	n/a	n/a	4	Bullet.obj	0.0	0	0
+801	1	Big_Antenna			4000	No		Aim	Straight	1	15	n/a	n/a	3	Bullet.obj	0.0	0	0
+802	1	Medium_Antenna			3000	No		Aim	Straight	1	10	n/a	n/a	2	Bullet.obj	0.0	0	0
+803	1	Small_Antenna			2000	No		Aim	Straight	1	5	n/a	n/a	1	Bullet.obj	0.0	0	0
+804	1	Head			10000	Yes	200,7	0	Straight	1	30	n/a	n/a	10	Bullet.obj	0.0	0	0
+805	1	Leg			2000	No		Aim	Straight	1	15	n/a	n/a	2	Bullet.obj	0.0	0	0
+806	1	Head_Weapon			5000	No		Aim	Straight	1	30	n/a	n/a	5	Missile.obj	0.0	0	0
+807	1	Body_Weapon			7000	Yes	500,5	Circle	Straight	1	50	n/a	n/a	7	Missile.obj	0.0	0	0
+808	1	Stinger			4000	No		Aim	Straight	1	70	n/a	n/a	8	Missile.obj	0.0	0	0

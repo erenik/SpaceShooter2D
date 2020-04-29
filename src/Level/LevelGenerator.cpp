@@ -88,7 +88,7 @@ void GenerateLevel (PlayingLevel & playingLevel, String arguments)
 		sg->shipType = relevantShips[selector.Randi(relevantShips.Size())];
 		level.spawnGroups.AddItem(sg);
 		// Pick a formation
-		sg->formation = selector.Randi(Formation::FORMATIONS - 2) + 1;
+		sg->formation = Formation(selector.Randi((int)Formation::FORMATIONS - 2) + 1);
 		
 		
 		// Pick a number of ships
@@ -99,7 +99,7 @@ void GenerateLevel (PlayingLevel & playingLevel, String arguments)
 		
 		while(sg->number < 5 && sg->formation == Formation::SQUARE)
 		{
-			sg->formation = selector.Randi(Formation::FORMATIONS - 2) + 1;
+			sg->formation = Formation(selector.Randi((int)Formation::FORMATIONS - 2) + 1);
 		}
 		
 		/// Default spawn on right side of field, and spawn location.

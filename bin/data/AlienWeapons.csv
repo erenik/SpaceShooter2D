@@ -1,0 +1,8 @@
+Type;Level;Weapon Name;ShootSFX;HitSFX;Cooldown;Burst;Burst details;Angle;Projectile Path;Projectile Speed;Damage;Abilities;Ability Trigger;Projectile Scale;Projectile Shape;HomingFactor;Penetration;Explosion Radius
+100;1;EMachine gun I;Bullet Fire 001;Bullet Hit 001;4000;No;;Aim;Straight;7;20;n/a;n/a;2;Bullet.obj;0.0;0;
+101;1;EBomber I;Missile Fire;Missile Hit;8000;Yes;300,1;Aim;Straight;3,5;40;n/a;n/a;2;Missile.obj;0.5;0;1.5
+102;1;EBF Aim gun I;Bullet Fire 001;Bullet Hit 001;2000;No;;Aim;Straight;15;12;n/a;n/a;3;Bullet.obj;0.0;.3;
+103;1;EBF Burst gun I;Bullet Fire 001;Bullet Hit 001;1500;Yes;300,3;Aim;Straight;15;4;n/a;n/a;1.5;Bullet.obj;0.0;.3;
+104;1;FighterLv1Gun;Bullet Fire 001;Bullet Hit 001;3000;No;;Aim;Straight;10;4;n/a;n/a;1;Bullet.obj;0.0;0;
+105;1;Fighter2Lv1Gun;Bullet Fire 001;Bullet Hit 001;2500;No;;Aim;Straight;15;5;n/a;n/a;1;Bullet.obj;0.0;0;
+106;1;BomberLv1Gun;Bullet Fire 001;Bullet Hit 001;5000;No;;Aim;Straight;20;10;n/a;n/a;2;Missile.obj;0.7;0;

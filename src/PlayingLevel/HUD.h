@@ -12,6 +12,9 @@ private:
 public:
 	static HUD* Get();
 
+
+	void Show();
+
 	// Updates all
 	void UpdateUI();
 

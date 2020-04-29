@@ -1,0 +1,75 @@
+// Main UI when starting up.
+
+defaultTexture	0x2244
+defaultTextColor	1 1 1 1
+
+// Make root active
+root
+name LevelStats
+texture NULL
+removeOnPop true
+
+parent LevelStats
+defaultSizeRatioXY 1 1
+
+label "Level cleared!"
+sizeRatioXY 0.4 0.2
+alignmentXY	0.5 0.9
+
+list ScoreList
+sizeRatioXY 0.6 0.6
+alignmentXY 0.5 0.5
+
+button NextLevel
+sizeRatioXY 0.2 0.1
+alignmentXY	0.5 0.1
+text "Next level"
+onActivate PopUI(LevelStats)&NextLevel
+
+button PlayAgain
+sizeRatioXY 0.2 0.1
+alignmentXY	0.5 0.1
+text "Play again"
+onActivate PopUI(LevelStats)&ReloadLevel
+
+button FinishStage
+sizeRatioXY 0.2 0.1
+alignmentXY	0.5 0.1
+text "Continue"
+onActivate PopUI(LevelStats)&FinishStage
+
+parent ScoreList
+defaultSizeRatioXY 1 0.1
+
+label "Score breakdown"
+list	ScoreBreakdownList
+sizeRatioXY 1 0.9
+
+parent ScoreBreakdownList
+defaultSizeRatioXY 1 0.1
+
+ColumnList clKills
+ColumnList clLevelScore
+ColumnList clScoreTotal
+
+parent clKills
+defaultSizeRatioXY 0.5 1
+label "Level kills"
+defaultSizeRatioXY 0.2 1
+label LevelKills
+label "/"
+label TotalKillsPossible
+
+parent clLevelScore
+defaultSizeRatioXY 0.5 1
+label "Level score"
+label LevelScore
+
+parent clScoreTotal
+defaultSizeRatioXY 0.5 1
+label "Score total"
+label ScoreTotal
+
+
+
+

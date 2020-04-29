@@ -1,0 +1,11 @@
+Name,Price,Max Shield,Shield Regen,Info
+Shield Generator I,0,100,1,
+Cascade,200,250,0,"The first long-term shield made to recharge in stations. \nIt lacks any regenerative capabilties while in the field."
+Shield Generator II,500,125,2,"Tech II of the basic shield generator. \nHas increased renegerative capabilties."
+Big Cascade,800,500,0,"The extended version of the Cascade, the Big Cascade can sustain many \nmore blows. It lacks any regenerative capabilties while in the field."
+Shield Generator III,1250,150,3,"Tech III of the basic shield generator. \nHas increased renegerative capabilties."
+Fat One,1700,900,0,"It lacks any regenerative capabilties while in the field."
+Shield Generator IV,2250,175,4,"Tech IV of the basic shield generator. \nHas increased renegerative capabilties."
+The Wall,6000,1800,0,"It lacks any regenerative capabilties while in the field."
+Shield Generator V,12000,200,5,"Tech V of the basic shield generator. \nHas increased renegerative capabilties."
+Phalanx,30000,999,9,"The ultimate shield, at least as far as regeneration is concerned."

@@ -1,0 +1,29 @@
+RenderConfig
+
+// Pipeline featuring our first shadow-mapping pass...! o.o
+Name	SkyBoxOnly
+
+// Fixed or Multi-pass.
+Multi-pass
+
+// Or SkySphere, both work
+RenderPass SkyBox
+Shader	AtmosphericScatteringSkyBox
+SkyPass	true
+Input	SkyBox
+Output Default
+
+EndParse
+
+
+
+
+
+
+
+
+
+
+
+
+

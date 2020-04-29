@@ -5,12 +5,17 @@
 #include "MovementPattern.h"
 #include "File/File.h"
 #include "String/StringUtil.h"
+#include "File/LogFile.h"
 
 List<MovementPattern> MovementPattern::movementPatterns;
 
-void MovementPattern::Load()
+void MovementPattern::LoadPatterns(String fromPath)
 {
-	List<String> lines = File::GetLines("Ship Data/Alien/Movement pattern.csv");
+	List<String> lines = File::GetLines(fromPath);
+	if (lines.Size() == 0) {
+		LogMain("Unable to load movement patterns from file: " + fromPath, ERROR);
+		return;
+	}
 	char delimiter = FindCSVDelimiter(lines[0]);
 	List<String> columns = TokenizeCSV(lines[0], delimiter);
 	

@@ -29,10 +29,10 @@
 #include "Base/Gear.h"
 #include "PlayingLevel.h"
 
-#include "Input/InputManager.h"
+#include "SpaceShooter2D.h"
 
-/// Global pause, used for pause/Break, etc. Most calculations should stop/halt while paused.
-bool paused = false;
+#include "Input/Action.h"
+#include "Input/InputManager.h"
 
 List<Weapon> Weapon::types;
 List<ShipPtr> Ship::types;
@@ -52,10 +52,11 @@ void SetApplicationDefaults()
 
 // Global variables.
 SpaceShooter2D * spaceShooter = nullptr;
+String SpaceShooter2D::levelToLoad = String();
+bool SpaceShooter2D::paused = false;
+
 PlayingLevel* playingLevel = nullptr;
 
-/// The level entity, around which the playing field and camera are based upon.
-EntitySharedPtr levelEntity = NULL;
 float playingFieldPadding;
 /// All ships, including player.
 List< std::shared_ptr<Entity> > shipEntities;
@@ -92,7 +93,6 @@ bool SpaceShooter2D::shipDataLoaded = false;
 SpaceShooter2D::SpaceShooter2D()
 {
 	levelCamera = NULL;
-	levelEntity = NULL;
 	playingFieldPadding = 1.f;
 	gearCategory = 0;
 	previousMode = mode = SSGameMode::START_UP;
@@ -110,7 +110,6 @@ SpaceShooter2D::~SpaceShooter2D()
 void SpaceShooter2D::OnEnter(AppState * previousState)
 {
 
-	MovementPattern::Load();
 	QueuePhysics(new PMSeti(PT_AABB_SWEEPER_DIVISIONS, 1));// subdivisionsZ
 
 	WeaponScript::CreateDefault();
@@ -161,9 +160,6 @@ void SpaceShooter2D::OnEnter(AppState * previousState)
 
 	PhysicsMan.checkType = AABB_SWEEP;
 
-	// Run OnStartApp script.
-	ScriptMan.PlayScript("scripts/OnStartApp.txt");
-
 	/// Enter main menu
 //	OpenMainMenu();
 
@@ -171,9 +167,16 @@ void SpaceShooter2D::OnEnter(AppState * previousState)
 	TextMan.SetLanguage("English");
 
 	// Run OnEnter.ini start script if such a file exists.
-	Script * script = new Script();
-	script->Load("OnEnter.ini");
-	ScriptMan.PlayScript(script);
+	if (firstTimeEntering) {
+		// Run OnStartApp script.
+		ScriptMan.PlayScript("scripts/OnStartApp.txt");
+
+		Script* script = new Script();
+		script->Load("OnEnter.ini");
+		ScriptMan.PlayScript(script);
+		firstTimeEntering = false;
+	}
+
 
 	// Remove initial cover screen.
 	QueueGraphics(new GMSetOverlay(NULL));
@@ -211,11 +214,6 @@ void SpaceShooter2D::CreateUserInterface()
 //	ui->Load("gui/MainMenu.gui");
 }
 
-bool playerInvulnerability = false;
-void OnPlayerInvulnerabilityUpdated()
-{
-	
-}
 
 void PrintEntityData(EntitySharedPtr entity)
 {
@@ -233,7 +231,7 @@ void PrintEntityData(EntitySharedPtr entity)
 			<<", HP: "<<ship->hp<<", Allied: "<<(ship->allied? "Yes" : "No")
 			<<"\nLastCollission: "<<ship->lastShipCollision.Seconds()<<", CollisionDmgCooldown: "<<ship->collisionDamageCooldown.Seconds()
 			<<"\nMovement pattern: "<<ship->spawnGroup->mp.name<<" CurrMove: "<<ship->movements[ship->currentMovement].Name()
-			<<"\nSGFormation: "<<Formation::GetName(ship->spawnGroup->formation)<<" SGAmount: "<<ship->spawnGroup->number;
+			<<"\nSGFormation: "<<GetName(ship->spawnGroup->formation)<<" SGAmount: "<<ship->spawnGroup->number;
 	}
 }
 
@@ -322,197 +320,257 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 			int found = msg.Find("//");
 			if (found > 0)
 				msg = msg.Part(0,found);
-			if (msg == "ProceedMessage")
-			{
-				level.ProceedMessage();
-			}
-			if (msg == "NewGame")
-				NewGame();
-			if (msg == "TogglePlayerInvulnerability")
-			{
-				playerInvulnerability = !playerInvulnerability;
-				OnPlayerInvulnerabilityUpdated();
-			}
-			if (msg == "GoToHangar")
-			{
-				SetMode(IN_HANGAR);
-			}
-			if (msg == "GoToEditWeaponSwitchScripts")
-			{
-				SetMode(EDIT_WEAPON_SWITCH_SCRIPTS);
-			}
-			if (msg == "GoToWorkshop")
-			{
-				SetMode(IN_WORKSHOP);
-			}
 
-			if (msg.StartsWith("SetOnDeath:"))
-			{
-				onDeath = msg - "SetOnDeath:";
-			}
-			if (msg.StartsWith("ActiveUpgrade:"))
-			{
-				String upgrade = msg.Tokenize(":")[1];
-			//	if (previousActiveUpgrade == upgrade)
-				BuySellToUpgrade(upgrade);
-				UpdateHoverUpgrade(upgrade, true);
-			//	UpdateActiveUpgrade(upgrade);
-				previousActiveUpgrade = upgrade;
-			}
-			if (msg == "OpenJumpDialog")
-			{
-				Pause();
-				OpenJumpDialog();
-			}
-
-			else if (msg == "Reload OnEnter")
-			{
-				// Run OnEnter.ini start script if such a file exists.
-				Script * script = new Script();
-				script->Load("OnEnter.ini");
-				ScriptMan.PlayScript(script);
-			}
-			else if (msg.Contains("AutoSave"))
-			{
-				bool silent = msg.Contains("(silent)");
-				bool ok = SaveGame();
-				if (ok)
-				{
-					if (silent)
-						return;
-					GraphicsMan.QueueMessage(new GMSetUIs("CenterText", GMUI::TEXT, "Auto-save: Progress saved"));
-					ScriptMan.NewScript(List<String>("Wait(1500)", "ClearCenterText"));
-				}
-				else 
-				{
-					GraphicsMan.QueueMessage(new GMSetUIs("CenterText", GMUI::TEXT, "Auto-save: Failed. Details: "+lastError));	
-					ScriptMan.NewScript(List<String>("Wait(6000)", "ClearCenterText"));
-				}
-			}
-			else if (msg == "OpenLoadScreen")
-			{
-				OpenLoadScreen();
-			}
-			else if (msg.Contains("LoadGame("))
-			{
-				bool ok = LoadGame(msg.Tokenize("()")[1]);
-				if (ok)
-				{
-					// Data loaded. Check which state we should enter?
-					if (currentLevel->iValue < 4)
-					{
-						// Enter the next-level straight away.
-						MesMan.QueueMessages("NextLevel");
-					}
-					else 
-					{
-						SetMode(IN_LOBBY);
-					}
-				}
-				else {
-					GraphicsMan.QueueMessage(new GMSetUIs("CenterText", GMUI::TEXT, "Load failed. Details: "+lastError));	
-					ScriptMan.NewScript(List<String>("Wait(6000)", "ClearCenterText"));
-				}
-			}
-			else if (msg == "OpenMainMenu" || msg == "Back" ||
-				msg == "GoToMainMenu")
-				OpenMainMenu();
-			else if (msg == "OpenNewGameMenu")
-				SetMode(NEW_GAME, false);
-			else if (msg == "LoadDefaultName")
-				LoadDefaultName();
-			else if (msg == "GoToPreviousMode")
-				SetMode(previousMode);
-			else if (msg == "OpenOptionsScreen")
-			{
-				SetMode(EDITING_OPTIONS);
-			}
-			else if (msg == "Pause/Break" || msg == "TogglePause")
-			{
-				TogglePause();
-			}
-			else if (msg == "ResumeGame")
-				Resume();
-			else if (msg == "ListEntitiesAndRegistrations")
-			{
-				std::cout<<"\nGraphics entities "<<GraphicsMan.RegisteredEntities()<<" physics "<<PhysicsMan.RegisteredEntities()
-					<<" projectiles "<<projectileEntities.Size()<<" ships "<<shipEntities.Size();
-			}
-			else if (msg.StartsWith("LevelToLoad:"))
-			{
-				String source = msg;
-				source.Remove("LevelToLoad:");
-				source.RemoveSurroundingWhitespaces();
-				levelToLoad = source;
-			}
-			else if (msg.Contains("GoToLobby"))
-			{
-				SetMode(IN_LOBBY);
-			}
-			else if (msg.StartsWith("ShowGearDesc:"))
-			{
-				String text = msg;
-				text.Remove("ShowGearDesc:");
-				GraphicsMan.QueueMessage(new GMSetUIs("GearInfo", GMUI::TEXT, text));
-			}
-			else if (msg.StartsWith("BuyGear:"))
-			{
-				LogMain("Reimplement", INFO);
-				/*
-				String name = msg;
-				name.Remove("BuyGear:");
-				Gear gear = Gear::Get(name);
-				switch(gear.type)
-				{
-					case Gear::SHIELD_GENERATOR:
-						playerShip->shield = gear;
-						break;
-					case Gear::ARMOR:
-						playerShip->armor = gear;
-						break;
-				}
-				// Update stats.
-				playerShip->UpdateStatsFromGear();
-				/// Reduce munny
-				money->iValue -= gear.price;
-				/// Update UI to reflect reduced funds.
-				UpdateGearList();
-				// Play some SFX too?
-				
-				// Auto-save.
-				MesMan.QueueMessages("AutoSave(silent)");
-				*/
-			}
-			else if (msg.Contains("ExitToMainMenu"))
-			{
-				SetMode(MAIN_MENU);
-			}
-			if (msg.StartsWith("DisplayCenterText"))
-			{
-				String text = msg;
-				if (text.Contains("$-L"))
-				{
-					text.Replace("$-L", currentStage->ToString()+"-"+currentLevel->ToString());
-				}
-				text.Replace("Stage $", "Stage "+currentStage->ToString());
-				text.Remove("DisplayCenterText");
-				text.RemoveInitialWhitespaces();
-				GraphicsMan.QueueMessage(new GMSetUIs("CenterText", GMUI::TEXT, text));
-			}
-			else if (msg == "ClearCenterText")
-				GraphicsMan.QueueMessage(new GMSetUIs("CenterText", GMUI::TEXT, Text()));
-			else if (msg == "OnReloadUI")
-			{
-				UpdateUI();
-			}
-			else if (msg == "ResetCamera")
-			{
-				ResetCamera();
-			}
 			break;
 		}
 	}
+	ProcessGeneralMessage(message);
 }
+
+
+// Process messages which can be sent from any game state really.
+void SpaceShooter2D::ProcessGeneralMessage(Message* message) {
+	if (message->type == MessageType::STRING) {
+		String msg = message->msg;
+		msg.RemoveSurroundingWhitespaces();
+		int found = msg.Find("//");
+		if (found > 0)
+			msg = msg.Part(0, found);
+
+		if (msg == "OpenOptionsScreen")
+		{
+			SetMode(EDITING_OPTIONS);
+		}
+		if (msg == "ProceedMessage")
+		{
+			level.ProceedMessage();
+		}
+		if (msg == "NewGame")
+			NewGame();
+		if (msg == "GoToHangar")
+		{
+			SetMode(IN_HANGAR);
+		}
+		if (msg == "GoToEditWeaponSwitchScripts")
+		{
+			SetMode(EDIT_WEAPON_SWITCH_SCRIPTS);
+		}
+		if (msg == "GoToWorkshop")
+		{
+			SetMode(IN_WORKSHOP);
+		}
+
+		if (msg.StartsWith("SetOnDeath:"))
+		{
+			onDeath = msg - "SetOnDeath:";
+		}
+		if (msg.StartsWith("ActiveUpgrade:"))
+		{
+			String upgrade = msg.Tokenize(":")[1];
+			//      if (previousActiveUpgrade == upgrade)
+			BuySellToUpgrade(upgrade);
+			UpdateHoverUpgrade(upgrade, true);
+			//      UpdateActiveUpgrade(upgrade);
+			previousActiveUpgrade = upgrade;
+		}
+		if (msg == "OpenJumpDialog")
+		{
+			Pause();
+			OpenJumpDialog();
+		}
+		else if (msg.StartsWith("LevelToLoad:"))
+		{
+			String source = msg;
+			source.Remove("LevelToLoad:");
+			source.RemoveSurroundingWhitespaces();
+			levelToLoad = source;
+		}
+		else if (msg.Contains("GoToLobby"))
+		{
+			SetMode(IN_LOBBY);
+		}
+		else if (msg == "OnReloadUI")
+		{
+			UpdateUI();
+		}
+		else if (msg == "ResetCamera")
+		{
+			ResetCamera();
+		}
+
+		if (msg.StartsWith("ActiveUpgrade:"))
+		{
+			String upgrade = msg.Tokenize(":")[1];
+			//	if (previousActiveUpgrade == upgrade)
+			BuySellToUpgrade(upgrade);
+			UpdateHoverUpgrade(upgrade, true);
+			//	UpdateActiveUpgrade(upgrade);
+			previousActiveUpgrade = upgrade;
+		}
+
+		else if (msg == "Reload OnEnter")
+		{
+			// Run OnEnter.ini start script if such a file exists.
+			Script* script = new Script();
+			script->Load("OnEnter.ini");
+			ScriptMan.PlayScript(script);
+		}
+
+		else if (msg.StartsWith("ShowGearDesc:"))
+		{
+			String text = msg;
+			text.Remove("ShowGearDesc:");
+			GraphicsMan.QueueMessage(new GMSetUIs("GearInfo", GMUI::TEXT, text));
+		}
+		else if (msg.StartsWith("BuyGear:"))
+		{
+			LogMain("Reimplement", INFO);
+			/*
+			String name = msg;
+			name.Remove("BuyGear:");
+			Gear gear = Gear::Get(name);
+			switch(gear.type)
+			{
+				case Gear::SHIELD_GENERATOR:
+					playerShip->shield = gear;
+					break;
+				case Gear::ARMOR:
+					playerShip->armor = gear;
+					break;
+			}
+			// Update stats.
+			playerShip->UpdateStatsFromGear();
+			/// Reduce munny
+			money->iValue -= gear.price;
+			/// Update UI to reflect reduced funds.
+			UpdateGearList();
+			// Play some SFX too?
+
+			// Auto-save.
+			MesMan.QueueMessages("AutoSave(silent)");
+			*/
+		}
+		else if (msg.Contains("ExitToMainMenu"))
+		{
+			SetMode(MAIN_MENU);
+		}
+		else if (msg.Contains("AutoSave"))
+		{
+			bool silent = msg.Contains("(silent)");
+			bool ok = SaveGame();
+			if (ok)
+			{
+				if (silent)
+					return;
+				GraphicsMan.QueueMessage(new GMSetUIs("CenterText", GMUI::TEXT, "Auto-save: Progress saved"));
+				ScriptMan.NewScript(List<String>("Wait(1500)", "ClearCenterText"));
+			}
+			else
+			{
+				GraphicsMan.QueueMessage(new GMSetUIs("CenterText", GMUI::TEXT, "Auto-save: Failed. Details: " + lastError));
+				ScriptMan.NewScript(List<String>("Wait(6000)", "ClearCenterText"));
+			}
+		}
+		else if (msg == "OpenLoadScreen")
+		{
+			OpenLoadScreen();
+		}
+		else if (msg.Contains("LoadGame("))
+		{
+			bool ok = LoadGame(msg.Tokenize("()")[1]);
+			if (ok)
+			{
+				// Data loaded. Check which state we should enter?
+				if (currentLevel->iValue < 4)
+				{
+					// Enter the next-level straight away.
+					MesMan.QueueMessages("NextLevel");
+				}
+				else
+				{
+					SetMode(IN_LOBBY);
+				}
+			}
+			else {
+				GraphicsMan.QueueMessage(new GMSetUIs("CenterText", GMUI::TEXT, "Load failed. Details: " + lastError));
+				ScriptMan.NewScript(List<String>("Wait(6000)", "ClearCenterText"));
+			}
+		}
+		else if (msg == "OpenMainMenu" || msg == "Back" ||
+			msg == "GoToMainMenu")
+			OpenMainMenu();
+		else if (msg == "OpenNewGameMenu")
+			SetMode(NEW_GAME, false);
+		else if (msg == "LoadDefaultName")
+			LoadDefaultName();
+		else if (msg == "GoToPreviousMode")
+			SetMode(previousMode);
+		else if (msg == "Pause/Break" || msg == "TogglePause")
+		{
+			TogglePause();
+		}
+		else if (msg == "ResumeGame")
+			Resume();
+		else if (msg == "ListEntitiesAndRegistrations")
+		{
+			std::cout << "\nGraphics entities " << GraphicsMan.RegisteredEntities() << " physics " << PhysicsMan.RegisteredEntities()
+				<< " projectiles " << projectileEntities.Size() << " ships " << shipEntities.Size();
+		}
+
+	}
+}
+
+/// Creates default key-bindings for the state.
+void SpaceShooter2D::CreateDefaultBindings()
+{
+	List<Binding*>& bindings = this->inputMapping.bindings;
+#define BINDING(a,b) bindings.Add(new Binding(a,b));
+	BINDING(Action::FromString("TogglePlayerInvulnerability"), KEY::I);
+	BINDING(Action::CreateStartStopAction("MoveShipUp"), KEY::W);
+	BINDING(Action::CreateStartStopAction("MoveShipDown"), KEY::S);
+	BINDING(Action::CreateStartStopAction("MoveShipLeft"), KEY::A);
+	BINDING(Action::CreateStartStopAction("MoveShipRight"), KEY::D);
+	BINDING(Action::FromString("ReloadWeapon"), KEY::R);
+	BINDING(Action::FromString("ToggleWeaponScript"), KEY::E);
+	BINDING(Action::FromString("ActivateSkill"), KEY::Q);
+	BINDING(Action::FromString("ResetCamera"), KEY::HOME);
+	BINDING(Action::FromString("NewGame"), List<int>(KEY::N, KEY::G));
+	BINDING(Action::FromString("ClearLevel"), List<int>(KEY::C, KEY::L));
+	BINDING(Action::FromString("ListEntitiesAndRegistrations"), List<int>(KEY::L, KEY::E));
+	BINDING(Action::FromString("ToggleBlackness"), List<int>(KEY::T, KEY::B));
+	BINDING(Action::FromString("NextLevel"), List<int>(KEY::N, KEY::L));
+	BINDING(Action::FromString("PreviousLevel"), List<int>(KEY::P, KEY::L));
+	BINDING(Action::FromString("ToggleMenu"), KEY::ESCAPE);
+	BINDING(Action::FromString("ToggleMute"), KEY::M);
+#define BIND BINDING
+	BIND(Action::FromString("AdjustMasterVolume(0.05)", ACTIVATE_ON_REPEAT), List<int>(KEY::CTRL, KEY::V, KEY::PLUS));
+	BIND(Action::FromString("AdjustMasterVolume(-0.05)", ACTIVATE_ON_REPEAT), List<int>(KEY::CTRL, KEY::V, KEY::MINUS));
+
+	for (int i = 0; i < WeaponType::MAX_TYPES; ++i)
+	{
+		/// Debug bindings for adjusting weapon levels mid-flight.
+		BIND(Action::FromString("IncreaseWeaponLevel:" + String(i)), List<int>(KEY::PLUS, KEY::ONE + i));
+		BIND(Action::FromString("DecreaseWeaponLevel:" + String(i)), List<int>(KEY::MINUS, KEY::ONE + i));
+		BIND(Action::FromString("IncreaseWeaponLevel:" + String(i)), List<int>(KEY::ONE + i, KEY::PLUS));
+		BIND(Action::FromString("DecreaseWeaponLevel:" + String(i)), List<int>(KEY::ONE + i, KEY::MINUS));
+		BIND(Action::FromString("Weapon:" + String(i + 1)), KEY::ONE + i);
+	}
+
+	BIND(Action::FromString("ListPhysicalEntities"), List<int>(KEY::L, KEY::P));
+	BIND(Action::FromString("Reload OnEnter"), List<int>(KEY::CTRL, KEY::O, KEY::E));
+	/*
+	BIND(Action::FromString("Weapon:1"), KEY::ONE);
+	BIND(Action::FromString("Weapon:2"), KEY::TWO);
+	BIND(Action::FromString("Weapon:3"), KEY::THREE);
+	BIND(Action::FromString("Weapon:4"), KEY::FOUR);
+	BIND(Action::FromString("Weapon:5"), KEY::FIVE);
+	*/
+	BIND(Action::CreateStartStopAction("Shooting"), KEY::SPACE);
+	BIND(Action::FromString("OpenJumpDialog"), List<int>(KEY::CTRL, KEY::G));
+	BIND(Action::FromString("ProceedMessage"), KEY::ENTER);
+
+}
+
 
 /// Callback from the Input-manager, query it for additional information as needed.
 void SpaceShooter2D::KeyPressed(int keyCode, bool downBefore)
@@ -576,7 +634,7 @@ void SpaceShooter2D::LoadShipData()
 	/// Fetch file which dictates where to load weapons and ships from.
 	List<String> lines = File::GetLines("ToLoad.txt");
 	enum {
-		SHIPS, WEAPONS
+		MOVEMENTS, SHIPS, WEAPONS
 	};
 	int parseMode = SHIPS;
 	for (int i = 0; i < lines.Size(); ++i)
@@ -584,10 +642,14 @@ void SpaceShooter2D::LoadShipData()
 		String line = lines[i];
 		if (line.StartsWith("//"))
 			continue;
-		if (line.Contains("Ships:"))
+		if (line.Contains("Movements:"))
+			parseMode = MOVEMENTS;
+		else if (line.Contains("Ships:"))
 			parseMode = SHIPS;
 		else if (line.Contains("Weapons:"))
 			parseMode = WEAPONS;
+		else if (parseMode == MOVEMENTS)
+			MovementPattern::LoadPatterns(line);
 		else if (parseMode == SHIPS)
 			Ship::LoadTypes(line);	
 		else if (parseMode == WEAPONS)
@@ -763,6 +825,12 @@ List<SSGameMode> previousModes;
 /// Saves previousMode
 void SpaceShooter2D::SetMode(SSGameMode newMode, bool updateUI)
 {
+	switch (newMode) {
+	case SSGameMode::MAIN_MENU:
+		StateMan.QueueState(spaceShooter);
+		break;
+	}
+
 	if (mode == newMode) {
 		LogMain("Already within mode " + SSGameModeString(newMode)+", updating UI just in case...", INFO);
 		UpdateUI();

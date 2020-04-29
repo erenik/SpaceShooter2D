@@ -1,0 +1,219 @@
+// ==Phase 0: Spawn==
+// Change in music, ominous sounds to indicate huge enemy approaching. Huge arrow on screen showing where boss is. Gets brighter as boss appears, at Y middle, it charges and collides in left wall, then sluggishly moves back to right wall, (Speed 1). Then fight begins. 
+PlayBGM: music/2015-12-05_llll2.ogg
+
+// Disable stingers for starters, Stinger type 808
+DisableWeapon(self,808)
+/// Testing weapon locations
+// DisableAllWeapons(self)
+// EnableWeapon(self,804)
+
+// For controlling movement better
+CreateInt("timeInMovement", 200)
+CreateFloat("movementY", 0)
+CreateFloat("movementX", 0)
+CreateInt("bossphase", 1)
+SetInt("bossphase", 1)
+
+// Do charge.
+Charge(self, 20, 100) // Blocking.
+Return(self, 20) // Blocking.
+
+// Trigger Phase 1.
+CreateTimer("lastCharge")
+
+// ==Phase 1: Warming up==
+// Stinger Weapons deactivated.
+Log("Entering boss phase 1")
+
+// All batteries firing normal speed.
+// Boss moves up and down slowly (Speed 3)
+while(bossphase == 1)
+//	Log("Waiting on better tidings")
+	// Set movement pattern for 200 ms
+	if (ArrivedAtDestination(self) || TimeInCurrentMovement(self) > timeInMovement)
+		Log("Arrived at destination, posY: ", PositionY(self), " X:", PositionX(self))
+		// Dir will be normalized even if using Random functions.
+		if (PositionY(self) > 5)
+			Log("Phase1: Too high, going down")
+			SetFloat("movementY", -1)
+			SetInt("timeInMovement", 500)
+		elsif (PositionY(self) < -5)
+			Log("Phase1: Too low, going up")
+			SetFloat("movementY", 1)
+			SetInt("timeInMovement", 500)
+		else
+			Log("Randoming aroundddd")
+			SetFloat("movementY", Random(-1,1))
+			SetInt("timeInMovement", 200)
+		endif
+		Log("Arrived at destination, posY: ", PositionY(self), " X:", PositionX(self), " ",PositionX(self) < 5)
+		if (PositionX(self) > 13)
+			SetFloat("movementX", -0.5)
+			Log("Phase1: Going left a bit")
+		elsif (PositionX(self) < 5)
+			SetFloat("movementX", 0.5)
+			Log("Phase1: Going right a bit")
+		endif
+		SetMovementPattern(self, MoveDir, movementX, movementY)
+		SetSpeed(self, 3)
+	endif
+	// Trigger: At player's Y pos = Boss' Y pos => Charge. Slams (Speed 50, accelerating to 100 mid charge), into left wall, then sluggishly moves back to right wall (Speed 1), 10 second cooldown.
+	if (HPPercent(self) < 50 || PartsDestroyed(self) >= 3)
+		SetInt("bossphase", 2)
+	endif
+	/// Trigger charge.
+	if (abs(PositionY(player) - PositionY(self)) < 1 && TimeElapsedMs("lastCharge") > 10000)
+		Charge(self, 50, 100) // Blocking.
+		Return(self, 10) // Blocking.
+		ResetTimer("lastCharge")
+	endif
+endwhile 
+
+
+Log("Entering boss phase 2")
+// Trigger: At 50% damage of Head HP OR 50% of at least 3 Boss Limbs => Trigger Phase 2.
+// ==Phase 2: Fighting for realz==
+// Boss moves up and down faster (Speed 10), also moves left and right, always straight directions. 
+// All batteries firing +10 projectile speed.
+// Trigger: At player's Y pos = Boss' Y pos => Charge. Slams (Speed 80, accelerating to 120 mid charge), into left wall, then sluggishly moves back to right wall (Speed 1), 7 second cooldown.
+// Trigger: At 80% damage of Head HP OR 50% of at least 7 Boss Limbs => Trigger Phase 3.
+SetProjectileSpeedBonus(self, 10)
+while(bossphase == 2)
+	// Set movement pattern for 200 ms
+	if (ArrivedAtDestination(self) || TimeInCurrentMovement(self) > timeInMovement)
+		// Dir will be normalized even if using Random functions.
+		if (PositionY(self) > 5)
+			Log("Phase2: Too high, going down")
+			SetFloat("movementY", -1)
+			SetInt("timeInMovement", 500)
+		elsif (PositionY(self) < -5)
+			Log("Phase2: Too low, going up")
+			SetFloat("movementY", 1)
+			SetInt("timeInMovement", 500)
+		else
+			Log("Phase2: Randoming Y")
+			SetFloat("movementY", Random(-1,1))
+			SetInt("timeInMovement", 200)
+		endif
+		// X
+		if (PositionX(self) > 13)
+			SetFloat("movementX", -1)
+			Log("Phase2: Going left a bit")
+		elsif (PositionX(self) < -5)
+			SetFloat("movementX", 1)
+			Log("Phase2: Going right a bit")
+		else 
+			Log("Phase2: Randoming X")
+			SetFloat("movementX", Random(-1,1))
+		endif
+		SetMovementPattern(self, MoveDir, movementX, movementY)
+		SetSpeed(self, 10)
+	endif
+	if (HPPercent(self) < 20 || PartsDestroyed(self) >= 7)
+		SetInt("bossphase", 3)
+	endif
+	/// Trigger charge.
+	if (abs(PositionY(player) - PositionY(self)) < 1  && TimeElapsedMs("lastCharge") > 7000)
+		Charge(self, 80, 120) // Blocking.
+		Return(self, 10) // Blocking.
+		ResetTimer("lastCharge")
+	endif
+endwhile 
+
+
+Log("Entering boss phase 3")
+// ==Phase 3: Anger==
+// Boss moves faster still (Speed 12).
+// Head Cooldown from 10000 to 300, all batteries firing +20 projectile speed, cooldown -1000.
+// Trigger: At player's Y pos = Boss' Y pos => Charge. Slams (Speed 70, accelerating to 100 mid charge) into left wall, then sluggishly moves back to right wall (Speed 1), 3 second cooldown.
+// Trigger: At 90% damage of Head HP or 100% of at least 5 Boss Limbs => Trigger Phase 4.
+SetProjectileSpeedBonus(self, 20)
+SetWeaponCooldownBonus(self, -3000)
+SetWeaponCooldown(self,804,300)
+while(bossphase == 3)
+	// Set movement pattern for 200 ms
+	if (ArrivedAtDestination(self) || TimeInCurrentMovement(self) > 200)
+		// Dir will be normalized even if using Random functions.
+		if (PositionY(self) > 5)
+			Log("Phase3: Too high, going down")
+			SetFloat("movementY", -1)
+			SetInt("timeInMovement", 500)
+		elsif (PositionY(self) < -5)
+			Log("Phase3: Too low, going up")
+			SetFloat("movementY", 1)
+			SetInt("timeInMovement", 500)
+		else
+			Log("Randoming aroundddd")
+			SetFloat("movementY", Random(-1,1))
+			SetInt("timeInMovement", 200)
+		endif
+		// X
+		if (PositionX(self) > 13)
+			SetFloat("movementX", -1)
+			Log("Phase3: Going left a bit")
+		elsif (PositionX(self) < -5)
+			SetFloat("movementX", 1)
+			Log("Phase3: Going right a bit")
+		else 
+			SetFloat("movementX", Random(-1,1))
+		endif
+		SetMovementPattern(self, MoveDir, movementX, movementY)
+		SetSpeed(self, 12)
+	endif
+	if (HPPercent(self) < 10 || PartsDestroyed(self) >= 7)
+		SetInt("bossphase", 4)
+	endif
+	/// Trigger charge.
+	if (abs(PositionY(player) - PositionY(self)) < 1 && TimeElapsedMs("lastCharge") > 3000)
+		Charge(self, 70, 100) // Blocking.
+		Return(self, 8) // Blocking.
+		ResetTimer("lastCharge")
+	endif
+endwhile 
+
+
+
+Log("Entering boss phase 4")
+// ==Phase 4: Death Panic==
+// Stinger Weapons activated.
+// Boss moves slower (Speed 2).
+// Head Cooldown from 300 to 10000, all batteries firing +30 projectilespeed, cooldown -3000.
+// Continue phase 4 til death.
+SetWeaponCooldown(self,804,10000)
+SetProjectileSpeedBonus(self, 30)
+SetWeaponCooldownBonus(self, -3000)
+EnableWeapon(self,808)
+while(bossphase == 4)
+	// Set movement pattern for 200 ms
+	if (ArrivedAtDestination(self) || TimeInCurrentMovement(self) > 200)
+		// Dir will be normalized even if using Random functions.
+		if (PositionY(self) > 5)
+			Log("Phase4: Too high, going down")
+			SetFloat("movementY", -1)
+			SetInt("timeInMovement", 500)
+		elsif (PositionY(self) < -5)
+			Log("Phase4: Too low, going up")
+			SetFloat("movementY", 1)
+			SetInt("timeInMovement", 500)
+		else
+			Log("Randoming aroundddd")
+			SetFloat("movementY", Random(-1,1))
+			SetInt("timeInMovement", 200)
+		endif
+		// X
+		if (PositionX(self) > 13)
+			SetFloat("movementX", -1)
+			Log("Phase4: Going left a bit")
+		elsif (PositionX(self) < -5)
+			SetFloat("movementX", 1)
+			Log("Phase4: Going right a bit")
+		else 
+			SetFloat("movementX", Random(-1,1))
+		endif
+		SetMovementPattern(self, MoveDir, movementX, movementY)
+		SetSpeed(self, 2)
+	endif
+endwhile 
+
+

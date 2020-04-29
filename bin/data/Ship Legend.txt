@@ -1,0 +1,29 @@
+==Type, Name, Can Move, Can Shoot all self-explanatory==
+
+==Weapon Name==
+List ship weapons in order separated by commas, each column mentioning weapons use same order
+
+==Weapon Ammunition==
+inf - infinite amount
+
+==Weapon Cooldown==
+inf - infinite amount
+
+==Movement Pattern==
+duration - duration of mode in seconds
+Straight(duration) - from right to left, default movement of all ships that can move
+Zag(X Y vector, zagtime, duration) - goes up or down according to X Y vector, for zagtime seconds, then reflect y
+MoveTo(location, duration) - travels to specified location that can be: upper edge, lower edge, center, player
+MoveDir(x y angle, duration) - travels at set angle for duration
+Circle(object, radius, clockwise, duration) - travels to a specified object and circles it at radius distance, clockwise may be true or false
+Up-and-Down(distance, duration) - travels up distance, then down 2xdistance, then up 2xdistance, and repeats
+None(duration) - stops movement completely for the duration
+LookAt(duration) - travels in the same direction the ship is currently facing (it's LookAt-direction).
+
+==Rotation Pattern==
+MoveDir(duration) - rotatation follows direction of ship movement
+RotationTo(location, duration) - rotates to face specified object/location for the duration
+Spinning(velocity, duration) - Spinning like crazeh! Positive velocity is counter-clockwise, negative is clockwise. Velocity in radians per second.
+WeaponTarget(duration) - Rotates to face the current aiming target of the ship's weapon system. Used for those ships with no actual velocity (turrets).
+
+==Abilities==

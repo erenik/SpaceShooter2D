@@ -1,0 +1,41 @@
+RenderConfig
+
+// Pipeline featuring our first shadow-mapping pass...! o.o
+Name	SideScroller_Ambient
+
+// Fixed or Multi-pass.
+Multi-pass
+
+
+// Default entity-pass.
+RenderPass Entities
+Shader	PhongShadows // Ambient, diffuse and specular shading
+Shadows true
+Camera 	Default 
+Input	SolidEntities
+Output	Default
+
+// Render alpha-entities (those requiring sorting) 'n stuff.
+RenderPass AlphaEntities
+// Optimized will try and render all alpha entities in series, disregarding their individual settings (if any). Specific groups of entities should be created to make this work well.
+Optimized true
+Shader Ambient
+// Specifying alpha-entities will disable depth test by default for proper rendering of them.
+Input AlphaEntities
+Output Default
+
+
+EndParse
+
+
+
+
+
+
+
+
+
+
+
+
+

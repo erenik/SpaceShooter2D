@@ -1,0 +1,40 @@
+
+setVisibility(ScoreList,false) 
+setVisibility(NextLevel,false) 
+setVisibility(FinishStage,false)
+setVisibility(PlayAgain,false)
+
+DisplayCenterText	Level cleared!
+Wait(2000)
+ClearCenterText
+
+// Show stats for that level
+// Begin by making all UI invisible from previous iterations/default visibilities
+AddLevelScoreToTotal
+ShowLevelStats
+Wait(1000)
+
+// Diplay UI for score one at a time for effect.
+setVisibility(ScoreList,true) 
+
+// Wait before save. 
+Wait(2000)
+
+// Wait a bit, then show the next-level button.
+Wait(2000)
+
+if (playingScenario)
+	if (currentLevel < 4)
+		// Make visible next-level button.
+		setVisibility(NextLevel,true)
+	else
+		setVisibility(FinishStage,true)
+	endif
+
+	// Auto save. It should display a text upon success/failure.
+	AutoSave 
+else 
+	setVisibility(PlayAgain,true)
+endif
+
+	

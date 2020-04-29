@@ -1,0 +1,53 @@
+// Main UI when starting up.
+
+defaultTexture	0x2277
+defaultTextColor	1 1 1 1
+
+// Make root active
+root
+name 		Options
+onPop 		GoToPreviousMode
+removeOnPop true
+exitable 	true
+texture 	NULL
+
+parent Options
+
+list lOptions
+list lAudioOptions
+texture 0x22EE
+visible false
+
+parent lOptions
+
+
+defaultSizeRatioY 0.1
+
+button AudioOptionsButton
+text "Audio options"
+onActivate	PushUI(lAudioOptions)
+
+button Back
+onActivate PopUI(Options)
+
+
+/// Audio options
+parent lAudioOptions
+
+defaultSizeRatioY 0.1
+
+label "Audio options"
+
+IntegerInput MasterVolume
+text "Master Volume"
+
+IntegerInput BGMVolume
+text "BGM Volume"
+IntegerInput SFXVolume
+text "SFX Volume"
+
+
+Button Back
+onActivate PopUI(lAudioOptions)
+
+

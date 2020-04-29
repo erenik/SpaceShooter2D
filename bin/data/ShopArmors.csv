@@ -1,0 +1,13 @@
+Name,Price,Max HP,Toughness,Reactivity,Info
+Basic Armor,0,100,10,1,"Basic armor, providing moderate defense and a slight \nreactive coating to reduce impacts from projectiles."
+Reactive Armor,200,100,8,6,"An armor with a strong reactive coating to deter smaller \nprojectiles and explosives. Is more susceptible to ship-ship collisions."
+Basic Armor II,500,150,12,2,"Basic armor, providing moderate defense and a slight \nreactive coating to reduce impacts from projectiles."
+Reactive Armor II,750,150,9,8,"An armor with a strong reactive coating to deter smaller \nprojectiles and explosives. Is more susceptible to ship-ship collisions."
+Basic Armor III,1250,200,14,3,"Basic armor, providing moderate defense and a slight \nreactive coating to reduce impacts from projectiles."
+Reactive Armor III,1750,200,10,10,"An armor with a strong reactive coating to deter smaller \nprojectiles and explosives. Is more susceptible to ship-ship collisions."
+Basic Armor IV,3000,250,16,4,"Basic armor, providing moderate defense and a slight \nreactive coating to reduce impacts from projectiles."
+Reactive Armor IV,4500,250,11,12,"An armor with a strong reactive coating to deter smaller \nprojectiles and explosives. Is more susceptible to ship-ship collisions."
+Basic Armor V,9000,300,18,5,"Basic armor, providing moderate defense and a slight reactive coating to reduce impacts from projectiles."
+Reactive Armor V,12500,300,12,14,"An armor with a strong reactive coating to deter smaller \nprojectiles and explosives. Is more susceptible to ship-ship collisions."
+Reflective Ionized Titanium Armor,20000,350,15,25,"A ridiculously reactive armor, which almost reflects incoming \nexplosives. It is the best known armor against projectiles."
+Graphene Complex,35000,400,33,3,"A multi-layered Graphene-based armor using \nspecial honeycomb-formations for extra stability."

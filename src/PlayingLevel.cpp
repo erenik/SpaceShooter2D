@@ -16,9 +16,17 @@
 #include "Input/InputManager.h"
 #include "Message/MathMessage.h"
 #include <File\LogFile.h>
+#include <PlayingLevel\HandleCollision.h>
+#include "PlayingLevel/SpaceStars.h"
+#include "Properties/LevelProperty.h"
 
 /// Each other being original position, clamped position, orig, clamp, orig3, clamp3, etc.
 List<Vector3f> renderPositions;
+bool playerInvulnerability = false;
+void OnPlayerInvulnerabilityUpdated()
+{
+
+}
 
 EntitySharedPtr LevelEntity() {
 	return PlayingLevel::levelEntity;
@@ -46,13 +54,19 @@ GameVariable* SpaceShooter2D::currentLevel = nullptr,
 * SpaceShooter2D::gameStartDate = nullptr,
 * SpaceShooter2D::difficulty = nullptr;
 
-bool PlayingLevel::paused = false;
-String PlayingLevel::levelToLoad;
+
 PlayingLevel* PlayingLevel::singleton = nullptr;
 
 
 Vector2f PlayingLevel::playingFieldHalfSize = Vector2f(),
 PlayingLevel::playingFieldSize = Vector2f();
+
+PlayingLevel::PlayingLevel()
+	: SpaceShooter2D()
+{
+	assert(singleton == nullptr);
+	singleton = this;
+}
 
 ShipPtr PlayingLevel::GetShipByID(int id)
 {
@@ -82,13 +96,15 @@ void PlayingLevel::UpdateUI() {
 // Inherited via AppState
 void PlayingLevel::OnEnter(AppState* previousState) {
 
-	assert(singleton == nullptr);
-	singleton = this;
+	
+
+	/// Enable Input-UI navigation via arrow-keys and Enter/Esc.
+	InputMan.ForceNavigateUI(false);
+
 
 	SetPlayingFieldSize(Vector2f(30, 20));
 
-	String toPush = "gui/HUD.gui";
-	PushUI(toPush);
+	HUD::Get()->Show();
 
 	if (mode == PLAYING_LEVEL)
 		OpenSpawnWindow();
@@ -99,17 +115,9 @@ void PlayingLevel::OnEnter(AppState* previousState) {
 
 	// Create.. the sparks! o.o
 // New global sparks system.
-	sparks = new Sparks(true);
+	sparks = (new Sparks(true))->GetSharedPtr();
 	// Register it for rendering.
 	Graphics.QueueMessage(new GMRegisterParticleSystem(sparks, true));
-
-	stars = new Stars(true);
-	stars->deleteEmittersOnDeletion = true;
-	Graphics.QueueMessage(new GMRegisterParticleSystem(stars, true));
-
-	/// Add emitter
-	starEmitter = new StarEmitter(Vector3f());
-	Graphics.QueueMessage(new GMAttachParticleEmitter(starEmitter, stars));
 
 	// Load level upon entering.
 	LoadLevel();
@@ -127,7 +135,8 @@ void PlayingLevel::OnEnter(AppState* previousState) {
 void PlayingLevel::Process(int timeInMs) {
 
 	now = Time::Now();
-	timeElapsedMs = timeInMs;
+	timeElapsedMs += timeInMs;
+	hudUpdateMs += timeInMs;
 
 	SleepThread(10); // Updates 100 times a sec max?
 
@@ -137,7 +146,10 @@ void PlayingLevel::Process(int timeInMs) {
 	Cleanup();
 
 	level.Process(*this, timeInMs);
-	HUD::Get()->UpdateCooldowns();
+	if (hudUpdateMs > 100) {
+		HUD::Get()->UpdateCooldowns(); // Update HUD 10 times a sec.
+		hudUpdateMs = 0;
+	}
 	UpdateRenderArrows();
 
 }
@@ -163,10 +175,9 @@ void PlayingLevel::OnExit(AppState* nextState) {
 	SleepThread(50);
 	// Register it for rendering.
 	Graphics.QueueMessage(new GMUnregisterParticleSystem(sparks, true));
-	Graphics.QueueMessage(new GMUnregisterParticleSystem(stars, true));
+	ClearStars();
 	MapMan.DeleteAllEntities();
 	SleepThread(100);
-
 }
 
 
@@ -184,34 +195,7 @@ void PlayingLevel::ProcessMessage(Message* message)
 	{
 	case MessageType::COLLISSION_CALLBACK:
 	{
-
-		CollisionCallback* cc = (CollisionCallback*)message;
-		EntitySharedPtr one = cc->one;
-		EntitySharedPtr two = cc->two;
-#define SHIP 0
-#define PROJ 1
-		//			std::cout<<"\nColCal: "<<cc->one->name<<" & "<<cc->two->name;
-
-		EntitySharedPtr shipEntity1 = NULL;
-		EntitySharedPtr other = NULL;
-		int oneType = (one == playerShip->entity || shipEntities.Exists(one)) ? SHIP : PROJ;
-		int twoType = (two == playerShip->entity || shipEntities.Exists(two)) ? SHIP : PROJ;
-		int types[5] = { 0,0,0,0,0 };
-		++types[oneType];
-		++types[twoType];
-		//	std::cout<<"\nCollision between "<<one->name<<" and "<<two->name;
-		if (oneType == SHIP)
-		{
-			ShipProperty* shipProp = (ShipProperty*)one->GetProperty(ShipProperty::ID());
-			if (shipProp)
-				shipProp->OnCollision(two);
-		}
-		else if (twoType == SHIP)
-		{
-			ShipProperty* shipProp = (ShipProperty*)two->GetProperty(ShipProperty::ID());
-			if (shipProp)
-				shipProp->OnCollision(one);
-		}
+		HandleCollision(playerShip, shipEntities, (CollisionCallback*)message);
 		break;
 	}
 	case MessageType::INTEGER_MESSAGE:
@@ -235,6 +219,25 @@ void PlayingLevel::ProcessMessage(Message* message)
 			// Add level score to total upon showing level stats. o.o
 			score->iValue += LevelScore()->iValue;
 		}
+		else if (msg == "ProceedMessage")
+		{
+			level.ProceedMessage();
+		}
+		if (msg == "TogglePlayerInvulnerability")
+		{
+			playerInvulnerability = !playerInvulnerability;
+			OnPlayerInvulnerabilityUpdated();
+		}
+		if (msg.StartsWith("SetOnDeath:"))
+		{
+			onDeath = msg - "SetOnDeath:";
+		}
+		if (msg == "OpenJumpDialog")
+		{
+			Pause();
+			OpenJumpDialog();
+		}
+
 		if (msg == "ReloadWeapon")
 		{
 			if (playerShip->activeWeapon == nullptr)
@@ -251,14 +254,14 @@ void PlayingLevel::ProcessMessage(Message* message)
 		if (msg.Contains("StartMoveShip"))
 		{
 			String dirStr = msg - "StartMoveShip";
-			int dir = Direction::Get(dirStr);
+			Direction dir = GetDirection(dirStr);
 			movementDirections.Add(dir);
 			UpdatePlayerVelocity();
 		}
 		else if (msg.Contains("StopMoveShip"))
 		{
 			String dirStr = msg - "StopMoveShip";
-			int dir = Direction::Get(dirStr);
+			Direction dir = GetDirection(dirStr);
 			while (movementDirections.Remove(dir));
 			UpdatePlayerVelocity();
 		}
@@ -477,6 +480,21 @@ void PlayingLevel::ProcessMessage(Message* message)
 			money->iValue += 1000 + (currentStage->iValue - 1) * 2000;
 			ScriptMan.PlayScript("scripts/FinishStage.txt");
 		}
+		if (msg.StartsWith("DisplayCenterText"))
+		{
+			String text = msg;
+			if (text.Contains("$-L"))
+			{
+				text.Replace("$-L", currentStage->ToString() + "-" + currentLevel->ToString());
+			}
+			text.Replace("Stage $", "Stage " + currentStage->ToString());
+			text.Remove("DisplayCenterText");
+			text.RemoveInitialWhitespaces();
+			GraphicsMan.QueueMessage(new GMSetUIs("CenterText", GMUI::TEXT, text));
+		}
+		else if (msg == "ClearCenterText")
+			GraphicsMan.QueueMessage(new GMSetUIs("CenterText", GMUI::TEXT, Text()));
+
 		if (msg == "Continue")
 		{
 			if (levelToLoad.Length())
@@ -537,6 +555,8 @@ void PlayingLevel::ProcessMessage(Message* message)
 
 	}
 	}
+	// If not returned, process general messages from parent app state.
+	ProcessGeneralMessage(message);
 }
 
 void PlayingLevel::Cleanup()
@@ -596,7 +616,7 @@ void PlayingLevel::UpdatePlayerVelocity()
 	Vector3f totalVec;
 	for (int i = 0; i < movementDirections.Size(); ++i)
 	{
-		Vector3f vec = Direction::GetVector(movementDirections[i]);
+		Vector3f vec = GetVector(movementDirections[i]);
 		totalVec += vec;
 	}
 	totalVec.Normalize();
@@ -629,15 +649,14 @@ void PlayingLevel::NewPlayer()
 	if (!shipDataLoaded)
 		LoadShipData();
 
-	playerShip = Ship::NewShip();
+	/// Creates new ship of specified type.
+	
 
-	// Reset player-ship.
-	if (playerShip == 0)
-	{
-		playerShip = Ship::New("Default");
-		playerShip->enemy = false;
-		playerShip->allied = true;
-	}
+	playerShip = Ship::New("Default");
+
+	playerShip->enemy = false;
+	playerShip->allied = true;
+
 	playerShip->weapon = Gear::StartingWeapon();
 	playerShip->armor = Gear::StartingArmor();
 	playerShip->shield = Gear::StartingShield();
@@ -676,6 +695,8 @@ void PlayingLevel::LoadLevel(String fromSource)
 	GraphicsMan.PauseRendering();
 	PhysicsMan.Pause();
 
+	SleepThread(50);
+	// Await all unregistrations..?
 
 	HUD::Get()->HideLevelStats();
 	HUD::Get()->CloseInGameMenu();
@@ -704,47 +725,18 @@ void PlayingLevel::LoadLevel(String fromSource)
 		playerShip->RandomizeWeaponCooldowns();
 
 
-	/// Clear old stars?
-	QueueGraphics(new GMClearParticles(stars));
+	ClearStars();
 
 	/// Add emitter for stars at player start.
-	float emissionSpeed = level.starSpeed.Length();
-	Vector3f starDir = level.starSpeed.NormalizedCopy();
-	float starScale = 0.2f;
-
-	ParticleEmitter* startEmitter = new ParticleEmitter();
-	startEmitter->newType = true;
-	startEmitter->instantaneous = true;
-	startEmitter->constantEmission = 1400;
-	startEmitter->positionEmitter.type = EmitterType::PLANE_XY;
-	startEmitter->positionEmitter.SetScale(100.f);
-	startEmitter->velocityEmitter.type = EmitterType::VECTOR;
-	startEmitter->velocityEmitter.vec = starDir;
-	startEmitter->SetEmissionVelocity(emissionSpeed);
-	startEmitter->SetParticleLifeTime(60.f);
-	startEmitter->SetScale(starScale);
-	startEmitter->SetColor(level.starColor);
-	QueueGraphics(new GMAttachParticleEmitter(startEmitter, stars));
-
-	/// Update base emitter emitting all the time.
-	starEmitter->newType = true;
-	starEmitter->direction = starDir;
-	starEmitter->SetEmissionVelocity(emissionSpeed);
-	starEmitter->SetParticlesPerSecond(40);
-	starEmitter->positionEmitter.type = EmitterType::PLANE_XY;
-	starEmitter->positionEmitter.SetScale(30.f);
-	starEmitter->velocityEmitter.type = EmitterType::VECTOR;
-	starEmitter->velocityEmitter.vec = starDir;
-	starEmitter->SetParticleLifeTime(60.f);
-	starEmitter->SetColor(level.starColor);
-	starEmitter->SetScale(starScale);
+	NewStars(level.starSpeed.NormalizedCopy(), level.starSpeed.Length(), 0.2f, level.starColor);
 
 
 	/// Add entity to track for both the camera, blackness and player playing field.
 	Vector3f initialPosition = Vector3f(0, 10, 0);
-	if (!levelEntity)
+	if (levelEntity == nullptr)
 	{
 		levelEntity = EntityMan.CreateEntity("LevelEntity", NULL, NULL);
+		levelEntity->properties.Add(new LevelProperty(levelEntity));
 		levelEntity->localPosition = initialPosition;
 		PhysicsProperty* pp = levelEntity->physics = new PhysicsProperty();
 		pp->collisionsEnabled = false;
@@ -771,21 +763,21 @@ void PlayingLevel::LoadLevel(String fromSource)
 		}
 		// Register blackness entities for rendering.
 		GraphicsMan.QueueMessage(new GMRegisterEntities(blacknessEntities));
+		// Finalize details before registering.
+		levelEntity->localPosition = initialPosition;
+		levelEntity->physics->velocity = level.BaseVelocity();
 		PhysicsMan.QueueMessage(new PMRegisterEntities(levelEntity));
+		//PhysicsMan.QueueMessage(new PMSetEntity(levelEntity, PT_VELOCITY, level.BaseVelocity()));
 		// Set level camera to track the level entity.
 		GraphicsMan.QueueMessage(new GMSetCamera(levelCamera, CT_ENTITY_TO_TRACK, levelEntity));
 	}
-	// Track ... level with effects.
-	starEmitter->entityToTrack = levelEntity;
-	starEmitter->positionOffset = Vector3f(playingFieldSize.x + 10.f, 0, 0);
+	LetStarsTrack(levelEntity, Vector3f(playingFieldSize.x + 10.f, 0, 0));
+
 	//	GraphicsMan.QueueMessage(new GMSetParticleEmitter(starEmitter, GT_EMITTER_ENTITY_TO_TRACK, playerShip->entity));
 	//	GraphicsMan.QueueMessage(new GMSetParticleEmitter(starEmitter, GT_EMITTER_POSITION_OFFSET, Vector3f(70.f, 0, 0)));
 		// Reset position of level entity if already created.
-	levelEntity->localPosition = initialPosition;
-	levelEntity->physics->velocity = level.BaseVelocity();
 	//	PhysicsMan.QueueMessage(new PMSetEntity(levelEntity, PT_POSITION, initialPosition));
 		// Set velocity of the game.
-	//	PhysicsMan.QueueMessage(new PMSetEntity(levelEntity, PT_VELOCITY, level.BaseVelocity()));
 		// Reset position of player!
 	//	PhysicsMan.QueueMessage(new PMSetEntity(playerShip->entity, PT_POSITION, initialPosition));
 
@@ -795,19 +787,19 @@ void PlayingLevel::LoadLevel(String fromSource)
 	playerShip->shieldValue = playerShip->maxShieldValue;
 	playerShip->entity->localPosition = initialPosition + Vector3f(-50, 0, 0);
 
-
 	sparks->SetAlphaDecay(DecayType::QUADRATIC);
 
 	GraphicsMan.ResumeRendering();
 	PhysicsMan.Resume();
-	// Set mode! UI updated from within.
-	SetMode(PLAYING_LEVEL);
 	level.OnEnter();
 	// Run start script.
 	ScriptMan.PlayScript("scripts/OnLevelStart.txt");
 
 	// o.o
 	this->Resume();
+
+	QueueGraphics(new GMRecompileShaders()); // Shouldn't be needed...
+
 }
 
 void PlayingLevel::UpdateRenderArrows()
@@ -933,9 +925,9 @@ void PlayingLevel::OpenSpawnWindow()
 	}
 	QueueGraphics(new GMSetUIContents(spawnUI, "ShipTypeToSpawn", shipTypes));
 	List<String> spawnFormations;
-	for (int i = 0; i < Formation::FORMATIONS; ++i)
+	for (int i = 0; i < (int)Formation::FORMATIONS; ++i)
 	{
-		spawnFormations.AddItem(Formation::GetName(i));
+		spawnFormations.AddItem(GetName(Formation(i)));
 	}
 	QueueGraphics(new GMSetUIContents(spawnUI, "SpawnFormation", spawnFormations));
 }

@@ -1,0 +1,13 @@
+Name,Price,Damage,Reload time,Type,Info
+Projectile gun I,0,10,200,Bullet,
+Beam gun I,200,33,1200,Beam,
+Projectile gun II,500,13,195,Bullet,
+Beam gun II,750,44,1100,Beam,
+Projectile gun III,1250,17,190,Bullet,
+Beam gun III,1750,55,1000,Beam,
+Projectile gun IV,3000,23,185,Bullet,
+Beam gun IV,4500,66,900,Beam,
+Projectile gun V,9000,27,180,Bullet,
+Beam gun V,12500,77,800,Beam,
+Atomic Railgun,20000,99,500,Railgun,
+EMP Bomber,35000,250,2500,"EMP, Bomb",

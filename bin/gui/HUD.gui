@@ -1,0 +1,67 @@
+// Main UI when starting up.
+
+defaultTexture	0x2244
+defaultTextColor	1 1 1 1
+
+// Make root active
+root
+name HUD
+exitable false
+texture NULL
+
+//////////////////////////////
+/// HUD below
+parent HUD
+
+ColumnList topStats
+sizeRatioXY 0.4 0.05
+alignmentXY 0.2 0.975
+
+element BottomPart
+sizeRatioXY	1 0.15
+alignmentXY	0.5 0.075
+
+label	LevelMessage
+texture 	0x22AA
+text	"Level message"
+textSizeRatio 0.5
+sizeRatioXY 1 0.2
+alignmentXY	0.5	0.3
+visible false
+
+// Top stats now.
+parent topStats
+defaultSizeRatioXY 0.5 1
+defaultTexture 0x22AA
+
+IntegerLabel Scorei
+text "Score"
+IntegerLabel Livesi
+text "Lives"
+
+
+parent BottomPart
+
+ColumnList clHPShield
+sizeRatioXY 0.5 0.25
+alignmentXY 0.5 0.8
+
+ColumnList clWeaponSkillBar
+sizeRatioXY 0.8 0.7
+alignmentXY 0.5 0.35
+
+parent clHPShield
+defaultSizeRatioXY 0.5 1
+IntegerLabel HP
+IntegerLabel Shield
+
+parent clWeaponSkillBar
+
+Button Skill
+sizeRatioX 0.1
+
+RadioButtons 10 ActiveWeapon
+onEnterScope ActiveWeaponsShown
+onPop ActiveWeaponsHidden
+NoLabel
+sizeRatioX 0.9

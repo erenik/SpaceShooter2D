@@ -1,0 +1,34 @@
+// Main UI when starting up.
+
+defaultTexture	0x2244
+defaultTextColor	1 1 1 1
+
+// Make root active
+root
+name InGameMenu
+removeOnPop true
+texture NULL
+
+parent InGameMenu
+
+defaultSizeRatioXY 1 1
+
+list imList
+text Menu
+sizeRatioXY 0.4 0.4
+
+parent imList
+
+
+defaultSizeRatioXY 1 0.2
+Button Continue
+onActivate ToggleMenu
+
+Button	OptionsButton
+text "Options"
+onActivate OpenOptionsScreen
+
+Button ExitToMainMenuButton
+onActivate PopUI(HUD)&PopUI(InGameMenu)&GoToMainMenu
+text	"Exit to main menu"
+

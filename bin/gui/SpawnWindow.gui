@@ -1,0 +1,54 @@
+// Main UI when starting up.
+
+defaultTexture	0x2244
+defaultTextColor	1 1 1 1
+defaultDividerX	0.4
+// defaultSetDividerInMiddle true
+
+// Make root active
+root
+name SpawnWindow
+exitable false
+
+parent SpawnWindow
+
+list lSpawnWindow
+text ""
+
+parent lSpawnWindow
+
+defaultSizeRatioXY 1 0.1
+
+DropDownMenu ShipTypeToSpawn
+text "Ship type: "
+
+DropDownMenu SpawnFormation
+text "Spawn formation: "
+
+IntegerInput TestEnemiesAmount
+text "Amount"
+
+VectorInput 2 FormationSize
+text "Formation size"
+
+VectorInput 2 SpawnLocation
+
+IntegerInput Speed
+
+ColumnList SpawnButtons
+
+
+Button SetupForTesting
+text "Setup for testing"
+
+Button GenerateLevel
+
+
+parent SpawnButtons
+defaultSizeRatioXY 0.5 1
+Button SpawnTestEnemies
+text "Spawn 'em"
+/*Button StoreTestEnemies
+text "Store for spawning"
+*/
+

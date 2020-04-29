@@ -33,8 +33,8 @@ class alignas(16) Ship
 {
 private:
 	Ship();
-public:
 	static ShipPtr NewShip();
+public:
 	static ShipPtr NewShip(Ship & ref);
 	~Ship();
 	std::weak_ptr<Ship> selfPtr;

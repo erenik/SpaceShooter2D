@@ -12,7 +12,7 @@
 #include "StateManager.h"
 #include "../Properties/ExplosionProperty.h"
 #include "PlayingLevel.h"
-#include "OS/OSThread.h"
+#include "OS/Sleep.h"
 
 #define SPAWNED_ENEMIES_LOG "SpawnedEnemies.srl"
 
@@ -65,6 +65,7 @@ void Level::OnEnter()
 	Lighting lighting = Lighting();
 	lighting.SetAmbient(1.0, 1.0, 1.0, 1.0);
 	QueueGraphics(new GMSetLighting(lighting));
+
 }
 
 // Used for player and camera. Based on millisecondsPerPixel.
@@ -107,8 +108,8 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 		int playerColliding = 0,
 			enemyCategory = 0;
 		
-		int formations[Formation::FORMATIONS];
-		memset(formations, 0, sizeof(int) * Formation::FORMATIONS);
+		int formations[(int)Formation::FORMATIONS];
+		memset(formations, 0, sizeof(int) * (int)Formation::FORMATIONS);
 		for (int i = 0; i < ships.Size(); ++i)
 		{
 			ShipPtr ship = ships[i];
@@ -117,7 +118,7 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 				if (!ship->entity->registeredForPhysics)
 				{
 					spookyShips.AddItem(ship);
-					++formations[ship->spawnGroup->formation];
+					++formations[(int)ship->spawnGroup->formation];
 				}
 			}
 			if (!ship->entity)
@@ -129,7 +130,7 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 		}
 		if (spookyShips.Size() > 0)
 			LogMain(String("Spooky ships found: ")+spookyShips.Size()+" playerFilter: "+playerColliding+" enemyCategory: "+enemyCategory+" out of "+ships.Size()+" ships.", INFO);
-		for (int i = 0; i < Formation::FORMATIONS; ++i)
+		for (int i = 0; i < (int)Formation::FORMATIONS; ++i)
 		{
 			if (formations[i] > 0)
 				std::cout<<"\n in formation "<<i<<": "<<formations[i];
@@ -140,8 +141,11 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 	activeLevel = this;
 
 	removeInvuln = playingLevel.levelEntity->worldPosition[0] + playingLevel.playingFieldHalfSize[0] + playingLevel.playingFieldPadding + 1.f;
+	assert(removeInvuln > -1000);
 	spawnPositionRight = removeInvuln + 15.f;
+	assert(spawnPositionRight > -1000);
 	despawnPositionLeft = playingLevel.levelEntity->worldPosition[0] - playingLevel.playingFieldHalfSize[0] - 1.f;
+	assert(despawnPositionLeft > -1000);
 
 	// Check for game over.
 	if (playingLevel.playerShip->hp <= 0)
@@ -176,7 +180,7 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 	}
 	if (gameTimePaused) {
 		LogMain("Game time is paused", INFO);
-		ThreadSleep(100);
+		SleepThread(100);
 		return;
 	}
 	else
@@ -232,23 +236,20 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 		for (int i = 0; i < spawnGroups.Size(); ++i)
 		{
 			SpawnGroup * sg = spawnGroups[i];
-			if (sg->FinishedSpawning())
-			{
-				// Check if it's defeated?
-				if (sg->DefeatedOrDespawned())
-				{
-					if (sg->pausesGameTime)
-						gameTimePaused = false;
-				}
+			int msToSpawn = (int)(sg->spawnTime - levelTime).Milliseconds();
+			if (msToSpawn > 0)
+				continue;
+			if (sg->FinishedSpawning() && sg->pausesGameTime && sg->DefeatedOrDespawned()) {
+				gameTimePaused = false;
 				continue;
 			}
-			int msToSpawn = (int) (sg->spawnTime - levelTime).Milliseconds();
-			if (msToSpawn < 0) 
+			if (!sg->FinishedSpawning())
 			{
 				defeatedAllEnemies = false;
 				sg->Spawn(playingLevel);
 				if (sg->pausesGameTime)
 					gameTimePaused = true;
+				continue;
 			}
 		}
 	}
@@ -298,7 +299,7 @@ void Level::ProcessMessage(Message * message)
 			}
 			else if (msg == "DropDownMenuSelection:SpawnFormation")
 			{
-				testGroup.formation = Formation::GetByName(value);
+				testGroup.formation = GetFormationByName(value);
 			}
 			break;
 		}

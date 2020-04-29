@@ -1,0 +1,21 @@
+
+// Auto-save.
+AutoSave(silent)
+
+// Clear most UI.
+HideLevelStats
+
+// Display victory~!
+DisplayCenterText	Stage $ cleared!
+
+// Optionally present some stage statistics before continuing?
+
+
+// Wait a bit, then go to lobby.
+Wait(2000)
+GoToLobby
+
+/// Let the Stage-cleared text stay a bit more?
+Wait(2000)
+ClearCenterText
+

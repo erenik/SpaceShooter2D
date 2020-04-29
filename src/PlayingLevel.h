@@ -21,6 +21,8 @@ PlayingLevel& PlayingLevelRef();
 class PlayingLevel : public SpaceShooter2D
 {
 public:
+	PlayingLevel();
+
 	/// Searches among actively spawned ships.
 	ShipPtr GetShip(EntitySharedPtr forEntity);
 
@@ -59,12 +61,16 @@ public:
 
 	static PlayingLevel* singleton;
 
-	/// Time in current level, from 0 when starting. Measured in milliseconds.
+	/** Time in current level, from 0 when starting, which may pause while groups are spawning or messages being displayed. 
+		Measured in milliseconds. FlyTime in contrast refers to total seconds played the level as perceived by the User.
+		For achievements then low FlyTime is interested, for level planning and spawning groups of enemies LevelTime is interesting.
+	*/
 	Time levelTime, flyTime;
 	// extern int64 nowMs;
-	int timeElapsedMs;
+	int timeElapsedMs = 0;
+	int hudUpdateMs = 0;
 	/// Particle system for sparks/explosion-ish effects.
-	Sparks* sparks;
+	std::shared_ptr<ParticleSystem> sparks;
 
 	/// These will hopefully always be in AABB axes.
 	Vector3f frustumMin, frustumMax;
@@ -74,12 +80,12 @@ public:
 	static EntitySharedPtr levelEntity;
 	static Vector2f playingFieldSize;
 	static Vector2f playingFieldHalfSize;
-	float playingFieldPadding;
+	// What is this...?
+	const float playingFieldPadding = 1;
 	/// All ships, including player.
 	List< std::shared_ptr<Entity> > shipEntities;
 	List< std::shared_ptr<Entity> > projectileEntities;
 	String playerName;
-	static bool paused;
 	String onDeath; // What happens when the player dies?
 
 
@@ -92,9 +98,6 @@ private:
 	Time now;
 
 	ParticleEmitter* starEmitter = nullptr;
-
-	/// Particle system for sparks/explosion-ish effects.
-	Stars* stars = NULL;
 
 	/// 4 entities constitude the blackness.
 	List< std::shared_ptr<Entity> > blacknessEntities;

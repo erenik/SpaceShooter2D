@@ -1,0 +1,18 @@
+
+// Display some text!
+
+// Show some intro-video or image?
+
+// Play music?
+
+// Main main menu
+OpenMainMenu
+
+
+// Temporary, mute sfx and go to new game for testing.
+Mute
+NewGame
+
+
+
+EndScript

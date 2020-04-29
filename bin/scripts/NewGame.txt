@@ -1,0 +1,6 @@
+
+// Display some text!
+Wait(100)
+// Let OnLevelStart display level name.
+
+EndScript

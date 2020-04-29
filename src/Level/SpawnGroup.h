@@ -10,14 +10,13 @@
 #include "MovementPattern.h"
 
 /// Types. Default LINE_X?
-namespace Formation {
-enum {
+enum class Formation {
 	BAD_FORMATION = 0,
 	LINE_X,
 	DOUBLE_LINE_X,
 	LINE_Y,
 	LINE_XY,
-	X, 
+	X,
 	SQUARE,
 	CIRCLE,
 	HALF_CIRCLE_LEFT,
@@ -25,11 +24,12 @@ enum {
 	V_X, /// Typical V-bird-formation, flying X-wise.
 	V_Y, /// Typical V-bird-formation, flying Y-wise.
 	SWARM_BOX_XY, /// Random-based swarm with some minimum threshold distance between each ship, skipping ships if area is not large enough.
-	FORMATIONS,
+	FORMATIONS
 };
-	String GetName(int forFormationType);
-	int GetByName(String name);
-};
+
+String GetName(Formation forFormationType);
+Formation GetFormationByName(String name);
+
 
 class SpawnGroup 
 {
@@ -71,7 +71,7 @@ public:
 	/// Number along the formation bounds. Before PrepareForSpawning is called, this is an arbitrary argument, which may or may not be the same after preparing for spawning (e.g. it may multiply for generating a SQUARE formation).
 	int number;
 	// See enum above.
-	int formation;
+	Formation formation;
 	MovementPattern mp;
 	void ParseFormation(String fromString);
 	/// Usually just 1 or 2 sizes are used (X,Y)
