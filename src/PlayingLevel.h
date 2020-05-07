@@ -13,7 +13,6 @@ class Ship;
 class PlayingLevel;
 
 
-EntitySharedPtr LevelEntity();
 ShipPtr PlayerShip();
 EntitySharedPtr PlayerShipEntity();
 PlayingLevel& PlayingLevelRef();
@@ -98,9 +97,5 @@ private:
 	Time now;
 
 	ParticleEmitter* starEmitter = nullptr;
-
-	/// 4 entities constitude the blackness.
-	List< std::shared_ptr<Entity> > blacknessEntities;
-
 };
 

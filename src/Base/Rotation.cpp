@@ -186,7 +186,7 @@ void Rotation::MoveDir()
 	if (!entity->physics)
 	{
 		// Log it.
-		LogToFile("rotationErrors", "Entity "+entity->name+" lacking physics property, thus probably stationary, why does it have a Rotation pattern then?", WARNING);
+		LogPhysics("Entity "+entity->name+" lacking physics property, thus probably stationary, why does it have a Rotation pattern then?", WARNING);
 		return;
 	}
 	Vector3f dir = entity->Velocity();

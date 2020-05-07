@@ -5,6 +5,7 @@
 #include "SSIntegrator.h"
 #include "SpaceShooter2D.h"
 #include "PlayingLevel.h"
+#include "Properties/LevelProperty.h"
 
 extern EntitySharedPtr playerEntity;
 
@@ -16,7 +17,7 @@ SSIntegrator::SSIntegrator(float zPlane)
 
 void SSIntegrator::IntegrateDynamicEntities(List< std::shared_ptr<Entity> > & dynamicEntities, float timeInSeconds)
 {
-	EntitySharedPtr levelEntity = LevelEntity();
+	EntitySharedPtr levelEntity = LevelEntity->owner;
 	auto playingFieldHalfSize = PlayingLevel::playingFieldHalfSize;
 	if (levelEntity)
 	{

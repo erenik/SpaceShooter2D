@@ -21,6 +21,7 @@ HUD* HUD::Get() {
 
 void HUD::Show() {
 	String toPush = "gui/HUD.gui";
+	overlaysCreated = false;
 	PushUI(toPush);
 	// By default remove hover from any UI element. Select weapons with 1-9 keys.
 	QueueGraphics(new GMSetHoverUI(nullptr));
@@ -48,8 +49,6 @@ void RequeueHUDUpdate()
 /// Update UI
 void HUD::UpdateHUDGearedWeapons()
 {
-	if (PlayingLevelRef().mode != PLAYING_LEVEL)
-		return;
 	MutexHandle mh(uiMutex);
 	// Fetch the names of the checkboxes.
 	UserInterface* ui = MainWindow()->ui;
@@ -86,25 +85,40 @@ void HUD::UpdateHUDGearedWeapons()
 		QueueGraphics(new GMSetUIb(child->name, GMUI::ACTIVATABLE, true));
 		QueueGraphics(new GMSetUIb(child->name, GMUI::HOVERABLE, true));
 
-		/// Clear and add associated picture and cooldown-overlay on top.
-		QueueGraphics(new GMClearUI(child->name));
+		String overlayName = "WeaponCooldownOverlay" + String(i);
+		String textureSource = "img/ui/Cooldown_37.png";
+		if (overlaysCreated) {
+			QueueGraphics(new GMSetUIs(overlayName, GMUI::TEXTURE_SOURCE, textureSource));
+		}
+		else {
+			overlaysCreated = true;
+			/// Clear and add associated picture and cooldown-overlay on top.
+			QueueGraphics(new GMClearUI(child->name));
+			UIElement* cooldownOverlay = new UIElement();
+			cooldownOverlay->name = overlayName;
+			cooldownOverlay->textureSource = textureSource;
+			QueueGraphics(new GMAddUI(cooldownOverlay, child->name));
 
-		UIElement* cooldownOverlay = new UIElement();
-		cooldownOverlay->name = "WeaponCooldownOverlay" + String(i);
-		cooldownOverlay->textureSource = "img/ui/Cooldown_37.png";
-		QueueGraphics(new GMAddUI(cooldownOverlay, child->name));
-
-		// If weapon begs question of ammo (bursts).
-		if (weapon->burst)
-		{
-			UIElement* ammunition = new UIElement();
-			ammunition->name = "WeaponAmmunitionOverlay" + String(i);
-			ammunition->textureSource = "0x0000";
-			ammunition->text = "inf";
-			QueueGraphics(new GMAddUI(ammunition, child->name));
+			// If weapon begs question of ammo (bursts).
+			if (weapon->burst)
+			{
+				UIElement* ammunition = new UIElement();
+				ammunition->name = "WeaponAmmunitionOverlay" + String(i);
+				ammunition->textureSource = "0x0000";
+				ammunition->text = "inf";
+				QueueGraphics(new GMAddUI(ammunition, child->name));
+			}
 		}
 	}
 }
+
+// Only if cooldowns not already created.
+void HUD::UpdateHUDGearedWeaponsIfNeeded() {
+	if (overlaysCreated)
+		return;
+	UpdateHUDGearedWeapons();
+}
+
 
 void HUD::UpdateUIPlayerHP(bool force)
 {

@@ -28,9 +28,6 @@ void OnPlayerInvulnerabilityUpdated()
 
 }
 
-EntitySharedPtr LevelEntity() {
-	return PlayingLevel::levelEntity;
-}
 ShipPtr PlayerShip() {
 	return PlayingLevel::playerShip;
 }
@@ -157,16 +154,9 @@ void PlayingLevel::Process(int timeInMs) {
 /// Called from the render-thread for every viewport/AppWindow, after the main rendering-pipeline has done its job.
 void PlayingLevel::Render(GraphicsState* graphicsState)
 {
-	switch (mode)
-	{
-	case PLAYING_LEVEL:
-		if (!levelEntity)
-			return;
-		RenderInLevel(graphicsState);
-		break;
-	default:
+	if (!levelEntity)
 		return;
-	}
+	RenderInLevel(graphicsState);
 }
 
 
@@ -244,12 +234,12 @@ void PlayingLevel::ProcessMessage(Message* message)
 				return;
 			playerShip->activeWeapon->QueueReload();
 		}
-		else if ("ActiveWeaponsShown")
+		else if (msg == "ActiveWeaponsShown")
 		{
 			HUD::Get()->activeWeaponsShown = true;
 			HUD::Get()->UpdateHUDGearedWeapons();
 		}
-		else if ("ActiveWeaponsHidden")
+		else if (msg == "ActiveWeaponsHidden")
 			HUD::Get()->activeWeaponsShown = false;
 		if (msg.Contains("StartMoveShip"))
 		{
@@ -397,9 +387,12 @@ void PlayingLevel::ProcessMessage(Message* message)
 				weaponIndex = 9;
 			playerShip->SwitchToWeapon(weaponIndex);
 		}
+		else if (msg == "UpdateHUDGearedWeapons")
+			HUD::Get()->UpdateHUDGearedWeapons();
 		else if (msg == "StartShooting")
 		{
 			playerShip->shoot = true;
+			HUD::Get()->UpdateHUDGearedWeaponsIfNeeded();
 		}
 		else if (msg == "StopShooting")
 		{
@@ -471,7 +464,7 @@ void PlayingLevel::ProcessMessage(Message* message)
 			}
 			MapMan.DeleteEntities(shipEntities);
 			// Move the level-entity, the player will follow.
-			PhysicsMan.QueueMessage(new PMSetEntity(levelEntity, PT_POSITION, Vector3f(level.goalPosition - 5.f, 10, 0)));
+			LevelEntity->MoveTo(Vector3f(level.goalPosition - 5.f, 10, 0));
 			//				GraphicsMan.QueueMessage(new GMSetCamera(levelCamera, CT_POSITION, Vector3f(level.goalPosition - 5.f, 10, 0)));
 		}
 		else if (msg == "FinishStage")
@@ -527,8 +520,6 @@ void PlayingLevel::ProcessMessage(Message* message)
 		}
 		else if (msg == "ToggleMenu")
 		{
-			if (mode != PLAYING_LEVEL)
-				return;
 			// Pause the game.
 			if (!paused)
 			{
@@ -544,13 +535,7 @@ void PlayingLevel::ProcessMessage(Message* message)
 		}
 		else if (msg == "ToggleBlackness")
 		{
-			if (blacknessEntities.Size())
-			{
-				bool visible = blacknessEntities[0]->IsVisible();
-				GraphicsMan.QueueMessage(new GMSetEntityb(blacknessEntities, GT_VISIBILITY, !visible));
-				Viewport* viewport = MainWindow()->MainViewport();
-				viewport->renderGrid = visible;
-			}
+			LevelEntity->ToggleBlackness();
 		}
 
 	}
@@ -561,6 +546,8 @@ void PlayingLevel::ProcessMessage(Message* message)
 
 void PlayingLevel::Cleanup()
 {
+	float despawnDown = LevelEntity->DespawnDown();
+	float despawnUp = LevelEntity->DespawnUp();
 	/// Remove projectiles which have been passed by.
 	for (int i = 0; i < projectileEntities.Size(); ++i)
 	{
@@ -569,8 +556,8 @@ void PlayingLevel::Cleanup()
 		if (pp->sleeping ||
 			(proj->worldPosition[0] < despawnPositionLeft ||
 				proj->worldPosition[0] > spawnPositionRight ||
-				proj->worldPosition[1] < -1.f ||
-				proj->worldPosition[1] > playingFieldSize[1] + 2.f
+				proj->worldPosition.y < despawnDown ||
+				proj->worldPosition.y > despawnUp
 				)
 			)
 		{
@@ -622,7 +609,7 @@ void PlayingLevel::UpdatePlayerVelocity()
 	totalVec.Normalize();
 	totalVec *= playerShip->Speed();
 	totalVec *= playerShip->movementDisabled ? 0 : 1;
-	//totalVec += level.BaseVelocity();
+	totalVec += LevelEntity->Velocity();
 
 	// Set player speed.
 	if (playerShip->entity)
@@ -732,45 +719,12 @@ void PlayingLevel::LoadLevel(String fromSource)
 
 
 	/// Add entity to track for both the camera, blackness and player playing field.
-	Vector3f initialPosition = Vector3f(0, 10, 0);
 	if (levelEntity == nullptr)
 	{
-		levelEntity = EntityMan.CreateEntity("LevelEntity", NULL, NULL);
-		levelEntity->properties.Add(new LevelProperty(levelEntity));
-		levelEntity->localPosition = initialPosition;
-		PhysicsProperty* pp = levelEntity->physics = new PhysicsProperty();
-		pp->collisionsEnabled = false;
-		pp->type = PhysicsType::KINEMATIC;
-		/// Add blackness to track the level entity.
-		for (int i = 0; i < 4; ++i)
-		{
-			EntitySharedPtr blackness = EntityMan.CreateEntity("Blackness" + String(i), ModelMan.GetModel("sprite.obj"), TexMan.GetTexture("0x0A"));
-			float scale = 50.f;
-			float halfScale = scale * 0.5f;
-			blackness->scale = scale * Vector3f(1, 1, 1);
-			Vector3f position;
-			position[2] = 5.f; // Between game plane and camera
-			switch (i)
-			{
-			case 0: position[0] += playingFieldHalfSize[0] + halfScale + playingFieldPadding; break;
-			case 1: position[0] -= playingFieldHalfSize[0] + halfScale + playingFieldPadding; break;
-			case 2: position[1] += playingFieldHalfSize[1] + halfScale + playingFieldPadding; break;
-			case 3: position[1] -= playingFieldHalfSize[1] + halfScale + playingFieldPadding; break;
-			}
-			blackness->localPosition = position;
-			levelEntity->AddChild(blackness);
-			blacknessEntities.Add(blackness);
-		}
-		// Register blackness entities for rendering.
-		GraphicsMan.QueueMessage(new GMRegisterEntities(blacknessEntities));
-		// Finalize details before registering.
-		levelEntity->localPosition = initialPosition;
-		levelEntity->physics->velocity = level.BaseVelocity();
-		PhysicsMan.QueueMessage(new PMRegisterEntities(levelEntity));
-		//PhysicsMan.QueueMessage(new PMSetEntity(levelEntity, PT_VELOCITY, level.BaseVelocity()));
-		// Set level camera to track the level entity.
-		GraphicsMan.QueueMessage(new GMSetCamera(levelCamera, CT_ENTITY_TO_TRACK, levelEntity));
+		levelEntity = LevelEntity->Create(playingFieldSize, playingFieldPadding, levelCamera);
+		LevelEntity->SetVelocity(level.BaseVelocity());
 	}
+
 	LetStarsTrack(levelEntity, Vector3f(playingFieldSize.x + 10.f, 0, 0));
 
 	//	GraphicsMan.QueueMessage(new GMSetParticleEmitter(starEmitter, GT_EMITTER_ENTITY_TO_TRACK, playerShip->entity));
@@ -781,11 +735,15 @@ void PlayingLevel::LoadLevel(String fromSource)
 		// Reset position of player!
 	//	PhysicsMan.QueueMessage(new PMSetEntity(playerShip->entity, PT_POSITION, initialPosition));
 
-	level.AddPlayer(*this, playerShip);
+	level.SpawnPlayer(*this, playerShip);
+	QueueGraphics(new GMSetCamera(levelCamera, CT_ENTITY_TO_TRACK, playerShip->entity));
+	levelCamera->smoothness = 0.05f;
+	levelCamera->trackingPositionOffset = Vector3f(10.f, 0, 0);
+
 	// Reset player stats.
 	playerShip->hp = playerShip->maxHP;
 	playerShip->shieldValue = playerShip->maxShieldValue;
-	playerShip->entity->localPosition = initialPosition + Vector3f(-50, 0, 0);
+	playerShip->entity->localPosition = Vector3f(-50, 0, 0);
 
 	sparks->SetAlphaDecay(DecayType::QUADRATIC);
 
@@ -794,6 +752,9 @@ void PlayingLevel::LoadLevel(String fromSource)
 	level.OnEnter();
 	// Run start script.
 	ScriptMan.PlayScript("scripts/OnLevelStart.txt");
+
+	// Update all UI now that a player is there.
+	HUD::Get()->UpdateUI();
 
 	// o.o
 	this->Resume();

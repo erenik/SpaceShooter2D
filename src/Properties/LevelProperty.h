@@ -9,12 +9,35 @@
 #include "Entity/Entity.h"
 #include "Entity/EntityProperty.h"
 
+#define LevelEntity LevelProperty::GetSingleton()
+
 class LevelProperty : public EntityProperty {
-public:
+	static LevelProperty* singleton;
+	static EntitySharedPtr levelEntity;
 	/// Default annulizing constructor.
-	LevelProperty(EntitySharedPtr owner);
+	LevelProperty(EntitySharedPtr owner, Vector2f playingFieldSize, float playingFieldPadding);
+public:
+	static LevelProperty* GetSingleton() { return singleton; };
+
+	// Creates the entity and property, as well as darkness entities to show where the player cannot proceed beyond.
+	static EntitySharedPtr Create(Vector2f playingFieldSize, float playingFieldPadding, Camera*  levelCamera);
+	void MoveTo(Vector3f position);
+	void SetVelocity(Vector3f velocity);
+	void CreateBlackness();
+	void ToggleBlackness();
+	Vector3f Velocity();
+
+	float DespawnDown();
+	float DespawnUp();
 
 	/// Time passed in seconds..!
 	virtual void Process(int timeInMs) override;
+
+private:
+	float playingFieldPadding;
+	Vector2f playingFieldSize, playingFieldHalfSize;
+	/// 4 entities constitude the blackness.
+	List< std::shared_ptr<Entity> > blacknessEntities;
+
 
 };

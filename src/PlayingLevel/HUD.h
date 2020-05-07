@@ -20,6 +20,8 @@ public:
 
 	// Updates part of it
 	void UpdateHUDGearedWeapons();
+	// Only if cooldowns not already created.
+	void UpdateHUDGearedWeaponsIfNeeded();
 	void UpdateUIPlayerHP(bool force);
 	void UpdateUIPlayerShield(bool force);
 	void UpdateCooldowns();
@@ -37,6 +39,7 @@ public:
 private:
 	bool inGameMenuOpened = false;
 	bool showLevelStats = false;
+	bool overlaysCreated = false;
 
 
 };

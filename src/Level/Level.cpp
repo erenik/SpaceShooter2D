@@ -75,7 +75,7 @@ Vector3f Level::BaseVelocity()
 }
 
 /// Creates player entity within this level. (used for spawning)
-EntitySharedPtr Level::AddPlayer(PlayingLevel& playingLevel, ShipPtr playerShip, ConstVec3fr atPosition)
+EntitySharedPtr Level::SpawnPlayer(PlayingLevel& playingLevel, ShipPtr playerShip, ConstVec3fr atPosition)
 {	
 	EntitySharedPtr entity = playerShip->Spawn(atPosition, 0, playingLevel);
 	return entity;
@@ -157,7 +157,7 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 		else if (playingLevel.onDeath.StartsWith("RespawnAt"))
 		{
 			playingLevel.playerShip->hp = (float)playingLevel.playerShip->maxHP;
-			this->AddPlayer(playingLevel, playingLevel.playerShip, Vector3f(playingLevel.levelEntity->worldPosition.x, 10.f, 0));
+			this->SpawnPlayer(playingLevel, playingLevel.playerShip, Vector3f(playingLevel.levelEntity->worldPosition.x, 10.f, 0));
 			// Reset level-time.
 			String timeStr = playingLevel.onDeath.Tokenize("()")[1];
 			levelTime.ParseFrom(timeStr);
@@ -179,8 +179,8 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 		return; // No more processing if cleared?
 	}
 	if (gameTimePaused) {
-		LogMain("Game time is paused", INFO);
-		SleepThread(100);
+		LogMain("Game time is paused", EXTENSIVE_DEBUG);
+		SleepThread(10);
 		return;
 	}
 	else

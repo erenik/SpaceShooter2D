@@ -50,7 +50,7 @@ public:
 	// Used for player and camera. Based on millisecondsPerPixel.
 	Vector3f BaseVelocity();
 	/// Creates player entity within this level. (used for spawning)
-	EntitySharedPtr AddPlayer(PlayingLevel& playingLevel, ShipPtr playerShip, ConstVec3fr atPosition = Vector3f(-50.f, 10.f, 0));
+	EntitySharedPtr SpawnPlayer(PlayingLevel& playingLevel, ShipPtr playerShip, ConstVec3fr atPosition = Vector3f(-50.f, 10.f, 0));
 	void SetupCamera();
 	/// o.o
 	void Process(PlayingLevel& playingLevel, int timeInMs);

@@ -742,7 +742,7 @@ ShipPtr Ship::New(String shipByName)
 	}
 	String shipTypesStr = MergeLines(typesNames, ", ");
 	// For now, just add a default one.
-	LogToFile("LevelCreationErrors.txt", "ERROR: Couldn't find ship by name \'"+shipByName+"\'. Available ships types as follows:\n\t" + shipTypesStr, ERROR);
+	LogMain("ERROR: Couldn't find ship by name \'"+shipByName+"\'. Available ships types as follows:\n\t" + shipTypesStr, ERROR);
 	std::cout<<"\nERROR: Couldn't find ship by name \'"<<shipByName<<"\'";
 	return 0;
 }
