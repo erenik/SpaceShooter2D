@@ -87,9 +87,9 @@ public:
 	bool pausesGameTime;
 	int shipsDefeatedOrDespawned;
 	int shipsDespawned, shipsDefeated;
+	int shipsSpawned, defeated; // num spawned and defeated?
 private:
 	bool finishedSpawning;
-	int spawned, defeated; // num spawned and defeated?
 	AETime lastSpawn;
 	bool preparedForSpawning;
 	List<ShipPtr> ships;

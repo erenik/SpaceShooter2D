@@ -78,7 +78,8 @@ bool LevelMessage::Display()
 			MesMan.QueueMessages(strings);
 		if (goToTime.intervals != 0)
 		{
-			spaceShooter->level.SetTime(goToTime);
+			assert(false && "commented out");
+			//spaceShooter->level.SetTime(goToTime);
 			LogMain("Jumping to time: "+String(goToTime.Seconds()), INFO);
 			return false; // Return as if it failed, so the event is not saved as currently active one. (instantaneous)
 		}

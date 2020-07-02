@@ -8,6 +8,8 @@
 #include "../Base/Ship.h"
 #include "Color.h"
 
+#define SPAWNED_ENEMIES_LOG "SpawnedEnemies.srl"
+
 extern bool gameTimePaused;
 extern bool defeatedAllEnemies;
 extern bool failedToSurvive;
@@ -57,24 +59,29 @@ public:
 	void ProcessMessage(Message * message);
 	void ProceedMessage();
 	// Dialogue, tutorials
-	void ProcessLevelMessages(); 
-	void SetTime(Time newTime);
+	void ProcessLevelMessages(Time levelTime);
+//	void SetTime(Time newTime);
 	/// enable respawing on shit again.
-	void OnLevelTimeAdjusted();
+	void OnLevelTimeAdjusted(Time levelTime);
 	EntitySharedPtr ClosestTarget(PlayingLevel& playingLevel, bool ally, ConstVec3fr position);
 	/// o.o'
 	void Explode(Weapon & weapon, EntitySharedPtr causingEntity, bool enemy);
 	/// Returns ships close enough to given point. Returns distance to them too. Checks only to center of ship, not edges.
 	List<ShipPtr> GetShipsAtPoint(ConstVec3fr position, float maxRadius, List<float> & distances);
 
+	// # of spawn groups yet to start spawning. (may be 0 while spawning last one or enemies still on screen).
+	int SpawnGroupsRemaining();
+	// Null if none after this one.
+	SpawnGroup* NextSpawnGroup();
 	void RemoveRemainingSpawnGroups();
+	void SetSpawnGroupsFinishedAndDefeated(Time beforeLevelTime);
 	void RemoveExistingEnemies(PlayingLevel& playingLevel);
 
 	/// Yes.
 	List<ShipPtr> PlayerShips(PlayingLevel& playingLevel);
 
 	/// In format mm:ss.ms
-	void JumpToTime(String timeString);
+	//void JumpToTime(String timeString);
 
 	String source;
 

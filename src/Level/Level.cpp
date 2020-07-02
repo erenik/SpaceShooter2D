@@ -14,8 +14,6 @@
 #include "PlayingLevel.h"
 #include "OS/Sleep.h"
 
-#define SPAWNED_ENEMIES_LOG "SpawnedEnemies.srl"
-
 Camera * levelCamera = NULL;
 
 // See header file. Position boundaries.
@@ -25,18 +23,12 @@ float despawnPositionLeft = 0;
 
 Level * activeLevel = NULL;
 
-Time levelTime = Time(TimeType::MILLISECONDS_NO_CALENDER); // Time used in level-scripting. Will be paused arbitrarily to allow for easy scripting.
-Time flyTime = Time(TimeType::MILLISECONDS_NO_CALENDER); // The actual player-felt time. 
 bool gameTimePaused = false;
 bool defeatedAllEnemies = true;
 bool failedToSurvive = false;
-SpawnGroup testGroup;
-List<SpawnGroup> storedTestGroups;
 
 Level::Level()
 {
-	testGroup.number = 1;
-
 	height = 20.f;
 	endCriteria = NO_MORE_ENEMIES;
 	levelCleared = false;
@@ -160,17 +152,17 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 			this->SpawnPlayer(playingLevel, playingLevel.playerShip, Vector3f(playingLevel.levelEntity->worldPosition.x, 10.f, 0));
 			// Reset level-time.
 			String timeStr = playingLevel.onDeath.Tokenize("()")[1];
-			levelTime.ParseFrom(timeStr);
-			OnLevelTimeAdjusted();
+			playingLevel.levelTime.ParseFrom(timeStr);
+			OnLevelTimeAdjusted(playingLevel.levelTime);
 		}
 		else 
 			std::cout<<"\nBad Game over (onDeath) critera.";
 		return;
 	}
 
-	flyTime.AddMs(timeInMs);
+	playingLevel.flyTime.AddMs(timeInMs);
 
-	ProcessLevelMessages();
+	ProcessLevelMessages(playingLevel.levelTime);
 
 	/// Clearing the level
 	if (LevelCleared(playingLevel))
@@ -185,7 +177,7 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 	}
 	else
 	{
-		levelTime.AddMs(timeInMs);
+		playingLevel.levelTime.AddMs(timeInMs);
 	}
 
 	/// Process active explosions. No.
@@ -236,7 +228,7 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 		for (int i = 0; i < spawnGroups.Size(); ++i)
 		{
 			SpawnGroup * sg = spawnGroups[i];
-			int msToSpawn = (int)(sg->spawnTime - levelTime).Milliseconds();
+			int msToSpawn = (int)(sg->spawnTime - playingLevel.levelTime).Milliseconds();
 			if (msToSpawn > 0)
 				continue;
 			if (sg->FinishedSpawning() && sg->pausesGameTime && sg->DefeatedOrDespawned()) {
@@ -256,7 +248,7 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 }
 
 // Dialogue, tutorials
-void Level::ProcessLevelMessages() {
+void Level::ProcessLevelMessages(Time levelTime) {
 	/// Check messages.
 	if (messages.Size())
 	{
@@ -290,41 +282,7 @@ void Level::ProcessMessage(Message * message)
 	String & msg = message->msg;
 	switch(message->type)
 	{
-		case MessageType::SET_STRING:
-		{
-			String value = ((SetStringMessage*)message)->value;
-			if (msg == "DropDownMenuSelection:ShipTypeToSpawn")
-			{
-				testGroup.shipType = value;
-			}
-			else if (msg == "DropDownMenuSelection:SpawnFormation")
-			{
-				testGroup.formation = GetFormationByName(value);
-			}
-			break;
-		}
-		case MessageType::INTEGER_MESSAGE:
-		{
-			IntegerMessage * im = (IntegerMessage*) message;
-			if (msg == "SetTestEnemiesAmount")
-			{
-				testGroup.number = im->value;
-			}
-			break;	
-		}
-		case MessageType::VECTOR_MESSAGE:
-		{
-			VectorMessage * vm = (VectorMessage*)message;
-			if (msg == "SetFormationSize")
-			{
-				testGroup.size = vm->GetVector2f();
-			}
-			else if (msg == "SetSpawnLocation")
-			{
-				testGroup.position = vm->GetVector3f();
-			}
-			break;	
-		}
+
 		case MessageType::STRING:
 		{
  			if (msg.StartsWith("GenerateLevel"))
@@ -353,38 +311,7 @@ void Level::ProcessMessage(Message * message)
 			if (msg == "ResumeGameTime")
 				gameTimePaused = false;
 			if (msg == "ResetFailedToSurvive")
-				failedToSurvive = false;
-
-			else if (msg == "SetupForTesting")
-			{
-				File::ClearFile(SPAWNED_ENEMIES_LOG);
-				// Disable game-over/dying/winning
-				Clear(PlayingLevelRef());
-				levelTime.intervals = 0;
-			}
-			else if (msg.StartsWith("ShipTypeToSpawn:"))
-			{
-				testGroup.shipType = msg.Tokenize(":")[1];
-			}
-			else if (msg == "StoreTestEnemies")
-			{
-				storedTestGroups.AddItem(testGroup);
-	//			QueueGraphics(new GMSetUIs("StoreTestEnemies", GMUI::TEXT, "Store for spawning ("+String(storedTestGroups.Size())+")"));
-			}
-			else if (msg == "SpawnTestEnemies")
-			{
-				storedTestGroups.AddItem(testGroup);
-//				QueueGraphics(new GMSetUIs("StoreTestEnemies", GMUI::TEXT, "Store for spawning", ));
-				for (int i = 0; i < storedTestGroups.Size(); ++i)
-				{
-					SpawnGroup sg = storedTestGroups[i];
-					String str = sg.GetLevelCreationString(flyTime);
-					File::AppendToFile(SPAWNED_ENEMIES_LOG, str);
-					LogMain(str, INFO);
-					sg.Spawn(PlayingLevelRef());
-				}
-				storedTestGroups.Clear();
-			}
+				failedToSurvive = false;			
 			break;		
 		}
 	}
@@ -397,14 +324,15 @@ void Level::ProceedMessage()
 	activeLevelMessage = 0;
 }
 
-void Level::SetTime(Time newTime)
-{
-	Time oldTime;
-	levelTime = newTime;
-	OnLevelTimeAdjusted();
-}
+//void Level::SetTime(Time newTime)
+//{
+//	Time oldTime;
+//	levelTime = newTime;
+//	OnLevelTimeAdjusted();
+//}
+
 /// enable respawing on shit again.
-void Level::OnLevelTimeAdjusted()
+void Level::OnLevelTimeAdjusted(Time levelTime)
 {
 	for (int i = 0; i < spawnGroups.Size(); ++i)
 	{
@@ -432,7 +360,7 @@ bool Level::LevelCleared(PlayingLevel& playingLevel)
 		case NEVER:
 			return false;
 		case NO_MORE_ENEMIES:
-			if (levelTime.Seconds() < 3)
+			if (playingLevel.levelTime.Seconds() < 3)
 				return false;
 			if (playingLevel.shipEntities.Size() > this->PlayerShips(playingLevel).Size())
 				return false;
@@ -529,12 +457,50 @@ List<ShipPtr> Level::GetShipsAtPoint(ConstVec3fr position, float maxRadius, List
 	return relevantShips;
 }
 
+// # of spawn groups yet to start spawning. (may be 0 while spawning last one or enemies still on screen).
+int Level::SpawnGroupsRemaining() {
+	int num = 0;
+	for (int i = 0; i < spawnGroups.Size(); ++i) {
+		if (!spawnGroups[i]->DefeatedOrDespawned())
+			++num;
+	}
+	return num;
+}
+
+// Null if none after this one.
+SpawnGroup* Level::NextSpawnGroup() {
+	SpawnGroup * nextOneToSpawn = nullptr;
+	for (int i = 0; i < spawnGroups.Size(); ++i) {
+		SpawnGroup * spawnGroup = spawnGroups[i];
+		if (spawnGroup->shipsSpawned == 0) {
+			if (nextOneToSpawn == nullptr)
+				nextOneToSpawn = spawnGroup;
+			else if (spawnGroup->spawnTime < nextOneToSpawn->spawnTime)
+				nextOneToSpawn = spawnGroup;
+		}
+	}
+	return nextOneToSpawn;
+}
+
+
 void Level::RemoveRemainingSpawnGroups()
 {
 	for (int i = 0; i < spawnGroups.Size(); ++i)
 	{
 		SpawnGroup * sg = spawnGroups[i];
 		sg->SetFinishedSpawning();
+	}
+}
+
+void Level::SetSpawnGroupsFinishedAndDefeated(Time beforeLevelTime) {
+	for (int i = 0; i < spawnGroups.Size(); ++i)
+	{
+		SpawnGroup * sg = spawnGroups[i];
+		if (sg->spawnTime < beforeLevelTime)
+		{
+			sg->SetFinishedSpawning();
+			sg->SetDefeated();
+		}
 	}
 }
 
@@ -558,21 +524,6 @@ void Level::RemoveExistingEnemies(PlayingLevel& playingLevel)
 	ships.Clear();
 }
 
-void Level::JumpToTime(String timeString)
-{
-	// Jump to target level-time. Adjust position if needed.
-	levelTime.ParseFrom(timeString);
-	for (int i = 0; i < spawnGroups.Size(); ++i)
-	{
-		SpawnGroup * sg = spawnGroups[i];
-		if (sg->spawnTime < levelTime)
-		{
-			sg->SetFinishedSpawning();
-			sg->SetDefeated();
-		}
-	}
-	OnLevelTimeAdjusted();
-}
 
 List<ShipPtr> Level::PlayerShips(PlayingLevel& playingLevel)
 {

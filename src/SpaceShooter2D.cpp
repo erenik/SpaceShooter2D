@@ -281,7 +281,7 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 			}
 			if (msg == "JumpToTime")
 			{
-				level.JumpToTime(strMes->value);
+				playingLevel->JumpToTime(strMes->value);
 			}
 
 			break;

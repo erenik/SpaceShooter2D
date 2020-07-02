@@ -12,6 +12,7 @@
 #include "PlayingLevel.h"
 #include "UI/UIUtil.h"
 #include "Input/InputManager.h"
+#include "Level/SpawnGroup.h"
 
 HUD HUD::hud = HUD();
 
@@ -189,6 +190,14 @@ void HUD::UpdateCooldowns()
 			QueueGraphics(new GMSetUIs("WeaponAmmunitionOverlay" + String(i), GMUI::TEXT, String(shotsLeft)));
 		}
 	}
+}
+
+void HUD::UpdateDebug() {
+	PlayingLevel& pl = PlayingLevelRef();
+	QueueGraphics(new GMSetUIs("LevelTime", GMUI::STRING_INPUT, pl.levelTime.ToString("m:S")));
+	QueueGraphics(new GMSetUIi("SpawnGroupsRemaining", GMUI::INTEGER_INPUT, pl.level.SpawnGroupsRemaining()));
+	SpawnGroup * nextSpawnGroup = pl.level.NextSpawnGroup();
+	QueueGraphics(new GMSetUIs("NextSpawnGroupTime", GMUI::STRING_INPUT, (nextSpawnGroup != nullptr? nextSpawnGroup->spawnTime.ToString("m:S") : "N/A" )));
 }
 
 String levelStatsGui = "gui/LevelStats.gui";

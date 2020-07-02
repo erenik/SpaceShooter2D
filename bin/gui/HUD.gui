@@ -65,3 +65,29 @@ onEnterScope ActiveWeaponsShown
 onPop ActiveWeaponsHidden
 NoLabel
 sizeRatioX 0.9
+
+
+///////////////////////////////////
+// Debug 
+
+parent HUD 
+defaultTexture NULL
+defaultSizeRatioXY 1 1 
+
+element Debug
+sizeRatioXY 1 1  
+
+parent Debug
+list DebugRight 
+sizeRatioXY 0.3 1
+alignmentXY 0.85 0.5
+
+parent DebugRight 
+
+defaultSizeRatioXY 1 0.1
+StringLabel LevelTime "Level time" 
+IntegerLabel SpawnGroupsRemaining "Spawngroups remaining" 
+StringLabel NextSpawnGroupTime "Next spawn group at " 
+
+
+

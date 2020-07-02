@@ -71,7 +71,7 @@ void SpawnGroup::Reset()
 	preparedForSpawning = false;
 	relativeSpeed = 5.f;
 	shoot = true;
-	spawned = false;
+	shipsSpawned = false;
 	defeated = false;
 	survived = false;
 	shipsDefeatedOrDespawned = 0;
@@ -107,7 +107,7 @@ bool SpawnGroup::Spawn(PlayingLevel& playingLevel)
 			ShipPtr ship = ships[i];
 			ship->Spawn(ship->position, 0, playingLevel);
 			activeLevel->ships.AddItem(ship);
-			++spawned;
+			++shipsSpawned;
 			ships.RemoveItem(ship);
 		}
 		finishedSpawning = true;
@@ -387,13 +387,13 @@ void SpawnGroup::AddShipAtPosition(ConstVec3fr position)
 /// Query, compares active ships vs. spawned amount
 bool SpawnGroup::DefeatedOrDespawned()
 {
-	return shipsDefeatedOrDespawned >= spawned;
+	return shipsDefeatedOrDespawned >= shipsSpawned;
 }
 
 void SpawnGroup::SetDefeated()
 {
 	SetFinishedSpawning();
-	shipsDefeatedOrDespawned = shipsDefeated = spawned;
+	shipsDefeatedOrDespawned = shipsDefeated = shipsSpawned;
 	for (int i = 0; i < ships.Size(); ++i)
 	{
 		ShipPtr s = ships[i];

@@ -30,21 +30,14 @@ public:
 	void UpdateUI();
 	// Inherited via AppState
 	virtual void OnEnter(AppState* previousState) override;
-
 	virtual void Process(int timeInMs) override;
-
 	void Render(GraphicsState* graphicsState);
-
 	virtual void OnExit(AppState* nextState) override;
-
 	void ProcessMessage(Message* message);
 
 	void OpenInGameMenu();
-
 	void Cleanup();
-
 	void UpdatePlayerVelocity();
-
 	void NewPlayer();
 
 	/// Loads target level. The source and separate .txt description have the same name, just different file-endings, e.g. "Level 1.png" and "Level 1.txt"
@@ -54,6 +47,9 @@ public:
 
 	void RenderInLevel(GraphicsState* graphicsState);
 
+	void JumpToTime(String timeString);
+
+	void JumpToTime();
 
 	static bool IsPaused() { return paused; }
 
@@ -64,7 +60,9 @@ public:
 		Measured in milliseconds. FlyTime in contrast refers to total seconds played the level as perceived by the User.
 		For achievements then low FlyTime is interested, for level planning and spawning groups of enemies LevelTime is interesting.
 	*/
-	Time levelTime, flyTime;
+	Time levelTime = Time(TimeType::MILLISECONDS_NO_CALENDER); // Time used in level-scripting. Will be paused arbitrarily to allow for easy scripting.
+	Time flyTime = Time(TimeType::MILLISECONDS_NO_CALENDER); // The actual player-felt time. 
+		
 	// extern int64 nowMs;
 	int timeElapsedMs = 0;
 	int hudUpdateMs = 0;

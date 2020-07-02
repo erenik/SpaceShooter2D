@@ -25,6 +25,8 @@ public:
 	void UpdateUIPlayerHP(bool force);
 	void UpdateUIPlayerShield(bool force);
 	void UpdateCooldowns();
+	void UpdateDebug();
+
 	void ShowLevelStats();
 
 	void HideLevelStats();

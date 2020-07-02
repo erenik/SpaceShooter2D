@@ -4,6 +4,7 @@
 
 #include "SpaceShooter2D.h"
 #include "PlayingLevel.h"
+
 #include "UI/UIUtil.h"
 #include "Window/AppWindowManager.h"
 #include "OS/Sleep.h"
@@ -19,6 +20,12 @@
 #include <PlayingLevel\HandleCollision.h>
 #include "PlayingLevel/SpaceStars.h"
 #include "Properties/LevelProperty.h"
+
+#include "Level/SpawnGroup.h"
+
+SpawnGroup testGroup;
+List<SpawnGroup> storedTestGroups;
+
 
 /// Each other being original position, clamped position, orig, clamp, orig3, clamp3, etc.
 List<Vector3f> renderPositions;
@@ -94,6 +101,7 @@ void PlayingLevel::UpdateUI() {
 void PlayingLevel::OnEnter(AppState* previousState) {
 
 	
+	testGroup.number = 1;
 
 	/// Enable Input-UI navigation via arrow-keys and Enter/Esc.
 	InputMan.ForceNavigateUI(false);
@@ -144,7 +152,9 @@ void PlayingLevel::Process(int timeInMs) {
 
 	level.Process(*this, timeInMs);
 	if (hudUpdateMs > 100) {
-		HUD::Get()->UpdateCooldowns(); // Update HUD 10 times a sec.
+		HUD* hud = HUD::Get();
+		hud->UpdateCooldowns(); // Update HUD 10 times a sec.
+		hud->UpdateDebug();
 		hudUpdateMs = 0;
 	}
 	UpdateRenderArrows();
@@ -195,7 +205,38 @@ void PlayingLevel::ProcessMessage(Message* message)
 		{
 			playerShip->SwitchToWeapon(im->value);
 		}
+		if (msg == "SetTestEnemiesAmount")
+		{
+			testGroup.number = im->value;
+		}
+		break;
+	}
 
+	case MessageType::SET_STRING:
+	{
+		String value = ((SetStringMessage*)message)->value;
+		if (msg == "DropDownMenuSelection:ShipTypeToSpawn")
+		{
+			testGroup.shipType = value;
+		}
+		else if (msg == "DropDownMenuSelection:SpawnFormation")
+		{
+			testGroup.formation = GetFormationByName(value);
+		}
+		break;
+	}
+	case MessageType::VECTOR_MESSAGE:
+	{
+		VectorMessage * vm = (VectorMessage*)message;
+		if (msg == "SetFormationSize")
+		{
+			testGroup.size = vm->GetVector2f();
+		}
+		else if (msg == "SetSpawnLocation")
+		{
+			testGroup.position = vm->GetVector3f();
+		}
+		break;
 	}
 	case MessageType::STRING:
 	{
@@ -204,10 +245,45 @@ void PlayingLevel::ProcessMessage(Message* message)
 		if (found > 0)
 			msg = msg.Part(0, found);
 		
-		if (!false) {}
+		if (false) {}
 		else if (msg.StartsWith("AddLevelScoreToTotal")) {
 			// Add level score to total upon showing level stats. o.o
 			score->iValue += LevelScore()->iValue;
+		}
+		else if (msg == "SetupForTesting")
+		{
+			File::ClearFile(SPAWNED_ENEMIES_LOG);
+			// Disable game-over/dying/winning
+			level.Clear(*this);
+			levelTime.intervals = 0;
+		}
+		else if (msg == "SpawnTestEnemies")
+		{
+			storedTestGroups.AddItem(testGroup);
+			//				QueueGraphics(new GMSetUIs("StoreTestEnemies", GMUI::TEXT, "Store for spawning", ));
+			for (int i = 0; i < storedTestGroups.Size(); ++i)
+			{
+				SpawnGroup sg = storedTestGroups[i];
+				String str = sg.GetLevelCreationString(flyTime);
+				File::AppendToFile(SPAWNED_ENEMIES_LOG, str);
+				LogMain(str, INFO);
+				sg.Spawn(PlayingLevelRef());
+			}
+			storedTestGroups.Clear();
+		}
+		else if (msg.StartsWith("ShipTypeToSpawn:"))
+		{
+			testGroup.shipType = msg.Tokenize(":")[1];
+		}
+		else if (msg == "StoreTestEnemies")
+		{
+			storedTestGroups.AddItem(testGroup);
+			//			QueueGraphics(new GMSetUIs("StoreTestEnemies", GMUI::TEXT, "Store for spawning ("+String(storedTestGroups.Size())+")"));
+		}
+
+		else if (msg == "OnReloadUI") {
+			CreateUserInterface();
+			HUD::Get()->Show();
 		}
 		else if (msg == "ProceedMessage")
 		{
@@ -608,7 +684,7 @@ void PlayingLevel::UpdatePlayerVelocity()
 	}
 	totalVec.Normalize();
 	totalVec *= playerShip->Speed();
-	totalVec *= playerShip->movementDisabled ? 0 : 1;
+	totalVec *= (float) (playerShip->movementDisabled ? 0 : 1);
 	totalVec += LevelEntity->Velocity();
 
 	// Set player speed.
@@ -741,7 +817,7 @@ void PlayingLevel::LoadLevel(String fromSource)
 	levelCamera->trackingPositionOffset = Vector3f(10.f, 0, 0);
 
 	// Reset player stats.
-	playerShip->hp = playerShip->maxHP;
+	playerShip->hp = (float) ( playerShip->maxHP);
 	playerShip->shieldValue = playerShip->maxShieldValue;
 	playerShip->entity->localPosition = Vector3f(-50, 0, 0);
 
@@ -857,6 +933,15 @@ void PlayingLevel::RenderInLevel(GraphicsState * graphicsState)
 	}
 	glEnable(GL_DEPTH_TEST);
 	CheckGLError("SpaceShooter2D::Render");
+}
+
+
+void PlayingLevel::JumpToTime(String timeString)
+{
+	// Jump to target level-time. Adjust position if needed.
+	levelTime.ParseFrom(timeString);
+	level.SetSpawnGroupsFinishedAndDefeated(levelTime);
+	level.OnLevelTimeAdjusted(levelTime);
 }
 
 
