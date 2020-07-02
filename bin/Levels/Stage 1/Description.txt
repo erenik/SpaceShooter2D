@@ -1,0 +1,7 @@
+1-1: Contains Tutorial. Random display of enemy ships and formations.
+
+1-2: Destroy Relay Stations. A block of metal (the relay) stops path, destroy core to move on, guarded by ships and turrets - two of these events. Between relays are ships, turrets and walls.
+
+1-3: Destroy Relay Stations. Same as above - but three events. Between relays are more ships, turrets and walls.
+
+1-4: Has Boss. Ships mostly, strongest fighter squads yet. Boss is Battleship with long range cannons to harass during the stage.

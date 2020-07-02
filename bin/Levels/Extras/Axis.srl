@@ -1,0 +1,223 @@
+// The tutorial level, written as Level 1-0 due to laziness in code.
+MillisecondsPerPixel 300
+
+StarSpeed XY 0 0
+StarColor RGBA 1 1 1 0.3
+
+MessagesPauseGameTime false
+SpawnGroupsPauseGameTime false
+
+PlayBGM: music/PSB Axis Level.ogg
+
+// ==00:03.87 - 00:07.74== First enemies
+/*
+single fighter (F1) at 4 times: 00:03.87, 00:04.83, 00:05.80, 00:06.77
+differing random spawn location, flying straight speed 3 (out of 5), shooting, not aiming
+*/
+SpawnGroup 00:03.87, 00:04.83, 00:05.80, 00:06.77 // .77
+Name 1_Fighter
+ShipType Fighter
+Formation SWARM_BOX_XY
+Number	1
+Size xy 5 18
+Position xy 0 0
+RelativeSpeed 3
+Shoot yes
+
+// 00:07.74 - 00:15.48
+/*
+Single (F1) at 13 times: 00:07.74, +0,4825, +0,4825 x12
+differing random spawn location, flying straight speed 4, not shooting
+*/
+CopyGroup 00:07.74, +0.4825, +0.4825 x12
+RelativeSpeed 4
+Shoot no
+
+
+// ==00:15.48 - 00:46.45== First main battle
+CopyGroup 00:15.48, +0.965, +0.24125, +0.4825
+Number 5
+Formation LINE_Y
+Shoot yes
+RelativeSpeed 3
+CopyGroup 00:19.35, +0.965, +0.24125, +0.4825
+// A1 waves: 5 (F1) in a column, shooting, not aiming.
+
+// B1 waves: 5 (F1) in a column + 1 bomber (B1) in middle, all shooting, not aiming
+CopyGroup 00:23.22, +0.965, +0.24125, +0.4825
+Name B1_4_Fighters
+Number 4
+CopyGroup 00:23.22, +0.965, +0.24125, +0.4825
+Name B1_1_Bomber
+ShipType Bomber
+Number 1
+Size xy 0 0
+Position xy 0 0 
+
+CopyNamedGroup B1_4_Fighters 00:27.09, +0.965, +0.24125, +0.4825
+CopyNamedGroup B1_1_Bomber 00:27.09, +0.965, +0.24125, +0.4825
+
+// A2 waves: 7 (F1) in a column, shooting, aiming.
+CopyNamedGroup B1_4_Fighters 00:30.96, +0.965, +0.24125, +0.4825
+Name A2_7_Fighters
+Number 7
+Aim yes
+CopyGroup 00:34.83, +0.965, +0.24125, +0.4825
+
+// B2 waves: 7 (F1) in a column + 2 bomber (B1) in middle, all shooting, aiming
+CopyNamedGroup A2_7_Fighters 00:38.71, +0.965, +0.24125, +0.4825
+Name B2_7_Fighters
+CopyNamedGroup B1_1_Bomber 00:38.71, +0.965, +0.24125, +0.4825
+Name B2_2_Bombers
+Number 2
+Size xy 0 5
+Position xy 0 -2.5 
+
+CopyNamedGroup B2_7_Fighters 00:42.58, +0.965, +0.24125, +0.4825
+CopyNamedGroup B2_2_Bombers 00:42.58, +0.965, +0.24125, +0.4825
+
+// On each event, spawn waves. all ships of each wave spawn simultaneously.
+
+
+
+
+
+// all fly straight speed 3
+
+
+
+/*
+CopyGroup 0:30
+Name Fighters_3
+ShipType Fighter
+Formation LINE_Y
+Number 3
+Position (y -2.5) 
+CopyGroup 0:32
+Name Bomber_1
+ShipType Bomber
+Number	1
+Position (y 0) 
+
+CopyNamedGroup Fighters_3 0:37
+CopyNamedGroup Bomber_1 0:39
+
+CopyNamedGroup Fighters_3 0:45
+CopyNamedGroup Bomber_1 0:47
+
+
+CopyGroup 0:52
+Name Fighters_6
+ShipType Fighter
+Formation LINE_Y
+Size (y 8)
+Number 6
+Position (y -4) 
+CopyGroup 0:54
+Name Bombers_2
+ShipType Bomber
+Number	2
+Size (y 4)
+Position (y -2) 
+
+CopyNamedGroup Fighters_6 1:00
+CopyNamedGroup Bombers_2 1:02
+CopyNamedGroup Fighters_6 1:08
+CopyNamedGroup Bombers_2 1:10
+
+CopyGroup 1:17
+Name Fighters_9
+ShipType Fighter
+Formation LINE_Y
+Size (y 11)
+Position (y -5.5)
+Number 9
+CopyGroup 1:19
+Name Bombers_3
+ShipType Bomber
+Size (y 8)
+Position (y -4)
+Number	3
+
+CopyNamedGroup Fighters_9 1:26
+CopyNamedGroup Bombers_3 1:28
+CopyNamedGroup Fighters_9 1:35
+CopyNamedGroup Bombers_3 1:37
+
+CopyGroup 1:43
+Number 9
+Size (y 11)
+Position (y -5.5)
+
+/*
+01:45 - 02:30 (if too long/boring throw in whatever)
+
+Big fighters (x4 in size, 10 hits) escorted by fighters in different formations, smaller next to and behind the big ones. Big fighters stop in the middle of the screen for 10s before moving on, firing main weapon (aim, high damage, high reload) and two bursts (aim, 3 burst, low damage). Small fighters don’t stop. 
+
+Bomber survivors return with new payloads at 02:15. *Release 1*
+*/
+/*
+SpawnGroup 1:45
+Name BigFighter_1_Escort
+ShipType Fighter
+Formation DOUBLE_LINE_X
+Number	5
+Size (xy 10 8)
+Position (xy 0 -4) 
+
+CopyGroup 1:50
+Name BigFighter_1
+ShipType BigFighter
+Formation LINE_Y
+Number 1
+Position (y 0)
+
+CopyNamedGroup BigFighter_1_Escort 1:55
+CopyNamedGroup BigFighter_1 2:00
+
+CopyNamedGroup BigFighter_1_Escort 2:05
+CopyNamedGroup BigFighter_1 2:10
+
+CopyNamedGroup BigFighter_1_Escort 2:15
+CopyNamedGroup BigFighter_1 2:20
+
+CopyNamedGroup BigFighter_1_Escort 2:25
+CopyNamedGroup BigFighter_1 2:30
+
+/*
+02:30-03:00
+
+Turrets (5 hits) come in horizontal rows, firing bursts (aim, 4 burst, low damage). Fighters traveling up and down firing straight support them. 
+*/
+
+
+
+/*
+03:00 - 03:50
+*Traveling speed +200%* (player is chasing some ship that is escaping with an important bit of technology. Uses text box with no interaction. Story.)
+
+Fast enemies ramming player spawns at random positions on right side of screen, one at a time, increasing spawn rate over time. After some time they’re accompanied by fighters that slowly circle the player at up to half screen distance from player while shooting. 
+
+2x: The spawning of both enemies stop for a few seconds, and 5-7 volleys of 4 clustered ramming enemies spawn in rhombus formation with 1.71 second delay. Previous enemy spawning resumes after. Spawn rate never resets.
+*/
+
+/* 
+03:50 - 04:45
+*Traveling speed reset*
+
+Fighters in wavy and loopy patterns. Occasional bombers.
+*/
+
+/*
+04:45 - 05:00
+
+Three big fighters spawn, firing with low cooldown and no aim. They move slowly straight forward.
+*/
+
+
+Event 5:05
+String GoToHangar
+
+StopLoading // Makes it stop loading past this point.
+
+

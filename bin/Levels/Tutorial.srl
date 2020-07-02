@@ -1,0 +1,227 @@
+// The tutorial level
+MillisecondsPerPixel 300
+
+// StarSpeed XY 0 0
+StarColor RGBA 1 0.9 0.9 0.3
+
+MessagesPauseGameTime true
+SpawnGroupsPauseGameTime true
+
+Message 0:00
+TextID	99
+
+Event 0:01
+String TutorialBaseGun
+
+// Introduction messages concerning movement. See /data/Texts_English.csv for the actual contents of these.
+Message	0:02
+TextID	100
+Message
+TextID	101
+Message
+TextID	102
+Message 
+TextID 	103
+
+// All spawn groups spawn outside of screen to the right at the specified time.
+SpawnGroup 0:06
+ShipType ImmobilePracticeTarget
+Formation LINE_Y
+Number	3
+Size(xy 2 5)
+Position(xy 0 -2.5) 
+
+
+Message 0:05
+Condition FailedToDefeatAllEnemies
+TextID 105
+
+/// New spawning formations below /// Emil, 2015-03-03
+/// All spawn groups spawn outside of screen to the right at the specified time.
+SpawnGroup 0:06
+ShipType ImmobilePracticeTarget
+Formation LINE_Y
+Number	3
+Size(xy 2 5)
+Position(xy 0 -2.5) 
+
+Event 0:07
+Condition FailedToDefeatAllEnemies
+GoToTime 0:04
+
+Message 0:08
+TextID	104
+
+// Weapon switching
+Message 0:09
+TextID	110
+Message 
+TextID	111
+Message
+TextID	112
+Message
+TextID 113
+Event 
+String TutorialLevel1Weapons
+
+Message 0:11
+Condition FailedToDefeatAllEnemies
+TextID 115
+
+SpawnGroup 0:12
+Number 3
+ShipType ImmobilePracticeTargetTougher
+Formation LINE_Y
+Size(xy 2 5)
+Position(xy 0 -2.5) 
+
+Event 0:12
+Condition FailedToDefeatAllEnemies
+GoToTime 0:10
+
+Message 0:15
+TextID 114
+// Weapon-scripts
+Message
+TextID 120
+Message 
+TextID 121
+Event
+String ActivateWeaponScript
+Message
+TextID 122
+
+Message 0:17
+Condition FailedToDefeatAllEnemies
+TextID 123
+
+SpawnGroup 0:18
+Number 4
+ShipType ImmobilePracticeTargetTougher
+Formation LINE_Y
+Size(xy 2 6)
+Position(xy 0 -3) 
+
+Event 0:19
+Condition FailedToDefeatAllEnemies
+GoToTime 0:16
+
+
+Event 0:20
+String DeactivateWeaponScript
+
+// Weapon upgrades
+Message
+TextID 130
+Event
+String TutorialLevel3Weapons
+Message
+TextID 131
+
+Message 0:22
+Condition FailedToDefeatAllEnemies
+TextID 132
+
+SpawnGroup 0:23
+Number 10
+ShipType ImmobilePracticeTargetTougher
+Formation LINE_Y
+Size(xy 2 10)
+Position(xy 0 -5)
+
+Event 0:24
+Condition FailedToDefeatAllEnemies
+GoToTime 0:22
+
+Event 0:25
+String TutorialLevel1Weapons
+
+// Abilities/Skills
+Event 
+String TutorialSkillCooldowns
+Message 
+TextID 140
+Message
+TextID 141
+Event
+String SetSkill:AttackFrenzy
+Message
+TextID 142
+
+Message 0:27
+Condition FailedToDefeatAllEnemies
+TextID 147
+
+SpawnGroup 0:28
+Number 5
+ShipType ImmobilePracticeTargetTougher
+Formation LINE_Y
+Size(xy 2 10)
+Position(xy 0 -5) 
+
+Event 0:29
+Condition FailedToDefeatAllEnemies
+GoToTime 0:26
+
+Message 0:30 
+TextID 143
+// Speed boost
+Event
+String SetSkill:SpeedBoost
+Message 
+TextID 144
+
+Message 0:32
+Condition FailedToDefeatAllEnemies
+TextID 147
+
+SpawnGroup 0:33
+Number 3
+ShipType SpeedDebris
+Formation LINE_Y
+Size(xy 2 20)
+Position(xy 0 -10) 
+
+Event 0:34
+Condition FailedToDefeatAllEnemies
+GoToTime 0:31
+
+// Shield info
+Message 0:35
+TextID 143
+Message
+TextID 146
+Event 
+String SetSkill:PowerShield
+
+// Retry text
+Message 0:37
+Condition FailedToSurvive
+TextID 147
+Message
+TextID 148
+
+// Spawn bomb and set onDeath stuff.
+Event 
+String DisablePlayerMovement
+String ResetFailedToSurvive
+String PauseGameTime
+String SpawnTutorialBomb
+String SetOnDeath:RespawnAt(0:36)
+
+Message 0:38
+TextID 150
+Event 
+String EnablePlayerMovement
+
+Event 0:40
+String GoToHangar
+// String GoToWorkshop
+
+// Event	1:10
+// String 	EndLevel 
+
+// Old shit below.
+StopLoading // Makes it stop loading past this point.
+
+

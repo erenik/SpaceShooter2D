@@ -1,0 +1,116 @@
+// The tutorial level, written as Level 1-0 due to laziness in code.
+MillisecondsPerPixel 300
+
+StarSpeed XY -10 0
+StarColor RGBA 1 1 1 0.3
+
+MessagesPauseGameTime true
+
+Message 0:00
+TextID	99
+
+// Introduction messages concerning movement. See /data/Texts_English.csv for the actual contents of these.
+Message	0:05
+TextID	100
+Message 
+TextID	101
+Message 
+TextID	102
+
+/// New spawning formations below /// Emil, 2015-03-03
+/// All spawn groups spawn outside of screen to the right at the specified time.
+SpawnGroup 0:10
+ShipType ImmobilePracticeTarget
+Formation LINE_Y
+Number	3
+Size(xy 2 5)
+Position(xy 0 -2.5) 
+
+Message 0:25
+TextID	103
+
+// Weapon switching
+Message 0:30
+TextID	110
+Message 
+TextID	111
+Message  
+TextID	112
+Message
+TextID 113
+
+SpawnGroup 0:48
+Number 3
+ShipType ImmobilePracticeTargetTougher
+Formation LINE_Y
+Number	3
+Size(xy 2 5)
+Position(xy 0 -2.5) 
+
+
+Message 0:55
+TextID 114
+
+Event 1:00
+String GoToHangar
+// String GoToWorkshop
+
+Event	1:10
+String 	EndLevel 
+
+// Old shit below.
+StopLoading // Makes it stop loading past this point.
+
+
+/// New spawning formations below /// Emil, 2015-03-03
+/// All spawn groups spawn outside of screen to the right at the specified time.
+SpawnGroup 0:23
+ShipType V-Fighter_1
+Formation LINE_Y
+Number	2
+Size(xy 0 2)
+Position(xy 0 0) // centered in Y, no offset in X (default, right outside screen on the right)
+
+// Some more pairs.
+CopyGroup(0:32)
+Position(y -5)
+CopyGroup(0:39)
+Position(y 5) 
+CopyGroup(0:52) // First trio group
+Number	3
+Size(y 3)
+Position(y 0) 
+
+// Non-shooters.
+CopyGroup(0:59)
+Formation LINE_XY
+Number 5
+Size(xy 10 10)
+Position(y 0)
+
+// Some more lines.
+CopyGroup(1:05)
+Size(y -10)
+Position(y 5)
+CopyGroup(1:10)
+Size(y 10)
+Position(y -5)
+
+CopyGroup(1:15)
+Size(y -10)
+Position(y 0)
+
+
+/// Introduce.. da bombah.
+SpawnGroup 1:33
+ShipType V-Bomber_1
+Formation LINE_X
+Number	5
+Size(xy 15 0) // 5 in x, y irrelevant for LINE_X
+Position(xy 0 0) // centered in Y, no offset in X (default, right outside screen on the right)
+
+
+
+
+// Back-up of the stuff above since I need to test rotations. - Emil
+

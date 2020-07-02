@@ -1,0 +1,41 @@
+
+MillisecondsPerPixel 300
+ShipType V-Turret_1 RGB 10 0 0
+ShipType V-Assault_1 RGB 20 0 0
+ShipType V-Fighter_3_A	 RGB 30 0 0
+ShipType V-Fighter_3_B	 RGB 40 0 0
+ShipType V-Turret_1 RGB 50 0 0
+ShipType L-Bomber_A RGB 100 0 0
+ShipType Wall_1 RGB 120 0 0
+
+Goal RGB 195 195 195
+
+StarSpeed XY -10 0
+StarColor RGBA 1 0.5 0 1
+
+BeginReturningFormation RGB 0 0 100
+StopReturningFormation RGB 0 0 120
+
+
+
+
+
+StopLoading // Makes it stop loading past this point.
+
+// Back-up of the stuff above since I need to test rotations. - Emil
+
+MillisecondsPerPixel 300
+ShipType V-Fighter_2 RGB 10 0 0
+ShipType V-Fighter_1 RGB 20 0 0
+ShipType V-Fighter_3_A	 RGB 30 0 0
+ShipType V-Fighter_3_B	 RGB 40 0 0
+ShipType V-Turret_1 RGB 50 0 0
+ShipType L-Bomber_A RGB 100 0 0
+ShipType Wall_1 RGB 120 0 0
+
+Goal RGB 195 195 195
+
+StarSpeed XY -10 0
+
+BeginReturningFormation RGB 0 0 100
+StopReturningFormation RGB 0 0 120
