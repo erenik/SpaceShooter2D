@@ -1,0 +1,12 @@
+SpaceShooter
+------------
+WSAD			Movement
+N + G			New Game
+
+
+System
+------
+ALT + F4		Shutdown
+ALT + Enter		Toggle full-screen
+CTRL + R + U 	Reload UI files (.gui)
+CTRL + T 	 	Print render and physics time statistics

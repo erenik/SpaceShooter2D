@@ -1,0 +1,8 @@
+
+All placeholder models are assigned names as follows:
+	(Width)x(Length).obj
+
+
+
+
+

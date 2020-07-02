@@ -1,0 +1,15 @@
+/// Specifies which (extra) ship- and weapon-data files to load.
+/// Weapons should be loaded first.
+Weapons:
+data/AlienWeapons.csv
+data/HumanWeapons.csv
+data/Boss 1 Weapons.csv
+
+Movements:
+data/AlienMovementPatterns.csv
+
+
+Ships:
+data/HumanShips.csv
+data/AlienShips.csv
+data/Boss 1 Data.csv

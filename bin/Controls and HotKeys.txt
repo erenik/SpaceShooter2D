@@ -1,0 +1,15 @@
+SpaceShooter
+------------
+WSAD			Movement
+N + G			New Game
+C + L 			Complete level (kill mobs and move close to the end of the level)
+T + B			Toggle blackness (and possibly other debug-renders)
+N + L			Next level (works for levels 1 through 4 in the current stage)
+P + L			Previous level (works for levels 1 through 4 in the current stage)
+
+System
+------
+ALT + F4		Shutdown
+ALT + Enter		Toggle full-screen
+CTRL + R + U 	Reload UI files (.gui)
+CTRL + T 	 	Print render and physics time statistics
