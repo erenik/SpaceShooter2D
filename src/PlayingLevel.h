@@ -94,6 +94,6 @@ private:
 
 	Time now;
 
-	ParticleEmitter* starEmitter = nullptr;
+	std::shared_ptr<ParticleEmitter> starEmitter = nullptr;
 };
 

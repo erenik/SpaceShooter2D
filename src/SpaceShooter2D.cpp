@@ -149,6 +149,7 @@ void SpaceShooter2D::OnEnter(AppState * previousState)
 	// Set UI without delay.
 //	GraphicsMan.ProcessMessage(new GMSetUI(ui));
 	GraphicsMan.ProcessMessage(new GMSetOverlay(NULL));
+	UpdateUI();
 
 	// Load Space Race integrator
 	integrator = new SSIntegrator(0.f);
@@ -829,6 +830,10 @@ void SpaceShooter2D::SetMode(SSGameMode newMode, bool updateUI)
 	case SSGameMode::MAIN_MENU:
 		StateMan.QueueState(spaceShooter);
 		break;
+	default:
+		// Update UI automagically?
+		if (updateUI)
+			UpdateUI();
 	}
 
 	if (mode == newMode) {
@@ -843,8 +848,5 @@ void SpaceShooter2D::SetMode(SSGameMode newMode, bool updateUI)
 	}
 	LogMain("Entering game mode: " + SSGameModeString(newMode) + ", previously: " + SSGameModeString(mode), INFO);
 	mode = newMode;
-	// Update UI automagically?
-	if (updateUI)
-		UpdateUI();
 }
 

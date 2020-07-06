@@ -9,6 +9,7 @@
 #include "StateManager.h"
 #include "Graphics/GraphicsManager.h"
 #include "Graphics/Messages/GMParticles.h"
+#include "Graphics/Messages/GraphicsMessages.h"
 #include "Graphics/Particles/Stars.h"
 
 std::shared_ptr<ParticleSystem> stars = nullptr;
@@ -68,6 +69,9 @@ void NewStars(Vector3f starDir, float emissionSpeed, float starScale, Color colo
 
 
 void LetStarsTrack(EntitySharedPtr entity, Vector3f positionOffset) {
+	GraphicsMan.QueueMessage(new GMSetParticleEmitter(starEmitter, GT_EMITTER_ENTITY_TO_TRACK, entity));
+	GraphicsMan.QueueMessage(new GMSetParticleEmitter(starEmitter, GT_EMITTER_POSITION_OFFSET, Vector3f(70.f, 0, 0)));
+
 	// Track ... level with effects.
 	starEmitter->entityToTrack = entity;
 	starEmitter->positionOffset = positionOffset;

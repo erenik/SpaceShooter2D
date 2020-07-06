@@ -37,6 +37,7 @@ void SpaceShooter2D::UpdateUI()
 	// Reveal specifics?
 	switch(mode)
 	{
+		case START_UP: break; // No UI, or splash screen?
 		case MAIN_MENU: toPush = "gui/MainMenu.gui"; break;
 		case EDITING_OPTIONS: toPush = "gui/Options.gui"; break;
 		case NEW_GAME: toPush = "gui/NewGame.gui"; break;

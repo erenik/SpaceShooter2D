@@ -788,12 +788,6 @@ void PlayingLevel::LoadLevel(String fromSource)
 		playerShip->RandomizeWeaponCooldowns();
 
 
-	ClearStars();
-
-	/// Add emitter for stars at player start.
-	NewStars(level.starSpeed.NormalizedCopy(), level.starSpeed.Length(), 0.2f, level.starColor);
-
-
 	/// Add entity to track for both the camera, blackness and player playing field.
 	if (levelEntity == nullptr)
 	{
@@ -801,14 +795,16 @@ void PlayingLevel::LoadLevel(String fromSource)
 		LevelEntity->SetVelocity(level.BaseVelocity());
 	}
 
+	/// Add emitter for stars at player start.
+	ClearStars();
+	NewStars(level.starSpeed.NormalizedCopy(), level.starSpeed.Length(), 0.2f, level.starColor);
 	LetStarsTrack(levelEntity, Vector3f(playingFieldSize.x + 10.f, 0, 0));
 
-	//	GraphicsMan.QueueMessage(new GMSetParticleEmitter(starEmitter, GT_EMITTER_ENTITY_TO_TRACK, playerShip->entity));
-	//	GraphicsMan.QueueMessage(new GMSetParticleEmitter(starEmitter, GT_EMITTER_POSITION_OFFSET, Vector3f(70.f, 0, 0)));
-		// Reset position of level entity if already created.
-	//	PhysicsMan.QueueMessage(new PMSetEntity(levelEntity, PT_POSITION, initialPosition));
-		// Set velocity of the game.
-		// Reset position of player!
+
+	// Reset position of level entity if already created.
+	// PhysicsMan.QueueMessage(new PMSetEntity(levelEntity, PT_POSITION, initialPosition));
+	// Set velocity of the game.
+	// Reset position of player!
 	//	PhysicsMan.QueueMessage(new PMSetEntity(playerShip->entity, PT_POSITION, initialPosition));
 
 	level.SpawnPlayer(*this, playerShip);
