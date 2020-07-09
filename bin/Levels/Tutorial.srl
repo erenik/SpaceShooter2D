@@ -28,8 +28,8 @@ SpawnGroup 0:06
 ShipType ImmobilePracticeTarget
 Formation LINE_Y
 Number	3
-Size(xy 2 5)
-Position(xy 0 -2.5) 
+Size xy 2 5
+Position xy 0 -2.5
 
 
 Message 0:05
@@ -42,8 +42,8 @@ SpawnGroup 0:06
 ShipType ImmobilePracticeTarget
 Formation LINE_Y
 Number	3
-Size(xy 2 5)
-Position(xy 0 -2.5) 
+Size xy 2 5
+Position xy 0 -2.5
 
 Event 0:07
 Condition FailedToDefeatAllEnemies
@@ -72,8 +72,8 @@ SpawnGroup 0:12
 Number 3
 ShipType ImmobilePracticeTargetTougher
 Formation LINE_Y
-Size(xy 2 5)
-Position(xy 0 -2.5) 
+Size xy 2 5
+Position xy 0 -2.5
 
 Event 0:12
 Condition FailedToDefeatAllEnemies
@@ -99,8 +99,8 @@ SpawnGroup 0:18
 Number 4
 ShipType ImmobilePracticeTargetTougher
 Formation LINE_Y
-Size(xy 2 6)
-Position(xy 0 -3) 
+Size xy 2 6
+Position xy 0 -3
 
 Event 0:19
 Condition FailedToDefeatAllEnemies
@@ -126,8 +126,8 @@ SpawnGroup 0:23
 Number 10
 ShipType ImmobilePracticeTargetTougher
 Formation LINE_Y
-Size(xy 2 10)
-Position(xy 0 -5)
+Size xy 2 10
+Position xy 0 -5
 
 Event 0:24
 Condition FailedToDefeatAllEnemies
@@ -156,8 +156,8 @@ SpawnGroup 0:28
 Number 5
 ShipType ImmobilePracticeTargetTougher
 Formation LINE_Y
-Size(xy 2 10)
-Position(xy 0 -5) 
+Size xy 2 10
+Position xy 0 -5
 
 Event 0:29
 Condition FailedToDefeatAllEnemies
@@ -179,8 +179,8 @@ SpawnGroup 0:33
 Number 3
 ShipType SpeedDebris
 Formation LINE_Y
-Size(xy 2 20)
-Position(xy 0 -10) 
+Size xy 2 20
+Position xy 0 -10
 
 Event 0:34
 Condition FailedToDefeatAllEnemies

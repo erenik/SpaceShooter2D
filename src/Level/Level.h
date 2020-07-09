@@ -10,10 +10,6 @@
 
 #define SPAWNED_ENEMIES_LOG "SpawnedEnemies.srl"
 
-extern bool gameTimePaused;
-extern bool defeatedAllEnemies;
-extern bool failedToSurvive;
-
 void GenerateLevel (PlayingLevel& playingLevel, String arguments);
 
 struct ShipColorCoding 
@@ -30,12 +26,6 @@ class LevelMessage;
 class Message;
 
 extern Camera * levelCamera;
-// Right hand boundary when ships remove initial invulnerability.
-extern float removeInvuln;
-/// Position in X at which ships are spawned. Before that, their entity representations have not yet been created.
-extern float spawnPositionRight;
-/// Left X limit for despawning ships.
-extern float despawnPositionLeft;
 extern Level * activeLevel;
 
 class Level 
@@ -56,11 +46,11 @@ public:
 	void SetupCamera();
 	/// o.o
 	void Process(PlayingLevel& playingLevel, int timeInMs);
-	void ProcessMessage(Message * message);
+	void ProcessMessage(PlayingLevel& playingLevel, Message * message);
 	void ProceedMessage();
 	// Dialogue, tutorials
 	void ProcessLevelMessages(Time levelTime);
-//	void SetTime(Time newTime);
+	void SetTime(Time newTime);
 	/// enable respawing on shit again.
 	void OnLevelTimeAdjusted(Time levelTime);
 	EntitySharedPtr ClosestTarget(PlayingLevel& playingLevel, bool ally, ConstVec3fr position);
@@ -118,6 +108,10 @@ public:
 	Color starColor;
 
 	bool levelCleared;
+
+	/// Position in X at which ships are spawned. Before that, their entity representations have not yet been created.
+	float spawnPositionRight;
+
 
 	/// Displayed ones, that is.
 	LevelMessage * activeLevelMessage;

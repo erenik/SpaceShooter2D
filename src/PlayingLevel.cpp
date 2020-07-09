@@ -107,7 +107,7 @@ void PlayingLevel::OnEnter(AppState* previousState) {
 	InputMan.ForceNavigateUI(false);
 
 
-	SetPlayingFieldSize(Vector2f(30, 20));
+	SetPlayingFieldSize(Vector2f(40, 30));
 
 	HUD::Get()->Show();
 
@@ -171,7 +171,10 @@ void PlayingLevel::Render(GraphicsState* graphicsState)
 
 
 void PlayingLevel::OnExit(AppState* nextState) {
-		levelEntity = NULL;
+
+	HUD::Get()->Hide();
+
+	levelEntity = NULL;
 	SleepThread(50);
 	// Register it for rendering.
 	Graphics.QueueMessage(new GMUnregisterParticleSystem(sparks, true));
@@ -187,7 +190,7 @@ void PlayingLevel::ProcessMessage(Message* message)
 	String msg = message->msg;
 	if (mode == SSGameMode::EDIT_WEAPON_SWITCH_SCRIPTS)
 		ProcessMessageWSS(message);
-	level.ProcessMessage(message);
+	level.ProcessMessage(*this, message);
 
 	HUD::Get()->ProcessMessage(message);
 
@@ -631,7 +634,7 @@ void PlayingLevel::Cleanup()
 		ProjectileProperty* pp = (ProjectileProperty*)proj->GetProperty(ProjectileProperty::ID());
 		if (pp->sleeping ||
 			(proj->worldPosition[0] < despawnPositionLeft ||
-				proj->worldPosition[0] > spawnPositionRight ||
+				proj->worldPosition[0] > level.spawnPositionRight ||
 				proj->worldPosition.y < despawnDown ||
 				proj->worldPosition.y > despawnUp
 				)
@@ -937,6 +940,11 @@ void PlayingLevel::JumpToTime(String timeString)
 	// Jump to target level-time. Adjust position if needed.
 	levelTime.ParseFrom(timeString);
 	level.SetSpawnGroupsFinishedAndDefeated(levelTime);
+	level.OnLevelTimeAdjusted(levelTime);
+}
+
+void PlayingLevel::SetTime(Time time) {
+	levelTime = time;
 	level.OnLevelTimeAdjusted(levelTime);
 }
 

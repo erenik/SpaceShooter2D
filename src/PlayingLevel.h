@@ -49,7 +49,7 @@ public:
 
 	void JumpToTime(String timeString);
 
-	void JumpToTime();
+	void SetTime(Time time);
 
 	static bool IsPaused() { return paused; }
 
@@ -88,6 +88,14 @@ public:
 
 	void OpenSpawnWindow();
 	void CloseSpawnWindow();
+
+	bool gameTimePaused = false;
+	bool defeatedAllEnemies = true;
+	bool failedToSurvive = false;
+
+	// Position boundaries.
+	float removeInvuln = 0;
+	float despawnPositionLeft = 0;
 
 private:
 

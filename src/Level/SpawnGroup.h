@@ -48,6 +48,7 @@ public:
 	bool Spawn(PlayingLevel& playingLevel);
 	/// To avoid spawning later.
 	void SetFinishedSpawning();
+	void OnFinishedSpawning(PlayingLevel& playingLevel);
 	void SetDefeated();
 	bool FinishedSpawning() { return finishedSpawning;};
 
@@ -58,8 +59,8 @@ public:
 	List<ShipPtr> LivingShips() { return ships; };
 	/// Query, compares active ships vs. spawned amount
 	bool DefeatedOrDespawned();
-	void OnShipDestroyed(ShipPtr ship);
-	void OnShipDespawned(ShipPtr ship);
+	void OnShipDestroyed(PlayingLevel& playingLevel, ShipPtr ship);
+	void OnShipDespawned(PlayingLevel& playingLevel, ShipPtr ship);
 	/// Creates string (sequence of lines) required to create this specific SpawnGroup in e.g. a level file.
 	String GetLevelCreationString(Time t);
 	/// o.o

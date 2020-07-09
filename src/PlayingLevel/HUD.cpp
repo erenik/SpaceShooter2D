@@ -16,16 +16,22 @@
 
 HUD HUD::hud = HUD();
 
+String hudPath = "gui/HUD.gui";
+
 HUD* HUD::Get() {
 	return &hud;
 }
 
 void HUD::Show() {
-	String toPush = "gui/HUD.gui";
+	
 	overlaysCreated = false;
-	PushUI(toPush);
+	PushUI(hudPath);
 	// By default remove hover from any UI element. Select weapons with 1-9 keys.
 	QueueGraphics(new GMSetHoverUI(nullptr));
+}
+
+void HUD::Hide() {
+	PopUI(hudPath);
 }
 
 void HUD::UpdateUI() {

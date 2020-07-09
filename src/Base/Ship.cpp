@@ -134,7 +134,7 @@ List< std::shared_ptr<Entity> > Ship::Spawn(ConstVec3fr atLocalPosition, ShipPtr
 	movementDisabled = false;
 	RandomizeWeaponCooldowns();
 
-	Vector3f atPosition = atLocalPosition + playingLevel.levelEntity->worldPosition;
+	Vector3f atPosition = atLocalPosition + Vector3f(playingLevel.level.spawnPositionRight, 0, 0);
 	atPosition.z = 0;
 //	atPosition.y += levelEntity->worldPosition
 
@@ -317,9 +317,9 @@ void Ship::Despawn(PlayingLevel& playingLevel, bool doExplodeEffectsForChildren)
 	if (spawnGroup)
 	{
 		if (hp <= 0)
-			spawnGroup->OnShipDestroyed(GetSharedPtr());
+			spawnGroup->OnShipDestroyed(PlayingLevelRef(), GetSharedPtr());
 		else
-			spawnGroup->OnShipDespawned(GetSharedPtr());
+			spawnGroup->OnShipDespawned(PlayingLevelRef(), GetSharedPtr());
 	}
 }
 
@@ -596,7 +596,7 @@ void Ship::Destroy(PlayingLevel& playingLevel)
 	{
 		if (spawnGroup)
 		{
-			spawnGroup->OnShipDestroyed(GetSharedPtr());
+			spawnGroup->OnShipDestroyed(PlayingLevelRef(), GetSharedPtr());
 		}
 		ShipProperty * sp = entity->GetProperty<ShipProperty>();
 		if (sp)
@@ -613,7 +613,7 @@ void Ship::Destroy(PlayingLevel& playingLevel)
 			spaceShooter->OnScoreUpdated();
 		}
 		else 
-			failedToSurvive = true;
+			PlayingLevelRef().failedToSurvive = true;
 		/// Despawn.
 		Despawn(playingLevel, true);
 	}

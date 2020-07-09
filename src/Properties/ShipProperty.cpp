@@ -65,7 +65,7 @@ void ShipProperty::Process(int timeInMs)
 	/// o.o
 	if (spawnInvulnerability)
 	{
-		if (owner->worldPosition.x < removeInvuln)
+		if (owner->worldPosition.x < PlayingLevelRef().removeInvuln)
 		{
 			// Change color.
 			QueueGraphics(new GMSetEntityTexture(owner, DIFFUSE_MAP | SPECULAR_MAP, TexMan.GetTextureByColor(Color(255,255,255,255))));
@@ -132,13 +132,13 @@ void ShipProperty::OnCollision(EntitySharedPtr withEntity)
 		// Check collision damage cooldown for if we should apply damage.
 		if (ship->lastShipCollision < pl.flyTime - ship->collisionDamageCooldown)
 		{
-			if (!ship->Damage(pl, sspp->ship->collideDamage, true))
+			if (!ship->Damage(pl, float(sspp->ship->collideDamage), true))
 				ship->lastShipCollision = pl.flyTime;
 		}
 		// Same for the other ship.
 		if (ship && sspp->ship->lastShipCollision < pl.flyTime - sspp->ship->collisionDamageCooldown)
 		{
-			if (!sspp->ship->Damage(pl, ship->collideDamage, false))
+			if (!sspp->ship->Damage(pl, float(ship->collideDamage), false))
 				sspp->ship->lastShipCollision = pl.flyTime;
 		}
 
@@ -174,8 +174,8 @@ void ShipProperty::OnCollision(EntitySharedPtr withEntity)
 		if (pp->ShouldDamage(ship))
 		{
 			// Take damage? D:
-			if (pp->penetratedTargets.Size())
-				; // std::cout<<"\nPenetrator damaing again: "<<pp->penetratedTargets.Size();
+			//if (pp->penetratedTargets.Size())
+			//	; // std::cout<<"\nPenetrator damaing again: "<<pp->penetratedTargets.Size();
 			ship->Damage(PlayingLevelRef(), pp->weapon);
 			// Check penetration rate.
 			if (penetrationRand.Randf() > pp->weapon.penetration)

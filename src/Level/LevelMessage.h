@@ -14,8 +14,8 @@ public:
 	LevelMessage();
 	void PrintAll(); // debug
 	// UI Returns true if it was displayed, false if skipped (condition false).
-	bool Display();
-	void Hide();
+	bool Display(PlayingLevel& playingLevel, Level * level);
+	void Hide(PlayingLevel& playingLevel);
 	
 	enum {
 		TEXT_MESSAGE,

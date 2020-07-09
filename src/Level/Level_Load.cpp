@@ -125,9 +125,6 @@ bool Level::Load(String fromSource)
 	spaceShooter->ResetLevelStats();
 
 
-	failedToSurvive = false;
-	defeatedAllEnemies = true;
-	gameTimePaused = false;
 	/// Clear old stuff.
 	ships.Clear();
 	spawnGroups.ClearAndDelete();

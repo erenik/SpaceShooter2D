@@ -263,6 +263,11 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 				String file = fv->files[i];
 				if (file.Contains(".srl"))
 				{
+
+					playingLevel->gameTimePaused = false;
+					playingLevel->defeatedAllEnemies = true;
+					playingLevel->failedToSurvive = false;
+					
 					level.Load(file);
 					level.OnEnter();
 				}

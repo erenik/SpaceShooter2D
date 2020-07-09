@@ -14,6 +14,7 @@ public:
 
 
 	void Show();
+	void Hide();
 
 	// Updates all
 	void UpdateUI();

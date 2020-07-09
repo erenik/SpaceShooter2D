@@ -7,6 +7,7 @@
 #include "../SpaceShooter2D.h"
 #include "LevelMessage.h"
 #include "File/LogFile.h"
+#include "PlayingLevel.h"
 
 LevelMessage::LevelMessage()
 {
@@ -32,7 +33,7 @@ void LevelMessage::PrintAll()
 int activeLevelDisplayMessages = 0;
 
 // UI
-bool LevelMessage::Display()
+bool LevelMessage::Display(PlayingLevel& playingLevel, Level * level)
 {
 	bool trigger = true;
 	if (condition.Length())
@@ -40,11 +41,11 @@ bool LevelMessage::Display()
 		std::cout<<"\nCondition: "<<condition;
 		if (condition == "FailedToDefeatAllEnemies")
 		{
-			trigger = defeatedAllEnemies == false;
+			trigger = playingLevel.defeatedAllEnemies == false;
 		}
 		else if (condition == "FailedToSurvive")
 		{
-			trigger = failedToSurvive;
+			trigger = playingLevel.failedToSurvive;
 		}
 		else {
 			LogMain("Bad condition in LevelMessage", WARNING);
@@ -78,21 +79,20 @@ bool LevelMessage::Display()
 			MesMan.QueueMessages(strings);
 		if (goToTime.intervals != 0)
 		{
-			assert(false && "commented out");
-			//spaceShooter->level.SetTime(goToTime);
+			level->SetTime(goToTime);
 			LogMain("Jumping to time: "+String(goToTime.Seconds()), INFO);
 			return false; // Return as if it failed, so the event is not saved as currently active one. (instantaneous)
 		}
 	}
 	if (pausesGameTime)
 	{
-		gameTimePaused = true;
+		playingLevel.gameTimePaused = true;
 		// If any entities are present, pause game entirely?
 	}
 	return true;
 }
 
-void LevelMessage::Hide()
+void LevelMessage::Hide(PlayingLevel& playingLevel)
 {
 	if (type == LevelMessage::TEXT_MESSAGE)
 	{
@@ -100,11 +100,11 @@ void LevelMessage::Hide()
 		if (activeLevelDisplayMessages <= 0)
 		{
 			QueueGraphics(new GMSetUIb("LevelMessage", GMUI::VISIBILITY, false));
-			gameTimePaused = false;
+			playingLevel.gameTimePaused = false;
 		}
 		displayed = true;
 	}
 	hidden = true;
 	if (pausesGameTime)
-		gameTimePaused = false;
+		playingLevel.gameTimePaused = false;
 }

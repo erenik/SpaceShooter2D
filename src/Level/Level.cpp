@@ -16,16 +16,8 @@
 
 Camera * levelCamera = NULL;
 
-// See header file. Position boundaries.
-float removeInvuln = 0;
-float spawnPositionRight = 0;
-float despawnPositionLeft = 0;
 
 Level * activeLevel = NULL;
-
-bool gameTimePaused = false;
-bool defeatedAllEnemies = true;
-bool failedToSurvive = false;
 
 Level::Level()
 {
@@ -33,6 +25,7 @@ Level::Level()
 	endCriteria = NO_MORE_ENEMIES;
 	levelCleared = false;
 	activeLevelMessage = 0;
+	spawnPositionRight = 0;
 }
 
 Level::~Level()
@@ -132,12 +125,12 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 
 	activeLevel = this;
 
-	removeInvuln = playingLevel.levelEntity->worldPosition[0] + playingLevel.playingFieldHalfSize[0] + playingLevel.playingFieldPadding + 1.f;
-	assert(removeInvuln > -1000);
-	spawnPositionRight = removeInvuln + 15.f;
+	PlayingLevelRef().removeInvuln = playingLevel.levelEntity->worldPosition[0] + playingLevel.playingFieldHalfSize[0] + playingLevel.playingFieldPadding + 1.f;
+	assert(PlayingLevelRef().removeInvuln > -1000);
+	spawnPositionRight = PlayingLevelRef().removeInvuln + 15.f;
 	assert(spawnPositionRight > -1000);
-	despawnPositionLeft = playingLevel.levelEntity->worldPosition[0] - playingLevel.playingFieldHalfSize[0] - 1.f;
-	assert(despawnPositionLeft > -1000);
+	PlayingLevelRef().despawnPositionLeft = playingLevel.levelEntity->worldPosition[0] - playingLevel.playingFieldHalfSize[0] - 1.f;
+	assert(PlayingLevelRef().despawnPositionLeft > -1000);
 
 	// Check for game over.
 	if (playingLevel.playerShip->hp <= 0)
@@ -170,7 +163,7 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 		spaceShooter->OnLevelCleared();
 		return; // No more processing if cleared?
 	}
-	if (gameTimePaused) {
+	if (playingLevel.gameTimePaused) {
 		LogMain("Game time is paused", EXTENSIVE_DEBUG);
 		SleepThread(10);
 		return;
@@ -232,15 +225,15 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 			if (msToSpawn > 0)
 				continue;
 			if (sg->FinishedSpawning() && sg->pausesGameTime && sg->DefeatedOrDespawned()) {
-				gameTimePaused = false;
+				playingLevel.gameTimePaused = false;
 				continue;
 			}
 			if (!sg->FinishedSpawning())
 			{
-				defeatedAllEnemies = false;
+				playingLevel.defeatedAllEnemies = false;
 				sg->Spawn(playingLevel);
 				if (sg->pausesGameTime)
-					gameTimePaused = true;
+					playingLevel.gameTimePaused = true;
 				continue;
 			}
 		}
@@ -261,13 +254,13 @@ void Level::ProcessLevelMessages(Time levelTime) {
 			{
 				if (activeLevelMessage)
 					continue;
-				if (lm->Display())
+				if (lm->Display(PlayingLevelRef(), this))
 					activeLevelMessage = lm;
 			}
 			if (lm->displayed && lm->stopTime < levelTime)
 			{
 				// Retain sorting.
-				lm->Hide();
+				lm->Hide(PlayingLevelRef());
 				if (activeLevelMessage == lm)
 				{
 					activeLevelMessage = 0;
@@ -277,7 +270,7 @@ void Level::ProcessLevelMessages(Time levelTime) {
 	}
 }
 
-void Level::ProcessMessage(Message * message)
+void Level::ProcessMessage(PlayingLevel& playingLevel, Message * message)
 {
 	String & msg = message->msg;
 	switch(message->type)
@@ -307,11 +300,11 @@ void Level::ProcessMessage(Message * message)
 				levelCleared = true;
 			}
 			if (msg == "PauseGameTime")
-				gameTimePaused = true;
+				playingLevel.gameTimePaused = true;
 			if (msg == "ResumeGameTime")
-				gameTimePaused = false;
+				playingLevel.gameTimePaused = false;
 			if (msg == "ResetFailedToSurvive")
-				failedToSurvive = false;			
+				playingLevel.failedToSurvive = false;
 			break;		
 		}
 	}
@@ -320,16 +313,14 @@ void Level::ProcessMessage(Message * message)
 void Level::ProceedMessage()
 {
 	if (activeLevelMessage)
-		activeLevelMessage->Hide();
+		activeLevelMessage->Hide(PlayingLevelRef());
 	activeLevelMessage = 0;
 }
 
-//void Level::SetTime(Time newTime)
-//{
-//	Time oldTime;
-//	levelTime = newTime;
-//	OnLevelTimeAdjusted();
-//}
+void Level::SetTime(Time newTime)
+{
+	PlayingLevelRef().SetTime(newTime);
+}
 
 /// enable respawing on shit again.
 void Level::OnLevelTimeAdjusted(Time levelTime)

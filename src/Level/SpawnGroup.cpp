@@ -135,6 +135,12 @@ bool SpawnGroup::Spawn(PlayingLevel& playingLevel)
 	return false;
 }
 
+void SpawnGroup::OnFinishedSpawning(PlayingLevel& playingLevel) {
+	if (pausesGameTime && DefeatedOrDespawned()) {
+		playingLevel.gameTimePaused = false;
+	}
+}
+
 /// To avoid spawning later.
 void SpawnGroup::SetFinishedSpawning()
 {
@@ -295,18 +301,18 @@ void SpawnGroup::PrepareForSpawning(SpawnGroup * parent)
 				break;//std::cout<<"\nImplement";
 			case Formation::CIRCLE:
 				angles = true;
-				degrees = 360.0 / number;
+				degrees = 360.0f / number;
 				startDegree = 180;
 				break;
 			case Formation::HALF_CIRCLE_LEFT:
 				angles = true;
-				degrees = 180.0 / max((number - 1), 1);
+				degrees = 180.0f / max((number - 1), 1);
 				startDegree = 90;
 				radialMultiplier.x = 2;
 				break;
 			case Formation::HALF_CIRCLE_RIGHT:
 				angles = true;
-				degrees = 180.0 / max((number - 1), 1);
+				degrees = 180.0f / max((number - 1), 1);
 				startDegree = -90;
 				radialMultiplier.x = 2;
 				break;
@@ -327,10 +333,13 @@ void SpawnGroup::PrepareForSpawning(SpawnGroup * parent)
 		position += this->position;
 
 		assert(position.x == position.x);
+		assert(position.y == position.y);
 		LogMain(String("Spawning ship @ x")+ String(position.x)+" y"+position.y, INFO);
 
 		/// Add current position offset to it.
 //		position += Vector3f(spawnPositionRight, activeLevel->height * 0.5f, 0); 
+
+
 		/// Create entity
 		AddShipAtPosition(position);
 		if (formation == Formation::DOUBLE_LINE_X)
@@ -403,30 +412,30 @@ void SpawnGroup::SetDefeated()
 	ships.Clear();
 }
 
-void SpawnGroup::OnShipDestroyed(ShipPtr ship)
+void SpawnGroup::OnShipDestroyed(PlayingLevel& playingLevel, ShipPtr ship)
 {
 	++shipsDefeated;
 	++shipsDefeatedOrDespawned;
 	if (shipsDefeated >= number)
 	{
-		defeatedAllEnemies = true;
+		playingLevel.defeatedAllEnemies = true;
 		defeated = true;
 		survived = true;
 		if (pausesGameTime)
-			gameTimePaused = false;
+			playingLevel.gameTimePaused = false;
 	}
 }
 
-void SpawnGroup::OnShipDespawned(ShipPtr ship)
+void SpawnGroup::OnShipDespawned(PlayingLevel& playingLevel, ShipPtr ship)
 {
 	++shipsDespawned;
 	++shipsDefeatedOrDespawned;
 	if (shipsDefeatedOrDespawned >= number)
 	{
-		defeatedAllEnemies = false;
+		playingLevel.defeatedAllEnemies = false;
 		survived = true;
 		if (pausesGameTime)
-			gameTimePaused = false;
+			playingLevel.gameTimePaused = false;
 	}
 }
 
