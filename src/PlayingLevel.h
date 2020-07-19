@@ -35,10 +35,16 @@ public:
 	virtual void OnExit(AppState* nextState) override;
 	void ProcessMessage(Message* message);
 
+	void OnPlayerSpawned();
 	void OpenInGameMenu();
 	void Cleanup();
 	void UpdatePlayerVelocity();
 	void NewPlayer();
+	// If true, game over is pending/checking respawn conditions, don't process other messages.
+	bool CheckForGameOver(int timeInMs);
+	void OnPlayerDied();
+
+	void SpawnPlayer();
 
 	/// Loads target level. The source and separate .txt description have the same name, just different file-endings, e.g. "Level 1.png" and "Level 1.txt"
 	void LoadLevel(String levelSource = "CurrentStageLevel");
@@ -49,9 +55,12 @@ public:
 
 	void JumpToTime(String timeString);
 
-	void SetTime(Time time);
+	// Returns the new time set to.
+	Time SetTime(Time time);
 
 	static bool IsPaused() { return paused; }
+
+	void HideLevelMessage();
 
 
 	static PlayingLevel* singleton;
@@ -89,18 +98,33 @@ public:
 	void OpenSpawnWindow();
 	void CloseSpawnWindow();
 
-	bool gameTimePaused = false;
-	bool defeatedAllEnemies = true;
+
+	bool GameTimePausedDueToActiveSpawnGroup();
+	bool GameTimePaused();
+
+	bool gameTimePausedDueToActiveLevelMessage = false;
+	bool gameTimePausedDueToScriptableMessage = false;
+
+
+	// In the most recent spawn group
+	bool DefeatedAllEnemiesInTheLastSpawnGroup();
 	bool failedToSurvive = false;
 
 	// Position boundaries.
 	float removeInvuln = 0;
 	float despawnPositionLeft = 0;
+	float spawnPositionRight = 0;
+
+	int spaceDebrisCollected = 0;
+
+	void SetLastSpawnGroup(SpawnGroup * sg);
 
 private:
 
+	SpawnGroup * lastSpawnGroup;
 
 	Time now;
+	int timeDeadMs = 0;
 
 	std::shared_ptr<ParticleEmitter> starEmitter = nullptr;
 };

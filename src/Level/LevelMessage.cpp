@@ -16,7 +16,7 @@ LevelMessage::LevelMessage()
 	type = TEXT_MESSAGE;
 	eventType = STRING_EVENT;
 	pausesGameTime = false;
-	textID = -1;
+	textID = "";
 }
 
 void LevelMessage::PrintAll()
@@ -33,7 +33,7 @@ void LevelMessage::PrintAll()
 int activeLevelDisplayMessages = 0;
 
 // UI
-bool LevelMessage::Display(PlayingLevel& playingLevel, Level * level)
+bool LevelMessage::Trigger(PlayingLevel& playingLevel, Level * level)
 {
 	bool trigger = true;
 	if (condition.Length())
@@ -41,11 +41,15 @@ bool LevelMessage::Display(PlayingLevel& playingLevel, Level * level)
 		std::cout<<"\nCondition: "<<condition;
 		if (condition == "FailedToDefeatAllEnemies")
 		{
-			trigger = playingLevel.defeatedAllEnemies == false;
+			trigger = playingLevel.DefeatedAllEnemiesInTheLastSpawnGroup() == false;
 		}
 		else if (condition == "FailedToSurvive")
 		{
 			trigger = playingLevel.failedToSurvive;
+		}
+		else if (condition == "2SpaceDebrisNotCollected") {
+			trigger = playingLevel.spaceDebrisCollected != 2;
+			playingLevel.spaceDebrisCollected = 0;
 		}
 		else {
 			LogMain("Bad condition in LevelMessage", WARNING);
@@ -63,7 +67,7 @@ bool LevelMessage::Display(PlayingLevel& playingLevel, Level * level)
 	if (type == LevelMessage::TEXT_MESSAGE)
 	{
 		// o.o uiiii
-		if (textID == -1)
+		if (textID == "-1")
 		{
 			PrintAll();
 		}
@@ -86,7 +90,7 @@ bool LevelMessage::Display(PlayingLevel& playingLevel, Level * level)
 	}
 	if (pausesGameTime)
 	{
-		playingLevel.gameTimePaused = true;
+		playingLevel.gameTimePausedDueToActiveLevelMessage = true;
 		// If any entities are present, pause game entirely?
 	}
 	return true;
@@ -100,11 +104,11 @@ void LevelMessage::Hide(PlayingLevel& playingLevel)
 		if (activeLevelDisplayMessages <= 0)
 		{
 			QueueGraphics(new GMSetUIb("LevelMessage", GMUI::VISIBILITY, false));
-			playingLevel.gameTimePaused = false;
+			playingLevel.gameTimePausedDueToActiveLevelMessage = false;
 		}
-		displayed = true;
+		displayed = false;
 	}
 	hidden = true;
 	if (pausesGameTime)
-		playingLevel.gameTimePaused = false;
+		playingLevel.gameTimePausedDueToActiveLevelMessage = false;
 }

@@ -67,7 +67,7 @@ void ExplosionProperty::ProcessMessage(Message * message)
 float ExplosionProperty::CurrentDamage()
 {
 	float currDmg = weapon.damage * pow((float)(1 - timeAliveMs/(float)duration), 2);
-	totalDamageInflicted += currDmg;
+	totalDamageInflicted = int (totalDamageInflicted + currDmg);
 	std::cout<<"\nCurrent Damage: "<<currDmg<<" total: "<<totalDamageInflicted;
 	return currDmg;
 }

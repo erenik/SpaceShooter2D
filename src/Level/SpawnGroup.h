@@ -37,9 +37,11 @@ class SpawnGroup
 public:
 	SpawnGroup();
 	virtual ~SpawnGroup();
-	void Reset();
+	void Nullify();
+	void ResetForSpawning();
 	void RemoveThis(Ship* sp);
 
+	bool AllShipsSpawned();
 	/** Spawns ze entities. 
 		True if spawning sub-part of an aggregate formation-type. 
 		Returns true if it has finished spawning. 
@@ -55,19 +57,23 @@ public:
 	/// Gathers all ships internally for spawning. Returns lsit of all ships (used internally)
 	void PrepareForSpawning(SpawnGroup * parent = 0);
 
-	/// Living ships
-	List<ShipPtr> LivingShips() { return ships; };
+	// Number of ships active and alive (not despawned or destroyed).
+	int ShipsActive();
+
 	/// Query, compares active ships vs. spawned amount
 	bool DefeatedOrDespawned();
 	void OnShipDestroyed(PlayingLevel& playingLevel, ShipPtr ship);
 	void OnShipDespawned(PlayingLevel& playingLevel, ShipPtr ship);
 	/// Creates string (sequence of lines) required to create this specific SpawnGroup in e.g. a level file.
 	String GetLevelCreationString(Time t);
+
+	Time SpawnTime() const { return spawnTime;  }
+	void SetSpawnTime(Time newSpawnTime);
+
 	/// o.o
 	String name;
 	String shipType;
-	bool survived; // player survived the way?
-	Time spawnTime;
+	bool playerSurvived; // player survived the way?
 	Vector3f position;
 	/// Number along the formation bounds. Before PrepareForSpawning is called, this is an arbitrary argument, which may or may not be the same after preparing for spawning (e.g. it may multiply for generating a SQUARE formation).
 	int number;
@@ -86,10 +92,18 @@ public:
 	bool shoot;
 	/// If true, pauses game time, until all ships of the group have either been destroyed or despawned by exiting the screen.
 	bool pausesGameTime;
-	int shipsDefeatedOrDespawned;
-	int shipsDespawned, shipsDefeated;
-	int shipsSpawned, defeated; // num spawned and defeated?
+	bool ShipsDefeatedOrDespawned();
+	int ShipsDespawned();
+	int ShipsDefeated();
+	int shipsSpawned;
+
 private:
+
+	Time spawnTime;
+
+	ShipPtr GetNextShipToSpawn();
+	void SpawnAllShips(PlayingLevel& playingLevel);
+
 	bool finishedSpawning;
 	AETime lastSpawn;
 	bool preparedForSpawning;

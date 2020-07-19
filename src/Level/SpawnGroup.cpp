@@ -50,7 +50,7 @@ SpawnGroup::SpawnGroup()
 	spawnTime = Time(TimeType::MILLISECONDS_NO_CALENDER);
 	pausesGameTime = false;
 	spawnIntervalMsBetweenEachShipInFormation = 0;
-	Reset();
+	Nullify();
 	lastSpawn = AETime(TimeType::MILLISECONDS_NO_CALENDER, 0);
 }
 
@@ -64,19 +64,21 @@ SpawnGroup::~SpawnGroup()
 	}
 }
 
-void SpawnGroup::Reset()
+void SpawnGroup::Nullify()
 {
-	pausesGameTime = false;
-	finishedSpawning = false;
-	preparedForSpawning = false;
+	ResetForSpawning();
+	spawnTime = Time(TimeType::MILLISECONDS_NO_CALENDER);
 	relativeSpeed = 5.f;
 	shoot = true;
-	shipsSpawned = false;
-	defeated = false;
-	survived = false;
-	shipsDefeatedOrDespawned = 0;
-	shipsDespawned = shipsDefeated = 0;
-	spawnTime = Time(TimeType::MILLISECONDS_NO_CALENDER);
+	pausesGameTime = false;
+}
+
+void SpawnGroup::ResetForSpawning() {
+	finishedSpawning = false;
+	preparedForSpawning = false;
+	shipsSpawned = 0;
+	playerSurvived = false;
+	ships.Clear();
 }
 
 void SpawnGroup::RemoveThis(Ship* sp) {
@@ -86,6 +88,25 @@ void SpawnGroup::RemoveThis(Ship* sp) {
 	}
 }
 
+
+ShipPtr SpawnGroup::GetNextShipToSpawn() {
+	for (int i = 0; i < ships.Size(); ++i)
+		if (!ships[i]->spawned)
+			return ships[i];
+	return nullptr;
+}
+
+void SpawnGroup::SpawnAllShips(PlayingLevel& playingLevel) {
+	for (int i = 0; i < ships.Size(); ++i)
+	{
+		ShipPtr ship = ships[i];
+		ship->Spawn(ship->position + Vector3f(playingLevel.spawnPositionRight, 0, 0), 0, playingLevel);
+		activeLevel->ships.AddItem(ship);
+		++shipsSpawned;
+	}
+	finishedSpawning = true;
+	OnFinishedSpawning(playingLevel);
+}
 
 Random spawnGroupRand;
 /** Spawns ze entities. 
@@ -99,36 +120,33 @@ bool SpawnGroup::Spawn(PlayingLevel& playingLevel)
 	if (!preparedForSpawning)
 		PrepareForSpawning();
 
+	// Shouldn't spawn yet, this check might be better placed before this call though?
+	if (playingLevel.levelTime < spawnTime) {
+		assert(false && "Shouldn't be here.");
+		return false;
+	}
+
 	// Spawn all?
 	if (spawnIntervalMsBetweenEachShipInFormation == 0)
 	{
-		for (int i = 0; i < ships.Size(); ++i)
-		{
-			ShipPtr ship = ships[i];
-			ship->Spawn(ship->position, 0, playingLevel);
-			activeLevel->ships.AddItem(ship);
-			++shipsSpawned;
-			ships.RemoveItem(ship);
-		}
-		finishedSpawning = true;
+		SpawnAllShips(playingLevel);
 		return true;
 	}
 	/// Spawn one at a time?
 	else
 	{
+		ShipPtr ship = GetNextShipToSpawn();
+		// Finished spawning
+		if (!ship) {
+			finishedSpawning = true;
+			OnFinishedSpawning(playingLevel);
+			return true;
+		}
 		if (lastSpawn.Seconds() == 0 || (playingLevel.levelTime - lastSpawn).Milliseconds() > spawnIntervalMsBetweenEachShipInFormation)
 		{
-			ShipPtr ship = ships[0];
 			ship->Spawn(ship->position, 0, playingLevel);
 			activeLevel->ships.AddItem(ship);
-			ships.RemoveIndex(0, ListOption::RETAIN_ORDER);
 			lastSpawn = playingLevel.levelTime;
-		}
-		// Spawn one ata  time.
-		if (ships.Size() == 0)
-		{
-			finishedSpawning = true;
-			return true;
 		}
 	}
 	/// o.o
@@ -136,9 +154,7 @@ bool SpawnGroup::Spawn(PlayingLevel& playingLevel)
 }
 
 void SpawnGroup::OnFinishedSpawning(PlayingLevel& playingLevel) {
-	if (pausesGameTime && DefeatedOrDespawned()) {
-		playingLevel.gameTimePaused = false;
-	}
+	LogMain("Spawngroup "+name+ " finished spawning", INFO);
 }
 
 /// To avoid spawning later.
@@ -361,6 +377,21 @@ end:
 	}
 }
 
+// Number of ships active and alive (not despawned or destroyed).
+int SpawnGroup::ShipsActive() {
+	int numActive = 0;
+	for (int i = 0; i < ships.Size(); ++i){
+		ShipPtr ship = ships[i];
+		if (!ship->spawned)
+			continue;
+		if (ship->destroyed)
+			continue;
+		++numActive;
+	}	
+	return numActive;
+}
+
+
 void SpawnGroup::AddShipAtPosition(ConstVec3fr position)
 {
 	ShipPtr newShip = Ship::New(shipType);
@@ -393,51 +424,90 @@ void SpawnGroup::AddShipAtPosition(ConstVec3fr position)
 {
 }*/
 
+bool SpawnGroup::AllShipsSpawned() {
+	if (!preparedForSpawning)
+		return false;
+	for (int i = 0; i < ships.Size(); ++i)
+		if (!ships[i]->spawned)
+			return false;
+	return true;
+}
+
+
 /// Query, compares active ships vs. spawned amount
 bool SpawnGroup::DefeatedOrDespawned()
 {
-	return shipsDefeatedOrDespawned >= shipsSpawned;
+	if (ships.Size() == 0)
+		return false;
+	if (!AllShipsSpawned())
+		return false;
+	int stillAlive = 0;
+	for (int i = 0; i < ships.Size(); ++i) {
+		ShipPtr ship = ships[i];
+		if (!ship->destroyed)
+			++stillAlive;
+	}
+	return stillAlive == 0;
 }
 
 void SpawnGroup::SetDefeated()
 {
 	SetFinishedSpawning();
-	shipsDefeatedOrDespawned = shipsDefeated = shipsSpawned;
+	shipsSpawned = ships.Size();
 	for (int i = 0; i < ships.Size(); ++i)
 	{
 		ShipPtr s = ships[i];
-		s->spawnGroup = 0;
+		s->spawned = true;
+		s->destroyed = true;
 	}
-	// Destroy ships!
-	ships.Clear();
 }
 
 void SpawnGroup::OnShipDestroyed(PlayingLevel& playingLevel, ShipPtr ship)
 {
-	++shipsDefeated;
-	++shipsDefeatedOrDespawned;
-	if (shipsDefeated >= number)
+	if (ShipsDefeated() == shipsSpawned)
 	{
-		playingLevel.defeatedAllEnemies = true;
-		defeated = true;
-		survived = true;
-		if (pausesGameTime)
-			playingLevel.gameTimePaused = false;
+		playerSurvived = true;
 	}
 }
 
 void SpawnGroup::OnShipDespawned(PlayingLevel& playingLevel, ShipPtr ship)
 {
-	++shipsDespawned;
-	++shipsDefeatedOrDespawned;
-	if (shipsDefeatedOrDespawned >= number)
+	if (ShipsDefeatedOrDespawned())
 	{
-		playingLevel.defeatedAllEnemies = false;
-		survived = true;
-		if (pausesGameTime)
-			playingLevel.gameTimePaused = false;
+		playerSurvived = true;
 	}
 }
+
+bool SpawnGroup::ShipsDefeatedOrDespawned() {
+	for (int i = 0; i < ships.Size(); ++i) {
+		ShipPtr ship = ships[i];
+		if (ship->destroyed || ship->despawned)
+			continue;
+		// One still alive?
+		return false; 
+	}
+	return true;
+}
+
+int SpawnGroup::ShipsDespawned() {
+	int num = 0;
+	for (int i = 0; i < ships.Size(); ++i) {
+		ShipPtr ship = ships[i];
+		if (ship->despawned)
+			++num;
+	}
+	return num;
+}
+int SpawnGroup::ShipsDefeated() {
+	int num = 0;
+	for (int i = 0; i < ships.Size(); ++i) {
+		ShipPtr ship = ships[i];
+		if (ship->destroyed)
+			++num;
+	}
+	return num;
+}
+
 
 String SpawnGroup::GetLevelCreationString(Time t)
 {
@@ -454,6 +524,10 @@ String SpawnGroup::GetLevelCreationString(Time t)
 		str += "\nTimeBetweenShipSpawnsMs "+String(this->spawnIntervalMsBetweenEachShipInFormation);
 
 	return str;
+}
+
+void SpawnGroup::SetSpawnTime(Time newSpawnTime) { 
+	spawnTime = newSpawnTime; 
 }
 
 void SpawnGroup::ParseFormation(String fromString)

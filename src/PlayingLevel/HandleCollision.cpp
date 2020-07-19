@@ -33,7 +33,7 @@ void HandleCollision(ShipPtr playerShip, List<EntitySharedPtr> shipEntities, Col
 		if (shipProp)
 			shipProp->OnCollision(two);
 	}
-	else if (twoType == SHIP)
+	if (twoType == SHIP)
 	{
 		ShipProperty* shipProp = (ShipProperty*)two->GetProperty(ShipProperty::ID());
 		if (shipProp)

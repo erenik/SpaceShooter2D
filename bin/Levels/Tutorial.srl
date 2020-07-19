@@ -8,35 +8,26 @@ MessagesPauseGameTime true
 SpawnGroupsPauseGameTime true
 
 Message 0:00
-TextID	99
+TextID	TutorialStart
 
 Event 0:01
 String TutorialBaseGun
 
 // Introduction messages concerning movement. See /data/Texts_English.csv for the actual contents of these.
 Message	0:02
-TextID	100
+TextID	GreetingsPilot
 Message
-TextID	101
+TextID	FirstTask
 Message
-TextID	102
+TextID	FireWithSpacebar
 Message 
-TextID 	103
-
-// All spawn groups spawn outside of screen to the right at the specified time.
-SpawnGroup 0:06
-ShipType ImmobilePracticeTarget
-Formation LINE_Y
-Number	3
-Size xy 2 5
-Position xy 0 -2.5
+TextID 	MoveWithWASD
 
 
 Message 0:05
 Condition FailedToDefeatAllEnemies
-TextID 105
+TextID TryAgainToFire
 
-/// New spawning formations below /// Emil, 2015-03-03
 /// All spawn groups spawn outside of screen to the right at the specified time.
 SpawnGroup 0:06
 ShipType ImmobilePracticeTarget
@@ -50,23 +41,23 @@ Condition FailedToDefeatAllEnemies
 GoToTime 0:04
 
 Message 0:08
-TextID	104
+TextID	WellDone
 
 // Weapon switching
 Message 0:09
-TextID	110
+TextID	WeaponSwitchingIntro
 Message 
-TextID	111
+TextID	WeaponSwitchingIntro2
 Message
-TextID	112
+TextID	WeaponSwitchingIntro3
 Message
-TextID 113
+TextID SecondTask
 Event 
 String TutorialLevel1Weapons
 
 Message 0:11
 Condition FailedToDefeatAllEnemies
-TextID 115
+TextID TryAgainWeaponSwitch
 
 SpawnGroup 0:12
 Number 3
@@ -75,12 +66,13 @@ Formation LINE_Y
 Size xy 2 5
 Position xy 0 -2.5
 
-Event 0:12
+Event 0:13
 Condition FailedToDefeatAllEnemies
 GoToTime 0:10
 
-Message 0:15
-TextID 114
+Message 0:14
+TextID WellDone
+
 // Weapon-scripts
 Message
 TextID 120
@@ -91,7 +83,7 @@ String ActivateWeaponScript
 Message
 TextID 122
 
-Message 0:17
+Message 0:15
 Condition FailedToDefeatAllEnemies
 TextID 123
 
@@ -183,7 +175,7 @@ Size xy 2 20
 Position xy 0 -10
 
 Event 0:34
-Condition FailedToDefeatAllEnemies
+Condition 2SpaceDebrisNotCollected
 GoToTime 0:31
 
 // Shield info
@@ -198,23 +190,30 @@ String SetSkill:PowerShield
 Message 0:37
 Condition FailedToSurvive
 TextID 147
-Message
+Message 
 TextID 148
 
+
 // Spawn bomb and set onDeath stuff.
-Event 
+Event 0:38
 String DisablePlayerMovement
 String ResetFailedToSurvive
+
+Event 0:39
 String PauseGameTime
 String SpawnTutorialBomb
 String SetOnDeath:RespawnAt(0:36)
 
-Message 0:38
-TextID 150
-Event 
-String EnablePlayerMovement
+Message 0:40
+TextID SurvivedBomb
 
 Event 0:40
+String EnablePlayerMovement
+
+Message 0:42
+TextID 150
+
+Event 0:44
 String GoToHangar
 // String GoToWorkshop
 

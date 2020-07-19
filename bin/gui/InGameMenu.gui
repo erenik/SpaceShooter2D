@@ -8,6 +8,7 @@ root
 name InGameMenu
 removeOnPop true
 texture NULL
+onPop InGameMenuPopped
 
 parent InGameMenu
 
@@ -23,6 +24,9 @@ parent imList
 defaultSizeRatioXY 1 0.2
 Button Continue
 onActivate ToggleMenu
+
+Button Restart "Restart level"
+onActivate PopUI(InGameMenu)&RestartLevel
 
 Button	OptionsButton
 text "Options"

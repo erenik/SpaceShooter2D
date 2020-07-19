@@ -18,6 +18,10 @@ HUD HUD::hud = HUD();
 
 String hudPath = "gui/HUD.gui";
 
+static int lastHP;
+static int lastShield;
+
+
 HUD* HUD::Get() {
 	return &hud;
 }
@@ -28,6 +32,8 @@ void HUD::Show() {
 	PushUI(hudPath);
 	// By default remove hover from any UI element. Select weapons with 1-9 keys.
 	QueueGraphics(new GMSetHoverUI(nullptr));
+
+	lastHP = lastShield = 0;
 }
 
 void HUD::Hide() {
@@ -35,6 +41,7 @@ void HUD::Hide() {
 }
 
 void HUD::UpdateUI() {
+	UpdateActiveWeapon();
 	UpdateHUDGearedWeapons();
 	UpdateUIPlayerHP(true);
 	UpdateUIPlayerShield(true);
@@ -43,6 +50,28 @@ void HUD::UpdateUI() {
 		PlayingLevelRef().OpenSpawnWindow();
 	else
 		PlayingLevelRef().CloseSpawnWindow();
+}
+
+void HUD::UpdateActiveWeapon() {
+	PlayingLevel& pl = PlayingLevelRef();
+	Weapon* activeWeapon = pl.playerShip->activeWeapon;
+	if (!activeWeapon)
+		return;
+	QueueGraphics(new GMSetUIs("ActiveWeaponName", GMUI::TEXT, activeWeapon->name));
+	String status;
+	if (activeWeapon->reloading) {
+		status = "Reloading...";
+  		float reloadRatio = activeWeapon->currCooldownMs / float(activeWeapon->cooldown.Milliseconds());
+		QueueGraphics(new GMSetUIs("ActiveWeaponAmmo", GMUI::TEXTURE_SOURCE, "0xFFFF00"));
+		QueueGraphics(new GMSetUIf("ActiveWeaponAmmo", GMUI::BAR_FILL_RATIO, 1 - reloadRatio));
+	}
+	else if (activeWeapon->shotsLeft > 0) {
+		status = "Ammo " + String(activeWeapon->shotsLeft);
+		float shotsLeftRatio = activeWeapon->shotsLeft / float(activeWeapon->burstRounds);
+		QueueGraphics(new GMSetUIs("ActiveWeaponAmmo", GMUI::TEXTURE_SOURCE, "0xFFFFFF"));
+		QueueGraphics(new GMSetUIf("ActiveWeaponAmmo", GMUI::BAR_FILL_RATIO, shotsLeftRatio));
+	}
+	QueueGraphics(new GMSetUIs("ActiveWeaponStatus", GMUI::TEXT, status));
 }
 
 void RequeueHUDUpdate()
@@ -64,7 +93,7 @@ void HUD::UpdateHUDGearedWeapons()
 		RequeueHUDUpdate();
 		return;
 	}
-	UIElement* activeWeapon = ui->GetElementByName("ActiveWeapon");
+	UIElement* activeWeapon = ui->GetElementByName("Weapons");
 	if (!activeWeapon)
 	{
 		RequeueHUDUpdate();
@@ -126,30 +155,29 @@ void HUD::UpdateHUDGearedWeaponsIfNeeded() {
 	UpdateHUDGearedWeapons();
 }
 
-
 void HUD::UpdateUIPlayerHP(bool force)
 {
 	PlayingLevel& pl = PlayingLevelRef();
 	if (pl.playerShip == nullptr)
 		return;
-	static int lastHP;
 	if (lastHP == pl.playerShip->hp && !force)
 		return;
 	lastHP = (int)pl.playerShip->hp;
 	GraphicsMan.QueueMessage(new GMSetUIi("HP", GMUI::INTEGER_INPUT, (int)pl.playerShip->hp));
-	float redRatio = pl.playerShip->hp / (float)pl.playerShip->maxHP;
-	GraphicsMan.QueueMessage(new GMSetUIv4f("HP", GMUI::TEXT_COLOR, Vector4f(1.0f, 1 - redRatio, 1 - redRatio, 1.0f)));
+	float ratio = pl.playerShip->hp / (float)pl.playerShip->maxHP;
+	GraphicsMan.QueueMessage(new GMSetUIf("HPBar", GMUI::BAR_FILL_RATIO, ratio));
 }
 void HUD::UpdateUIPlayerShield(bool force)
 {
 	PlayingLevel& pl = PlayingLevelRef();
 	if (pl.playerShip == nullptr)
 		return;
-	static int lastShield;
 	if (lastShield == pl.playerShip->shieldValue && !force)
 		return;
 	lastShield = (int)pl.playerShip->shieldValue;
 	GraphicsMan.QueueMessage(new GMSetUIi("Shield", GMUI::INTEGER_INPUT, (int)pl.playerShip->shieldValue));
+	float ratio = (float) pl.playerShip->shieldValue / pl.playerShip->MaxShield();
+	GraphicsMan.QueueMessage(new GMSetUIf("ShieldBar", GMUI::BAR_FILL_RATIO, ratio));
 }
 
 void HUD::UpdateCooldowns()
@@ -202,8 +230,10 @@ void HUD::UpdateDebug() {
 	PlayingLevel& pl = PlayingLevelRef();
 	QueueGraphics(new GMSetUIs("LevelTime", GMUI::STRING_INPUT, pl.levelTime.ToString("m:S")));
 	QueueGraphics(new GMSetUIi("SpawnGroupsRemaining", GMUI::INTEGER_INPUT, pl.level.SpawnGroupsRemaining()));
+	QueueGraphics(new GMSetUIi("SpawnGroupsActive", GMUI::INTEGER_INPUT, pl.level.SpawnGroupsActive()));
+	
 	SpawnGroup * nextSpawnGroup = pl.level.NextSpawnGroup();
-	QueueGraphics(new GMSetUIs("NextSpawnGroupTime", GMUI::STRING_INPUT, (nextSpawnGroup != nullptr? nextSpawnGroup->spawnTime.ToString("m:S") : "N/A" )));
+	QueueGraphics(new GMSetUIs("NextSpawnGroupTime", GMUI::STRING_INPUT, (nextSpawnGroup != nullptr? nextSpawnGroup->SpawnTime().ToString("m:S") : "N/A" )));
 }
 
 String levelStatsGui = "gui/LevelStats.gui";

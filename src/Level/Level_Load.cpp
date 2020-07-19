@@ -9,12 +9,10 @@
 #include "File/LogFile.h"
 #include "PlayingLevel.h"
 
-#define SET_GROUP_DEFAULTS { group->pausesGameTime = spawnGroupsPauseGameTime; }
+#define SET_GROUP_DEFAULTS { group->pausesGameTime = loadLevel->spawnGroupsPauseGameTime; }
 
 namespace LevelLoader 
 {
-	bool messagesPauseGameTime = false;
-	bool spawnGroupsPauseGameTime = false;
 	SpawnGroup * group = (SpawnGroup*)0;
 	Level * loadLevel = (Level*)0;
 	SpawnGroup * lastGroup = (SpawnGroup*)0;
@@ -25,21 +23,21 @@ namespace LevelLoader
 	{ 
 		if (group) {
 			lastGroup = group; 
-			LogMain("Setting spawn time to group from "+group->spawnTime.ToString("m:S.n")+" to "+spawnTimes[0].ToString("m:S.n"), DEBUG);
-			group->spawnTime = spawnTimes[0]; // Set spawn time if not already done so.
+			LogMain("Setting spawn time to group from "+group->SpawnTime().ToString("m:S.n")+" to "+spawnTimes[0].ToString("m:S.n"), DEBUG);
+			group->SetSpawnTime(spawnTimes[0]); // Set spawn time if not already done so.
 			if (group->name.Length() == 0)
-				group->name = group->spawnTime.ToString("m:S.n");
+				group->name = group->SpawnTime().ToString("m:S.n");
 			loadLevel->spawnGroups.AddItem(group);
-			LogMain("SpawnGroup "+String(loadLevel->spawnGroups.Size()+1)+" added "+group->name+"\t"+group->spawnTime.ToString("m:S.n"), DEBUG);
+			LogMain("SpawnGroup "+String(loadLevel->spawnGroups.Size()+1)+" added "+group->name+"\t"+group->SpawnTime().ToString("m:S.n"), DEBUG);
 		} 
 		for (int p = 1; p < spawnTimes.Size(); ++p)
 		{
 			SpawnGroup * newGroup = new SpawnGroup(*lastGroup);
 			SET_GROUP_DEFAULTS;
-			newGroup->spawnTime = spawnTimes[p];
+			newGroup->SetSpawnTime(spawnTimes[p]);
 			newGroup->name = lastGroup->name + "_"+String(p+1);
 			loadLevel->spawnGroups.AddItem(newGroup);
-			LogMain("SpawnGroup "+String(loadLevel->spawnGroups.Size()+1)+" added "+newGroup->name+"\t"+newGroup->spawnTime.ToString("m:S.n"), DEBUG);
+			LogMain("SpawnGroup "+String(loadLevel->spawnGroups.Size()+1)+" added "+newGroup->name+"\t"+newGroup->SpawnTime().ToString("m:S.n"), DEBUG);
 		}
 		spawnTimes.Clear();
 		group = NULL;
@@ -91,6 +89,18 @@ using namespace LevelLoader;
 		group = NULL;\
 	}
 */
+
+int Level::SpawnGroupsActive() {
+	int numActive = 0;
+	for (int i = 0; i < spawnGroups.Size(); ++i) {
+		SpawnGroup * spawnGroup = spawnGroups[i];
+		if (spawnGroup->shipsSpawned == 0) // Ignore those not yet spawned.
+			continue;
+		if (spawnGroup->ShipsActive() > 0) 
+			++numActive;
+	}
+	return numActive;
+}
 
 /// Deletes all ships, spawngroups, resets variables to defaults.
 void Level::Clear(PlayingLevel& playingLevel)
@@ -192,7 +202,7 @@ bool Level::Load(String fromSource)
 			SET_GROUP_DEFAULTS;
 			// Parse time.
 			ParseTimeStringsFromLine(line);
-			group->spawnTime = spawnTimes[0];
+			group->SetSpawnTime(spawnTimes[0]);
 	//		group->spawnTime.PrintData();
 //			String timeStr = line.Tokenize(" \t")[1];
 //			group->spawnTime.ParseFrom(timeStr);
@@ -243,7 +253,7 @@ bool Level::Load(String fromSource)
 			if (var == "Condition")
 				message->condition = arg;
 			if (var == "TextID")
-				message->textID = arg.ParseInt();
+				message->textID = arg;
 			if (var == "String")
 			{
 				String strArg = line - "String";
@@ -272,7 +282,7 @@ bool Level::Load(String fromSource)
 				SET_GROUP_DEFAULTS;
 				// Parse time.
 				ParseTimeStringsFromLine(line);
-				group->spawnTime = spawnTimes[0];
+				group->SetSpawnTime(spawnTimes[0]);
 				parseMode = PARSE_MODE_FORMATIONS;
 			}
 			if (var == "CopyNamedGroup")
@@ -307,7 +317,7 @@ bool Level::Load(String fromSource)
 				SET_GROUP_DEFAULTS;
 				// Parse time.
 				ParseTimeStringsFromLine(line);
-				group->spawnTime = spawnTimes[0];
+				group->SetSpawnTime(spawnTimes[0]);
 				parseMode = PARSE_MODE_FORMATIONS;
 			}
 			if (var == "RelativeSpeed")
@@ -317,7 +327,7 @@ bool Level::Load(String fromSource)
 			if (var == "Name")
 				group->name = arg;
 			if (var == "SpawnTime")
-				group->spawnTime.ParseFrom(arg);
+				group->SetSpawnTime(ParseTimeFrom(arg));
 			if (var == "Position")
 				group->position.ParseFrom(line - "Position");
 			if (var == "ShipType")

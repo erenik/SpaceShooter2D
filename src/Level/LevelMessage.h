@@ -14,7 +14,7 @@ public:
 	LevelMessage();
 	void PrintAll(); // debug
 	// UI Returns true if it was displayed, false if skipped (condition false).
-	bool Display(PlayingLevel& playingLevel, Level * level);
+	bool Trigger(PlayingLevel& playingLevel, Level * level);
 	void Hide(PlayingLevel& playingLevel);
 	
 	enum {
@@ -32,7 +32,7 @@ public:
 	bool displayed, hidden;
 	Time startTime;
 	Time stopTime;
-	int textID;
+	String textID;
 	bool pausesGameTime; // Default true.
 	Time goToTime;
 };

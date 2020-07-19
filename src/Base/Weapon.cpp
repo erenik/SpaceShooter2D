@@ -64,6 +64,7 @@ Weapon::Weapon()
 	burstRoundsShot = 0;
 	burstRoundDelay = Time(TimeType::MILLISECONDS_NO_CALENDER, 50);
 	lifeTimeMs = 3000;
+	ammunition = 0;
 }
 
 bool Weapon::Get(String byName, Weapon * weapon)
@@ -109,12 +110,8 @@ bool Weapon::LoadTypes(String fromFile)
 	List<String> columns;
 	String firstLine = lines[0];
 	// Keep empty strings or all will break.
-	char tokenizer = '\t';
-	int numTabs = firstLine.Count('\t');
-	int numSemiColons = firstLine.Count(';');
-	if (numSemiColons > numTabs)
-		tokenizer = ';';
-	columns = TokenizeCSV(firstLine, tokenizer);
+	char delimiter = FindCSVDelimiter(firstLine);
+	columns = TokenizeCSV(firstLine, delimiter);
 	LogMain("Loading weapons from file: "+fromFile, INFO);
 
 	// For each line after the first one, parse data.
@@ -122,7 +119,7 @@ bool Weapon::LoadTypes(String fromFile)
 	{
 		String & line = lines[j];
 		// Keep empty strings or all will break.
-		List<String> values = TokenizeCSV(line, tokenizer);
+		List<String> values = TokenizeCSV(line, delimiter);
 		// If not, now loop through the words, parsing them according to the column name.
 		// First create the new spell to load the data into!
 		Weapon weapon;
@@ -380,7 +377,7 @@ void Weapon::Shoot(PlayingLevel& playingLevel, ShipPtr ship)
 		/// Change initial direction based on stability of the weapon?
 		float currStab = stability;
 		if (ship->activeSkill == ATTACK_FRENZY)
-			currStab *= 0.75f;
+			currStab *= 0.85f;
 		// Get orthogonal direction.
 		Vector3f dirRight = dir.CrossProduct(Vector3f(0,0,1));
 		if (currStab < 1.f && type != LASER_BEAM)
@@ -423,7 +420,7 @@ void Weapon::QueueReload()
 	if (!burst)
 		return;
 	reloading = true;
-	currCooldownMs = cooldown.Milliseconds();
+	currCooldownMs = int (cooldown.Milliseconds());
 }
 
 /// Called to update the various states of the weapon, such as reload time, making lightning arcs jump, etc.
@@ -438,8 +435,12 @@ void Weapon::Process(PlayingLevel& playingLevel, ShipPtr ship, int timeInMs)
 	{
 		QueueReload();
 	}
-
+	
+	// Reduce cooldown every frame.
 	currCooldownMs -= timeInMs;
+	if (ship->activeSkill == ATTACK_FRENZY) // Extra so if under frenzy.
+		currCooldownMs -= timeInMs;
+
 	if (currCooldownMs < 0) {
 		currCooldownMs = 0;
 		if (reloading)
@@ -558,7 +559,7 @@ void Weapon::ProcessLightning(PlayingLevel& playingLevel, ShipPtr owner, bool in
 		shipsStruckThisArc.AddItem(target);
 		assert(shipsStruckThisArc.Duplicates() == 0);
 		std::cout<<"\nThunderstruck! "<<target->entity->worldPosition;
-		target->Damage(playingLevel, (int)arc->damage, false);
+		target->Damage(playingLevel, (float)arc->damage, false);
 		/// Span up a nice graphical entity to represent the bolt
 		EntitySharedPtr entity = EntityMan.CreateEntity("BoldPart", ModelMan.GetModel("cube.obj"), TexMan.GetTexture("0x00FFFF"));
 		entity->localPosition = (arc->position + newArc->position) * 0.5f;

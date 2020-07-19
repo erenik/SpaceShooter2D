@@ -25,7 +25,6 @@ Level::Level()
 	endCriteria = NO_MORE_ENEMIES;
 	levelCleared = false;
 	activeLevelMessage = 0;
-	spawnPositionRight = 0;
 }
 
 Level::~Level()
@@ -63,6 +62,7 @@ Vector3f Level::BaseVelocity()
 EntitySharedPtr Level::SpawnPlayer(PlayingLevel& playingLevel, ShipPtr playerShip, ConstVec3fr atPosition)
 {	
 	EntitySharedPtr entity = playerShip->Spawn(atPosition, 0, playingLevel);
+	playingLevel.OnPlayerSpawned();
 	return entity;
 }
 
@@ -127,31 +127,10 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 
 	PlayingLevelRef().removeInvuln = playingLevel.levelEntity->worldPosition[0] + playingLevel.playingFieldHalfSize[0] + playingLevel.playingFieldPadding + 1.f;
 	assert(PlayingLevelRef().removeInvuln > -1000);
-	spawnPositionRight = PlayingLevelRef().removeInvuln + 15.f;
-	assert(spawnPositionRight > -1000);
+	PlayingLevelRef().spawnPositionRight = PlayingLevelRef().removeInvuln + 15.f;
+	assert(PlayingLevelRef().spawnPositionRight > -1000);
 	PlayingLevelRef().despawnPositionLeft = playingLevel.levelEntity->worldPosition[0] - playingLevel.playingFieldHalfSize[0] - 1.f;
 	assert(PlayingLevelRef().despawnPositionLeft > -1000);
-
-	// Check for game over.
-	if (playingLevel.playerShip->hp <= 0)
-	{
-		LogMain("Game over! Player HP 0", INFO);
-		// Game OVER!
-		if (playingLevel.onDeath.Length() == 0)
-			spaceShooter->GameOver();
-		else if (playingLevel.onDeath.StartsWith("RespawnAt"))
-		{
-			playingLevel.playerShip->hp = (float)playingLevel.playerShip->maxHP;
-			this->SpawnPlayer(playingLevel, playingLevel.playerShip, Vector3f(playingLevel.levelEntity->worldPosition.x, 10.f, 0));
-			// Reset level-time.
-			String timeStr = playingLevel.onDeath.Tokenize("()")[1];
-			playingLevel.levelTime.ParseFrom(timeStr);
-			OnLevelTimeAdjusted(playingLevel.levelTime);
-		}
-		else 
-			std::cout<<"\nBad Game over (onDeath) critera.";
-		return;
-	}
 
 	playingLevel.flyTime.AddMs(timeInMs);
 
@@ -163,7 +142,7 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 		spaceShooter->OnLevelCleared();
 		return; // No more processing if cleared?
 	}
-	if (playingLevel.gameTimePaused) {
+	if (playingLevel.GameTimePaused()) {
 		LogMain("Game time is paused", EXTENSIVE_DEBUG);
 		SleepThread(10);
 		return;
@@ -216,26 +195,26 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 	*/
 
 	/// Check spawn-groups to spawn.
-	if (spawnGroups.Size())
+	for (int i = 0; i < spawnGroups.Size(); ++i)
 	{
-		for (int i = 0; i < spawnGroups.Size(); ++i)
+		SpawnGroup * sg = spawnGroups[i];
+		if (sg->DefeatedOrDespawned())
+			continue;
+
+		Time spawnTime = sg->SpawnTime();
+		int msToSpawn = (int)(sg->SpawnTime() - playingLevel.levelTime).Milliseconds();
+		if (msToSpawn > 0)
+			continue;
+		if (spawnTime.Milliseconds() < 100) {
+			LogMain("Spawn group spawn time under 100 ms, intended?", WARNING);
+		}
+
+		if (!sg->FinishedSpawning())
 		{
-			SpawnGroup * sg = spawnGroups[i];
-			int msToSpawn = (int)(sg->spawnTime - playingLevel.levelTime).Milliseconds();
-			if (msToSpawn > 0)
-				continue;
-			if (sg->FinishedSpawning() && sg->pausesGameTime && sg->DefeatedOrDespawned()) {
-				playingLevel.gameTimePaused = false;
-				continue;
-			}
-			if (!sg->FinishedSpawning())
-			{
-				playingLevel.defeatedAllEnemies = false;
-				sg->Spawn(playingLevel);
-				if (sg->pausesGameTime)
-					playingLevel.gameTimePaused = true;
-				continue;
-			}
+			LogMain("Spawning group " + sg->name + " at time " + spawnTime, INFO);
+			playingLevel.SetLastSpawnGroup(sg);
+			sg->Spawn(playingLevel);
+			continue;
 		}
 	}
 }
@@ -248,24 +227,24 @@ void Level::ProcessLevelMessages(Time levelTime) {
 		for (int i = 0; i < messages.Size(); ++i)
 		{
 			LevelMessage* lm = messages[i];
+
+			// If being displayed, check if we should stop displaying it.
+			if (lm->displayed && lm->stopTime < levelTime)
+				HideLevelMessage(lm);
+
 			if (lm->hidden)
 				continue;
-			if (lm->startTime < levelTime && !lm->displayed)
-			{
-				if (activeLevelMessage)
-					continue;
-				if (lm->Display(PlayingLevelRef(), this))
-					activeLevelMessage = lm;
-			}
-			if (lm->displayed && lm->stopTime < levelTime)
-			{
-				// Retain sorting.
-				lm->Hide(PlayingLevelRef());
-				if (activeLevelMessage == lm)
-				{
-					activeLevelMessage = 0;
-				}
-			}
+
+			if (lm->startTime > levelTime) // Not time yet.
+				continue;
+
+			if (lm->displayed) // Already displayed.
+				continue;
+
+			if (activeLevelMessage)
+				continue;
+			if (lm->Trigger(PlayingLevelRef(), this))
+				activeLevelMessage = lm;
 		}
 	}
 }
@@ -300,9 +279,9 @@ void Level::ProcessMessage(PlayingLevel& playingLevel, Message * message)
 				levelCleared = true;
 			}
 			if (msg == "PauseGameTime")
-				playingLevel.gameTimePaused = true;
+				playingLevel.gameTimePausedDueToScriptableMessage = true;
 			if (msg == "ResumeGameTime")
-				playingLevel.gameTimePaused = false;
+				playingLevel.gameTimePausedDueToScriptableMessage = false;
 			if (msg == "ResetFailedToSurvive")
 				playingLevel.failedToSurvive = false;
 			break;		
@@ -328,14 +307,17 @@ void Level::OnLevelTimeAdjusted(Time levelTime)
 	for (int i = 0; i < spawnGroups.Size(); ++i)
 	{
 		SpawnGroup * sg = spawnGroups[i];
-		if (sg->spawnTime > levelTime)
-			spawnGroups[i]->Reset();
+		if (sg->SpawnTime() > levelTime)
+			spawnGroups[i]->ResetForSpawning();
 	}
 	for (int i = 0; i < messages.Size(); ++i)
 	{
 		LevelMessage * lm = messages[i];
-		if (lm->startTime > levelTime)
+		if (lm->startTime < levelTime) // Mark earlier messages as displayed
 		{
+			lm->displayed = lm->hidden = true;
+		}
+		else { // And future ones as yet to display.
 			lm->displayed = lm->hidden = false;
 		}
 	}
@@ -418,7 +400,7 @@ void Level::Explode(Weapon & weapon, EntitySharedPtr causingEntity, bool enemy)
 	/// Add physics thingy straight away.
 	EstimatorFloat * estimator = new EstimatorFloat();
 	estimator->variablesToPutResultTo.Add(&explosionEntity->scale.x, &explosionEntity->scale.y, &explosionEntity->scale.z);
-	estimator->AddStateMs(0.1, 0);
+	estimator->AddStateMs(0.1f, 0);
 	estimator->AddStateMs(weapon.explosionRadius, explosionProperty->duration);
 	prop->estimationEnabled = true;
 	prop->estimators.AddItem(estimator);
@@ -466,7 +448,7 @@ SpawnGroup* Level::NextSpawnGroup() {
 		if (spawnGroup->shipsSpawned == 0) {
 			if (nextOneToSpawn == nullptr)
 				nextOneToSpawn = spawnGroup;
-			else if (spawnGroup->spawnTime < nextOneToSpawn->spawnTime)
+			else if (spawnGroup->SpawnTime() < nextOneToSpawn->SpawnTime())
 				nextOneToSpawn = spawnGroup;
 		}
 	}
@@ -487,7 +469,7 @@ void Level::SetSpawnGroupsFinishedAndDefeated(Time beforeLevelTime) {
 	for (int i = 0; i < spawnGroups.Size(); ++i)
 	{
 		SpawnGroup * sg = spawnGroups[i];
-		if (sg->spawnTime < beforeLevelTime)
+		if (sg->SpawnTime() < beforeLevelTime)
 		{
 			sg->SetFinishedSpawning();
 			sg->SetDefeated();
@@ -515,6 +497,20 @@ void Level::RemoveExistingEnemies(PlayingLevel& playingLevel)
 	ships.Clear();
 }
 
+void Level::HideLevelMessage(LevelMessage * levelMessage) {
+	// Retain sorting.
+	if (levelMessage == nullptr)
+		levelMessage = activeLevelMessage;
+	if (levelMessage == nullptr) {
+		LogMain("No message to hide", ERROR);
+		return;
+	}
+	levelMessage->Hide(PlayingLevelRef());
+	if (activeLevelMessage == levelMessage)
+	{
+		activeLevelMessage = 0;
+	}
+}
 
 List<ShipPtr> Level::PlayerShips(PlayingLevel& playingLevel)
 {

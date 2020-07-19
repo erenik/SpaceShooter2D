@@ -1,35 +1,35 @@
-Type;Level;Weapon Name;Cost;ShootSFX;HitSFX;Cooldown;Burst;Burst details;Angle;Projectile Path;Projectile Speed;Damage;Abilities;Ability Trigger;Projectile Scale;Projectile Shape;HomingFactor;Penetration;Explosion Radius;Max Range;Arc Delay;Max Bounces;Number of Projectiles;Distribution;Linear Damping;Stability;Linear Scaling
-0;1;Machine gun I;10;Weapons/Machine Gun;Bullet Hit 001;1000;Yes;100, 19;0;Straight;50;5;n/a;n/a;2;Bullet.obj;0.0;.3;;;;;1;;1;1;
-0;2;Machine gun II;15;Weapons/Machine Gun;Bullet Hit 001;95;No;;0;Straight;51;7;;;1;Bullet.obj;0.0;.35;;;;;1;;1;1;
-0;3;Machine gun III;25;Weapons/Machine Gun;Bullet Hit 001;92;No;;0;Straight;52;9;;;1;Bullet.obj;0.0;.4;;;;;1;;1;1;
-0;4;Machine gun IV;40;Weapons/Machine Gun;Bullet Hit 001;90;No;;0;Straight;53;11;;;1;Bullet.obj;0.0;.45;;;;;1;;1;1;
-0;5;Machine gun V;60;Weapons/Machine Gun;Bullet Hit 001;88;No;;0;Straight;54;13;;;1;Bullet.obj;0.0;.5;;;;;1;;1;1;
-1;1;Small rockets I;10;Weapons/Small Rocket;Missile Hit;2000;Yes;200,8;0;Straight;20;20;;;1;Missile.obj;0.1;0.0;1.0;;;;1;;1;1;
-1;2;Small rockets II;15;Weapons/Small Rocket;Missile Hit;2400;Yes;190,8;0;Straight;26;33;;;1;Missile.obj;0.2;0.0;1.1;;;;1;;1;1;
-1;3;Small rockets III;25;Weapons/Small Rocket;Missile Hit;2300;Yes;180,8;0;Straight;27;43;;;1;Missile.obj;0.3;0.0;1.2;;;;1;;1;1;
-1;4;Small rockets IV;40;Weapons/Small Rocket;Missile Hit;2200;Yes;170,8;0;Straight;28;53;;;1;Missile.obj;0.4;0.0;1.3;;;;1;;1;1;
-2;1;Big rockets I;10;Weapons/Big Rocket;Missile Hit;3500;No;;0;Straight;10;150;;;1;MissileBig.obj;0.5;0.0;3;;;;1;;1;1;
-2;2;Big rockets II;20;Weapons/Big Rocket;Missile Hit;3300;No;;0;Straight;11;200;;;1;MissileBig.obj;0.6;0.0;3.3;;;;1;;1;1;
-2;3;Big rockets III;30;Weapons/Big Rocket;Missile Hit;3100;No;;0;Straight;12;250;;;1;MissileBig.obj;0.7;0.0;3.6;;;;1;;1;1;
-2;4;Big rockets IV;45;Weapons/Big Rocket;Missile Hit;2900;No;;0;Straight;13;300;;;1;MissileBig.obj;0.8;0.0;3.9;;;;1;;1;1;
-3;1;Lightning;10;;;1000;No;;0;;;20;;;;;;;;15;100;5;1;;1;1;
-3;2;Lightning II;20;;;1000;No;;0;;;30;;;;;;;;15;100;6;1;;1;1;
-3;3;Lightning III;30;;;1000;No;;0;;;40;;;;;;;;15;100;7;1;;1;1;
-3;4;Lightning IV;45;;;1000;No;;0;;;50;;;;;;;;15;100;8;1;;1;1;
-3;5;Lightning V;70;;;1000;No;;0;;;60;;;;;;;;15;100;9;1;;1;1;
-4;1;Laser Beam I;10;;;10;No;;;Straight;150;0.4;;;1;LaserPart.obj;0.0;0.0;0;;;;1;;1;1;
-4;2;Laser Beam II;25;;;10;No;;;Straight;150;0.5;;;1;LaserPart.obj;0.0;0.0;;;;;1;;1;1;
-4;3;Laser Beam III;35;;;10;No;;;Straight;150;0.7;;;1;LaserPart.obj;0.0;0.0;;;;;1;;1;1;
-4;4;Laser Beam IV;50;;;10;No;;;Straight;150;0.9;;;1;LaserPart.obj;0.0;0.0;;;;;1;;1;1;
-5;1;Laser Burst I;10;;;200;Yes;20,4;;Straight;60;2;;;1;LaserBurst.obj;0.0;0.0;0;;;;1;;1;1;
-5;2;Laser Burst II;20;;;200;Yes;20,4;;Straight;60;3;;;1;LaserBurst.obj;0.0;0.0;0;;;;1;;1;1;
-5;3;Laser Burst III;30;;;200;Yes;20,4;;Straight;60;4;;;1;LaserBurst.obj;0.0;0.0;0;;;;1;;1;1;
-5;4;Laser Burst IV;45;;;200;Yes;20,4;;Straight;60;5;;;1;LaserBurst.obj;0;0.0;0;;;;1;;1;1;
-6;1;Heat Wave I;10;;;200;No;;;Straight;30;5;;;1;HeatWave.obj;;1;;15;;;1;;1;1;2
-6;2;Heat Wave II;25;;;200;No;;;Straight;30;6;;;1;HeatWave.obj;;1;;15;;;1;;1;1;3
-6;3;Heat Wave III;35;;;200;No;;;Straight;30;7;;;1;HeatWave.obj;;1;;15;;;1;;1;1;4
-6;4;Heat Wave IV;50;;;200;No;;;Straight;30;8;;;1;HeatWave.obj;;1;;15;;;1;;1;1;5
-7;1;Ion Flak I;10;Bullet Fire 001;Bullet Hit 001;1000;No;;;Straight;60;10;;;1;FlakAmmo.obj;;;;;;;10;Cone;0.5;0.5;
-7;2;Ion Flak II;20;Bullet Fire 001;Bullet Hit 001;1000;No;;;Straight;60;10;;;1;FlakAmmo.obj;;;;;;;15;Cone;0.5;0.5;
-7;3;Ion Flak III;30;Bullet Fire 001;Bullet Hit 001;1000;No;;;Straight;60;10;;;1;FlakAmmo.obj;;;;;;;21;Cone;0.5;0.5;
-7;4;Ion Flak IV;45;Bullet Fire 001;Bullet Hit 001;1000;No;;;Straight;60;10;;;1;FlakAmmo.obj;;;;;;;;;;;
+Type,Level,Weapon Name,Cost,ShootSFX,HitSFX,Cooldown,Burst,Burst details,Angle,Projectile Path,Projectile Speed,Damage,Abilities,Ability Trigger,Projectile Scale,Projectile Shape,HomingFactor,Penetration,Explosion Radius,Max Range,Arc Delay,Max Bounces,Number of Projectiles,Distribution,Linear Damping,Stability,Linear Scaling
+0,1,Machine gun I,10,Weapons/Machine Gun,Bullet Hit 001,3000,Yes,"100, 24",0,Straight,50,5,n/a,n/a,1,Bullet.obj,0,0.3,1,,,,1,,1,1,
+0,2,Machine gun II,15,Weapons/Machine Gun,Bullet Hit 001,3000,Yes,"100, 24",0,Straight,51,7,,,1,Bullet.obj,0,0.35,1,,,,1,,1,1,
+0,3,Machine gun III,25,Weapons/Machine Gun,Bullet Hit 001,3000,Yes,"100, 24",0,Straight,52,9,,,1,Bullet.obj,0,0.4,1,,,,1,,1,1,
+0,4,Machine gun IV,40,Weapons/Machine Gun,Bullet Hit 001,3000,Yes,"100, 24",0,Straight,53,11,,,1,Bullet.obj,0,0.45,1,,,,1,,1,1,
+0,5,Machine gun V,60,Weapons/Machine Gun,Bullet Hit 001,3000,Yes,"100, 24",0,Straight,54,13,,,1,Bullet.obj,0,0.5,1,,,,1,,1,1,
+1,1,Small rockets I,10,Weapons/Small Rocket,Missile Hit,6000,Yes,"200,8",0,Straight,20,20,,,1,Missile.obj,0.3,0,2,,,,1,,1,1,
+1,2,Small rockets II,15,Weapons/Small Rocket,Missile Hit,6000,Yes,"200,8",0,Straight,26,33,,,1,Missile.obj,0.3,0,2,,,,1,,1,1,
+1,3,Small rockets III,25,Weapons/Small Rocket,Missile Hit,6000,Yes,"200,8",0,Straight,27,43,,,1,Missile.obj,0.3,0,2,,,,1,,1,1,
+1,4,Small rockets IV,40,Weapons/Small Rocket,Missile Hit,6000,Yes,"200,8",0,Straight,28,53,,,1,Missile.obj,0.3,0,2,,,,1,,1,1,
+2,1,Big rockets I,10,Weapons/Big Rocket,Missile Hit,9000,Yes,"500,3",0,Straight,10,150,,,1,MissileBig.obj,0.6,0,4,,,,1,,1,1,
+2,2,Big rockets II,20,Weapons/Big Rocket,Missile Hit,9000,Yes,"500,3",0,Straight,11,200,,,1,MissileBig.obj,0.6,0,4,,,,1,,1,1,
+2,3,Big rockets III,30,Weapons/Big Rocket,Missile Hit,9000,Yes,"500,3",0,Straight,12,250,,,1,MissileBig.obj,0.6,0,4,,,,1,,1,1,
+2,4,Big rockets IV,45,Weapons/Big Rocket,Missile Hit,9000,Yes,"500,3",0,Straight,13,300,,,1,MissileBig.obj,0.6,0,4,,,,1,,1,1,
+3,1,Lightning,10,,,1000,No,,0,,,20,,,,,,,,15,100,5,1,,1,1,
+3,2,Lightning II,20,,,1000,No,,0,,,30,,,,,,,,15,100,6,1,,1,1,
+3,3,Lightning III,30,,,1000,No,,0,,,40,,,,,,,,15,100,7,1,,1,1,
+3,4,Lightning IV,45,,,1000,No,,0,,,50,,,,,,,,15,100,8,1,,1,1,
+3,5,Lightning V,70,,,1000,No,,0,,,60,,,,,,,,15,100,9,1,,1,1,
+4,1,Laser Beam I,10,,,10,No,,,Straight,150,0.4,,,1,LaserPart.obj,0,0,0,,,,1,,1,1,
+4,2,Laser Beam II,25,,,10,No,,,Straight,150,0.5,,,1,LaserPart.obj,0,0,,,,,1,,1,1,
+4,3,Laser Beam III,35,,,10,No,,,Straight,150,0.7,,,1,LaserPart.obj,0,0,,,,,1,,1,1,
+4,4,Laser Beam IV,50,,,10,No,,,Straight,150,0.9,,,1,LaserPart.obj,0,0,,,,,1,,1,1,
+5,1,Laser Burst I,10,,,200,Yes,"20,4",,Straight,60,2,,,1,LaserBurst.obj,0,0,0,,,,1,,1,1,
+5,2,Laser Burst II,20,,,200,Yes,"20,4",,Straight,60,3,,,1,LaserBurst.obj,0,0,0,,,,1,,1,1,
+5,3,Laser Burst III,30,,,200,Yes,"20,4",,Straight,60,4,,,1,LaserBurst.obj,0,0,0,,,,1,,1,1,
+5,4,Laser Burst IV,45,,,200,Yes,"20,4",,Straight,60,5,,,1,LaserBurst.obj,0,0,0,,,,1,,1,1,
+6,1,Heat Wave I,10,,,200,No,,,Straight,30,5,,,1,HeatWave.obj,,1,,15,,,1,,1,1,2
+6,2,Heat Wave II,25,,,200,No,,,Straight,30,6,,,1,HeatWave.obj,,1,,15,,,1,,1,1,3
+6,3,Heat Wave III,35,,,200,No,,,Straight,30,7,,,1,HeatWave.obj,,1,,15,,,1,,1,1,4
+6,4,Heat Wave IV,50,,,200,No,,,Straight,30,8,,,1,HeatWave.obj,,1,,15,,,1,,1,1,5
+7,1,Ion Flak I,10,Bullet Fire 001,Bullet Hit 001,1000,No,,,Straight,60,10,,,1,FlakAmmo.obj,,,,,,,10,Cone,0.5,0.5,
+7,2,Ion Flak II,20,Bullet Fire 001,Bullet Hit 001,1000,No,,,Straight,60,10,,,1,FlakAmmo.obj,,,,,,,15,Cone,0.5,0.5,
+7,3,Ion Flak III,30,Bullet Fire 001,Bullet Hit 001,1000,No,,,Straight,60,10,,,1,FlakAmmo.obj,,,,,,,21,Cone,0.5,0.5,
+7,4,Ion Flak IV,45,Bullet Fire 001,Bullet Hit 001,1000,No,,,Straight,60,10,,,1,FlakAmmo.obj,,,,,,,,,,,

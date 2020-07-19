@@ -83,7 +83,7 @@ void GenerateLevel (PlayingLevel & playingLevel, String arguments)
 		
 		//Select Rotation pattern
 		// When it spawns
-		sg->spawnTime = spawnTime;
+		sg->SetSpawnTime(spawnTime);
 		// Pick a ship
 		sg->shipType = relevantShips[selector.Randi(relevantShips.Size())];
 		level.spawnGroups.AddItem(sg);
@@ -115,7 +115,7 @@ void GenerateLevel (PlayingLevel & playingLevel, String arguments)
 		
 		spawnTime.AddMs((selector.Randi(5)+4)*500);
 
-		String str = sg->GetLevelCreationString(sg->spawnTime);
+		String str = sg->GetLevelCreationString(sg->SpawnTime());
 		File::AppendToFile("Generatedlevel.srl", str);
 		
 	}

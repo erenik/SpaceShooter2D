@@ -100,6 +100,7 @@ void ShipProperty::OnCollision(EntitySharedPtr withEntity)
 	EntitySharedPtr other = withEntity;
 
 	ShipProperty * sspp = (ShipProperty *) other->GetProperty(ShipProperty::ID());
+	bool despawning = false;
 	// Player-player collision? Sleep 'em both.
 	if (sspp)
 	{
@@ -114,7 +115,7 @@ void ShipProperty::OnCollision(EntitySharedPtr withEntity)
 				{
 					ship->hp = 0;
 					ship->Despawn(PlayingLevelRef(), false);
-					return;
+					despawning = true;
 				}
 				else 
 				{
@@ -122,6 +123,8 @@ void ShipProperty::OnCollision(EntitySharedPtr withEntity)
 				}
 			}
 		}
+		if (despawning)
+			return;
 
 
 		PlayingLevel& pl = PlayingLevelRef();
@@ -132,7 +135,7 @@ void ShipProperty::OnCollision(EntitySharedPtr withEntity)
 		// Check collision damage cooldown for if we should apply damage.
 		if (ship->lastShipCollision < pl.flyTime - ship->collisionDamageCooldown)
 		{
-			if (!ship->Damage(pl, float(sspp->ship->collideDamage), true))
+			if (!ship->Damage(pl, float(sspp->ship->collideDamage), false))
 				ship->lastShipCollision = pl.flyTime;
 		}
 		// Same for the other ship.

@@ -19,6 +19,8 @@ public:
 	// Updates all
 	void UpdateUI();
 
+	void UpdateActiveWeapon();
+
 	// Updates part of it
 	void UpdateHUDGearedWeapons();
 	// Only if cooldowns not already created.

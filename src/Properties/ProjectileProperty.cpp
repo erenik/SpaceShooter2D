@@ -62,7 +62,7 @@ void ProjectileProperty::Destroy()
 		// Explosion emitter o-o should prob. have its own system later on.
 		auto tmpEmitter = new SparksEmitter(owner->worldPosition);
 		tmpEmitter->SetEmissionVelocity(3.f);
-		tmpEmitter->constantEmission = 40 + weapon.damage * weapon.explosionRadius;
+		tmpEmitter->constantEmission = int( 40 + weapon.damage * weapon.explosionRadius);
 		tmpEmitter->instantaneous = true;
 		tmpEmitter->SetParticleLifeTime(2.5f);
 		tmpEmitter->SetScale(0.15f);
@@ -116,7 +116,7 @@ void ProjectileProperty::Process(int timeInMs)
 			bool wasRight = nextWobbleMs & 0x1;
 			up = Vector3f(0,1,0);
 			// Apply some pulse to the projectile.
-			Vector3f velocityImpulse = up * (wasRight? -1 : 1) * timeAliveMs * 0.05f + Vector3f(1,0,0);
+			Vector3f velocityImpulse = up * float(wasRight? -1 : 1) * float(timeAliveMs) * 0.05f + Vector3f(1,0,0);
 			float prevVel = owner->physics->velocity.Length();
 			Vector3f newVel = (owner->physics->velocity + velocityImpulse).NormalizedCopy() * prevVel;
 			QueuePhysics(new PMSetEntity(owner, PT_VELOCITY, newVel));

@@ -70,7 +70,7 @@ void LevelProperty::CreateBlackness() {
 	for (int i = 0; i < 4; ++i)
 	{
 		EntitySharedPtr blackness = EntityMan.CreateEntity("Blackness" + String(i), ModelMan.GetModel("sprite.obj"), TexMan.GetTexture("0x0A"));
-		float scale = 50.f;
+		float scale = 150.f;
 		float halfScale = scale * 0.5f;
 		blackness->scale = scale * Vector3f(1, 1, 1);
 		Vector3f position;

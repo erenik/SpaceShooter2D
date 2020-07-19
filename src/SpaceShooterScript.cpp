@@ -42,7 +42,8 @@ void SpaceShooterScript::EvaluateLine(String & line)
 	//	std::cout<<"\nDistance "<<distance;
 		ClampFloat(distance, -1.f, 1.f);
 		ShipPtr ship = pl.GetShip(targetEntity);
-		int minSpeed = args[2].ParseFloat(), maxSpeed = args[3].ParseFloat();
+		int minSpeed = int( args[2].ParseFloat()), 
+			maxSpeed = int (args[3].ParseFloat());
 		ship->speed = minSpeed + (1 - distance) * (maxSpeed - minSpeed);
 		/// Set initial speed.
 		if (sssState != 1)
@@ -181,7 +182,7 @@ bool SpaceShooterEvaluator::EvaluateFunction(String byName, List<String> argumen
 		if (!ship)
 			result = ExpressionResult::Error("Bad ship id");
 		else
-			result = ExpressionResult::Integral(ship->entity->worldPosition.y - pl.levelEntity->worldPosition.y);
+			result = ExpressionResult::Integral(int(ship->entity->worldPosition.y - pl.levelEntity->worldPosition.y));
 		return true;
 	}
 	else if (name == "PositionX")
@@ -190,7 +191,7 @@ bool SpaceShooterEvaluator::EvaluateFunction(String byName, List<String> argumen
 		if (!ship)
 			result = ExpressionResult::Error("Bad ship id");
 		else
-			result = ExpressionResult::Integral(ship->entity->worldPosition.x - pl.levelEntity->worldPosition.x);
+			result = ExpressionResult::Integral(int(ship->entity->worldPosition.x - pl.levelEntity->worldPosition.x));
 		return true;
 	}
 	else if (name == "DisableWeapon")
@@ -230,7 +231,7 @@ bool SpaceShooterEvaluator::EvaluateFunction(String byName, List<String> argumen
 		GRAB_SHIP
 		float percent = ship->hp / (float)ship->maxHP * 100;
 //		std::cout<<"\nperc "<<percent;
-		result = ExpressionResult::Integral(percent);
+		result = ExpressionResult::Integral(int(percent));
 		return true;	
 	}
 	else if (name == "PartsDestroyed")
@@ -256,7 +257,7 @@ bool SpaceShooterEvaluator::EvaluateFunction(String byName, List<String> argumen
 	else if (name == "SetWeaponCooldown")
 	{
 		GRAB_SHIP;
-		ship->SetWeaponCooldownByID(arguments[1].ParseInt(), AETime(TimeType::MILLISECONDS_NO_CALENDER, arguments[2].ParseFloat()));
+		ship->SetWeaponCooldownByID(arguments[1].ParseInt(), AETime(TimeType::MILLISECONDS_NO_CALENDER, (uint64) arguments[2].ParseFloat()));
 		result = ExpressionResult::Boolean(true);
 		return true;
 	}
@@ -272,7 +273,7 @@ bool SpaceShooterEvaluator::EvaluateFunction(String byName, List<String> argumen
 		GameVar * var = GameVars.GetTime(arguments[0]);
 		if (!var)
 			result = ExpressionResult::Boolean(false);
-		result = ExpressionResult::Integral((pl.levelTime - var->timeValue).Milliseconds());
+		result = ExpressionResult::Integral(int((pl.levelTime - var->timeValue).Milliseconds()));
 		return true;
 	}
 	else if (name == "ResetTimer")
@@ -311,7 +312,7 @@ bool SpaceShooterEvaluator::EvaluateFunction(String byName, List<String> argumen
 	}
 	else if (name == "CreateInt")
 	{
-		GameVars.CreateInt(arguments[0], arguments[1].ParseFloat());
+		GameVars.CreateInt(arguments[0], int(arguments[1].ParseFloat()));
 		result = ExpressionResult::Boolean(true);
 		return true;
 	}

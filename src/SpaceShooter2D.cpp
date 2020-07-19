@@ -264,8 +264,8 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 				if (file.Contains(".srl"))
 				{
 
-					playingLevel->gameTimePaused = false;
-					playingLevel->defeatedAllEnemies = true;
+					playingLevel->gameTimePausedDueToActiveLevelMessage = 
+						playingLevel->gameTimePausedDueToScriptableMessage = false;
 					playingLevel->failedToSurvive = false;
 					
 					level.Load(file);

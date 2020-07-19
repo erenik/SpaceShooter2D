@@ -108,7 +108,9 @@ public:
 	int level; // Also mainly for player-based weapons.
 	/// -1 = Infinite, >= 0 = Finite
 	bool reloading;
+	// Shots left in the current burst/round.
 	int shotsLeft;
+	// Does nothing at all. If finite, this means the total supply of shots you have before you cannot use the weapon any more.
 	int ammunition;
 	int lifeTimeMs;
 	int numberOfProjectiles; // Per 'firing'

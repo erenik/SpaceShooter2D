@@ -33,6 +33,9 @@ class Level
 public:
 	Level();
 	virtual ~Level();
+
+	int SpawnGroupsActive();
+
 	/// Deletes all ships, spawngroups, resets variables to defaults.
 	void Clear(PlayingLevel& playingLevel);
 	bool FinishedSpawning();
@@ -42,7 +45,7 @@ public:
 	// Used for player and camera. Based on millisecondsPerPixel.
 	Vector3f BaseVelocity();
 	/// Creates player entity within this level. (used for spawning)
-	EntitySharedPtr SpawnPlayer(PlayingLevel& playingLevel, ShipPtr playerShip, ConstVec3fr atPosition = Vector3f(-50.f, 10.f, 0));
+	EntitySharedPtr SpawnPlayer(PlayingLevel& playingLevel, ShipPtr playerShip, ConstVec3fr atPosition);
 	void SetupCamera();
 	/// o.o
 	void Process(PlayingLevel& playingLevel, int timeInMs);
@@ -66,6 +69,8 @@ public:
 	void RemoveRemainingSpawnGroups();
 	void SetSpawnGroupsFinishedAndDefeated(Time beforeLevelTime);
 	void RemoveExistingEnemies(PlayingLevel& playingLevel);
+
+	void HideLevelMessage(LevelMessage * levelMessage);
 
 	/// Yes.
 	List<ShipPtr> PlayerShips(PlayingLevel& playingLevel);
@@ -109,12 +114,12 @@ public:
 
 	bool levelCleared;
 
-	/// Position in X at which ships are spawned. Before that, their entity representations have not yet been created.
-	float spawnPositionRight;
-
-
 	/// Displayed ones, that is.
 	LevelMessage * activeLevelMessage;
+
+	bool spawnGroupsPauseGameTime;
+	bool messagesPauseGameTime;
+
 private:
 	// Check spawn groups.
 	bool LevelCleared(PlayingLevel& playingLevel);

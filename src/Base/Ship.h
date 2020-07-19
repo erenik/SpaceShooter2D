@@ -43,7 +43,7 @@ public:
 	/// Call on spawning.
 	void RandomizeWeaponCooldowns();
 	/// Spawns at local position according to window/player area, creating entities, registering for movement, etc. Returns it and all children spawned with it.
-	List< std::shared_ptr<Entity> > Spawn(ConstVec3fr atLocalPosition, ShipPtr parent, PlayingLevel & playingLevel);
+	List< std::shared_ptr<Entity> > Spawn(ConstVec3fr atWorldPosition, ShipPtr parent, PlayingLevel & playingLevel);
 	/// Handles spawning of children as needed.
 	List< std::shared_ptr<Entity> > SpawnChildren(PlayingLevel& playingLevel);
 	void Despawn(PlayingLevel& playingLevel, bool doExplodeEffectsForChildren);
@@ -145,6 +145,7 @@ public:
 	String onCollision;
 	bool spawned;
 	bool destroyed;
+	bool despawned;
 
 	/// In order to not take damage allllll the time (depending on processor speed, etc. too.)
 	Time lastShipCollision;

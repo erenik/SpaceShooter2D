@@ -506,8 +506,8 @@ void SpaceShooter2D::OpenJumpDialog()
 		jumpDialog = new UIStringInput("JumpTo", "JumpToTime");
 		jumpDialog->textureSource = "0x44AA";
 		jumpDialog->onTrigger += "PopUI(JumpTo)&ResumeGame";
-		jumpDialog->sizeRatioX = 0.5;
-		jumpDialog->sizeRatioY = 0.1;
+		jumpDialog->sizeRatioX = 0.5f;
+		jumpDialog->sizeRatioY = 0.1f;
 		jumpDialog->CreateChildren(nullptr);
 		jumpDialog->input->BeginInput(); // Make its input active straight away.
 		// Add it to the main UI.

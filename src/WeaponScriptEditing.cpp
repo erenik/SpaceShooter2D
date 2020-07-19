@@ -155,7 +155,7 @@ void ProcessMessageWSS(Message * message)
 	ScriptAction * sa = 0;
 	if (editScript)
 	{
-		if (editIndex < editScript->actions.Size() && editIndex >= 0);
+		if (editIndex < editScript->actions.Size() && editIndex >= 0)
 			sa = &editScript->actions[editIndex];
 	}
 	lastEdited = editScript;

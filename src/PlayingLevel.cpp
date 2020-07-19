@@ -67,6 +67,7 @@ PlayingLevel::playingFieldSize = Vector2f();
 
 PlayingLevel::PlayingLevel()
 	: SpaceShooter2D()
+	, lastSpawnGroup(nullptr)
 {
 	assert(singleton == nullptr);
 	singleton = this;
@@ -143,22 +144,70 @@ void PlayingLevel::Process(int timeInMs) {
 	timeElapsedMs += timeInMs;
 	hudUpdateMs += timeInMs;
 
-	SleepThread(10); // Updates 100 times a sec max?
+	SleepThread(5); // Updates 200 times a sec max?
 
 	if (paused)
 		return;
 
 	Cleanup();
 
+	// Check for game over.
+	if (CheckForGameOver(timeInMs))
+		return;
+
 	level.Process(*this, timeInMs);
-	if (hudUpdateMs > 100) {
+	// Update > 30 fps if possible
+	if (hudUpdateMs > 10) {
 		HUD* hud = HUD::Get();
+		hud->UpdateActiveWeapon();
 		hud->UpdateCooldowns(); // Update HUD 10 times a sec.
 		hud->UpdateDebug();
 		hudUpdateMs = 0;
 	}
 	UpdateRenderArrows();
 
+}
+
+// If true, game over is pending/checking respawn conditions, don't process other messages.
+bool PlayingLevel::CheckForGameOver(int timeInMs) {
+	if (!playerShip->destroyed)
+		return false;
+
+	timeDeadMs += timeInMs;
+	if (timeDeadMs < 2000)
+		return true;
+
+	LogMain("Game over! Player HP 0", INFO);
+	// Game OVER!
+	if (onDeath.Length() == 0)
+		spaceShooter->GameOver();
+	else if (onDeath.StartsWith("RespawnAt"))
+	{
+		playerShip->hp = (float)playerShip->maxHP;
+		SpawnPlayer();
+		// Reset level-time.
+		String timeStr = onDeath.Tokenize("()")[1];
+		SetTime(ParseTimeFrom(timeStr));
+	}
+	else
+		std::cout << "\nBad Game over (onDeath) critera.";
+	return true;
+}
+
+void PlayingLevel::OnPlayerDied() {
+	QueueGraphics(new GMSetCamera(levelCamera, CT_POSITION, Vector3f(0,0,10) + playerShip->entity->worldPosition));
+	QueueGraphics(new GMSetCamera(levelCamera, CT_ENTITY_TO_TRACK, (EntitySharedPtr) nullptr));
+	QueueGraphics(new GMSetCamera(levelCamera, CT_SMOOTHING, 0.95f));
+	failedToSurvive = true;
+}
+
+void PlayingLevel::OnPlayerSpawned() {
+	levelCamera->trackingPositionOffset = Vector3f(10.f, 0, 0);
+	QueueGraphics(new GMSetCamera(levelCamera, CT_POSITION, Vector3f(0,0,10)));
+	QueueGraphics(new GMSetCamera(levelCamera, CT_ENTITY_TO_TRACK, playerShip->entity));
+	QueueGraphics(new GMSetCamera(levelCamera, CT_SMOOTHING, 0.05f));
+
+	timeDeadMs = 0;
 }
 
 /// Called from the render-thread for every viewport/AppWindow, after the main rendering-pipeline has done its job.
@@ -226,6 +275,9 @@ void PlayingLevel::ProcessMessage(Message* message)
 		{
 			testGroup.formation = GetFormationByName(value);
 		}
+		else if (msg == "JumpToTime") {
+			JumpToTime(value);
+		}
 		break;
 	}
 	case MessageType::VECTOR_MESSAGE:
@@ -249,6 +301,10 @@ void PlayingLevel::ProcessMessage(Message* message)
 			msg = msg.Part(0, found);
 		
 		if (false) {}
+		if (msg == "RestartLevel") {
+			levelTime = flyTime = Time(TimeType::MILLISECONDS_NO_CALENDER, 0);
+			level.OnLevelTimeAdjusted(levelTime);
+		}
 		else if (msg.StartsWith("AddLevelScoreToTotal")) {
 			// Add level score to total upon showing level stats. o.o
 			score->iValue += LevelScore()->iValue;
@@ -292,6 +348,10 @@ void PlayingLevel::ProcessMessage(Message* message)
 		{
 			level.ProceedMessage();
 		}
+		else if (msg == "SpeedDebrisCollected") {
+			++spaceDebrisCollected;
+		}
+
 		if (msg == "TogglePlayerInvulnerability")
 		{
 			playerInvulnerability = !playerInvulnerability;
@@ -334,7 +394,7 @@ void PlayingLevel::ProcessMessage(Message* message)
 			while (movementDirections.Remove(dir));
 			UpdatePlayerVelocity();
 		}
-		if (msg == "ActivateSkill")
+		else if (msg == "ActivateSkill")
 		{
 			playerShip->ActivateSkill();
 		}
@@ -388,6 +448,9 @@ void PlayingLevel::ProcessMessage(Message* message)
 			if (playerShip->weaponScript == 0)
 				playerShip->weaponScript = WeaponScript::LastEdited();
 			playerShip->weaponScriptActive = !playerShip->weaponScriptActive;
+			if (!playerShip->weaponScriptActive) {
+				playerShip->shoot = false;
+			}
 		}
 		if (msg == "ActivateWeaponScript")
 		{
@@ -434,7 +497,8 @@ void PlayingLevel::ProcessMessage(Message* message)
 			Texture* tex = TexMan.GetTextureByColor(color);
 			EntitySharedPtr projectileEntity = EntityMan.CreateEntity(name + " Projectile", ModelMan.GetModel("sphere.obj"), tex);
 			Weapon weapon;
-			weapon.damage = 750;
+			weapon.damage = 500;
+			weapon.lifeTimeMs = 100000;
 			ProjectileProperty* projProp = new ProjectileProperty(weapon, projectileEntity, true);
 			projectileEntity->properties.Add(projProp);
 			// Set scale and position.
@@ -597,6 +661,9 @@ void PlayingLevel::ProcessMessage(Message* message)
 			// Resume physics/graphics if paused.
 			Resume();
 		}
+		else if (msg == "InGameMenuPopped") {
+			Resume();
+		}
 		else if (msg == "ToggleMenu")
 		{
 			// Pause the game.
@@ -634,7 +701,7 @@ void PlayingLevel::Cleanup()
 		ProjectileProperty* pp = (ProjectileProperty*)proj->GetProperty(ProjectileProperty::ID());
 		if (pp->sleeping ||
 			(proj->worldPosition[0] < despawnPositionLeft ||
-				proj->worldPosition[0] > level.spawnPositionRight ||
+				proj->worldPosition[0] > spawnPositionRight ||
 				proj->worldPosition.y < despawnDown ||
 				proj->worldPosition.y > despawnUp
 				)
@@ -737,6 +804,8 @@ void PlayingLevel::NewPlayer()
 /// Loads target level. The source and separate .txt description have the same name, just different file-endings, e.g. "Level 1.png" and "Level 1.txt"
 void PlayingLevel::LoadLevel(String fromSource)
 {
+
+	lastSpawnGroup = nullptr;
 	levelTime = flyTime = Time(TimeType::MILLISECONDS_NO_CALENDER, 0);
 
 	bool nonStandardLevel = false;
@@ -749,6 +818,7 @@ void PlayingLevel::LoadLevel(String fromSource)
 	// Reset stats for this specific level.
 	LevelKills()->iValue = 0;
 	LevelScore()->iValue = 0;
+	spaceDebrisCollected = 0;
 
 	QueueGraphics(new GMSetUIb("LevelMessage", GMUI::VISIBILITY, false));
 
@@ -809,11 +879,7 @@ void PlayingLevel::LoadLevel(String fromSource)
 	// Set velocity of the game.
 	// Reset position of player!
 	//	PhysicsMan.QueueMessage(new PMSetEntity(playerShip->entity, PT_POSITION, initialPosition));
-
-	level.SpawnPlayer(*this, playerShip);
-	QueueGraphics(new GMSetCamera(levelCamera, CT_ENTITY_TO_TRACK, playerShip->entity));
-	levelCamera->smoothness = 0.05f;
-	levelCamera->trackingPositionOffset = Vector3f(10.f, 0, 0);
+	SpawnPlayer();
 
 	// Reset player stats.
 	playerShip->hp = (float) ( playerShip->maxHP);
@@ -837,6 +903,12 @@ void PlayingLevel::LoadLevel(String fromSource)
 	QueueGraphics(new GMRecompileShaders()); // Shouldn't be needed...
 
 }
+
+void PlayingLevel::SpawnPlayer() {
+	level.SpawnPlayer(*this, playerShip, Vector3f(levelEntity->worldPosition.x - playingFieldHalfSize.x, 0, 0));
+
+}
+
 
 void PlayingLevel::UpdateRenderArrows()
 {
@@ -939,15 +1011,23 @@ void PlayingLevel::JumpToTime(String timeString)
 {
 	// Jump to target level-time. Adjust position if needed.
 	levelTime.ParseFrom(timeString);
+	HideLevelMessage();
 	level.SetSpawnGroupsFinishedAndDefeated(levelTime);
 	level.OnLevelTimeAdjusted(levelTime);
+	playerShip->movementDisabled = false;
+
+	gameTimePausedDueToScriptableMessage = false;
 }
 
-void PlayingLevel::SetTime(Time time) {
+Time PlayingLevel::SetTime(Time time) {
 	levelTime = time;
 	level.OnLevelTimeAdjusted(levelTime);
+	return levelTime;
 }
 
+void PlayingLevel::HideLevelMessage() {
+	level.HideLevelMessage(nullptr);
+}
 
 #include "Level/SpawnGroup.h"
 AppWindow* spawnWindow = 0;
@@ -987,5 +1067,27 @@ void PlayingLevel::CloseSpawnWindow()
 	if (spawnWindow)
 		spawnWindow->Close();
 }
+
+
+bool PlayingLevel::GameTimePausedDueToActiveSpawnGroup() {
+	return level.messagesPauseGameTime && level.SpawnGroupsActive() > 0;
+}
+
+bool PlayingLevel::GameTimePaused() {
+	return GameTimePausedDueToActiveSpawnGroup() || gameTimePausedDueToActiveLevelMessage || gameTimePausedDueToScriptableMessage;
+}
+
+bool PlayingLevel::DefeatedAllEnemiesInTheLastSpawnGroup() {
+	if (lastSpawnGroup == nullptr)
+		return false;
+	if (lastSpawnGroup->ShipsDefeated())
+		return true;
+	return false;
+}
+
+void PlayingLevel::SetLastSpawnGroup(SpawnGroup * sg) {
+	lastSpawnGroup = sg;
+}
+
 
 

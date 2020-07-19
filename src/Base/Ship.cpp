@@ -48,13 +48,15 @@ Ship::Ship()
 	canShoot = false;
 	spawnInvulnerability = false;
 	hasShield = false;
-	shieldValue = maxShieldValue = 10;
+	shieldValue = 0;
+	maxShieldValue = 10;
 	currentMovement = 0;
 	timeInCurrentMovement = 0;
 	speed = 0.f;
 	score = 10;
 	destroyed = false;
 	spawned = false;
+	despawned = false;
 
 	currentRotation = 0;
 	timeInCurrentRotation = 0;
@@ -125,16 +127,17 @@ void Ship::RandomizeWeaponCooldowns()
 	}
 }
 
-List< std::shared_ptr<Entity> > Ship::Spawn(ConstVec3fr atLocalPosition, ShipPtr in_parent, PlayingLevel & playingLevel)
+List< std::shared_ptr<Entity> > Ship::Spawn(ConstVec3fr atWorldPosition, ShipPtr in_parent, PlayingLevel & playingLevel)
 {	
 
 	std::cout<<"\nPossible kills: "<<++spaceShooter->LevelPossibleKills()->iValue;
 
 	/// Reset stuffs if not already done so.
 	movementDisabled = false;
+	destroyed = false;
 	RandomizeWeaponCooldowns();
 
-	Vector3f atPosition = atLocalPosition + Vector3f(playingLevel.level.spawnPositionRight, 0, 0);
+	Vector3f atPosition = atWorldPosition;
 	atPosition.z = 0;
 //	atPosition.y += levelEntity->worldPosition
 
@@ -361,9 +364,10 @@ void Ship::Process(PlayingLevel& playingLevel, int timeInMs)
 	if (hasShield)
 	{
 		// Repair shield
-		shieldValue += timeInMs * shieldRegenRate * (activeSkill == POWER_SHIELD? 10.f : 0.001f);
+		if (shieldValue < MaxShield())
+			shieldValue += timeInMs * shieldRegenRate * (activeSkill == POWER_SHIELD? 0.1f : 0.001f);
 		if (shieldValue > MaxShield())
-			shieldValue = MaxShield();
+			shieldValue = shieldValue * 0.998f + 0.002f * MaxShield(); // If past the max, tune to max by 1% per frame?
 		if (allied)
 			HUD::Get()->UpdateUIPlayerShield(false);
 	}
@@ -555,15 +559,18 @@ bool Ship::Damage(PlayingLevel& playingLevel, float amount, bool ignoreShield)
 	}
 	if (hasShield && !ignoreShield)
 	{
+		float oldShieldValue = shieldValue;
 		shieldValue -= amount;
-		amount = -shieldValue;
-		if (shieldValue < 0 )
+		// Shield destroyed. Show some particles perhaps?
+		if (shieldValue < 0) {
 			shieldValue = 0;
+			amount -= oldShieldValue;
+		}
 		if (this->allied)
 			HUD::Get()->UpdateUIPlayerShield(true);
+		// If no more dmg, no need to calc armor.
 		if (amount < 0)
 			return false;
-		shieldValue = 0;
 	}
 	// Modulate amount depending on armor toughness and reactivity.
 	float activeToughness = (float)armor.toughness;
@@ -591,7 +598,7 @@ void Ship::Destroy(PlayingLevel& playingLevel)
 {	
 	if (destroyed)
 		return;
-	destroyed = 0;
+	destroyed = true;
 	if (entity)
 	{
 		if (spawnGroup)
@@ -612,8 +619,9 @@ void Ship::Destroy(PlayingLevel& playingLevel)
 			std::cout<<"\nKills: "<<spaceShooter->LevelKills()->iValue++;
 			spaceShooter->OnScoreUpdated();
 		}
-		else 
-			PlayingLevelRef().failedToSurvive = true;
+		else {
+			playingLevel.OnPlayerDied();
+		}
 		/// Despawn.
 		Despawn(playingLevel, true);
 	}
@@ -763,7 +771,7 @@ float Ship::Speed()
 float Ship::MaxShield()
 {
 	if (activeSkill == POWER_SHIELD)
-		return maxShieldValue + 10000;
+		return maxShieldValue * 10;
 	return maxShieldValue;
 }
 
@@ -784,7 +792,7 @@ void Ship::UpdateStatsFromGear()
 {
 	this->maxHP = armor.maxHP;
 	hp = (float) maxHP;
-	shieldValue = (float) (this->maxShieldValue = (float)shield.maxShield);
+	shieldValue = 0; //  (float)(this->maxShieldValue = (float)shield.maxShield);
 	this->shieldRegenRate = shield.shieldRegen;
 }
 
@@ -801,7 +809,7 @@ bool Ship::SwitchToWeapon(int index)
 	// Update ui
 	if (!enemy)
 	{
-		QueueGraphics(new GMSetUIi("ActiveWeapon", GMUI::INTEGER_INPUT, index));
+		QueueGraphics(new GMSetUIi("Weapons", GMUI::INTEGER_INPUT, index));
 	}
 	return true;
 }
@@ -860,7 +868,7 @@ void Ship::ActivateSkill()
 		return;
 	activeSkill = skill;
 	timeSinceLastSkillUseMs = 0;
-	skillDurationMs = 5000;
+	skillDurationMs = 7000;
 	switch(skill)
 	{
 		case POWER_SHIELD:	
@@ -875,7 +883,7 @@ void Ship::ActivateSkill()
 		default:
 			skillCooldownMs = skillDurationMs = 100;
 	}
-	skillCooldownMs *= skillCooldownMultiplier;
+	skillCooldownMs = (int) (skillCooldownMs * skillCooldownMultiplier);
 	// Reflect activation in HUD?
 	spaceShooter->UpdateHUDSkill();
 }
