@@ -101,7 +101,8 @@ void PlayingLevel::UpdateUI() {
 // Inherited via AppState
 void PlayingLevel::OnEnter(AppState* previousState) {
 
-	
+	assert(playerName.Length() > 0);
+
 	testGroup.number = 1;
 
 	/// Enable Input-UI navigation via arrow-keys and Enter/Esc.
@@ -187,7 +188,12 @@ bool PlayingLevel::CheckForGameOver(int timeInMs) {
 		SpawnPlayer();
 		// Reset level-time.
 		String timeStr = onDeath.Tokenize("()")[1];
-		SetTime(ParseTimeFrom(timeStr));
+		Time time;
+		if (timeStr == "RewindPoint")
+			time = rewindPoint;
+		else
+			time = ParseTimeFrom(timeStr);
+		SetTime(time);
 	}
 	else
 		std::cout << "\nBad Game over (onDeath) critera.";
@@ -301,7 +307,28 @@ void PlayingLevel::ProcessMessage(Message* message)
 			msg = msg.Part(0, found);
 		
 		if (false) {}
-		if (msg == "RestartLevel") {
+		else if (msg.StartsWith("SetMessagesPauseGameTime")) {
+			bool arg = msg.Tokenize("()")[1].ParseBool();
+			level.messagesPauseGameTime = arg;
+		}
+		else if (msg.StartsWith("SetSpawnGroupsPauseGameTime")) {
+			bool arg = msg.Tokenize("()")[1].ParseBool();
+			level.spawnGroupsPauseGameTime = arg;
+		}
+		else if (msg == "ZoomIn") {
+			if (levelCamera->TargetZoom() <= levelCamera->trackingPositionOffset.Length())
+				return;
+			QueueGraphics(new GMSetCamera(levelCamera, CT_ZOOM, levelCamera->TargetZoom() - 3.0f));
+		}
+		else if (msg == "ZoomOut") {
+			if (levelCamera->TargetZoom() > 30)
+				return;
+			QueueGraphics(new GMSetCamera(levelCamera, CT_ZOOM, levelCamera->TargetZoom() + 3.0f));
+		}
+		else if (msg == "SetRewindPoint") {
+			rewindPoint = levelTime;
+		}
+		else if (msg == "RestartLevel") {
 			levelTime = flyTime = Time(TimeType::MILLISECONDS_NO_CALENDER, 0);
 			level.OnLevelTimeAdjusted(levelTime);
 		}
@@ -401,47 +428,51 @@ void PlayingLevel::ProcessMessage(Message* message)
 		//			std::cout<<"\n"<<msg;
 		if (msg == "TutorialBaseGun")
 		{
-			playerShip->weapons.Clear(); // Clear old wepaons.
-			playerShip->SetWeaponLevel(WeaponType::TYPE_0, 1);
-			playerShip->activeWeapon = playerShip->weapons[0];
+			playerShip->SetLevelOfAllWeaponsTo(0);
+			playerShip->activeWeapon = playerShip->SetWeaponLevel(Weapon::Type::MachineGun, 1);
 		}
 		if (msg == "TutorialLevel1Weapons")
 		{
-			playerShip->SetWeaponLevel(WeaponType::TYPE_0, 1);
-			playerShip->SetWeaponLevel(WeaponType::TYPE_1, 1);
-			playerShip->SetWeaponLevel(WeaponType::TYPE_2, 1);
+			playerShip->SetWeaponLevel(Weapon::Type::MachineGun, 1);
+			playerShip->SetWeaponLevel(Weapon::Type::SmallRockets, 1);
+			playerShip->SetWeaponLevel(Weapon::Type::BigRockets, 1);
 		}
 		if (msg == "TutorialLevel3Weapons")
 		{
-			playerShip->SetWeaponLevel(WeaponType::TYPE_0, 3);
-			playerShip->SetWeaponLevel(WeaponType::TYPE_1, 3);
-			playerShip->SetWeaponLevel(WeaponType::TYPE_2, 3);
+			playerShip->SetWeaponLevel(Weapon::Type::MachineGun, 3);
+			playerShip->SetWeaponLevel(Weapon::Type::SmallRockets, 3);
+			playerShip->SetWeaponLevel(Weapon::Type::BigRockets, 3);
 		}
 		if (msg.StartsWith("DecreaseWeaponLevel:"))
 		{
-			List<String> parts = msg.Tokenize(":");
-			int weaponIndex = parts[1].ParseInt();
-			Weapon* weap = playerShip->GetWeapon(WeaponType::TYPE_0 + weaponIndex);
-			int currLevel = weap->level;
-			playerShip->SetWeaponLevel(WeaponType::TYPE_0 + weaponIndex, currLevel - 1);
-			std::cout << "\nWeapon " << weap->type << " set to level " << weap->level << ": " << weap->name;
+			assert(false);
+
+			//List<String> parts = msg.Tokenize(":");
+			//int weaponIndex = parts[1].ParseInt();
+			//Weapon* weap = playerShip->GetWeapon(WeaponType::TYPE_0 + weaponIndex);
+			//int currLevel = weap->level;
+			//playerShip->SetWeaponLevel(WeaponType::TYPE_0 + weaponIndex, currLevel - 1);
+			//std::cout << "\nWeapon " << weap->type << " set to level " << weap->level << ": " << weap->name;
 		}
 		if (msg.StartsWith("IncreaseWeaponLevel:"))
 		{
-			List<String> parts = msg.Tokenize(":");
-			int weaponIndex = parts[1].ParseInt();
-			Weapon* weap = playerShip->GetWeapon(WeaponType::TYPE_0 + weaponIndex);
-			int currLevel = weap->level;
-			playerShip->SetWeaponLevel(WeaponType::TYPE_0 + weaponIndex, currLevel + 1);
-			std::cout << "\nWeapon " << weap->type << " set to level " << weap->level << ": " << weap->name;
+			assert(false);
+			//List<String> parts = msg.Tokenize(":");
+			//int weaponIndex = parts[1].ParseInt();
+			//Weapon* weap = playerShip->GetWeapon(WeaponType::TYPE_0 + weaponIndex);
+			//int currLevel = weap->level;
+			//playerShip->SetWeaponLevel(WeaponType::TYPE_0 + weaponIndex, currLevel + 1);
+			//std::cout << "\nWeapon " << weap->type << " set to level " << weap->level << ": " << weap->name;
 		}
 		else if (msg == "AllTheWeapons")
 		{
-			for (int i = 0; i < WeaponType::MAX_TYPES; ++i)
-			{
-				if (playerShip->weapons[i]->level <= 0)
-					playerShip->SetWeaponLevel(i, 1);
-			}
+			assert(false);
+
+			//for (int i = 0; i < WeaponType::MAX_TYPES; ++i)
+			//{
+			//	if (playerShip->weapons[i]->level <= 0)
+			//		playerShip->SetWeaponLevel(i, 1);
+			//}
 		}
 		if (msg == "ToggleWeaponScript")
 		{
@@ -790,15 +821,19 @@ void PlayingLevel::NewPlayer()
 	playerShip->enemy = false;
 	playerShip->allied = true;
 
-	playerShip->weapon = Gear::StartingWeapon();
+	playerShip->weapons = WeaponSet();
+	const Weapon * starterWeapon = Weapon::Get(Weapon::Type::MachineGun, 1);
+	Weapon * weapon = new Weapon();
+	*weapon = *starterWeapon;
+	assert(starterWeapon != nullptr);
+	playerShip->weapons.Add(weapon);
+
 	playerShip->armor = Gear::StartingArmor();
 	playerShip->shield = Gear::StartingShield();
 	playerShip->UpdateStatsFromGear();
 
-	for (int i = 0; i < WeaponType::MAX_TYPES; ++i)
-	{
-		playerShip->SetWeaponLevel(i, 0);
-	}
+	playerShip->SetLevelOfAllWeaponsTo(0);
+
 }
 
 /// Loads target level. The source and separate .txt description have the same name, just different file-endings, e.g. "Level 1.png" and "Level 1.txt"
@@ -1079,7 +1114,7 @@ bool PlayingLevel::GameTimePaused() {
 
 bool PlayingLevel::DefeatedAllEnemiesInTheLastSpawnGroup() {
 	if (lastSpawnGroup == nullptr)
-		return false;
+		return true;
 	if (lastSpawnGroup->ShipsDefeated())
 		return true;
 	return false;

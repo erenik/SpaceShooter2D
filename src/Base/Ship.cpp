@@ -171,6 +171,7 @@ List< std::shared_ptr<Entity> > Ship::Spawn(ConstVec3fr atWorldPosition, ShipPtr
 	else 
 	{
 		pp->velocity = spaceShooter->level.BaseVelocity();
+		assert(!pp->velocity.IsInfinite());
 		pp->collisionCategory = CC_PLAYER;
 		pp->collisionFilter = CC_ALL_ENEMY;
 		/// Turn to face X+
@@ -365,7 +366,7 @@ void Ship::Process(PlayingLevel& playingLevel, int timeInMs)
 	{
 		// Repair shield
 		if (shieldValue < MaxShield())
-			shieldValue += timeInMs * shieldRegenRate * (activeSkill == POWER_SHIELD? 0.1f : 0.001f);
+			shieldValue += timeInMs * shieldRegenRate * (activeSkill == POWER_SHIELD? 0.1f : 0.001f) * (activeSkill == ATTACK_FRENZY? -1.0f : 1.0f);
 		if (shieldValue > MaxShield())
 			shieldValue = shieldValue * 0.998f + 0.002f * MaxShield(); // If past the max, tune to max by 1% per frame?
 		if (allied)
@@ -475,16 +476,17 @@ void Ship::SetWeaponCooldownBonus(float newBonus)
 
 void Ship::SetWeaponCooldownByID(int id, AETime newcooldown)
 {
-	for (int i = 0; i < weapons.Size(); ++i)
-	{
-		Weapon * weap = weapons[i];
-		if (weap->type == id)
-			weap->cooldown = newcooldown;
-	}
-	for (int i = 0; i < children.Size(); ++i)
-	{
-		children[i]->SetWeaponCooldownByID(id, newcooldown);
-	}
+	assert(false);
+	//for (int i = 0; i < weapons.Size(); ++i)
+	//{
+	//	Weapon * weap = weapons[i];
+	//	if (weap->type == id)
+	//		weap->cooldown = newcooldown;
+	//}
+	//for (int i = 0; i < children.Size(); ++i)
+	//{
+	//	children[i]->SetWeaponCooldownByID(id, newcooldown);
+	//}
 }
 /// Disables weapon in this and children ships.
 void Ship::DisableWeapon(String weaponName)
@@ -535,7 +537,7 @@ void Ship::Damage(PlayingLevel& playingLevel, Weapon & weapon)
 {
 	float damage = weapon.damage * weapon.relativeStrength;
 	bool ignoreShield = false;
-	if (weapon.type == HEAT_WAVE)
+	if (weapon.type == Weapon::Type::HeatWave)
 	{
 		heatDamageTaken += damage;
 		damage += heatDamageTaken;
@@ -557,6 +559,7 @@ bool Ship::Damage(PlayingLevel& playingLevel, float amount, bool ignoreShield)
 	//	std::cout<<"\nInvulnnnn!";
 	//	return;
 	}
+	int remainingDamage = amount;
 	if (hasShield && !ignoreShield)
 	{
 		float oldShieldValue = shieldValue;
@@ -564,12 +567,12 @@ bool Ship::Damage(PlayingLevel& playingLevel, float amount, bool ignoreShield)
 		// Shield destroyed. Show some particles perhaps?
 		if (shieldValue < 0) {
 			shieldValue = 0;
-			amount -= oldShieldValue;
 		}
+		remainingDamage = amount - oldShieldValue;
 		if (this->allied)
 			HUD::Get()->UpdateUIPlayerShield(true);
 		// If no more dmg, no need to calc armor.
-		if (amount < 0)
+		if (remainingDamage < 0)
 			return false;
 	}
 	// Modulate amount depending on armor toughness and reactivity.
@@ -579,9 +582,9 @@ bool Ship::Damage(PlayingLevel& playingLevel, float amount, bool ignoreShield)
 	{
 		activeToughness += armor.reactivity;
 	}
-	amount = (amount / (activeToughness / 10.f));
+	remainingDamage = (remainingDamage / (activeToughness / 10.f));
 
-	hp -= amount;
+	hp -= remainingDamage;
 	if (hp < 0)
 		hp = 0;
 	if (this->allied)
@@ -669,14 +672,16 @@ void Ship::ExplodeEffects(PlayingLevel& playingLevel)
 
 bool Ship::DisableWeaponsByID(int id)
 {
-	for (int i = 0; i < weapons.Size(); ++i)
-	{
-		Weapon * weap = weapons[i];
-		if (weap->type == id)
-			weap->enabled = false;
-	}
-	for (int i = 0; i < children.Size(); ++i)
-		children[i]->DisableWeaponsByID(id);
+	assert(false);
+
+	//for (int i = 0; i < weapons.Size(); ++i)
+	//{
+	//	Weapon * weap = weapons[i];
+	//	if (weap->type == id)
+	//		weap->enabled = false;
+	//}
+	//for (int i = 0; i < children.Size(); ++i)
+	//	children[i]->DisableWeaponsByID(id);
 	return true;
 }
 
@@ -686,14 +691,22 @@ bool Ship::DisableWeaponsByID(int id)
 		Weapon * weap = weapons[i];
 bool Ship::EnableWeaponsByID(int id)
 {
-	FOR_ALL_WEAPONS
-		if (weap->type == id)
-			weap->enabled = true;
-	}
-	for (int i = 0; i < children.Size(); ++i)
-		children[i]->EnableWeaponsByID(id);
+	assert(false);
+	//FOR_ALL_WEAPONS
+	//	if (weap->type == id)
+	//		weap->enabled = true;
+	//}
+	//for (int i = 0; i < children.Size(); ++i)
+	//	children[i]->EnableWeaponsByID(id);
 	return true;
 }
+
+
+void Ship::SetLevelOfAllWeaponsTo(int level) {
+	for (int i = 0; i < weapons.Size(); ++i)
+		weapons[i]->level = level;
+}
+
 
 bool Ship::DisableAllWeapons()
 {
@@ -824,10 +837,10 @@ void Ship::StartMovement(PlayingLevel& playingLevel)
 }
 
 /// For player ship.
-void Ship::SetWeaponLevel(int weaponType, int level)
+Weapon * Ship::SetWeaponLevel(Weapon::Type weaponType, int level)
 {
 	Weapon * weapon = GetWeapon(weaponType);
-	Weapon * targetWeapon = Weapon::Get(weaponType, level);
+	const Weapon * targetWeapon = Weapon::Get(weaponType, level);
 	if (!targetWeapon)
 	{
 		if (level == 0)
@@ -841,12 +854,14 @@ void Ship::SetWeaponLevel(int weaponType, int level)
 				weapon->cooldown = Time(TimeType::MILLISECONDS_NO_CALENDER, 400);
 			}
 		}
-		return;
+		return weapon;
 	}
 	*weapon = *targetWeapon;
+	assert(weapon->name.Length() > 0);
+	return weapon;
 }
 
-Weapon * Ship::GetWeapon(int ofType)
+Weapon * Ship::GetWeapon(Weapon::Type ofType)
 {
 	for (int i = 0; i < weapons.Size(); ++i)
 	{
@@ -861,29 +876,35 @@ Weapon * Ship::GetWeapon(int ofType)
 	return weapons.Last();
 }
 
+int SkillCooldown(int skill) {
+	int skillCooldownMs = -1;
+	switch (skill)
+	{
+	case POWER_SHIELD:
+		skillCooldownMs = 25000;
+		break;
+	case SPEED_BOOST:
+		skillCooldownMs = 20000;
+		break;
+	case ATTACK_FRENZY:
+		skillCooldownMs = 30000;
+		break;
+	default:
+		break;
+	}
+	return skillCooldownMs;
+}
+
 void Ship::ActivateSkill()
 {
 	// Check cooldown?
+	LogMain("Attempting to use skill: "+ String(activeSkill)+ " timeSinceLastSkillUseMs "+String(timeSinceLastSkillUseMs)+" coolDown: "+ SkillCooldown(skill), INFO);
 	if (timeSinceLastSkillUseMs != -1)
 		return;
 	activeSkill = skill;
 	timeSinceLastSkillUseMs = 0;
 	skillDurationMs = 7000;
-	switch(skill)
-	{
-		case POWER_SHIELD:	
-			skillCooldownMs = 25000; 
-			break;
-		case SPEED_BOOST: 	
-			skillCooldownMs = 20000;
-			break;
-		case ATTACK_FRENZY: 
-			skillCooldownMs = 30000; 
-			break;
-		default:
-			skillCooldownMs = skillDurationMs = 100;
-	}
-	skillCooldownMs = (int) (skillCooldownMs * skillCooldownMultiplier);
+	skillCooldownMs = (int) (SkillCooldown(skill) * skillCooldownMultiplier);
 	// Reflect activation in HUD?
 	spaceShooter->UpdateHUDSkill();
 }

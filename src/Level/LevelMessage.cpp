@@ -17,6 +17,7 @@ LevelMessage::LevelMessage()
 	eventType = STRING_EVENT;
 	pausesGameTime = false;
 	textID = "";
+	goToRewindPoint = false;
 }
 
 void LevelMessage::PrintAll()
@@ -38,17 +39,18 @@ bool LevelMessage::Trigger(PlayingLevel& playingLevel, Level * level)
 	bool trigger = true;
 	if (condition.Length())
 	{
-		std::cout<<"\nCondition: "<<condition;
 		if (condition == "FailedToDefeatAllEnemies")
 		{
 			trigger = playingLevel.DefeatedAllEnemiesInTheLastSpawnGroup() == false;
+			LogMain("FailedToDefeatAllEnemies: "+ String(trigger), INFO);
 		}
 		else if (condition == "FailedToSurvive")
 		{
 			trigger = playingLevel.failedToSurvive;
 		}
-		else if (condition == "2SpaceDebrisNotCollected") {
-			trigger = playingLevel.spaceDebrisCollected != 2;
+		else if (condition.Contains("SpaceDebrisNotCollected(")) {
+			int target = condition.Tokenize("()")[1].ParseInt();
+			trigger = playingLevel.spaceDebrisCollected != target;
 			playingLevel.spaceDebrisCollected = 0;
 		}
 		else {
@@ -71,7 +73,9 @@ bool LevelMessage::Trigger(PlayingLevel& playingLevel, Level * level)
 		{
 			PrintAll();
 		}
-		QueueGraphics(new GMSetUIs("LevelMessage", GMUI::TEXT, TextMan.GetText(textID)));
+		Text text = TextMan.GetText(textID); 
+		text.Replace("$Name", playingLevel.playerName);
+		QueueGraphics(new GMSetUIs("LevelMessage", GMUI::TEXT, text));
 		QueueGraphics(new GMSetUIb("LevelMessage", GMUI::VISIBILITY, true));
 		displayed = true;
 		++activeLevelDisplayMessages;
@@ -86,6 +90,10 @@ bool LevelMessage::Trigger(PlayingLevel& playingLevel, Level * level)
 			level->SetTime(goToTime);
 			LogMain("Jumping to time: "+String(goToTime.Seconds()), INFO);
 			return false; // Return as if it failed, so the event is not saved as currently active one. (instantaneous)
+		}
+		if (goToRewindPoint) {
+			level->SetTime(playingLevel.rewindPoint);
+			LogMain("Rewinding to time: " + String(playingLevel.rewindPoint.Seconds()), INFO);
 		}
 	}
 	if (pausesGameTime)

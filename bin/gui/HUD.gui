@@ -48,6 +48,7 @@ alignmentXY 0.5 0.8
 
 ColumnList clWeaponSkillBar
 sizeRatioXY 0.9 0.7
+maxWidth 1200
 alignmentXY 0.5 0.35
 
 parent clHPShield
@@ -86,15 +87,17 @@ Button Skill
 sizeRatioX 0.1
 
 RadioButtons 10 Weapons
+textures icons/MachineGun icons/SmallRockets icons/BigRockets 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
 onEnterScope ActiveWeaponsShown
 onPop ActiveWeaponsHidden
 NoLabel
 sizeRatioX 0.9
 
 parent ActiveWeaponList
-defaultSizeRatioXY 1 0.5
+defaultSizeRatioXY 1 0.3
 Label ActiveWeaponName ""
 ColumnList clWeaponStatus
+Label WeaponScriptStatus
 
 parent clWeaponStatus
 defaultSizeRatioXY 0.5 1

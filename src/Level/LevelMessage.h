@@ -28,6 +28,7 @@ public:
 	enum {
 		STRING_EVENT,
 		GO_TO_TIME_EVENT,
+		GO_TO_REWIND_POINT,
 	};
 	bool displayed, hidden;
 	Time startTime;
@@ -35,6 +36,7 @@ public:
 	String textID;
 	bool pausesGameTime; // Default true.
 	Time goToTime;
+	bool goToRewindPoint;
 };
 
 #endif // LEVEL_MSG_H

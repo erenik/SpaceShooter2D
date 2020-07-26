@@ -55,7 +55,7 @@ void Level::OnEnter()
 // Used for player and camera. Based on millisecondsPerPixel.
 Vector3f Level::BaseVelocity()
 {
-	return Vector3f(1,0,0) * (1000.f / millisecondsPerPixel);
+	return Vector3f(1,0,0) * 4;
 }
 
 /// Creates player entity within this level. (used for spawning)
@@ -228,12 +228,12 @@ void Level::ProcessLevelMessages(Time levelTime) {
 		{
 			LevelMessage* lm = messages[i];
 
-			// If being displayed, check if we should stop displaying it.
-			if (lm->displayed && lm->stopTime < levelTime)
-				HideLevelMessage(lm);
-
 			if (lm->hidden)
 				continue;
+
+			// If being displayed, check if we should stop displaying it.
+			if (lm->displayed && lm->stopTime > levelTime)
+				HideLevelMessage(lm);
 
 			if (lm->startTime > levelTime) // Not time yet.
 				continue;
@@ -299,6 +299,7 @@ void Level::ProceedMessage()
 void Level::SetTime(Time newTime)
 {
 	PlayingLevelRef().SetTime(newTime);
+	OnLevelTimeAdjusted(newTime);
 }
 
 /// enable respawing on shit again.

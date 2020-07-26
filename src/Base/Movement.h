@@ -48,6 +48,7 @@ public:
 	String ToString();
 
 	static List<Movement> ParseFrom(String);
+	void ParseDuration(String fromString);
 	String Name() const;
 	static String Name(int type);
 

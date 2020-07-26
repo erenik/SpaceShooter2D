@@ -104,42 +104,44 @@ void SpaceShooter2D::LoadDefaultName()
 
 void SpaceShooter2D::UpdateUpgradesLists()
 {
-	PlayingLevel& pl = PlayingLevelRef();
-	QueueGraphics(new GMClearUI("lWeaponCategories"));
-	/// Fill with column lists for each weapon.
-	List<UIElement*> cls;
-	for (int i = 0; i < WeaponType::MAX_TYPES; ++i)
-	{
-		UIColumnList * cl = new UIColumnList("Weapon"+String(i)+"UpgradeCL");
-		cl->sizeRatioY = 0.1f;
-		cl->padding = 0.01f;
-		cls.AddItem(cl);
-		UILabel * label = new UILabel(TextMan.GetText(i+10));
-		label->sizeRatioX = 0.4f;
-		cl->AddChild(nullptr, label);
+	assert(false);
 
-		for (int j = 0; j < 10; ++j)
-		{
-			Weapon * weapon = Weapon::Get(i, j);
-			if (!weapon && j != 0)
-				continue;
+	//PlayingLevel& pl = PlayingLevelRef();
+	//QueueGraphics(new GMClearUI("lWeaponCategories"));
+	///// Fill with column lists for each weapon.
+	//List<UIElement*> cls;
+	//for (int i = 0; i < WeaponType::MAX_TYPES; ++i)
+	//{
+	//	UIColumnList * cl = new UIColumnList("Weapon"+String(i)+"UpgradeCL");
+	//	cl->sizeRatioY = 0.1f;
+	//	cl->padding = 0.01f;
+	//	cls.AddItem(cl);
+	//	UILabel * label = new UILabel(TextMan.GetText(i+10));
+	//	label->sizeRatioX = 0.4f;
+	//	cl->AddChild(nullptr, label);
 
-			UIButton * bn = new UIButton(WeaponTypeLevelToString(i,j));
-			bn->text = "";
-			bn->hoverable = true;
-			bn->onHover = "SetHoverUpgrade:"+bn->name;
-			bn->activationMessage = "ActiveUpgrade:"+bn->name;
-			bn->sizeRatioY = 0.6f;
-			if (pl.playerShip->weapons[i]->level > j)
-				bn->textureSource = "0x00FF00AA";
-			else
-				bn->textureSource = "0x44AA";
-			bn->sizeRatioX = 0.05f;
-			cl->AddChild(nullptr, bn);
-		}
-	}
-	QueueGraphics(new GMAddUI(cls, "lWeaponCategories"));
-	UpdateUpgradeStatesInList();
+	//	for (int j = 0; j < 10; ++j)
+	//	{
+	//		Weapon * weapon = Weapon::Get(i, j);
+	//		if (!weapon && j != 0)
+	//			continue;
+
+	//		UIButton * bn = new UIButton(WeaponTypeLevelToString(i,j));
+	//		bn->text = "";
+	//		bn->hoverable = true;
+	//		bn->onHover = "SetHoverUpgrade:"+bn->name;
+	//		bn->activationMessage = "ActiveUpgrade:"+bn->name;
+	//		bn->sizeRatioY = 0.6f;
+	//		if (pl.playerShip->weapons[i]->level > j)
+	//			bn->textureSource = "0x00FF00AA";
+	//		else
+	//			bn->textureSource = "0x44AA";
+	//		bn->sizeRatioX = 0.05f;
+	//		cl->AddChild(nullptr, bn);
+	//	}
+	//}
+	//QueueGraphics(new GMAddUI(cls, "lWeaponCategories"));
+	//UpdateUpgradeStatesInList();
 }
 
 void SpaceShooter2D::UpdateUpgradesMoney()
@@ -149,46 +151,46 @@ void SpaceShooter2D::UpdateUpgradesMoney()
 
 void SpaceShooter2D::UpdateUpgradeStatesInList()
 {
-
-	PlayingLevel& pl = PlayingLevelRef();
-	// Does not create, merely modifies.
-	for (int i = 0; i < WeaponType::MAX_TYPES; ++i)
-	{
-		for (int j = 0; j < 10; ++j)
-		{
-			String buttonName = WeaponTypeLevelToString(i,j);
-			String textureSource;
-			Vector4f color(1,1,1,1);
-			textureSource = "ui/SpaceShooterUpgrade_White";//textureSource = "0xFFFF00AA";
-			if (j == 0)
-			{
-				if (pl.playerShip->weapons[i]->level > 0)
-				{
-	//				textureSource = "ui/SpaceShooterUpgrade_White";//textureSource = "0xFFFF00AA";
-					color = Vector4f(1,1,0,1);
-				}
-				else 
-				{
-					color = Vector4f(1,0,0,1);
-//					textureSource = "0xFF0000AA";
-//				textureSource = "0x44AA";
-				}
-			}
-			else 
-			{
-				if (pl.playerShip->weapons[i]->level >= j)
-//					color = Vector4f(0,1,0,1);
-					color = Color(102, 255, 0, 255);
-				//	textureSource = "ui/SpaceShooterGreenUpgrade.png";
-					//textureSource = "0x00FF00AA";
-				else
-					color = Vector4f(1,1,1,1) * 0.25f;
-//					textureSource = "0x44AA";
-			}
-			QueueGraphics(new GMSetUIv4f(buttonName, GMUI::COLOR, color));
-			QueueGraphics(new GMSetUIs(buttonName, GMUI::TEXTURE_SOURCE, textureSource));
-		}
-	}
+	assert(false);
+//	PlayingLevel& pl = PlayingLevelRef();
+//	// Does not create, merely modifies.
+//	for (int i = 0; i < WeaponType::MAX_TYPES; ++i)
+//	{
+//		for (int j = 0; j < 10; ++j)
+//		{
+//			String buttonName = WeaponTypeLevelToString(i,j);
+//			String textureSource;
+//			Vector4f color(1,1,1,1);
+//			textureSource = "ui/SpaceShooterUpgrade_White";//textureSource = "0xFFFF00AA";
+//			if (j == 0)
+//			{
+//				if (pl.playerShip->weapons[i]->level > 0)
+//				{
+//	//				textureSource = "ui/SpaceShooterUpgrade_White";//textureSource = "0xFFFF00AA";
+//					color = Vector4f(1,1,0,1);
+//				}
+//				else 
+//				{
+//					color = Vector4f(1,0,0,1);
+////					textureSource = "0xFF0000AA";
+////				textureSource = "0x44AA";
+//				}
+//			}
+//			else 
+//			{
+//				if (pl.playerShip->weapons[i]->level >= j)
+////					color = Vector4f(0,1,0,1);
+//					color = Color(102, 255, 0, 255);
+//				//	textureSource = "ui/SpaceShooterGreenUpgrade.png";
+//					//textureSource = "0x00FF00AA";
+//				else
+//					color = Vector4f(1,1,1,1) * 0.25f;
+////					textureSource = "0x44AA";
+//			}
+//			QueueGraphics(new GMSetUIv4f(buttonName, GMUI::COLOR, color));
+//			QueueGraphics(new GMSetUIs(buttonName, GMUI::TEXTURE_SOURCE, textureSource));
+//		}
+//	}
 }
 
 
@@ -218,7 +220,8 @@ void FillBasicInfo(String upgrade, String inElement)
 	Vector2i tl = WeaponTypeLevelFromString(upgrade);
 	int type = tl.x, level = tl.y;
 	// Fetch type.
-	Weapon * weapon = Weapon::Get(type, level);
+	assert(false);
+	// Weapon * weapon = Weapon::Get(type, level);
 
 	List<UIElement*> elements;
 	UIList * l1 = new UIList(), * l2 = new UIList();
@@ -227,57 +230,58 @@ void FillBasicInfo(String upgrade, String inElement)
 	l2->alignmentX = 0.75f;
 	l1->alignmentX = 0.25f;
 	/// o.o lvl 0?
-	if (!weapon)
-	{
-		if (playerShip->weapons[type]->level > 0)
-			tmpElements.AddItem(BasicLabel("Unequip?"));
-		else
-			tmpElements.AddItem(BasicLabel("Level 0."));
-		l1->AddChildren(nullptr, tmpElements);
+	////if (!weapon)
+	////{
+	////	if (playerShip->weapons[type]->level > 0)
+	////		tmpElements.AddItem(BasicLabel("Unequip?"));
+	////	else
+	////		tmpElements.AddItem(BasicLabel("Level 0."));
+	////	l1->AddChildren(nullptr, tmpElements);
+	////	tmpElements.Clear();
+	////}
+	//else // Weapon exists.
+	//{
+	//	tmpElements.AddItem(BasicLabel("Name: "+weapon->name));
+	//	tmpElements.AddItem(BasicLabel("Price: "+String(weapon->cost)));
+	//	tmpElements.AddItem(BasicLabel("Cooldown: "+String(weapon->cooldown.Milliseconds())));
+	//	tmpElements.AddItem(BasicLabel("Damage: "+String(weapon->damage, 1)));
+	//	l1->AddChildren(nullptr, tmpElements);
+	//	tmpElements.Clear();
+	//	// Depending on type, add extra statistics too that might be interesting? ^^
+	//	assert(false);
+		//switch(type)
+		//{
+		//	case BULLETS:
+		//		tmpElements.AddItem(BasicLabel("Penetration: "+String(weapon->penetration,2)));
+		//		tmpElements.AddItem(BasicLabel("Stability: "+String(weapon->stability,2)));
+		//		break;
+		//	case SMALL_ROCKETS:
+		//		tmpElements.AddItem(BasicLabel("Burst: "+String(weapon->burstRounds)+"/"+String(weapon->burstRoundDelay.Milliseconds())));
+		//		tmpElements.AddItem(BasicLabel("Homing: "+String(weapon->homingFactor, 2)));
+		//		tmpElements.AddItem(BasicLabel("Explosion radius: "+String(weapon->explosionRadius, 1)));
+		//		break;
+		//	case BIG_ROCKETS:
+		//		tmpElements.AddItem(BasicLabel("Homing: "+String(weapon->homingFactor, 2)));
+		//		tmpElements.AddItem(BasicLabel("Explosion radius: "+String(weapon->explosionRadius, 1)));
+		//		break;	
+		//	case LIGHTNING:
+		//		tmpElements.AddItem(BasicLabel("Max range: "+String(weapon->maxRange)));
+		//		tmpElements.AddItem(BasicLabel("Max bounces: "+String(weapon->maxBounces)));
+		//		break;	
+		//	case LASER_BEAM:
+		//	case LASER_BURST:
+		//		break;
+		//	case HEAT_WAVE:
+		//		tmpElements.AddItem(BasicLabel("Max range: "+String(weapon->maxRange)));
+		//		break;
+		//	case ION_FLAK:
+		//		tmpElements.AddItem(BasicLabel("Num Projectiles/Salvo: "+String(weapon->numberOfProjectiles)));
+		//		tmpElements.AddItem(BasicLabel("Stability: "+String(weapon->stability,2)));
+		//		break;			
+		//};
+		/*l2->AddChildren(nullptr, tmpElements);
 		tmpElements.Clear();
-	}
-	else // Weapon exists.
-	{
-		tmpElements.AddItem(BasicLabel("Name: "+weapon->name));
-		tmpElements.AddItem(BasicLabel("Price: "+String(weapon->cost)));
-		tmpElements.AddItem(BasicLabel("Cooldown: "+String(weapon->cooldown.Milliseconds())));
-		tmpElements.AddItem(BasicLabel("Damage: "+String(weapon->damage, 1)));
-		l1->AddChildren(nullptr, tmpElements);
-		tmpElements.Clear();
-		// Depending on type, add extra statistics too that might be interesting? ^^
-		switch(type)
-		{
-			case BULLETS:
-				tmpElements.AddItem(BasicLabel("Penetration: "+String(weapon->penetration,2)));
-				tmpElements.AddItem(BasicLabel("Stability: "+String(weapon->stability,2)));
-				break;
-			case SMALL_ROCKETS:
-				tmpElements.AddItem(BasicLabel("Burst: "+String(weapon->burstRounds)+"/"+String(weapon->burstRoundDelay.Milliseconds())));
-				tmpElements.AddItem(BasicLabel("Homing: "+String(weapon->homingFactor, 2)));
-				tmpElements.AddItem(BasicLabel("Explosion radius: "+String(weapon->explosionRadius, 1)));
-				break;
-			case BIG_ROCKETS:
-				tmpElements.AddItem(BasicLabel("Homing: "+String(weapon->homingFactor, 2)));
-				tmpElements.AddItem(BasicLabel("Explosion radius: "+String(weapon->explosionRadius, 1)));
-				break;	
-			case LIGHTNING:
-				tmpElements.AddItem(BasicLabel("Max range: "+String(weapon->maxRange)));
-				tmpElements.AddItem(BasicLabel("Max bounces: "+String(weapon->maxBounces)));
-				break;	
-			case LASER_BEAM:
-			case LASER_BURST:
-				break;
-			case HEAT_WAVE:
-				tmpElements.AddItem(BasicLabel("Max range: "+String(weapon->maxRange)));
-				break;
-			case ION_FLAK:
-				tmpElements.AddItem(BasicLabel("Num Projectiles/Salvo: "+String(weapon->numberOfProjectiles)));
-				tmpElements.AddItem(BasicLabel("Stability: "+String(weapon->stability,2)));
-				break;			
-		};
-		l2->AddChildren(nullptr, tmpElements);
-		tmpElements.Clear();
-	}
+	}*/
 	QueueGraphics(new GMAddUI(elements, inElement));
 //	QueueGraphics(new GMSetUIs(inElement, GMUI::TEXT, upgrade));
 }
@@ -445,45 +449,46 @@ void SpaceShooter2D::UpdateGearList()
 		label->sizeRatioX = 0.3f;
 		label->hoverable = false;
 		list->AddChild(nullptr, label);
+		assert(false);
 		// Add stats?
-		switch(gearCategory)
-		{
-			// Weapons:
-			case 0:
-			{
-				break;
-			}
-			// Shields
-			case 1:
-			{
-				label = new UILabel("Max Shield: "+String(gear.maxShield));
-				label->hoverable = false;
-				label->sizeRatioX = 0.2f;
-				list->AddChild(nullptr, label);
-				label = new UILabel("Regen: "+String(gear.shieldRegen));
-				label->hoverable = false;
-				label->sizeRatioX = 0.1f;
-				list->AddChild(nullptr, label);
-				break;
-			}
-			// Armors
-			case 2:
-			{
-				label = new UILabel("Max HP: "+String(gear.maxHP));
-				label->hoverable = false;
-				label->sizeRatioX = 0.15f;
-				list->AddChild(nullptr, label);
-				label = new UILabel("Toughness: "+String(gear.toughness));
-				label->hoverable = false;
-				label->sizeRatioX = 0.1f;
-				list->AddChild(nullptr, label);
-				label = new UILabel("Reactivity: "+String(gear.reactivity));
-				label->hoverable = false;
-				label->sizeRatioX = 0.1f;
-				list->AddChild(nullptr, label);
-				break;		
-			}
-		}
+		//switch(gearCategory)
+		//{
+		//	// Weapons:
+		//	case 0:
+		//	{
+		//		break;
+		//	}
+		//	// Shields
+		//	case 1:
+		//	{
+		//		label = new UILabel("Max Shield: "+String(gear.maxShield));
+		//		label->hoverable = false;
+		//		label->sizeRatioX = 0.2f;
+		//		list->AddChild(nullptr, label);
+		//		label = new UILabel("Regen: "+String(gear.shieldRegen));
+		//		label->hoverable = false;
+		//		label->sizeRatioX = 0.1f;
+		//		list->AddChild(nullptr, label);
+		//		break;
+		//	}
+		//	// Armors
+		//	case 2:
+		//	{
+		//		label = new UILabel("Max HP: "+String(gear.maxHP));
+		//		label->hoverable = false;
+		//		label->sizeRatioX = 0.15f;
+		//		list->AddChild(nullptr, label);
+		//		label = new UILabel("Toughness: "+String(gear.toughness));
+		//		label->hoverable = false;
+		//		label->sizeRatioX = 0.1f;
+		//		list->AddChild(nullptr, label);
+		//		label = new UILabel("Reactivity: "+String(gear.reactivity));
+		//		label->hoverable = false;
+		//		label->sizeRatioX = 0.1f;
+		//		list->AddChild(nullptr, label);
+		//		break;		
+		//	}
+		//}
 		// Add price.
 		label = new UILabel(String(gear.price));
 		label->hoverable = false;

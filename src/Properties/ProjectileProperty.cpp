@@ -109,7 +109,7 @@ void ProjectileProperty::Process(int timeInMs)
 		Remove();
 		return;
 	}
-	if (weapon.type == LASER_BURST)
+	if (weapon.type == Weapon::Type::LaserBurst)
 	{
 		if (nextWobbleMs == 0 || nextWobbleMs < timeAliveMs)
 		{
@@ -128,7 +128,7 @@ void ProjectileProperty::Process(int timeInMs)
 				nextWobbleMs = nextWobbleMs | 0x00001;
 		}
 	}
-	else if (weapon.type == HEAT_WAVE)
+	else if (weapon.type == Weapon::Type::HeatWave)
 	{
 		// Decay over distance / time.
 		distanceTraveled = timeAliveMs * weapon.projectileSpeed * 0.001f;

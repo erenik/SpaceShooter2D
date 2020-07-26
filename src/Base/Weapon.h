@@ -25,34 +25,6 @@ public:
 	WeaponSet(WeaponSet & otherWeaponSet);
 };
 
-namespace WeaponType
-{
-	enum 
-	{
-		BAD_TYPE = -1,
-		TYPE_0 = 0, // + 0 to 9
-		TYPE_1,
-		TYPE_2,
-		TYPE_3, // etc.
-		TYPE_4,
-		TYPE_5,
-		TYPE_6,
-		TYPE_7,
-		TYPE_8,
-		MAX_TYPES,
-	};
-};
-
-#define BULLETS WeaponType::TYPE_0
-#define SMALL_ROCKETS WeaponType::TYPE_1
-#define BIG_ROCKETS WeaponType::TYPE_2
-#define LIGHTNING WeaponType::TYPE_3
-#define LASER_BEAM WeaponType::TYPE_4
-#define LASER_BURST WeaponType::TYPE_5
-#define HEAT_WAVE WeaponType::TYPE_6
-#define ION_FLAK WeaponType::TYPE_7
-
-
 class LightningArc
 {
 public:
@@ -72,12 +44,30 @@ public:
 class Weapon
 {
 public:
+
+	enum class Type {
+		None,
+		MachineGun,
+		SmallRockets,
+		BigRockets,
+		Lightning,
+		LaserBeam,
+		LaserBurst,
+		HeatWave,
+		IonCannon
+	};
+
 	Weapon();
+
+	String TypeName();
+	static String GetTypeName(Type type);
+	static Weapon::Type ParseType(String fromString);
+
 	// Sets
 	static bool Get(String byName, Weapon * weapon);
 	/** For player-based, returns pointer, but should be used as reference only (*-dereference straight away). 
 		Returns 0 if it doesn't exist. */
-	static Weapon * Get(int type, int level); 
+	static const Weapon * const Get(Type type, int level);
 	static bool LoadTypes(String fromFile);
 	/// Moves the aim of this weapon turrent.
 	void Aim(PlayingLevel& playingLevel, ShipPtr ship);
@@ -101,10 +91,11 @@ public:
 	int currCooldownMs = 0; /// Used instead of flyTime.
 	int previousUIUpdateCooldownMs = 0;
 	float stability;
-	String name;
+	String name; // Printable
+	String id; // Shorter
 	bool enabled; // default true.
 	int cost; // o-o
-	int type; // mainly for player-based weapons.
+	Type type; // mainly for player-based weapons.
 	int level; // Also mainly for player-based weapons.
 	/// -1 = Infinite, >= 0 = Finite
 	bool reloading;

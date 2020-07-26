@@ -14,12 +14,12 @@ public:
 	Gear();
 	String name;
 	int price;
-	enum {
+	enum class Type {
 		WEAPON,
 		SHIELD_GENERATOR,
 		ARMOR,
 	};
-	int type;
+	Type type;
 	// Weapon stats?
 	int damage;
 	Time reloadTime;
@@ -35,7 +35,7 @@ public:
 
 	/// o.o
 	static bool Load(String fromFile);
-	static List<Gear> GetType(int type);
+	static List<Gear> GetType(Type type);
 	static Gear Get(String byName);
 
 	static Gear StartingWeapon();

@@ -6,7 +6,7 @@
 #include "File/File.h"
 #include "String/StringUtil.h"
 
-/// Available to buy!
+/// Available to buy! .. what?
 List<Gear> Gear::availableGear;
 
 Gear::Gear()
@@ -17,6 +17,14 @@ Gear::Gear()
 	maxHP = -1;
 	maxShield = -1;
 	reloadTime = Time(TimeType::MILLISECONDS_NO_CALENDER, 0);
+}
+
+Gear::Type ParseType(String fromString) {
+	if (fromString == "Weapon")
+		return Gear::Type::WEAPON;
+	if (fromString == "Armor")
+		return Gear::Type::ARMOR;
+	assert(false);
 }
 
 /// o.o
@@ -38,11 +46,11 @@ bool Gear::Load(String fromFile)
 		String & line = lines[j];
 		Gear gear;
 		if (fromFile.Contains("Shield"))
-			gear.type = SHIELD_GENERATOR;
+			gear.type = Gear::Type::SHIELD_GENERATOR;
 		else if (fromFile.Contains("Armor"))
-			gear.type = ARMOR;
+			gear.type = Gear::Type::ARMOR;
 		else 
-			gear.type = WEAPON;
+			gear.type = Gear::Type::WEAPON;
 		List<String> values = TokenizeCSV(line, delimiter);
 		for (int k = 0; k < values.Size(); ++k)
 		{
@@ -61,7 +69,7 @@ bool Gear::Load(String fromFile)
 				gear.name = value;
 			}
 			else if (column == "Type")
-				gear.type = value.ParseInt();
+				gear.type = ParseType(value);
 			else if (column == "Price")
 				gear.price = value.ParseInt();
 			else if (column == "Damage")
@@ -94,7 +102,7 @@ bool Gear::Load(String fromFile)
 	}
 }
 
-List<Gear> Gear::GetType(int type)
+List<Gear> Gear::GetType(Gear::Type type)
 {
 	List<Gear> list;
 	for (int i = 0; i < availableGear.Size(); ++i)
@@ -118,7 +126,7 @@ Gear Gear::Get(String byName)
 
 Gear Gear::StartingWeapon()
 {
-	List<Gear> weapons = GetType(WEAPON);
+	List<Gear> weapons = GetType(Gear::Type::WEAPON);
 	for (int i = 0; i < weapons.Size(); ++i)
 	{
 		Gear & weapon = weapons[i];
@@ -130,7 +138,7 @@ Gear Gear::StartingWeapon()
 }
 Gear Gear::StartingArmor()
 {
-	List<Gear> armors = GetType(ARMOR);
+	List<Gear> armors = GetType(Gear::Type::ARMOR);
 	for (int i = 0; i < armors.Size(); ++i)
 	{
 		Gear & armor = armors[i];
@@ -142,7 +150,7 @@ Gear Gear::StartingArmor()
 }
 Gear Gear::StartingShield()
 {
-	List<Gear> shields = GetType(SHIELD_GENERATOR);
+	List<Gear> shields = GetType(Gear::Type::SHIELD_GENERATOR);
 	for (int i = 0; i < shields.Size(); ++i)
 	{
 		Gear & shield = shields[i];

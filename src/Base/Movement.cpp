@@ -12,6 +12,14 @@ String Movement::ToString()
 	return Name(type);
 }
 
+void Movement::ParseDuration(String fromString) {
+	fromString.RemoveSurroundingWhitespaces();
+	if (fromString == "inf") 
+		durationMs = -1; 
+	else 
+		durationMs = fromString.ParseInt();
+}
+
 List<Movement> Movement::ParseFrom(String fromString)
 {	
 	List<Movement> movements;
@@ -68,18 +76,18 @@ List<Movement> Movement::ParseFrom(String fromString)
 	LogMain("Expected "+String(a)+" arguments for movement type \'"+\
 	Movement::Name(move.type)+"\', encountered "+String(args.Size())+".", INFO); \
 	continue;}
-#define GET_DURATION(a) if (args[a] == "inf") move.durationMs = -1; else move.durationMs = args[a].ParseInt();
+// #define GET_DURATION(a) if (args[a] == "inf") move.durationMs = -1; else move.durationMs = args[a].ParseInt();
 		switch(move.type)
 		{
 			case Movement::STRAIGHT:
 				DEMAND_ARGS(1);
-				GET_DURATION(0);
+				move.ParseDuration(args[0]);
 				break;	
 			case Movement::ZAG:
 				DEMAND_ARGS(3);
 				move.vec.ParseFrom(args[0]);
 				move.zagTimeMs = args[1].ParseInt();
-				GET_DURATION(2);
+				move.ParseDuration(args[2]);
 				break;
 			case Movement::MOVE_TO:
 			{
@@ -109,14 +117,14 @@ List<Movement> Movement::ParseFrom(String fromString)
 					move.vec.ParseFrom(args[0]);
 					move.location = Location::VECTOR;
 				}
-				GET_DURATION(1);
+				move.ParseDuration(args[1]);
 				break;
 			}
 			case Movement::MOVE_DIR:
 			{
 				DEMAND_ARGS(2);
 				move.vec.ParseFrom(args[0]);
-				GET_DURATION(1);
+				move.ParseDuration(args[1]);
 				break;
 			}
 			case Movement::CIRCLE:
@@ -125,14 +133,14 @@ List<Movement> Movement::ParseFrom(String fromString)
 				move.target = args[0];
 				move.radius = args[1].ParseFloat();
 				move.clockwise = args[2].ParseBool();
-				GET_DURATION(3);
+				move.ParseDuration(args[3]);
 				break;
 			}
 			case Movement::UP_N_DOWN:
 			{
 				DEMAND_ARGS(2);
 				move.distance = args[0].ParseFloat();
-				GET_DURATION(1);
+				move.ParseDuration(args[1]);
 				break;
 			}
 		}

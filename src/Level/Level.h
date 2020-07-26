@@ -42,7 +42,7 @@ public:
 	bool Load(String fromSource);
 	/// Starts BGM, starts clocks/timers if any, etc.
 	void OnEnter();
-	// Used for player and camera. Based on millisecondsPerPixel.
+	// Used for player and camera. 
 	Vector3f BaseVelocity();
 	/// Creates player entity within this level. (used for spawning)
 	EntitySharedPtr SpawnPlayer(PlayingLevel& playingLevel, ShipPtr playerShip, ConstVec3fr atPosition);
@@ -102,8 +102,6 @@ public:
 
 	List<Explosion*> explosions;
 
-	/// To determine when things spawn and the duration of the entire "track".
-	int millisecondsPerPixel;
 	/// Music source to play.
 	String music;
 	/// Goal position in X.

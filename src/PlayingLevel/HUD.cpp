@@ -85,6 +85,9 @@ void RequeueHUDUpdate()
 /// Update UI
 void HUD::UpdateHUDGearedWeapons()
 {
+	return;
+
+
 	MutexHandle mh(uiMutex);
 	// Fetch the names of the checkboxes.
 	UserInterface* ui = MainWindow()->ui;

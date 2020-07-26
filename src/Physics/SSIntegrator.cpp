@@ -6,6 +6,7 @@
 #include "SpaceShooter2D.h"
 #include "PlayingLevel.h"
 #include "Properties/LevelProperty.h"
+#include "File/LogFile.h"
 
 extern EntitySharedPtr playerEntity;
 
@@ -83,7 +84,9 @@ void SSIntegrator::IntegrateVelocity(EntitySharedPtr forEntity, float timeInSeco
 	if (pp->paused)
 		return;
 	Vector3f & localPosition = forEntity->localPosition;
+	Vector3f oldLocalPos = localPosition;
 	Vector3f & velocity = pp->velocity;
+	Vector3f oldVelocity = velocity;
 	/// For linear damping.
 	float linearDamp = pow(pp->linearDamping, timeInSeconds);
 	velocity *= linearDamp;
@@ -102,6 +105,12 @@ void SSIntegrator::IntegrateVelocity(EntitySharedPtr forEntity, float timeInSeco
 		Vector3f velocity = forEntity->rotationMatrix * pp->relativeVelocity;
 		localPosition += velocity * timeInSeconds;
 	}
+	
+	if (localPosition.IsInfinite()) {
+		LogPhysics("Position out of bounds. Position previously: "+ VectorString(oldLocalPos)+ " old velocity: "+VectorString(oldVelocity), ERROR);
+		assert(!localPosition.IsInfinite());
+	}
+
 	if (pp->angularVelocity.MaxPart())
 	{
 		forEntity->rotation += pp->angularVelocity * timeInSeconds;

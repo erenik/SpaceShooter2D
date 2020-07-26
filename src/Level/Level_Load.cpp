@@ -13,11 +13,69 @@
 
 namespace LevelLoader 
 {
+	LevelMessage * lastMessage = nullptr;
+	LevelMessage * message = NULL;
 	SpawnGroup * group = (SpawnGroup*)0;
 	Level * loadLevel = (Level*)0;
 	SpawnGroup * lastGroup = (SpawnGroup*)0;
 	/// Additional spawn times for duplicates of the same group (times specified at start)
 	List<Time> spawnTimes;
+
+	Vector3i goalColor;
+
+	List<ShipColorCoding> colorCodings;
+	List<String> lines;
+
+	enum {
+		PARSE_MODE_INIT,
+		PARSE_MODE_FORMATIONS,
+		PARSE_MODE_MESSAGES,
+	};
+	int parseMode = 0;
+
+	Time LastSpawnGroupOrMessageTime();
+
+	// AddMessageIfNeeded(this)
+	void AddMessageIfNeeded(Level * level) {
+		if (message) { 
+			String prefix = "Message";
+			if (message->type == LevelMessage::EVENT)
+				prefix = "Event";
+			LogMain(prefix+" "+ message->textID+" added at time: "+ message->startTime.ToString("m:S"), INFO);
+			level->messages.Add(message); 
+			lastMessage = message;
+			message = nullptr;
+		} 
+	}
+
+
+	void ParseMessageStartTime(String arg) {
+		message->startTime = LastSpawnGroupOrMessageTime();
+		if (arg.StartsWith("+")) {
+			message->startTime.AddSeconds(arg.Tokenize(":")[1].ParseInt());
+		}
+		else if (arg.IsNumber())
+			message->startTime.ParseFrom(arg);
+		LogMain("Message start time set to: " + message->startTime.ToString("m:S"), INFO);
+		message->stopTime = message->startTime + Time(TimeType::MILLISECONDS_NO_CALENDER, 5000); // Default 5 seconds?
+	}
+
+	// Returns the most recent time parsed so far, regardless if Spawngroup or message/event.
+	Time LastSpawnGroupOrMessageTime() {
+		Time lastSpawnGroupTime = lastGroup ? lastGroup->SpawnTime() : Time(TimeType::MILLISECONDS_NO_CALENDER);
+		Time lastMessageTime = lastMessage ? lastMessage->startTime : Time(TimeType::MILLISECONDS_NO_CALENDER);
+		Time messageTime = message ? message->startTime : Time(TimeType::MILLISECONDS_NO_CALENDER);
+		Time spawnGroupTime = group ? group->SpawnTime() : Time(TimeType::MILLISECONDS_NO_CALENDER);
+
+		Time bestSoFar = lastSpawnGroupTime;
+		if (lastMessageTime > bestSoFar)
+			bestSoFar = lastMessageTime;
+		if (messageTime > bestSoFar)
+			bestSoFar = messageTime;
+		if (spawnGroupTime > bestSoFar)
+			bestSoFar = spawnGroupTime;
+		return bestSoFar;
+	}
 
 	void AddGroupsIfNeeded() 
 	{ 
@@ -61,15 +119,20 @@ namespace LevelLoader
 				continue;
 			}
 			Time t(TimeType::MILLISECONDS_NO_CALENDER);
-			bool ok = t.ParseFrom(timeStr);
-			if (!ok)
-				continue;
-/*			if (t.Milliseconds() == 0) /// Spawning at 0:0.0 should be possible - used in generator.
-				continue;*/
 			if (timeStr.StartsWith("+"))
 			{
-				t = t + spawnTimes.Last(); // Catenate to previous time ^^	
+				Time lastTime = LastSpawnGroupOrMessageTime();
+				t = lastTime; 
+				t.AddSeconds(timeStr.Tokenize(":")[1].ParseInt());
 			}
+			else {
+				bool ok = t.ParseFrom(timeStr);
+				if (!ok)
+					continue;
+			}
+			LogMain("Adding spawn group at time " + t.ToString("m:S"), INFO);
+			/*			if (t.Milliseconds() == 0) /// Spawning at 0:0.0 should be possible - used in generator.
+				continue;*/
 			spawnTimes.AddItem(t);
 		}
 		assert(spawnTimes.Size());
@@ -143,28 +206,14 @@ bool Level::Load(String fromSource)
 	/// Set end criteria..
 	endCriteria = Level::NO_MORE_ENEMIES;
 
-	millisecondsPerPixel = 250;
-
 	String sourceTxt = source;
 	music = source+".ogg";
-	Vector3i goalColor;
-	
-	Time startTime;
+	lines = File::GetLines(sourceTxt);
 
-	List<ShipColorCoding> colorCodings;
-	List<String> lines = File::GetLines(sourceTxt);
 	if (lines.Size() == 0)
 	{
 		LogMain("Unable to read any lines of text from level source: "+sourceTxt, ERROR);
 	}
-	enum {
-		PARSE_MODE_INIT,
-		PARSE_MODE_FORMATIONS,
-		PARSE_MODE_MESSAGES,
-	};
-	int parseMode = 0;
-	LevelMessage * message = NULL;
-#define	ADD_MESSAGE_IF_NEEDED {if (message) { messages.Add(message);} message = NULL;}
 	bool inComments = false;
 
 	for (int i = 0; i < lines.Size(); ++i)
@@ -197,6 +246,7 @@ bool Level::Load(String fromSource)
 			spawnGroupsPauseGameTime = arg.ParseBool();
 		else if (line.StartsWith("SpawnGroup"))
 		{
+			AddMessageIfNeeded(loadLevel);
 			AddGroupsIfNeeded();
 			group = new SpawnGroup();
 			SET_GROUP_DEFAULTS;
@@ -220,38 +270,28 @@ bool Level::Load(String fromSource)
 		}
 		else if (line.StartsWith("Message"))
 		{
-			ADD_MESSAGE_IF_NEEDED;
+			AddMessageIfNeeded(this);
 			message = new LevelMessage();
 			message->pausesGameTime = messagesPauseGameTime;
-			if (arg.Length())
-			{
-				message->startTime.ParseFrom(arg);
-				startTime = message->startTime;
-			}
-			else 
-				message->startTime = startTime;
-			message->stopTime = message->startTime + Time(TimeType::MILLISECONDS_NO_CALENDER, 5000); // Default 5 seconds?
+			ParseMessageStartTime(arg);
 			parseMode = PARSE_MODE_MESSAGES;
 		}
 		else if (line.StartsWith("Event"))
 		{
-			ADD_MESSAGE_IF_NEEDED;
+			AddMessageIfNeeded(this);
 			message = new LevelMessage();
 			message->type = LevelMessage::EVENT;
-			if (arg.Length())
-			{
-				message->startTime.ParseFrom(arg);
-				startTime = message->startTime;
-			}
-			else
-				message->startTime = startTime;
-			message->stopTime = Time::Milliseconds(0); // Default instant.
+			message->strings.Add(line - "Event "); // By default, add argument to be invoked on passing it.
+			message->textID = arg; // By default, for logging, add arg as textId.
+			ParseMessageStartTime(arg);
 			parseMode = PARSE_MODE_MESSAGES;
 		}
 		if (parseMode == PARSE_MODE_MESSAGES)
 		{
-			if (var == "Condition")
-				message->condition = arg;
+			if (var == "Condition") {
+				message->condition = line - "Condition";
+				message->condition.RemoveSurroundingWhitespaces();
+			}
 			if (var == "TextID")
 				message->textID = arg;
 			if (var == "String")
@@ -266,6 +306,10 @@ bool Level::Load(String fromSource)
 				String strArg = line - "GoToTime";
 				strArg.RemoveSurroundingWhitespaces();
 				message->goToTime.ParseFrom(strArg);
+			}
+			if (var == "GoToRewindPoint") {
+				message->eventType = LevelMessage::GO_TO_TIME_EVENT;
+				message->goToRewindPoint = true;
 			}
 		}
 		if (parseMode == PARSE_MODE_FORMATIONS)
@@ -345,15 +389,6 @@ bool Level::Load(String fromSource)
 				group->size.ParseFrom((line - "Size"));
 			continue;
 		}
-		if (line.StartsWith("MillisecondsPerPixel"))
-		{
-			List<String> tokens = line.Tokenize(" ");
-			if (tokens.Size() < 2)
-				continue;
-			millisecondsPerPixel = tokens[1].ParseInt();
-			if (millisecondsPerPixel == 0)
-				millisecondsPerPixel = 250;
-		}
 		if (line.StartsWith("ShipType"))
 		{
 			List<String> tokens = line.Tokenize(" ");
@@ -395,7 +430,7 @@ bool Level::Load(String fromSource)
 	}
 	// Add last group, if needed.
 	AddGroupsIfNeeded();
-	ADD_MESSAGE_IF_NEEDED;
+	AddMessageIfNeeded(this);
 
 	/// Sort groups based on spawn-time?
 

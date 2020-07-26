@@ -94,7 +94,7 @@ SpaceShooter2D::SpaceShooter2D()
 {
 	levelCamera = NULL;
 	playingFieldPadding = 1.f;
-	gearCategory = 0;
+	gearCategory = Gear::Type::WEAPON;
 	previousMode = mode = SSGameMode::START_UP;
 	// Default vel smoothing.
 	PhysicsProperty::defaultVelocitySmoothing = 0.02f;
@@ -109,6 +109,15 @@ SpaceShooter2D::~SpaceShooter2D()
 /// Function when entering this state, providing a pointer to the previous StateMan.
 void SpaceShooter2D::OnEnter(AppState * previousState)
 {
+	// Set some default 
+	// When clicking on it.
+	UIElement::onActiveHightlightFactor = 0.2f;
+	// When hovering on it.
+	UIElement::onHoverHighlightFactor = 0.1f;
+	// When toggled, additional factor
+	UIElement::onToggledHighlightFactor = 0.2f;
+
+
 
 	QueuePhysics(new PMSeti(PT_AABB_SWEEPER_DIVISIONS, 1));// subdivisionsZ
 
@@ -128,6 +137,7 @@ void SpaceShooter2D::OnEnter(AppState * previousState)
 
 	AppWindow * w = MainWindow();
 	assert(w);
+	w->SetMinimumSize(Vector2i(800, 600));
 	Viewport * vp = w->MainViewport();
 	assert(vp);
 	vp->renderGrid = false;	
@@ -297,7 +307,7 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 			IntegerMessage * im = (IntegerMessage*) message;
 			if (msg == "SetGearCategory")
 			{
-				gearCategory = im->value;
+				gearCategory = im->value == 0 ? Gear::Type::WEAPON : Gear::Type::ARMOR;
 				UpdateGearList();
 			}
 			else if (msg == "SetDifficulty")
@@ -540,6 +550,8 @@ void SpaceShooter2D::CreateDefaultBindings()
 	BINDING(Action::FromString("ToggleWeaponScript"), KEY::E);
 	BINDING(Action::FromString("ActivateSkill"), KEY::Q);
 	BINDING(Action::FromString("ResetCamera"), KEY::HOME);
+	BINDING(Action::FromString("ZoomIn"), KEY::PG_UP);
+	BINDING(Action::FromString("ZoomOut"), KEY::PG_DOWN);
 	BINDING(Action::FromString("NewGame"), List<int>(KEY::N, KEY::G));
 	BINDING(Action::FromString("ClearLevel"), List<int>(KEY::C, KEY::L));
 	BINDING(Action::FromString("ListEntitiesAndRegistrations"), List<int>(KEY::L, KEY::E));
@@ -552,7 +564,7 @@ void SpaceShooter2D::CreateDefaultBindings()
 	BIND(Action::FromString("AdjustMasterVolume(0.05)", ACTIVATE_ON_REPEAT), List<int>(KEY::CTRL, KEY::V, KEY::PLUS));
 	BIND(Action::FromString("AdjustMasterVolume(-0.05)", ACTIVATE_ON_REPEAT), List<int>(KEY::CTRL, KEY::V, KEY::MINUS));
 
-	for (int i = 0; i < WeaponType::MAX_TYPES; ++i)
+	for (int i = 0; i < 9; ++i)
 	{
 		/// Debug bindings for adjusting weapon levels mid-flight.
 		BIND(Action::FromString("IncreaseWeaponLevel:" + String(i)), List<int>(KEY::PLUS, KEY::ONE + i));
@@ -659,12 +671,14 @@ void SpaceShooter2D::LoadShipData()
 		else if (parseMode == SHIPS)
 			Ship::LoadTypes(line);	
 		else if (parseMode == WEAPONS)
-			Weapon::LoadTypes(line);	
+			Weapon::LoadTypes(line);
 	}
+
 	// Load shop-data.
-	Gear::Load("data/ShopWeapons.csv");
+//	Gear::Load("data/ShopWeapons.csv");
 	Gear::Load("data/ShopArmors.csv");
 	Gear::Load("data/ShopShields.csv");
+
 	shipDataLoaded = true;
 }
 
@@ -677,6 +691,7 @@ void SpaceShooter2D::NewGame()
 		
 	startDate = Time::Now();
 
+	playingLevel->playerName = playerName->strValue;
 	// Reset scores.
 	score->iValue = 0;
 	// Set stage n level
@@ -824,7 +839,7 @@ bool SpaceShooter2D::LoadGame(String saveName)
 void SpaceShooter2D::ResetCamera()
 {
 	levelCamera->projectionType = Camera::ORTHOGONAL;
-	levelCamera->zoom = 15.f;
+	QueueGraphics(new GMSetCamera(levelCamera, CT_ZOOM, 15.0f));
 }
 
 List<SSGameMode> previousModes;

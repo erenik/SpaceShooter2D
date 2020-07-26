@@ -70,6 +70,8 @@ public:
 		For achievements then low FlyTime is interested, for level planning and spawning groups of enemies LevelTime is interesting.
 	*/
 	Time levelTime = Time(TimeType::MILLISECONDS_NO_CALENDER); // Time used in level-scripting. Will be paused arbitrarily to allow for easy scripting.
+	// Time to rewind to for scripting.
+	Time rewindPoint;
 	Time flyTime = Time(TimeType::MILLISECONDS_NO_CALENDER); // The actual player-felt time. 
 		
 	// extern int64 nowMs;

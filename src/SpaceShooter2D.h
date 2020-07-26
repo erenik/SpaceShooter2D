@@ -234,7 +234,7 @@ public:
 	/// o.o
 	SSGameMode previousMode;
 	/// 0 by default.
-	int gearCategory;
+	Gear::Type gearCategory;
 
 	static Time startDate;
 	static String levelToLoad;

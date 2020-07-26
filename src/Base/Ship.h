@@ -59,6 +59,7 @@ public:
 	bool DisableWeaponsByID(int id);
 	bool DisableAllWeapons();
 	bool EnableWeaponsByID(int id);
+	// What
 	void SetWeaponCooldownByID(int id, AETime newcooldown);
 	/// Prepends the source with '/obj/Ships/' and appends '.obj'. Uses default 'Ship.obj' if needed.
 	Model * GetModel();
@@ -106,8 +107,11 @@ public:
 	void StartMovement(PlayingLevel& playingLevel);
 
 	/// For player ship.
-	void SetWeaponLevel(int weaponType, int level);
-	Weapon * GetWeapon(int ofType);
+	Weapon * SetWeaponLevel(Weapon::Type ofType, int level);
+	Weapon * GetWeapon(Weapon::Type ofType);
+
+	void SetLevelOfAllWeaponsTo(int level);
+
 	void ActivateSkill();
 
 	/// Names of children to spawn along side it.

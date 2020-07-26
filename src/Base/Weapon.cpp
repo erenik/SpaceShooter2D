@@ -36,6 +36,7 @@ WeaponSet::WeaponSet(WeaponSet & otherWeaponSet)
 
 Weapon::Weapon()
 {
+	type = Type::None;
 	enabled = true;
 	circleSpam = false;
 	linearScaling = 1;
@@ -67,6 +68,58 @@ Weapon::Weapon()
 	ammunition = 0;
 }
 
+String Weapon::TypeName() {
+	return GetTypeName(type);
+}
+
+String Weapon::GetTypeName(Type type) {
+	switch (type) {
+	case Type::MachineGun:
+		return "Machine Gun";
+	case Type::SmallRockets:
+		return "Small Rockets";
+	case Type::BigRockets:
+		return "Big Rockets";
+	case Type::Lightning:
+		return "Lightning";
+	case Type::HeatWave:
+		return "Heat wave";
+	case Type::IonCannon:
+		return "Ion cannon";
+	case Type::LaserBeam:
+		return "Laser beam";
+	case Type::LaserBurst:
+		return "Burst laser";
+	default:
+		assert(false);
+		return "Implement Me";
+	}
+}
+
+Weapon::Type Weapon::ParseType(String fromString) {
+	fromString.SetComparisonMode(String::NOT_CASE_SENSITIVE);
+	if (fromString == GetTypeName(Type::MachineGun))
+		return Type::MachineGun;
+	else if (fromString == GetTypeName(Type::SmallRockets))
+		return Type::SmallRockets;
+	else if (fromString == GetTypeName(Type::BigRockets))
+		return Type::BigRockets;
+	else if (fromString == GetTypeName(Type::Lightning))
+		return Type::Lightning;
+	else if (fromString == GetTypeName(Type::HeatWave))
+		return Type::HeatWave;
+	else if (fromString == GetTypeName(Type::IonCannon))
+		return Type::IonCannon;
+	else if (fromString == GetTypeName(Type::LaserBeam))
+		return Type::LaserBeam;
+	else if (fromString == GetTypeName(Type::LaserBurst))
+		return Type::LaserBurst;
+//	else if (fromString == GetTypeName(Type::))
+	LogMain("Could find no type for string " + fromString, WARNING);
+	return Type::None;
+}
+
+
 bool Weapon::Get(String byName, Weapon * weapon)
 {
 	for (int i = 0; i < types.Size(); ++i)
@@ -83,7 +136,7 @@ bool Weapon::Get(String byName, Weapon * weapon)
 
 /** For player-based, returns pointer, but should be used as reference only (*-dereference straight away). 
 	Returns 0 if it doesn't exist. */
-Weapon * Weapon::Get(int type, int level)
+const Weapon * const Weapon::Get(Type type, int level)
 {
 	for (int i = 0; i < types.Size(); ++i)
 	{
@@ -93,7 +146,7 @@ Weapon * Weapon::Get(int type, int level)
 			return & weap;
 		}
 	}
-	LogMain("Unable to grab weapon "+String(type)+" of level "+String(level), ERROR);
+	LogMain("Unable to grab weapon "+ GetTypeName(type) +" of level "+String(level)+" among "+ String(types.Size())+" types.", ERROR);
 //	assert(false);
 	return 0;
 }
@@ -136,8 +189,10 @@ bool Weapon::LoadTypes(String fromFile)
 				weapon.name = value;
 			else if (column == "Cost")
 				weapon.cost = value.ParseInt();
+			else if (column == "Id")
+				weapon.id = value;
 			else if (column == "Type")
-				weapon.type = value.ParseInt();
+				weapon.type = ParseType(value);
 			else if (column == "ShootSFX")
 				weapon.shootSFX = value;
 			else if (column == "HitSFX")
@@ -184,7 +239,8 @@ bool Weapon::LoadTypes(String fromFile)
 					weapon.estimatePosition = true;
 				else if (value.Contains("Circle"))
 					weapon.circleSpam = true;
-				weapon.angle = value.ParseInt();
+				else 
+					weapon.angle = value.ParseInt();
 			}
 			else if (column == "Projectile path")
 			{
@@ -233,6 +289,12 @@ bool Weapon::LoadTypes(String fromFile)
 				types.RemoveIndex(i);
 				--i;
 			}
+		}
+		if (weapon.name.Length() == 0) {
+			continue;
+		}
+		if (weapon.projectileShape.Length() == 0) {
+			LogMain("Weapon " + weapon.name + " missing projectile shape. Skipping.", ERROR);
 		}
 		LogMain("Weapon loaded: "+weapon.name, DEBUG);
 		types.Add(weapon);
@@ -316,7 +378,7 @@ void Weapon::Shoot(PlayingLevel& playingLevel, ShipPtr ship)
 		currCooldownMs = (int) cooldown.Milliseconds();
 
 	// Shoot!
-	if (type ==	LIGHTNING)
+	if (type == Type::Lightning)
 	{
 		/// Create a lightning storm...!
 		ProcessLightning(playingLevel, ship, true);
@@ -339,7 +401,7 @@ void Weapon::Shoot(PlayingLevel& playingLevel, ShipPtr ship)
 			model = ModelMan.GetModel("sphere.obj");
 
 		float flakMultiplier = 1.f, flakDividendMultiplier = 1.f;
-		if (type == ION_FLAK)
+		if (type == Type::IonCannon)
 		{
 			flakMultiplier = shootRand.Randf(1.f) + 1.f;
 			flakDividendMultiplier = 1 / flakMultiplier;
@@ -377,10 +439,10 @@ void Weapon::Shoot(PlayingLevel& playingLevel, ShipPtr ship)
 		/// Change initial direction based on stability of the weapon?
 		float currStab = stability;
 		if (ship->activeSkill == ATTACK_FRENZY)
-			currStab *= 0.85f;
+			currStab *= 0.95f;
 		// Get orthogonal direction.
 		Vector3f dirRight = dir.CrossProduct(Vector3f(0,0,1));
-		if (currStab < 1.f && type != LASER_BEAM)
+		if (currStab < 1.f && type != Type::LaserBeam)
 		{
 			float amplitude = 1 - currStab;
 			float randomEffect = shootRand.Randf(amplitude * 2.f) - amplitude;
@@ -438,8 +500,8 @@ void Weapon::Process(PlayingLevel& playingLevel, ShipPtr ship, int timeInMs)
 	
 	// Reduce cooldown every frame.
 	currCooldownMs -= timeInMs;
-	if (ship->activeSkill == ATTACK_FRENZY) // Extra so if under frenzy.
-		currCooldownMs -= timeInMs;
+	if (ship->activeSkill == ATTACK_FRENZY) // Extra so if under frenzy - 4x reload speed
+		currCooldownMs -= timeInMs * 3;
 
 	if (currCooldownMs < 0) {
 		currCooldownMs = 0;
@@ -453,11 +515,11 @@ void Weapon::Process(PlayingLevel& playingLevel, ShipPtr ship, int timeInMs)
 
 	switch(type)
 	{
-		case LIGHTNING:
+	case Type::Lightning:
 			if (arcs.Size())
 				ProcessLightning(playingLevel, ship);
 			break;
-		case HEAT_WAVE:
+	case Type::HeatWave:
 //			ProcessHeatwave();
 			break;
 	}
