@@ -127,7 +127,7 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 
 	PlayingLevelRef().removeInvuln = playingLevel.levelEntity->worldPosition[0] + playingLevel.playingFieldHalfSize[0] + playingLevel.playingFieldPadding + 1.f;
 	assert(PlayingLevelRef().removeInvuln > -1000);
-	PlayingLevelRef().spawnPositionRight = PlayingLevelRef().removeInvuln + 15.f;
+	PlayingLevelRef().spawnPositionRight = PlayingLevelRef().removeInvuln + 5.f;
 	assert(PlayingLevelRef().spawnPositionRight > -1000);
 	PlayingLevelRef().despawnPositionLeft = playingLevel.levelEntity->worldPosition[0] - playingLevel.playingFieldHalfSize[0] - 1.f;
 	assert(PlayingLevelRef().despawnPositionLeft > -1000);
@@ -435,8 +435,12 @@ List<ShipPtr> Level::GetShipsAtPoint(ConstVec3fr position, float maxRadius, List
 int Level::SpawnGroupsRemaining() {
 	int num = 0;
 	for (int i = 0; i < spawnGroups.Size(); ++i) {
-		if (!spawnGroups[i]->DefeatedOrDespawned())
-			++num;
+		SpawnGroup * sg = spawnGroups[i];
+		if (sg->FinishedSpawning())
+			continue;
+		if (sg->DefeatedOrDespawned())
+			continue;
+		++num;
 	}
 	return num;
 }
@@ -446,6 +450,10 @@ SpawnGroup* Level::NextSpawnGroup() {
 	SpawnGroup * nextOneToSpawn = nullptr;
 	for (int i = 0; i < spawnGroups.Size(); ++i) {
 		SpawnGroup * spawnGroup = spawnGroups[i];
+		if (spawnGroup->DefeatedOrDespawned())
+			continue;
+		if (spawnGroup->FinishedSpawning())
+			continue;
 		if (spawnGroup->shipsSpawned == 0) {
 			if (nextOneToSpawn == nullptr)
 				nextOneToSpawn = spawnGroup;

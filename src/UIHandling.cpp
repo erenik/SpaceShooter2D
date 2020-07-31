@@ -92,7 +92,7 @@ void SpaceShooter2D::OnScoreUpdated()
 void SpaceShooter2D::UpdateHUDSkill()
 {
 	PlayingLevel& pl = PlayingLevelRef();
-	QueueGraphics(new GMSetUIs("Skill", GMUI::TEXT, pl.playerShip->skillName));
+	QueueGraphics(new GMSetUIs("Skill", GMUI::TEXT, Skill::Name(pl.playerShip->skill)));
 	QueueGraphics(new GMSetUIs("Skill", GMUI::TEXTURE_SOURCE, pl.playerShip->activeSkill != NO_SKILL? "0x00FF00FF" : "0x44AA"));
 }
 

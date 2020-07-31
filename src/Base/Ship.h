@@ -19,15 +19,27 @@ class SpawnGroup;
 class WeaponScript;
 class ShipProperty;
 
-enum 
-{
+#define ShipPtr std::shared_ptr<Ship>
+
+enum SkillType {
 	NO_SKILL,
 	ATTACK_FRENZY,
 	SPEED_BOOST,
 	POWER_SHIELD,
 };
 
-#define ShipPtr std::shared_ptr<Ship>
+class Skill {
+public:
+	static int Cooldown(SkillType type);
+	static String Name(SkillType type ) {
+		switch (type) {
+		case NO_SKILL: return "None";
+		case ATTACK_FRENZY: return "Attack Frenzy";
+		case SPEED_BOOST: return "Speed Boost";
+		case POWER_SHIELD: return "Power Shield";
+		}
+	}
+};
 
 class alignas(16) Ship
 {
@@ -138,12 +150,13 @@ public:
 	bool shoot; // if shooting is requested.
 	bool weaponScriptActive; // Default false.
 	bool boss; //is it a boss?
-	int skill; // Default 0, see above.
-	String skillName;
 	int difficulty;
 	int timeSinceLastSkillUseMs;
-	int skillCooldownMs;
-	int activeSkill;
+	SkillType skill; // Default 0, see above.
+	SkillType activeSkill;
+
+	int SkillCooldown();
+
 	int skillDurationMs;
 	float skillCooldownMultiplier; // default 1, lower in situations or tutorial
 	String onCollision;

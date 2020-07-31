@@ -34,7 +34,6 @@ public:
 	Time startTime;
 	Time stopTime;
 	String textID;
-	bool pausesGameTime; // Default true.
 	Time goToTime;
 	bool goToRewindPoint;
 };

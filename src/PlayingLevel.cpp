@@ -109,7 +109,7 @@ void PlayingLevel::OnEnter(AppState* previousState) {
 	InputMan.ForceNavigateUI(false);
 
 
-	SetPlayingFieldSize(Vector2f(40, 30));
+	SetPlayingFieldSize(Vector2f(50, 30));
 
 	HUD::Get()->Show();
 
@@ -504,7 +504,6 @@ void PlayingLevel::ProcessMessage(Message* message)
 				playerShip->skill = SPEED_BOOST;
 			if (skill == "PowerShield")
 				playerShip->skill = POWER_SHIELD;
-			playerShip->skillName = skill;
 			UpdateHUDSkill();
 		}
 		if (msg == "TutorialSkillCooldowns")
@@ -783,6 +782,8 @@ void PlayingLevel::UpdatePlayerVelocity()
 		Vector3f vec = GetVector(movementDirections[i]);
 		totalVec += vec;
 	}
+	Vector3f requestedTotalVecBeforeLevelSpeed = totalVec;
+
 	totalVec.Normalize();
 	totalVec *= playerShip->Speed();
 	totalVec *= (float) (playerShip->movementDisabled ? 0 : 1);
@@ -792,6 +793,10 @@ void PlayingLevel::UpdatePlayerVelocity()
 	if (playerShip->entity)
 	{
 		PhysicsMan.QueueMessage(new PMSetEntity(playerShip->entity, PT_VELOCITY, totalVec));
+		if (requestedTotalVecBeforeLevelSpeed.LengthSquared() > 0)
+			PhysicsMan.QueueMessage(new PMSetEntity(playerShip->entity, PT_LINEAR_DAMPING, 0.85f));
+		else
+			PhysicsMan.QueueMessage(new PMSetEntity(playerShip->entity, PT_LINEAR_DAMPING, 0.999f));
 	}
 }
 
@@ -1055,6 +1060,7 @@ void PlayingLevel::JumpToTime(String timeString)
 }
 
 Time PlayingLevel::SetTime(Time time) {
+	assert(time.Type() != TimeType::UNDEFINED);
 	levelTime = time;
 	level.OnLevelTimeAdjusted(levelTime);
 	return levelTime;
@@ -1105,11 +1111,15 @@ void PlayingLevel::CloseSpawnWindow()
 
 
 bool PlayingLevel::GameTimePausedDueToActiveSpawnGroup() {
-	return level.messagesPauseGameTime && level.SpawnGroupsActive() > 0;
+	return level.spawnGroupsPauseGameTime && level.SpawnGroupsActive() > 0;
+}
+
+bool PlayingLevel::GameTimePausedDueToActiveLevelMessage() {
+	return level.messagesPauseGameTime && level.activeLevelMessage != nullptr;
 }
 
 bool PlayingLevel::GameTimePaused() {
-	return GameTimePausedDueToActiveSpawnGroup() || gameTimePausedDueToActiveLevelMessage || gameTimePausedDueToScriptableMessage;
+	return GameTimePausedDueToActiveSpawnGroup() || GameTimePausedDueToActiveLevelMessage() || gameTimePausedDueToScriptableMessage;
 }
 
 bool PlayingLevel::DefeatedAllEnemiesInTheLastSpawnGroup() {

@@ -10,7 +10,7 @@ OpenMainMenu
 
 
 // Temporary, mute sfx and go to new game for testing.
-Mute
+// Mute
 NewGame
 
 

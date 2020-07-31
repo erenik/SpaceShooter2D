@@ -158,6 +158,7 @@ List< std::shared_ptr<Entity> > Ship::Spawn(ConstVec3fr atWorldPosition, ShipPtr
 	entity->physics = pp;
 	// Setup physics.
 	pp->type = PhysicsType::DYNAMIC;
+	pp->linearDamping = 0.99f;
 	float radians = PI / 2;
 	if (enemy)
 	{
@@ -347,8 +348,6 @@ void Ship::Process(PlayingLevel& playingLevel, int timeInMs)
 		{
 			activeSkill = NO_SKILL;
 			spaceShooter->UpdateHUDSkill();
-			if (timeSinceLastSkillUseMs > skillCooldownMs)
-				timeSinceLastSkillUseMs = -1; // Ready to use.
 		}
 	}
 	/// Process scripts (pretty much AI and other stuff?)
@@ -876,7 +875,7 @@ Weapon * Ship::GetWeapon(Weapon::Type ofType)
 	return weapons.Last();
 }
 
-int SkillCooldown(int skill) {
+int Skill::Cooldown(SkillType skill) {
 	int skillCooldownMs = -1;
 	switch (skill)
 	{
@@ -895,16 +894,22 @@ int SkillCooldown(int skill) {
 	return skillCooldownMs;
 }
 
+int Ship::SkillCooldown() {
+	return (int)(Skill::Cooldown(activeSkill) * skillCooldownMultiplier);
+}
+
 void Ship::ActivateSkill()
 {
 	// Check cooldown?
-	LogMain("Attempting to use skill: "+ String(activeSkill)+ " timeSinceLastSkillUseMs "+String(timeSinceLastSkillUseMs)+" coolDown: "+ SkillCooldown(skill), INFO);
-	if (timeSinceLastSkillUseMs != -1)
+	LogMain("Attempting to use skill: "+ Skill::Name(activeSkill) + " timeSinceLastSkillUseMs "+String(timeSinceLastSkillUseMs)+" coolDown: "+ SkillCooldown(), INFO);
+	if (SkillCooldown() == -1)
 		return;
+	if (timeSinceLastSkillUseMs < SkillCooldown())
+		return;
+
 	activeSkill = skill;
 	timeSinceLastSkillUseMs = 0;
 	skillDurationMs = 7000;
-	skillCooldownMs = (int) (SkillCooldown(skill) * skillCooldownMultiplier);
 	// Reflect activation in HUD?
 	spaceShooter->UpdateHUDSkill();
 }

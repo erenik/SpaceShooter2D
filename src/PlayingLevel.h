@@ -102,9 +102,9 @@ public:
 
 
 	bool GameTimePausedDueToActiveSpawnGroup();
+	bool GameTimePausedDueToActiveLevelMessage();
 	bool GameTimePaused();
 
-	bool gameTimePausedDueToActiveLevelMessage = false;
 	bool gameTimePausedDueToScriptableMessage = false;
 
 

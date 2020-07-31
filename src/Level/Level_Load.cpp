@@ -18,6 +18,15 @@ namespace LevelLoader
 	SpawnGroup * group = (SpawnGroup*)0;
 	Level * loadLevel = (Level*)0;
 	SpawnGroup * lastGroup = (SpawnGroup*)0;
+
+	void Init() {
+		lastMessage = nullptr;
+		message = nullptr;
+		group = nullptr;
+		lastGroup = nullptr;
+		loadLevel = nullptr;
+	}
+
 	/// Additional spawn times for duplicates of the same group (times specified at start)
 	List<Time> spawnTimes;
 
@@ -186,11 +195,11 @@ bool Level::FinishedSpawning()
 
 bool Level::Load(String fromSource)
 {
+	LevelLoader::Init();
+
 	// Clear old stuff
 	Clear(PlayingLevelRef());
 	LevelLoader::loadLevel = this;
-	group = NULL;
-	lastGroup = NULL;
 	
 	source = fromSource;
 
@@ -272,7 +281,6 @@ bool Level::Load(String fromSource)
 		{
 			AddMessageIfNeeded(this);
 			message = new LevelMessage();
-			message->pausesGameTime = messagesPauseGameTime;
 			ParseMessageStartTime(arg);
 			parseMode = PARSE_MODE_MESSAGES;
 		}

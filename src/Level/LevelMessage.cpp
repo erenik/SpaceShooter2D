@@ -15,7 +15,6 @@ LevelMessage::LevelMessage()
 	goToTime = startTime = stopTime = Time(TimeType::MILLISECONDS_NO_CALENDER, 0);
 	type = TEXT_MESSAGE;
 	eventType = STRING_EVENT;
-	pausesGameTime = false;
 	textID = "";
 	goToRewindPoint = false;
 }
@@ -96,11 +95,6 @@ bool LevelMessage::Trigger(PlayingLevel& playingLevel, Level * level)
 			LogMain("Rewinding to time: " + String(playingLevel.rewindPoint.Seconds()), INFO);
 		}
 	}
-	if (pausesGameTime)
-	{
-		playingLevel.gameTimePausedDueToActiveLevelMessage = true;
-		// If any entities are present, pause game entirely?
-	}
 	return true;
 }
 
@@ -112,11 +106,8 @@ void LevelMessage::Hide(PlayingLevel& playingLevel)
 		if (activeLevelDisplayMessages <= 0)
 		{
 			QueueGraphics(new GMSetUIb("LevelMessage", GMUI::VISIBILITY, false));
-			playingLevel.gameTimePausedDueToActiveLevelMessage = false;
 		}
 		displayed = false;
 	}
 	hidden = true;
-	if (pausesGameTime)
-		playingLevel.gameTimePausedDueToActiveLevelMessage = false;
 }

@@ -355,7 +355,7 @@ void Weapon::Shoot(PlayingLevel& playingLevel, ShipPtr ship)
 {
 	if (!enabled)
 		return;
-	float firingSpeedDivisor = ship->activeSkill == ATTACK_FRENZY? 0.4f : 1.f; 
+	float firingSpeedDivisor = ship->activeSkill == ATTACK_FRENZY? 0.8f : 1.f;  // +20% firing speed
 	if (currCooldownMs - ship->weaponCooldownBonus > 0)
 		return;
 
@@ -500,8 +500,8 @@ void Weapon::Process(PlayingLevel& playingLevel, ShipPtr ship, int timeInMs)
 	
 	// Reduce cooldown every frame.
 	currCooldownMs -= timeInMs;
-	if (ship->activeSkill == ATTACK_FRENZY) // Extra so if under frenzy - 4x reload speed
-		currCooldownMs -= timeInMs * 3;
+	if (reloading && ship->activeSkill == ATTACK_FRENZY) // Extra reload speed during frenzy - 5x reload speed
+		currCooldownMs -= timeInMs * 4;
 
 	if (currCooldownMs < 0) {
 		currCooldownMs = 0;

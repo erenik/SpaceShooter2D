@@ -31,10 +31,13 @@ WeaponSwitchingIntro3;Switching weapons is done via the number keys.
 SecondTask;Task: Destroy 3 immobile units with weapon switch available.
 TryAgainWeaponSwitch;Try again. Use the 1-3 buttons to use all\n your weapons to your advantage.
 ;
-120;In order to ease stress on the pilot,\nscripts may be activated to automatically cycle\nbetween various available weapons.
-121;These may be adjusted to your preference later on.
-122;Engaging weapon-script.
-123;Try again. Aligning yourself with your enemies\nshould be enough.
+WeaponScriptsIntro;In order to ease stress on the pilot,\n weapon scripts may be activated. 
+WeaponScriptsIntro2;Weapon Scripts  automatically cycle\nbetween various available weapons.
+WeaponScriptsIntro3;These may be adjusted to your preference later on.
+EngagingWeaponScript;Engaging weapon-script.
+TryAgainWeaponScript;Try again. Aligning yourself with your enemies\nshould be enough.
+DeactivatingWeaponScript;De-activating weapon-script.
+WeaponScriptToggleWithE;You can toggle the selected weapon script at\nany time using the [E] key.
 ;
 // Weapon upgrades?;
 130;All weapons may be upgraded as you proceed.
@@ -57,7 +60,8 @@ SurvivedBomb;Good job! You survived the last test. Movement enabled again.
 // End tutorial :D;
 TutorialConcluded;This concludes the tutorial. Prepare for your mission.
 
-FirstMission;Control tower: $Name, we've got a call. Some pirates are patrolling your vicinity. Eliminate them.
+FirstMission;Control tower: $Name, we've got a call. \nSome pirates are patrolling your vicinity. 
+Eliminate;Eliminate them.
 RogerThat;$Name: Roger that.
 
 ;

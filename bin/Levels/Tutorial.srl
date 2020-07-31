@@ -11,7 +11,7 @@ Event SetMessagesPauseGameTime(true)
 Event SetSpawnGroupsPauseGameTime(true)
 Event TutorialBaseGun
 
-Message 0:00
+Message +:02
 TextID	TutorialStart
 
 // Introduction messages concerning movement. See /data/Texts_English.csv for the actual contents of these.
@@ -64,7 +64,7 @@ Message +:2
 Condition FailedToDefeatAllEnemies
 TextID TryAgainWeaponSwitch
 
-SpawnGroup +:12
+SpawnGroup +:2
 Number 3
 ShipType ImmobilePracticeTargetTougher
 Formation LINE_Y
@@ -80,20 +80,22 @@ TextID WellDone
 
 // Weapon-scripts
 Message
-TextID 120
+TextID WeaponScriptsIntro
 Message 
-TextID 121
+TextID WeaponScriptsIntro2
+Message 
+TextID WeaponScriptsIntro3
 Event
 String ActivateWeaponScript
 Message
-TextID 122
+TextID EngagingWeaponScript
 
 
 Event SetRewindPoint
 
 Message +:2
 Condition FailedToDefeatAllEnemies
-TextID 123
+TextID TryAgainWeaponScript
 
 SpawnGroup +:2
 Number 4
@@ -106,12 +108,18 @@ Event +:2
 Condition FailedToDefeatAllEnemies
 GoToRewindPoint
 
-
 Event +:2
 String DeactivateWeaponScript
 
+Message 
+TextID DeactivatingWeaponScript
+
+Message 
+TextID WeaponScriptToggleWithE
+
+
 // Weapon upgrades
-Message
+Message +:2
 TextID 130
 Event
 String TutorialLevel3Weapons
@@ -224,7 +232,7 @@ String SetOnDeath:RespawnAt(RewindPoint)
 Message +:2
 TextID SurvivedBomb
 
-Event +:2
+Event
 String EnablePlayerMovement
 
 Message +:2
@@ -236,10 +244,15 @@ String TutorialLevel1Weapons
 /// Start first mission
 Message +:2
 TextID FirstMission
+Message
+TextID Eliminate
+Message 
 TextID RogerThat
 
 Event SetMessagesPauseGameTime(false)
 Event SetSpawnGroupsPauseGameTime(false)
+
+Event SetRewindPoint
 
 /* 0+:00 - 0+:30
 *Start*
@@ -249,8 +262,8 @@ SpawnGroup +:05
 ShipType Fighter
 Formation LINE_Y
 Number	5
-Size (xy 5 5)
-Position (xy 0 -2.5) 
+Size xy 10 10
+Position xy 0 0
 
 CopyGroup +:05
 Formation LINE_X
@@ -263,10 +276,19 @@ Formation V_X
 
 CopyGroup +:05
 Formation V_Y
+Position xy 0 -10
 
 CopyGroup +:05
 Formation SWARM_BOX_XY
+Position xy 0 0
 
+CopyGroup +:05
+Formation SWARM_BOX_XY
+Position xy 0 10
+
+CopyGroup +:05
+Formation SWARM_BOX_XY
+Position xy 0 -10
 
 
 
