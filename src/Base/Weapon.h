@@ -149,6 +149,8 @@ public:
 	int burstRoundsShot;
 	/// Linear scaling over time (multiplied with initial scale?) 
 	float linearScaling;
+	// Acceleration in forward vector direction.
+	float acceleration;
 	/// Last show, format Time::Now().Milliseconds()
 //	Time lastShot;
 	static List<Weapon> types;

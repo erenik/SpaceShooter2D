@@ -213,3 +213,7 @@ bool ShipProperty::IsAllied()
 	return ship->allied;
 }
 
+bool ShipProperty::IsEnemy() {
+	return !ship->allied;
+}
+

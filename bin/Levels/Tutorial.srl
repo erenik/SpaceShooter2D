@@ -11,11 +11,13 @@ Event SetMessagesPauseGameTime(true)
 Event SetSpawnGroupsPauseGameTime(true)
 Event TutorialBaseGun
 
-Message +:02
+Event PlayBGM Levels/Tutorial
+
+Message +:01
 TextID	TutorialStart
 
 // Introduction messages concerning movement. See /data/Texts_English.csv for the actual contents of these.
-Message	+:02
+Message	+:01
 TextID	GreetingsPilot
 Message
 TextID	FirstTask
@@ -26,28 +28,28 @@ TextID 	MoveWithWASD
 
 Event SetRewindPoint
 
-Message +:02
+Message +:01
 Condition FailedToDefeatAllEnemies
 TextID TryAgainToFire
 
 
 /// All spawn groups spawn outside of screen to the right at the specified time.
-SpawnGroup +:02
+SpawnGroup +:01
 ShipType ImmobilePracticeTarget
 Formation LINE_Y
 Number	3
 Size xy 2 5
 Position xy 0 0
 
-Event +:02
+Event +:01
 Condition FailedToDefeatAllEnemies
 GoToRewindPoint
 
-Message +:02
+Message +:01
 TextID	WellDone
 
 // Weapon switching
-Message +:02
+Message +:01
 TextID	WeaponSwitchingIntro
 Message 
 TextID	WeaponSwitchingIntro2
@@ -60,22 +62,22 @@ String TutorialLevel1Weapons
 
 Event SetRewindPoint
 
-Message +:2
+Message +:01
 Condition FailedToDefeatAllEnemies
 TextID TryAgainWeaponSwitch
 
-SpawnGroup +:2
+SpawnGroup +:01
 Number 3
 ShipType ImmobilePracticeTargetTougher
 Formation LINE_Y
 Size xy 2 5
 Position xy 0 0
 
-Event +:2
+Event +:01
 Condition FailedToDefeatAllEnemies
 GoToRewindPoint
 
-Message +:2
+Message +:01
 TextID WellDone
 
 // Weapon-scripts
@@ -93,22 +95,22 @@ TextID EngagingWeaponScript
 
 Event SetRewindPoint
 
-Message +:2
+Message +:01
 Condition FailedToDefeatAllEnemies
 TextID TryAgainWeaponScript
 
-SpawnGroup +:2
+SpawnGroup +:01
 Number 4
 ShipType ImmobilePracticeTargetTougher
 Formation LINE_Y
 Size xy 2 6
 Position xy 0 0
 
-Event +:2
+Event +:01
 Condition FailedToDefeatAllEnemies
 GoToRewindPoint
 
-Event +:2
+Event +:01
 String DeactivateWeaponScript
 
 Message 
@@ -119,7 +121,7 @@ TextID WeaponScriptToggleWithE
 
 
 // Weapon upgrades
-Message +:2
+Message +:01
 TextID 130
 Event
 String TutorialLevel3Weapons
@@ -128,22 +130,22 @@ TextID 131
 
 Event SetRewindPoint
 
-Message +:2
+Message +:01
 Condition FailedToDefeatAllEnemies
 TextID 132
 
-SpawnGroup +:2
+SpawnGroup +:01
 Number 10
 ShipType ImmobilePracticeTargetTougher
 Formation LINE_Y
 Size xy 2 10
 Position xy 0 -5
 
-Event +:2
+Event +:01
 Condition FailedToDefeatAllEnemies
 GoToRewindPoint
 
-Event +:2
+Event +:01
 String TutorialLevel1Weapons
 
 // Abilities/Skills
@@ -160,22 +162,22 @@ TextID 142
 
 Event SetRewindPoint
 
-Message +:2
+Message +:01
 Condition FailedToDefeatAllEnemies
 TextID 147
 
-SpawnGroup +:2
+SpawnGroup +:01
 Number 5
 ShipType ImmobilePracticeTargetTougher
 Formation LINE_Y
 Size xy 2 10
 Position xy 0 0
 
-Event +:2
+Event +:01
 Condition FailedToDefeatAllEnemies
 GoToRewindPoint
 
-Message +:2 
+Message +:01 
 TextID WellDoneNext
 // Speed boost
 Event
@@ -186,23 +188,23 @@ TextID CatchDebrisWithSpeedBoost
 
 Event SetRewindPoint
 
-Message +:2
+Message +:01
 Condition FailedToDefeatAllEnemies
 TextID 147
 
-SpawnGroup +:2
+SpawnGroup +:01
 Number 3
 ShipType SpeedDebris
 Formation LINE_Y
 Size xy 2 20
 Position xy 0 0
 
-Event +:2
+Event +:01
 Condition SpaceDebrisNotCollected(3)
 GoToRewindPoint
 
 // Shield info
-Message +:2
+Message +:01
 TextID WellDoneNext
 Message
 TextID UsePowerShield
@@ -213,36 +215,36 @@ String SetSkill:PowerShield
 Event SetRewindPoint
 
 // Retry text
-Message +:2
+Message +:01
 Condition FailedToSurvive
 TextID TryAgainActivateSkill
 Message 
 TextID MovementeWillBeDisabled
 
 // Spawn bomb and set onDeath stuff.
-Event +:2
+Event +:01
 String DisablePlayerMovement
 String ResetFailedToSurvive
 
-Event +:2
+Event +:01
 String PauseGameTime
 String SpawnTutorialBomb
 String SetOnDeath:RespawnAt(RewindPoint)
 
-Message +:2
+Message +:01
 TextID SurvivedBomb
 
 Event
 String EnablePlayerMovement
 
-Message +:2
+Message +:01
 TextID TutorialConcluded
 
 Event 
 String TutorialLevel1Weapons
 
 /// Start first mission
-Message +:2
+Message +:01
 TextID FirstMission
 Message
 TextID Eliminate

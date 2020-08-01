@@ -64,8 +64,9 @@ Weapon::Weapon()
 	burstRounds = 3;
 	burstRoundsShot = 0;
 	burstRoundDelay = Time(TimeType::MILLISECONDS_NO_CALENDER, 50);
-	lifeTimeMs = 3000;
+	lifeTimeMs = 5000;
 	ammunition = 0;
+	acceleration = 0;
 }
 
 String Weapon::TypeName() {
@@ -197,6 +198,8 @@ bool Weapon::LoadTypes(String fromFile)
 				weapon.shootSFX = value;
 			else if (column == "HitSFX")
 				weapon.hitSFX = value;
+			else if (column == "Acceleration")
+				weapon.acceleration = value.ParseFloat();
 			else if (column == "Level")
 				weapon.level = value.ParseInt();
 			else if (column == "Explosion Radius")
@@ -458,12 +461,25 @@ void Weapon::Shoot(PlayingLevel& playingLevel, ShipPtr ship)
 		pp->velocity = vel;
 		pp->collisionCallback = true;
 		pp->maxCallbacks = -1; // unlimited callbacks or penetrating projs won't work
-		pp->faceVelocityDirection = true;
+		pp->faceVelocityDirection = false;
 		pp->velocitySmoothing = 0.f;
 		// Set collision category and filter.
 		pp->collisionCategory = ship->allied? CC_PLAYER_PROJ : CC_ENEMY_PROJ;
 		pp->collisionFilter = ship->allied? CC_ENEMY : CC_PLAYER;
 		pp->linearDamping = linearDamping;
+		pp->relativeAcceleration.z = acceleration;
+
+		
+		Matrix4f & rot = projectileEntity->rotationMatrix;
+		Vector2f up(0, 1);
+		Angle ang(up);
+		Vector2f normVel = pp->velocity.NormalizedCopy();
+		Angle look(normVel);
+		Angle toLook = look - ang;
+		projectileEntity->rotation.x = PI / 2;
+		projectileEntity->rotation.y = toLook.Radians();
+		projectileEntity->hasRotated = true;
+		projectileEntity->RecalcRotationMatrix(true);
 
 		GraphicsProperty * gp = projectileEntity->graphics = new GraphicsProperty(projectileEntity);
 		gp->flags |= RenderFlag::ALPHA_ENTITY;
@@ -471,6 +487,18 @@ void Weapon::Shoot(PlayingLevel& playingLevel, ShipPtr ship)
 		// Add to map.
 		MapMan.AddEntity(projectileEntity);
 		playingLevel.projectileEntities.Add(projectileEntity);
+
+		// Add some tasty thrust particles!
+ 		switch (type) {
+		case Type::SmallRockets:
+		case Type::BigRockets:
+			projProp->CreateThrustEmitter(weaponWorldPosition);
+			break;
+		default:
+			break;
+		}
+
+
 	//	lastShot = flyTime;
 	}
 	// Play sfx

@@ -5,6 +5,7 @@
 #include "SpaceShooter2D.h"
 #include "Properties/ProjectileProperty.h"
 #include "PlayingLevel.h"
+#include "Graphics/Particles/ThrustEmitter.h"
 
 ProjectileProperty::ProjectileProperty(const Weapon & weaponThatSpawnedIt, EntitySharedPtr owner, bool enemy)
 : EntityProperty("ProjProp", ID(), owner), weapon(weaponThatSpawnedIt), enemy(enemy)
@@ -12,6 +13,12 @@ ProjectileProperty::ProjectileProperty(const Weapon & weaponThatSpawnedIt, Entit
 	sleeping = false;
 	timeAliveMs = 0;
 	nextWobbleMs = 0;
+	thrustEmitter = nullptr;
+}
+
+ProjectileProperty::~ProjectileProperty() {
+	if (thrustEmitter != nullptr)
+		QueueGraphics(new GMDetachParticleEmitter(thrustEmitter));
 }
 
 // Static version.
@@ -43,6 +50,12 @@ void ProjectileProperty::Destroy()
 	PlayingLevel& pl = PlayingLevelRef();
 	
 	Remove();
+
+	if (thrustEmitter != nullptr) {
+		QueueGraphics(new GMDetachParticleEmitter(thrustEmitter));
+		thrustEmitter = nullptr;
+	}
+
 
 	// Check distance to player.
 //	Vector3f vectorDistance = (player1->position - atPosition);
@@ -158,17 +171,29 @@ void ProjectileProperty::Process(int timeInMs)
 		// 1.0 will change velocity entirely to look at the enemy.
 		// Values above 1.0 will try and compensate for target velocity and not just current position?
 		EntitySharedPtr closestTarget = spaceShooter->level.ClosestTarget(PlayingLevelRef(), !enemy, owner->worldPosition);
-		if (!closestTarget)
-			return;
-		Vector3f toTarget = closestTarget->worldPosition - owner->worldPosition;
-		toTarget.Normalize();
-		// Get current direction.
-		float timeFactor = timeInMs * 0.001f;
-		float factor = timeFactor * weapon.homingFactor;
-		direction = direction * (1 - factor) + toTarget * factor;
-		direction.Normalize();
+		Vector3f vecToTarget;
+		if (closestTarget) {
+			vecToTarget = closestTarget->worldPosition - owner->worldPosition;
+		}
+		else
+			vecToTarget = Vector3f(40, 0, 0);
+		vecToTarget.Normalize();
+
+		Angle toTarget(vecToTarget);
+		Angle lookingAt(owner->LookAt());
+
+		Angle toRotate = toTarget - lookingAt;
+
+		float rotationSpeed = ClampedFloat(toRotate.Radians(), -0.1f, 0.1f) * 5.0f * weapon.homingFactor;
+
+		// Add some rotational velocity to address this need.
+		QueuePhysics(new PMSetEntity(owner, PT_ANGULAR_VELOCITY, Vector3f(0, rotationSpeed, 0)));
+		
+		thrustEmitter->velocityEmitter.arcOffset = lookingAt.Radians() + PI;
+		thrustEmitter->SetParticleLifeTime(min(timeAliveMs * 0.001f, 2.0f));
+
 		// Go t'ward it!
-		UpdateVelocity();
+		//ResetVelocity();
 	}
 	// .. 
 	if (weapon.projectilePath == Weapon::HOMING)
@@ -184,11 +209,30 @@ void ProjectileProperty::Process(int timeInMs)
 	}
 }
 
-void ProjectileProperty::UpdateVelocity()
+void ProjectileProperty::ResetVelocity()
 {
 	QueuePhysics(new PMSetEntity(owner, PT_VELOCITY, direction * weapon.projectileSpeed));
 }
 
+
+void ProjectileProperty::CreateThrustEmitter(Vector3f initialPosition) {
+	auto tmpEmitter = new ThrustEmitter(initialPosition);
+//	tmpEmitter->type = EmitterType::POINT_DIRECTIONAL;
+	tmpEmitter->SetEmissionVelocity(8.f);
+	tmpEmitter->SetParticlesPerSecond(int(1000 * weapon.homingFactor));
+	tmpEmitter->velocityEmitter.arcOffset = PI;
+	tmpEmitter->velocityEmitter.arcLength = PI * 0.2f;
+	tmpEmitter->velocityEmitter.weight = 3.0f;
+	tmpEmitter->entityToTrack = owner;
+	tmpEmitter->SetParticleLifeTime(0.1f);
+	tmpEmitter->SetScale(0.15f);
+	tmpEmitter->SetColor(Vector4f(0.1f, 0.5f, 1.0f, 1.0f));
+	tmpEmitter->SetRatioRandomVelocity(0.5f);
+
+	thrustEmitter = tmpEmitter->GetSharedPtr();
+	Graphics.QueueMessage(new GMAttachParticleEmitter(thrustEmitter, PlayingLevelRef().sparks->GetSharedPtr()));
+
+}
 
 void ProjectileProperty::ProcessMessage(Message * message)
 {

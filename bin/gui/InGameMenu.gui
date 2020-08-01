@@ -1,13 +1,13 @@
 // Main UI when starting up.
 
-defaultTexture	0x2244
+defaultTexture	0x2222
 defaultTextColor	1 1 1 1
 
 // Make root active
 root
 name InGameMenu
 removeOnPop true
-texture NULL
+texture 0x1144
 onPop InGameMenuPopped
 
 parent InGameMenu
@@ -17,22 +17,30 @@ defaultSizeRatioXY 1 1
 list imList
 text Menu
 sizeRatioXY 0.4 0.4
+padding 0.01
 
 parent imList
 
 
 defaultSizeRatioXY 1 0.2
+defaultTopBorder ui/border_top_4
+defaultRightBorder 0xAAFF
+defaultTexture	0x22FF
+
 Button Continue
-onActivate ToggleMenu
+onActivate PopUI(InGameMenu)&ToggleMenu
+topRightCorner ui/message_top_right_corner_64x32
 
 Button Restart "Restart level"
 onActivate PopUI(InGameMenu)&RestartLevel
+topRightCorner ui/top_right_corner_8x8
 
 Button	OptionsButton
 text "Options"
 onActivate OpenOptionsScreen
+topRightCorner ui/top_right_corner_8x8
 
 Button ExitToMainMenuButton
 onActivate PopUI(HUD)&PopUI(InGameMenu)&GoToMainMenu
 text	"Exit to main menu"
-
+topRightCorner ui/top_right_corner_64x32_red

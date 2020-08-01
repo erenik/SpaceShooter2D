@@ -13,11 +13,14 @@ texture NULL
 /// HUD below
 parent HUD
 
-ColumnList topStats
-sizeRatioXY 0.4 0.05
-alignmentXY 0.2 0.975
+List topStats
+alignment LEFT
+sizeRatioXY 0.2 0.1
+alignmentXY 0 0.95
+topBorder ui/border_top_4
+rightBorder ui/border_right_4
 
-element BottomPart
+list BottomPart
 sizeRatioXY	1 0.15
 alignmentXY	0.5 0.075
 
@@ -28,11 +31,14 @@ textSizeRatio 0.5
 sizeRatioXY 0.9 0.2
 alignmentXY	0.5	0.3
 visible false
+topBorder ui/border_top
+rightBorder ui/border_right_4
+topRightCorner ui/message_top_right_corner_64x32
+
 
 // Top stats now.
 parent topStats
-defaultSizeRatioXY 0.5 1
-defaultTexture 0x22AA
+defaultSizeRatioXY 1 0.5
 
 IntegerLabel Scorei
 text "Score"
@@ -45,21 +51,28 @@ parent BottomPart
 ColumnList clHPShield
 sizeRatioXY 0.5 0.25
 alignmentXY 0.5 0.8
+padding 0.01
 
 ColumnList clWeaponSkillBar
 sizeRatioXY 0.9 0.7
-maxWidth 1200
 alignmentXY 0.5 0.35
+topBorder ui/border_top_4
 
 parent clHPShield
-defaultSizeRatioXY 0.5 1
+defaultSizeRatioXY 0.485 1
 defaultTexture null
 
 element HPFrame
 texture 0x880000FF
+topBorder ui/border_top_4
+rightBorder ui/border_right_4
+topRightCorner ui/top_right_corner_8x8
+
 element ShieldFrame
 texture 0x000088FF
-
+topBorder ui/border_top_4
+rightBorder ui/border_right_4
+topRightCorner ui/top_right_corner_8x8
 
 parent HPFrame
 defaultSizeRatioXY 1 1
@@ -86,12 +99,23 @@ sizeRatioX 0.2
 Button Skill
 sizeRatioX 0.1
 
-RadioButtons 10 Weapons
+Element WeaponSlots
+texture 0x2277
+sizeRatioX 0.7
+
+
+parent WeaponSlots
+
+RadioButtons 3 Weapons
+sizeRatioY 0.9
+alignmentY 0.45
+padding 0.01
+// alignment left
 textures icons/MachineGun icons/SmallRockets icons/BigRockets 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
 onEnterScope ActiveWeaponsShown
 onPop ActiveWeaponsHidden
 NoLabel
-sizeRatioX 0.9
+
 
 parent ActiveWeaponList
 defaultSizeRatioXY 1 0.3
@@ -103,10 +127,16 @@ parent clWeaponStatus
 defaultSizeRatioXY 0.5 1
 
 Label ActiveWeaponStatus ""
+
+Element ActiveWeaponAmmoFrame
+texture 0x997733FF
+
+
+parent ActiveWeaponAmmoFrame
 Bar ActiveWeaponAmmo
 Alignment Left
-sizeRatioY 0.5
-texture 0xFFFFFF
+sizeRatioXY 1 0.5
+texture 0xFFFF88FF
 
 
 ///////////////////////////////////

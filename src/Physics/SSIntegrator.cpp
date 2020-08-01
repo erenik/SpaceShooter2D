@@ -91,6 +91,17 @@ void SSIntegrator::IntegrateVelocity(EntitySharedPtr forEntity, float timeInSeco
 	float linearDamp = pow(pp->linearDamping, timeInSeconds);
 	velocity *= linearDamp;
 
+	Vector3f totalAcceleration;
+	if (pp->relativeAcceleration.MaxPart() != 0)
+	{
+		Vector3f relAcc = pp->relativeAcceleration;
+		relAcc.z *= -1;
+		Vector3f worldAcceleration = forEntity->rotationMatrix.Product(relAcc);
+		totalAcceleration += worldAcceleration;
+		assert(totalAcceleration.x == totalAcceleration.x);
+	}
+	velocity += totalAcceleration * timeInSeconds;
+
 	pp->currentVelocity = velocity;
 	if (velocitySmoothingLast != pp->velocitySmoothing)
 	{
@@ -114,7 +125,9 @@ void SSIntegrator::IntegrateVelocity(EntitySharedPtr forEntity, float timeInSeco
 	if (pp->angularVelocity.MaxPart())
 	{
 		forEntity->rotation += pp->angularVelocity * timeInSeconds;
+		std::cout << "\nAccelerating object with rotation: " + VectorString(forEntity->rotation)+" velocity: "+ VectorString(velocity);
 		forEntity->hasRotated = true;
+		//forEntity->RecalcRotationMatrix(true);
 	}
 
 	if (constantZ)
@@ -126,27 +139,6 @@ void SSIntegrator::IntegrateVelocity(EntitySharedPtr forEntity, float timeInSeco
 	// Force rot to follow vel.
 	if (pp->faceVelocityDirection)
 	{
-		if ((pp->currentVelocity.MaxPart() == 0))
-			return;
-		// 
-		Vector3f & cVel = pp->currentVelocity;
-		// Check Z is 0.
-		if (cVel.z != 0)
-		{	
-			/// Unregister
-			std::cout<<"\nBAD VEL";
-			PhysicsMan.QueueMessage(new PMUnregisterEntity(forEntity));
-//		assert(cVel.z == 0);
-			return;
-		}
-		Matrix4f & rot = forEntity->rotationMatrix;
-		Vector2f up(0,1);
-		Angle ang(up);
-		Vector2f normVel = cVel.NormalizedCopy();
-		Angle look(normVel);
-		Angle toLook = look - ang;
-		forEntity->rotation.x = PI / 2;
-		forEntity->rotation.y = toLook.Radians();
-		forEntity->hasRotated = true;
+
 	}
 }

@@ -20,6 +20,7 @@
 #include <PlayingLevel\HandleCollision.h>
 #include "PlayingLevel/SpaceStars.h"
 #include "Properties/LevelProperty.h"
+#include "Input/Gamepad/GamepadMessage.h"
 
 #include "Level/SpawnGroup.h"
 
@@ -251,6 +252,29 @@ void PlayingLevel::ProcessMessage(Message* message)
 
 	switch (message->type)
 	{
+	case MessageType::GAMEPAD_MESSAGE: {
+		GamepadMessage * gamepadMessage = (GamepadMessage*)message;
+		Gamepad state = gamepadMessage->gamepadState;
+		if (!playerShip->weaponScriptActive)
+			playerShip->shoot = state.rightTrigger > 0.5f;
+		if (state.leftStick.MaxPart() < 0.15f) // Make it 0 if near it to avoid unwanted drift
+			state.leftStick = Vector2f(0,0);
+		if (state.leftStick.Length() > 0.90) // Make it 1.0 if near it
+			state.leftStick.Normalize();
+		requestedMovement = state.leftStick;
+		UpdatePlayerVelocity();
+		if (gamepadMessage->xButtonPressed)
+			playerShip->weaponScriptActive = !playerShip->weaponScriptActive;
+		if (gamepadMessage->yButtonPressed)
+			playerShip->ActivateSkill();
+		if (gamepadMessage->leftButtonPressed)
+			playerShip->SwitchToWeapon(playerShip->CurrentWeaponIndex() - 1);
+		if (gamepadMessage->rightButtonPressed)
+			playerShip->SwitchToWeapon(playerShip->CurrentWeaponIndex() + 1);
+
+		SpaceShooter2D::ProcessMessage(message);
+		break;
+	}
 	case MessageType::COLLISSION_CALLBACK:
 	{
 		HandleCollision(playerShip, shipEntities, (CollisionCallback*)message);
@@ -411,14 +435,35 @@ void PlayingLevel::ProcessMessage(Message* message)
 		{
 			String dirStr = msg - "StartMoveShip";
 			Direction dir = GetDirection(dirStr);
-			movementDirections.Add(dir);
+			Vector3f dirVec = GetVector(dir);
+			switch (dir)
+			{
+			case Direction::UP: case Direction::DOWN:
+				requestedMovement.y = dirVec.y;
+				break;
+			case Direction::LEFT: case Direction::RIGHT:
+				requestedMovement.x = dirVec.x;
+				break;
+			default:
+				assert(false);
+			}
 			UpdatePlayerVelocity();
 		}
 		else if (msg.Contains("StopMoveShip"))
 		{
 			String dirStr = msg - "StopMoveShip";
 			Direction dir = GetDirection(dirStr);
-			while (movementDirections.Remove(dir));
+			switch (dir)
+			{
+			case Direction::UP: case Direction::DOWN:
+				requestedMovement.y = 0;
+				break;
+			case Direction::LEFT: case Direction::RIGHT:
+				requestedMovement.x = 0;
+				break;
+			default:
+				assert(false);
+			}
 			UpdatePlayerVelocity();
 		}
 		else if (msg == "ActivateSkill")
@@ -731,7 +776,7 @@ void PlayingLevel::Cleanup()
 		ProjectileProperty* pp = (ProjectileProperty*)proj->GetProperty(ProjectileProperty::ID());
 		if (pp->sleeping ||
 			(proj->worldPosition[0] < despawnPositionLeft ||
-				proj->worldPosition[0] > spawnPositionRight ||
+				proj->worldPosition[0] > despawnPositionRight ||
 				proj->worldPosition.y < despawnDown ||
 				proj->worldPosition.y > despawnUp
 				)
@@ -776,15 +821,12 @@ void PlayingLevel::Cleanup()
 
 void PlayingLevel::UpdatePlayerVelocity()
 {
-	Vector3f totalVec;
-	for (int i = 0; i < movementDirections.Size(); ++i)
-	{
-		Vector3f vec = GetVector(movementDirections[i]);
-		totalVec += vec;
-	}
+	Vector3f totalVec = requestedMovement;
 	Vector3f requestedTotalVecBeforeLevelSpeed = totalVec;
 
-	totalVec.Normalize();
+	// Don't normalize if length is [0,1] for gamepad nuance.
+	if (totalVec.LengthSquared() > 1)
+		totalVec.Normalize();
 	totalVec *= playerShip->Speed();
 	totalVec *= (float) (playerShip->movementDisabled ? 0 : 1);
 	totalVec += LevelEntity->Velocity();

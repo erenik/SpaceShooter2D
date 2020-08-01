@@ -216,7 +216,8 @@ bool Level::Load(String fromSource)
 	endCriteria = Level::NO_MORE_ENEMIES;
 
 	String sourceTxt = source;
-	music = source+".ogg";
+	source+".ogg";
+	// music = 
 	lines = File::GetLines(sourceTxt);
 
 	if (lines.Size() == 0)

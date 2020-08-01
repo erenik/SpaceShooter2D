@@ -56,7 +56,7 @@ public:
 	void SetTime(Time newTime);
 	/// enable respawing on shit again.
 	void OnLevelTimeAdjusted(Time levelTime);
-	EntitySharedPtr ClosestTarget(PlayingLevel& playingLevel, bool ally, ConstVec3fr position);
+	EntitySharedPtr ClosestTarget(PlayingLevel& playingLevel, bool enemy, ConstVec3fr position);
 	/// o.o'
 	void Explode(Weapon & weapon, EntitySharedPtr causingEntity, bool enemy);
 	/// Returns ships close enough to given point. Returns distance to them too. Checks only to center of ship, not edges.

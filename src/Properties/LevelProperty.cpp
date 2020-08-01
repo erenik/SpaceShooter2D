@@ -36,6 +36,7 @@ EntitySharedPtr LevelProperty::Create(Vector2f playingFieldSize, float playingFi
 	LevelProperty* lp = new LevelProperty(levelEntity, playingFieldSize, playingFieldPadding);
 	levelEntity->properties.Add(lp);
 	levelEntity->localPosition = Vector3f();
+
 	PhysicsProperty* pp = levelEntity->physics = new PhysicsProperty();
 	pp->collisionsEnabled = false;
 	pp->type = PhysicsType::KINEMATIC;
@@ -45,7 +46,7 @@ EntitySharedPtr LevelProperty::Create(Vector2f playingFieldSize, float playingFi
 	// Finalize details before registering.
 	levelEntity->localPosition = Vector3f();
 	QueuePhysics(new PMRegisterEntities(levelEntity));
-	QueueGraphics(new GMRegisterEntities(levelEntity));
+	//QueueGraphics(new GMRegisterEntities(levelEntity));
 	return levelEntity;
 }
 

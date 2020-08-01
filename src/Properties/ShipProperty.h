@@ -33,6 +33,9 @@ public:
 
 	// Since enemies go from right to left..
 	bool IsAllied();
+	// For enemies.
+	bool IsEnemy();
+
 	/// When deaded...
 	bool sleeping;
 	/// hm..

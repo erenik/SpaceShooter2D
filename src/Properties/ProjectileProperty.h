@@ -13,6 +13,8 @@ class ProjectileProperty : public EntityProperty
 {
 public:
 	ProjectileProperty(const Weapon & weaponThatSpawnedIt, EntitySharedPtr owner, bool enemy);
+	virtual ~ProjectileProperty();
+
 	// Static version.
 	static int ID();
 
@@ -24,7 +26,10 @@ public:
 
 	// Fall asleep.. unregistering it from physics, graphics, etc.
 	void SleepThread();
-	void UpdateVelocity();
+	void ResetVelocity();
+
+	// For rockets
+	void CreateThrustEmitter(Vector3f initialPosition);
 
 	/// Time passed in seconds..!
 	virtual void Process(int timeInMs);
@@ -52,6 +57,8 @@ public:
 	Vector3f direction;
 	Vector3f up; // Set upon launch, used to change direction of laser burst projectiles
 	int nextWobbleMs; // Next time in timeAliveMs that it should change direction.
+
+	std::shared_ptr<ParticleEmitter> thrustEmitter;
 };
 
 #endif

@@ -25,6 +25,7 @@
 #include "Graphics/Messages/GMRenderPass.h"
 #include "Render/RenderPass.h"
 
+#include "Input/Gamepad/GamepadMessage.h"
 #include "Message/MathMessage.h"
 #include "Base/Gear.h"
 #include "PlayingLevel.h"
@@ -254,6 +255,13 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 		ProcessMessageWSS(message);
 	switch(message->type)
 	{
+	case MessageType::GAMEPAD_MESSAGE: {
+		GamepadMessage * gamepadMessage = (GamepadMessage*)message;
+		Gamepad state = gamepadMessage->gamepadState;
+		if (gamepadMessage->aButtonPressed)
+			level.ProceedMessage();
+		break;
+	}
 		case MessageType::RAYCAST: 
 		{
 			Raycast * rayc = (Raycast*) message;

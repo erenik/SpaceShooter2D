@@ -127,10 +127,11 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 
 	PlayingLevelRef().removeInvuln = playingLevel.levelEntity->worldPosition[0] + playingLevel.playingFieldHalfSize[0] + playingLevel.playingFieldPadding + 1.f;
 	assert(PlayingLevelRef().removeInvuln > -1000);
-	PlayingLevelRef().spawnPositionRight = PlayingLevelRef().removeInvuln + 5.f;
+	PlayingLevelRef().spawnPositionRight = PlayingLevelRef().removeInvuln + 10.f;
 	assert(PlayingLevelRef().spawnPositionRight > -1000);
 	PlayingLevelRef().despawnPositionLeft = playingLevel.levelEntity->worldPosition[0] - playingLevel.playingFieldHalfSize[0] - 1.f;
 	assert(PlayingLevelRef().despawnPositionLeft > -1000);
+	PlayingLevelRef().despawnPositionRight = PlayingLevelRef().spawnPositionRight + 100.0f;
 
 	playingLevel.flyTime.AddMs(timeInMs);
 
@@ -351,9 +352,9 @@ bool Level::LevelCleared(PlayingLevel& playingLevel)
 	return false;
 }
 
-EntitySharedPtr Level::ClosestTarget(PlayingLevel & playingLevel, bool ally, ConstVec3fr position)
+EntitySharedPtr Level::ClosestTarget(PlayingLevel & playingLevel, bool enemy, ConstVec3fr position)
 {
-	if (!ally)
+	if (!enemy)
 	{
 		return playingLevel.playerShip->entity;
 	}
@@ -362,6 +363,10 @@ EntitySharedPtr Level::ClosestTarget(PlayingLevel & playingLevel, bool ally, Con
 	for (int i = 0; i < playingLevel.shipEntities.Size(); ++i)
 	{
 		EntitySharedPtr e = playingLevel.shipEntities[i];
+		ShipProperty * sp = e->GetProperty<ShipProperty>();
+		if (sp->IsEnemy() != enemy)
+			continue;
+
 		float dist = (e->worldPosition - position).LengthSquared();
 		if (dist < closestDist)
 		{

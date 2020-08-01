@@ -808,8 +808,16 @@ void Ship::UpdateStatsFromGear()
 	this->shieldRegenRate = shield.shieldRegen;
 }
 
+int Ship::CurrentWeaponIndex() {
+	return weapons.GetIndexOf(activeWeapon);
+}
+
 bool Ship::SwitchToWeapon(int index)
 {
+	if (index < 0)
+		index = weapons.Size() - 1;
+	if (index >= weapons.Size())
+		index = 0;
 	if (index < 0 || index >= weapons.Size())
 	{
 		std::cout<<"\nSwitchToWeapon bad index";

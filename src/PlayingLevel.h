@@ -115,6 +115,7 @@ public:
 	// Position boundaries.
 	float removeInvuln = 0;
 	float despawnPositionLeft = 0;
+	float despawnPositionRight = 0;
 	float spawnPositionRight = 0;
 
 	int spaceDebrisCollected = 0;
@@ -124,6 +125,7 @@ public:
 private:
 
 	SpawnGroup * lastSpawnGroup;
+	Vector3f requestedMovement;
 
 	Time now;
 	int timeDeadMs = 0;

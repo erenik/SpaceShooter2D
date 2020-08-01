@@ -113,6 +113,7 @@ public:
 
 	/// If using Armor and Shield gear (Player mainly).
 	void UpdateStatsFromGear();
+	int CurrentWeaponIndex();
 	bool SwitchToWeapon(int index);
 
 	/// Calls OnEnter for the initial movement pattern.

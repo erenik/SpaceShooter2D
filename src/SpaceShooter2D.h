@@ -215,7 +215,6 @@ public:
 	SpaceShooterCR * cr;
 	SpaceShooterCD * cd;
 	Level level;
-	List<Direction> movementDirections;
 
 	String levelSource;
 
