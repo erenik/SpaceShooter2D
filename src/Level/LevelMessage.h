@@ -36,6 +36,8 @@ public:
 	String textID;
 	Time goToTime;
 	bool goToRewindPoint;
+	// If true, will trigger even when jumping forward in time while testing.
+	bool dontSkip;
 };
 
 #endif // LEVEL_MSG_H

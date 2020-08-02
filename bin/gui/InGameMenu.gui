@@ -37,7 +37,7 @@ topRightCorner ui/top_right_corner_8x8
 
 Button	OptionsButton
 text "Options"
-onActivate OpenOptionsScreen
+onActivate PushUI(gui/Options.gui)  // OpenOptionsScreen
 topRightCorner ui/top_right_corner_8x8
 
 Button ExitToMainMenuButton

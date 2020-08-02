@@ -242,6 +242,7 @@ TextID TutorialConcluded
 
 Event 
 String TutorialLevel1Weapons
+DontSkip
 
 /// Start first mission
 Message +:01

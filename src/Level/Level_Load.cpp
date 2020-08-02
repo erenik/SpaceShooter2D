@@ -309,6 +309,10 @@ bool Level::Load(String fromSource)
 				strArg.RemoveSurroundingWhitespaces();
 				message->strings.AddItem(strArg);
 			}
+			if (var == "DontSkip")
+			{
+				message->dontSkip = true;
+			}
 			if (var == "GoToTime")
 			{
 				message->eventType = LevelMessage::GO_TO_TIME_EVENT;

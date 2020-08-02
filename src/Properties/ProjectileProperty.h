@@ -28,6 +28,8 @@ public:
 	void SleepThread();
 	void ResetVelocity();
 
+	// For Machine guns, line trace
+	void CreateProjectileTraceEmitter(Vector3f initialPosition);
 	// For rockets
 	void CreateThrustEmitter(Vector3f initialPosition);
 
@@ -58,7 +60,9 @@ public:
 	Vector3f up; // Set upon launch, used to change direction of laser burst projectiles
 	int nextWobbleMs; // Next time in timeAliveMs that it should change direction.
 
-	std::shared_ptr<ParticleEmitter> thrustEmitter;
+	std::shared_ptr<ParticleEmitter> thrustEmitter, traceEmitter;
+
+	EntitySharedPtr targetLock;
 };
 
 #endif

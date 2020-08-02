@@ -125,7 +125,7 @@ void SSIntegrator::IntegrateVelocity(EntitySharedPtr forEntity, float timeInSeco
 	if (pp->angularVelocity.MaxPart())
 	{
 		forEntity->rotation += pp->angularVelocity * timeInSeconds;
-		std::cout << "\nAccelerating object with rotation: " + VectorString(forEntity->rotation)+" velocity: "+ VectorString(velocity);
+//		std::cout << "\nAccelerating object with rotation: " + VectorString(forEntity->rotation)+" velocity: "+ VectorString(velocity);
 		forEntity->hasRotated = true;
 		//forEntity->RecalcRotationMatrix(true);
 	}

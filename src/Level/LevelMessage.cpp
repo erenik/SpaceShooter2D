@@ -10,6 +10,7 @@
 #include "PlayingLevel.h"
 
 LevelMessage::LevelMessage()
+	: dontSkip(false)
 {
 	displayed = hidden = false;
 	goToTime = startTime = stopTime = Time(TimeType::MILLISECONDS_NO_CALENDER, 0);

@@ -16,6 +16,8 @@
 #include "Entity/Entity.h"
 #include "PlayingLevel.h"
 
+Vector4f defaultAlliedProjectileColor = Vector4f(1.f, 0.5f, .1f, 1.f);
+
 WeaponSet::WeaponSet()
 {
 
@@ -394,7 +396,7 @@ void Weapon::Shoot(PlayingLevel& playingLevel, ShipPtr ship)
 		EntitySharedPtr shipEntity = ship->entity;
 		Color color;
 		if (ship->allied)
-			color = Vector4f(1.f, 0.5f, .1f, 1.f);
+			color = defaultAlliedProjectileColor;
 		else
 			color = Vector4f(0.8f,0.7f,0.1f,1.f);
 		Texture * tex = TexMan.GetTextureByColor(color);
@@ -490,6 +492,9 @@ void Weapon::Shoot(PlayingLevel& playingLevel, ShipPtr ship)
 
 		// Add some tasty thrust particles!
  		switch (type) {
+		case Type::MachineGun:
+			projProp->CreateProjectileTraceEmitter(weaponWorldPosition);
+			break;
 		case Type::SmallRockets:
 		case Type::BigRockets:
 			projProp->CreateThrustEmitter(weaponWorldPosition);

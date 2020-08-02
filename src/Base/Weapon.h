@@ -16,6 +16,8 @@ class Ship;
 class Weapon;
 class Entity;
 
+extern Vector4f defaultAlliedProjectileColor;
+
 class WeaponSet : public List<Weapon*> 
 {
 public:

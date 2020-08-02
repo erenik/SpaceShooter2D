@@ -5,11 +5,12 @@ defaultTextColor	1 1 1 1
 
 // Make root active
 root
+sizeRatioXY 0.5 0.5
 name 		Options
 onPop 		GoToPreviousMode
 removeOnPop true
 exitable 	true
-texture 	NULL
+defaultTexture	0x22FF
 
 parent Options
 
@@ -17,11 +18,17 @@ list lOptions
 list lAudioOptions
 texture 0x22EE
 visible false
+padding 0.01
 
 parent lOptions
+defaultTopBorder ui/border_top_4
+defaultRightBorder 0xAAFF
+defaultSizeRatioY 0.15
 
-
-defaultSizeRatioY 0.1
+label Options 
+topBorder 0x0000
+rightBorder 0x0000
+textAlignment Center  
 
 button AudioOptionsButton
 text "Audio options"
@@ -34,9 +41,13 @@ onActivate PopUI(Options)
 /// Audio options
 parent lAudioOptions
 
-defaultSizeRatioY 0.1
+defaultSizeRatioY 0.15
 
 label "Audio options"
+topBorder 0x0000
+rightBorder 0x0000
+textAlignment Center  
+
 
 IntegerInput MasterVolume
 text "Master Volume"

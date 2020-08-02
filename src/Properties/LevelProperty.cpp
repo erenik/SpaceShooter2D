@@ -105,10 +105,12 @@ Vector3f LevelProperty::Velocity() {
 	return owner->physics->velocity;
 }
 
+float despawnLimit = 10.0f;
+
 float LevelProperty::DespawnDown() {
-	return owner->worldPosition.y - playingFieldHalfSize.y - 2;
+	return owner->worldPosition.y - playingFieldHalfSize.y - despawnLimit;
 }
 float LevelProperty::DespawnUp() {
-	return owner->worldPosition.y + playingFieldHalfSize.y + 2;
+	return owner->worldPosition.y + playingFieldHalfSize.y + despawnLimit;
 }
 

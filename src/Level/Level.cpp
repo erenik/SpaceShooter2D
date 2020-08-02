@@ -318,6 +318,8 @@ void Level::OnLevelTimeAdjusted(Time levelTime)
 		if (lm->startTime < levelTime) // Mark earlier messages as displayed
 		{
 			lm->displayed = lm->hidden = true;
+			if (lm->dontSkip)
+				lm->Trigger(PlayingLevelRef(), this);
 		}
 		else { // And future ones as yet to display.
 			lm->displayed = lm->hidden = false;

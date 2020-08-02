@@ -138,7 +138,8 @@ void SpaceShooter2D::OnEnter(AppState * previousState)
 
 	AppWindow * w = MainWindow();
 	assert(w);
-	w->SetMinimumSize(Vector2i(800, 600));
+	//w->SetMinimumSize(Vector2i(800, 600));
+	w->SetRequestedSize(Vector2i(1200, 900));
 	Viewport * vp = w->MainViewport();
 	assert(vp);
 	vp->renderGrid = false;	
