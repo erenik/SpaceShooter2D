@@ -58,6 +58,10 @@ void ProjectileProperty::Destroy()
 		QueueGraphics(new GMDetachParticleEmitter(thrustEmitter));
 		thrustEmitter = nullptr;
 	}
+	if (traceEmitter != nullptr) {
+		QueueGraphics(new GMDetachParticleEmitter(traceEmitter));
+		traceEmitter = nullptr;
+	}
 
 
 	// Check distance to player.
@@ -164,7 +168,7 @@ void ProjectileProperty::Process(int timeInMs)
 	}
 	else if (weapon.linearDamping < 1.f)
 	{
-		if (owner->Velocity().LengthSquared() < 1.f)
+		if (owner->Velocity().LengthSquared() < 0.1f && weapon.acceleration == 0)
 			sleeping = true;
 	}
 	if (weapon.homingFactor > 0)
@@ -197,34 +201,51 @@ void ProjectileProperty::Process(int timeInMs)
 
 		// Set focus point a bit in front of the target depending on it's current speed and our estimated ETA.
 		vecToTarget = targetPosition - owner->worldPosition;
+		// Reset target lock if target is too far away, we might have a closer one.
+		if (vecToTarget.Length() > 5)
+			targetLock = nullptr;
+
 		Vector3f vecToTargetNormalized = vecToTarget.NormalizedCopy();
 		float velocityDotVecToTarget = owner->physics->currentVelocity.DotProduct(vecToTargetNormalized);
 		float distanceToTarget = vecToTarget.Length();
 		float offsetDueToMalignedDirection = 20 * (owner->physics->currentVelocity.Length() - velocityDotVecToTarget);
 		float secondsToTarget = distanceToTarget / velocityDotVecToTarget + offsetDueToMalignedDirection;
-		ClampFloat(secondsToTarget, 0, 100);
-		targetPosition += targetVelocity * secondsToTarget;
+		ClampFloat(secondsToTarget, 0, 3);
 
-		Vector3f vecToTargetWithOffset = targetPosition - owner->worldPosition;
-		vecToTargetWithOffset.Normalize();
+		Vector3f estimatedTargetPosition = targetPosition;
+		// For enemy projectiles which move slower, aim straight at the player.
+		if (enemy) {
+			estimatedTargetPosition += targetVelocity * 1.0f; // Aim 1 second ahead, should be enough?
 
-		Angle toTarget(vecToTargetWithOffset);
+		}
+		// For player projectiles, aim a bit ahead of where the enemy is moving to in order to hit them?
+		else {
+			estimatedTargetPosition += targetVelocity * 1.0f; // Aim 1 second ahead, should be enough?
+		}
+
+		Vector3f vecToEstimatedPosition = estimatedTargetPosition - owner->worldPosition;
+		Angle currentTrajectory(owner->physics->currentVelocity.NormalizedCopy());
+		Angle toEstimatedTarget(vecToEstimatedPosition.NormalizedCopy());
+		
+		Angle compensationCurrentTrajectoryMinusToTraget = toEstimatedTarget - currentTrajectory;
+
 		Angle lookingAt(owner->LookAt());
+		Angle diffLookingAtCurrentTrajectory = lookingAt - currentTrajectory;
 
-		Angle toRotate = toTarget - lookingAt;
+		Angle toRotate = toEstimatedTarget - lookingAt;
+		Angle toRotatePlusCompensation = toRotate + diffLookingAtCurrentTrajectory * 0.2f + compensationCurrentTrajectoryMinusToTraget * 0.2f;
+		float rotationSpeedPreClamping = toRotatePlusCompensation.Radians();
+		float rotationSpeed = ClampedFloat(rotationSpeedPreClamping, -0.5f, 0.5f) * 10.0f * weapon.homingFactor;
 
-		float rotationSpeed = ClampedFloat(toRotate.Radians(), -0.5f, 0.5f) * 10.0f * weapon.homingFactor;
-		std::cout << "\nSeconds to target: " << secondsToTarget << " Rotation speed: " << rotationSpeed;
+		if (enemy) {}
+		else 
+			std::cout << "\nPlayer proj seconds to target: " << secondsToTarget << " Rotation speed: " << rotationSpeed<< " DiffLookAtCurTraj: "<< diffLookingAtCurrentTrajectory.Radians();
 
 		// Add some rotational velocity to address this need.
 		QueuePhysics(new PMSetEntity(owner, PT_ANGULAR_VELOCITY, Vector3f(0, rotationSpeed, 0)));
 		
-		// + ClampedFloat(rotationSpeed, -2.5f, 2.5f)
-		thrustEmitter->velocityEmitter.arcOffset = lookingAt.Radians() + PI;
-		//thrustEmitter->SetParticleLifeTime((min(timeAliveMs * 0.001f, 2.0f));
-
-		// Go t'ward it!
-		//ResetVelocity();
+		if (thrustEmitter)
+			thrustEmitter->velocityEmitter.arcOffset = lookingAt.Radians() + PI;
 	}
 	// .. 
 	if (weapon.projectilePath == Weapon::HOMING)

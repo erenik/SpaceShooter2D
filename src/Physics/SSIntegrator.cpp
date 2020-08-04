@@ -88,8 +88,10 @@ void SSIntegrator::IntegrateVelocity(EntitySharedPtr forEntity, float timeInSeco
 	Vector3f & velocity = pp->velocity;
 	Vector3f oldVelocity = velocity;
 	/// For linear damping.
-	float linearDamp = pow(pp->linearDamping, timeInSeconds);
-	velocity *= linearDamp;
+	if (pp->linearDamping != 1.0f) {
+		float linearDamp = pow(pp->linearDamping, timeInSeconds);
+		velocity *= linearDamp;
+	}
 
 	Vector3f totalAcceleration;
 	if (pp->relativeAcceleration.MaxPart() != 0)

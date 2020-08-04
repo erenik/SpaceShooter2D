@@ -12,6 +12,7 @@ Event SetSpawnGroupsPauseGameTime(true)
 Event TutorialBaseGun
 
 Event PlayBGM Levels/Tutorial
+Event SetBGMVolume 0.1
 
 Message +:01
 TextID	TutorialStart
@@ -253,9 +254,12 @@ Message
 TextID RogerThat
 
 Event SetMessagesPauseGameTime(false)
+DontSkip
 Event SetSpawnGroupsPauseGameTime(false)
+DontSkip
 
 Event SetRewindPoint
+DontSkip
 
 /* 0+:00 - 0+:30
 *Start*
@@ -292,6 +296,152 @@ Position xy 0 10
 CopyGroup +:05
 Formation SWARM_BOX_XY
 Position xy 0 -10
+
+
+/* 00:30 - 01:45 (if too long/boring throw in whatever)
+
+Bombers (6 hits) carrying two missiles fired in succession escorted by fighters in different formations - fighters first, starting at three fighters for one bomber. Bombers increasing their speed as their missiles are fired. If bombers survive to the left edge of screen, they return later *Store 1*.
+
+3x: Unescorted bombers in vertical line formation spawn and after some delay all fire all their missiles simultaneously.
+*/
+
+
+CopyGroup +:7
+Name Fighters_3
+ShipType Fighter
+Formation LINE_Y
+Number 3
+Position y -2.5
+
+CopyGroup +:2
+Name Bomber_1
+ShipType Bomber
+Number	1
+Position y 0
+
+CopyNamedGroup Fighters_3 +:7
+CopyNamedGroup Bomber_1 +:2
+
+CopyNamedGroup Fighters_3 +:7
+CopyNamedGroup Bomber_1 +:2
+
+
+CopyGroup +:7
+Name Fighters_6
+ShipType Fighter
+Formation LINE_Y
+Size y 8
+Number 6
+Position y -4
+
+CopyGroup +:2
+Name Bombers_2
+ShipType Bomber
+Number	2
+Size y 4
+Position y -2
+
+CopyNamedGroup Fighters_6 +:7
+CopyNamedGroup Bombers_2 +:2
+
+CopyNamedGroup Fighters_6 +:7
+CopyNamedGroup Bombers_2 +:2
+
+CopyGroup +:7
+Name Fighters_9
+ShipType Fighter
+Formation LINE_Y
+Size y 11
+Position y -5.5
+Number 9
+
+CopyGroup +:2
+Name Bombers_3
+ShipType Bomber
+Size y 8
+Position y -4
+Number	3
+
+CopyNamedGroup Fighters_9 +:7
+CopyNamedGroup Bombers_3 +:2
+
+CopyNamedGroup Fighters_9 +:7
+CopyNamedGroup Bombers_3 +:2
+
+CopyGroup +:7
+Formation SWARM_BOX_XY
+Number 7
+Size xy 15 15
+Position xy 0 0
+
+/*
+01:45 - 02:30 (if too long/boring throw in whatever)
+
+Big fighters (x4 in size, 10 hits) escorted by fighters in different formations, smaller next to and behind the big ones. Big fighters stop in the middle of the screen for 10s before moving on, firing main weapon (aim, high damage, high reload) and two bursts (aim, 3 burst, low damage). Small fighters don’t stop. 
+
+Bomber survivors return with new payloads at 02:15. *Release 1*
+*/
+
+SpawnGroup +:15
+Name BigFighter_1_Escort
+ShipType Fighter
+Formation DOUBLE_LINE_X
+Number	5
+Size xy 10 8
+Position xy 0 0
+
+CopyGroup +:5
+Name BigFighter_1
+ShipType BigFighter
+Formation LINE_Y
+Number 1
+Position y 0
+
+CopyNamedGroup BigFighter_1_Escort +:13
+Size y 10
+CopyNamedGroup BigFighter_1 +:5
+
+CopyNamedGroup BigFighter_1_Escort +:11
+Size y 12
+CopyNamedGroup BigFighter_1 +:5
+
+CopyNamedGroup BigFighter_1_Escort +:9
+Size y 14
+CopyNamedGroup BigFighter_1 +:5
+
+CopyNamedGroup BigFighter_1_Escort +:7
+Size y 16
+CopyNamedGroup BigFighter_1 +:5
+
+/*
+02:30-03:00
+
+Turrets (5 hits) come in horizontal rows, firing bursts (aim, 4 burst, low damage). Fighters traveling up and down firing straight support them. 
+*/
+
+
+
+/*
+03:00 - 03:50
+*Traveling speed +200%* (player is chasing some ship that is escaping with an important bit of technology. Uses text box with no interaction. Story.)
+
+Fast enemies ramming player spawns at random positions on right side of screen, one at a time, increasing spawn rate over time. After some time they’re accompanied by fighters that slowly circle the player at up to half screen distance from player while shooting. 
+
+2x: The spawning of both enemies stop for a few seconds, and 5-7 volleys of 4 clustered ramming enemies spawn in rhombus formation with 1.71 second delay. Previous enemy spawning resumes after. Spawn rate never resets.
+*/
+
+/* 
+03:50 - 04:45
+*Traveling speed reset*
+
+Fighters in wavy and loopy patterns. Occasional bombers.
+*/
+
+/*
+04:45 - 05:00
+
+Three big fighters spawn, firing with low cooldown and no aim. They move slowly straight forward.
+*/
 
 
 

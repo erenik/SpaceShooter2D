@@ -232,8 +232,10 @@ bool Weapon::LoadTypes(String fromFile)
 				weapon.stability = value.ParseFloat();
 //				LogMain("Weapon "+weapon.name+" stability: "+String(weapon.stability), INFO);
 			}
-			else if (column == "Linear Damping")
+			else if (column == "Linear Damping") {
 				weapon.linearDamping = value.ParseFloat();
+				assert(weapon.linearDamping > 0);
+			}
 			else if (column == "HomingFactor")
 				weapon.homingFactor = value.ParseFloat();
 			else if (column == "Angle")
@@ -468,6 +470,7 @@ void Weapon::Shoot(PlayingLevel& playingLevel, ShipPtr ship)
 		// Set collision category and filter.
 		pp->collisionCategory = ship->allied? CC_PLAYER_PROJ : CC_ENEMY_PROJ;
 		pp->collisionFilter = ship->allied? CC_ENEMY : CC_PLAYER;
+		assert(linearDamping != 0);
 		pp->linearDamping = linearDamping;
 		pp->relativeAcceleration.z = acceleration;
 
@@ -490,6 +493,11 @@ void Weapon::Shoot(PlayingLevel& playingLevel, ShipPtr ship)
 		MapMan.AddEntity(projectileEntity);
 		playingLevel.projectileEntities.Add(projectileEntity);
 
+		bool createThrustEmitter = false;
+		if (homingFactor > 0) {
+			createThrustEmitter = true;
+		}
+
 		// Add some tasty thrust particles!
  		switch (type) {
 		case Type::MachineGun:
@@ -497,11 +505,14 @@ void Weapon::Shoot(PlayingLevel& playingLevel, ShipPtr ship)
 			break;
 		case Type::SmallRockets:
 		case Type::BigRockets:
-			projProp->CreateThrustEmitter(weaponWorldPosition);
+			createThrustEmitter = true;
 			break;
 		default:
 			break;
 		}
+
+		if (createThrustEmitter)
+			projProp->CreateThrustEmitter(weaponWorldPosition);
 
 
 	//	lastShot = flyTime;
