@@ -12,13 +12,19 @@ exitable false
 
 parent HangarScreen
 list lHangar
+sizeRatioXY 0.2 0.5
+alignmentXY 0.2 0.5
 
 parent lHangar
 
 defaultSizeRatioXY 1 0.2
+
 button Continue
+
 button Workshop
-onActivate GoToWorkshop
+onActivate PushUI(gui/Workshop.gui)
+// GoToWorkshop
+
 button bMainMenu
 text 	"Main Menu"
 onActivate GoToMainMenu

@@ -1,13 +1,12 @@
 // Main UI when starting up.
 
 defaultTexture	0x2244
-defaultTexture	0x2244
 defaultTextColor	1 1 1 1
 
 // Make root active
 root
 name WorkshopScreen
-texture NULL
+texture 0x44FF
 exitable true
 onExit GoToHangar
 

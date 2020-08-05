@@ -156,11 +156,12 @@ alignmentXY 0.85 0.5
 
 parent DebugRight 
 
-defaultSizeRatioXY 1 0.07
+defaultSizeRatioXY 1 0.05
 StringLabel LevelTime "Level time" 
 IntegerLabel SpawnGroupsRemaining "Spawngroups remaining" 
 IntegerLabel SpawnGroupsActive "Spawngroups active" 
-StringLabel NextSpawnGroupTime "Next spawn group at " 
+StringLabel NextSpawnGroupTime "Next spawn group at" 
+IntegerLabel NextSpawnGroupLine "Line in level file" 
 
 
 

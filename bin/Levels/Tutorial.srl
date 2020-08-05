@@ -411,7 +411,27 @@ CopyNamedGroup BigFighter_1 +:5
 
 CopyNamedGroup BigFighter_1_Escort +:7
 Size y 16
+
+// Make sure we pause and let the player kill the last enemies before we finalize the level
+Event SetMessagesPauseGameTime(true)
+DontSkip
+Event SetSpawnGroupsPauseGameTime(true)
+DontSkip
+
 CopyNamedGroup BigFighter_1 +:5
+
+Message +:2
+TextID FirstMissionComplete
+Message 
+TextID FirstMissionComplete2
+Message 
+TextID RogerReturningToBase
+
+Event +:1
+String GoToHangar
+DontSkip
+
+
 
 /*
 02:30-03:00

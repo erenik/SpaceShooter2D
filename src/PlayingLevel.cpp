@@ -228,9 +228,13 @@ void PlayingLevel::Render(GraphicsState* graphicsState)
 
 void PlayingLevel::OnExit(AppState* nextState) {
 
+	MapMan.DeleteAllEntities();
+
 	HUD::Get()->Hide();
 
 	levelEntity = NULL;
+	playerShip = nullptr;
+
 	SleepThread(50);
 	// Register it for rendering.
 	Graphics.QueueMessage(new GMUnregisterParticleSystem(sparks, true));

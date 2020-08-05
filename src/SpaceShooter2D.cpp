@@ -28,7 +28,10 @@
 #include "Input/Gamepad/GamepadMessage.h"
 #include "Message/MathMessage.h"
 #include "Base/Gear.h"
+
+// States
 #include "PlayingLevel.h"
+#include "InHangar.h"
 
 #include "SpaceShooter2D.h"
 
@@ -57,6 +60,7 @@ String SpaceShooter2D::levelToLoad = String();
 bool SpaceShooter2D::paused = false;
 
 PlayingLevel* playingLevel = nullptr;
+InHangar * inHangar = nullptr;
 
 float playingFieldPadding;
 /// All ships, including player.
@@ -72,18 +76,20 @@ String SSGameModeString(SSGameMode mode) {
 	case SSGameMode::MAIN_MENU: return "Main Menu";
 	case SSGameMode::NEW_GAME: return "New Game";
 	case SSGameMode::EDITING_OPTIONS: return "Options";
+	case SSGameMode::IN_HANGAR: return "In Hangar";
+	case SSGameMode::PLAYING_LEVEL: return "Playing level";
 	default:
 		break;
 	}
 	return "" + mode;
 }
 
-#include "PlayingLevel.h"
 
 void RegisterStates()
 {
 	spaceShooter = new SpaceShooter2D();
 	playingLevel = new PlayingLevel();
+	inHangar = new InHangar();
 	StateMan.RegisterState(spaceShooter);
 	StateMan.RegisterState(playingLevel);
 	StateMan.QueueState(spaceShooter);
@@ -858,6 +864,9 @@ void SpaceShooter2D::SetMode(SSGameMode newMode, bool updateUI)
 	switch (newMode) {
 	case SSGameMode::MAIN_MENU:
 		StateMan.QueueState(spaceShooter);
+		break;
+	case SSGameMode::IN_HANGAR:
+		StateMan.QueueState(inHangar);
 		break;
 	default:
 		// Update UI automagically?

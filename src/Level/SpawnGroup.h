@@ -77,6 +77,8 @@ public:
 	Vector3f position;
 	/// Number along the formation bounds. Before PrepareForSpawning is called, this is an arbitrary argument, which may or may not be the same after preparing for spawning (e.g. it may multiply for generating a SQUARE formation).
 	int number;
+	// What line number it corresponds to in the parsed level file for dev iteration purposes.
+	int lineNumber;
 	// See enum above.
 	Formation formation;
 	MovementPattern mp;

@@ -237,6 +237,7 @@ void HUD::UpdateDebug() {
 	
 	SpawnGroup * nextSpawnGroup = pl.level.NextSpawnGroup();
 	QueueGraphics(new GMSetUIs("NextSpawnGroupTime", GMUI::STRING_INPUT, (nextSpawnGroup != nullptr? nextSpawnGroup->SpawnTime().ToString("m:S") : "N/A" )));
+	QueueGraphics(new GMSetUIi("NextSpawnGroupLine", GMUI::INTEGER_INPUT, nextSpawnGroup != nullptr ? nextSpawnGroup->lineNumber : 0));
 }
 
 String levelStatsGui = "gui/LevelStats.gui";

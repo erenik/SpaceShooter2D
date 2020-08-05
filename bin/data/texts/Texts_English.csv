@@ -32,7 +32,7 @@ SecondTask;Task: Destroy 3 immobile units with weapon switch available.
 TryAgainWeaponSwitch;Try again. Use the [123] buttons to use all\n your weapons to your advantage.
 ;
 WeaponScriptsIntro;In order to ease stress on the pilot,\nweapon scripts may be activated. 
-WeaponScriptsIntro2;Weapon Scripts  automatically cycle\nbetween various available weapons.
+WeaponScriptsIntro2;Weapon Scripts automatically cycle\nbetween various available weapons.
 WeaponScriptsIntro3;These may be adjusted to your preference later on.
 EngagingWeaponScript;Engaging weapon-script.
 TryAgainWeaponScript;Try again. Aligning yourself with your enemies\nshould be enough.
@@ -63,6 +63,11 @@ TutorialConcluded;This concludes the tutorial. Prepare for your mission.
 FirstMission;Control tower: $Name, we've got a call. \nSome pirates are patrolling your vicinity. 
 Eliminate;Eliminate them.
 RogerThat;$Name: Roger that.
+
+FirstMissionComplete;Control tower: Great job $Name! Our scans show \nthat you have eliminated most pirates in the area.
+FirstMissionComplete2;Feel free to return to base at your leisure.
+RogerReturningToBase;$Name: Roger that. Returning to base.
+
 
 ;
 ;

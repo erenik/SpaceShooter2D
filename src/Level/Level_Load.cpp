@@ -9,8 +9,6 @@
 #include "File/LogFile.h"
 #include "PlayingLevel.h"
 
-#define SET_GROUP_DEFAULTS { group->pausesGameTime = loadLevel->spawnGroupsPauseGameTime; }
-
 namespace LevelLoader 
 {
 	LevelMessage * lastMessage = nullptr;
@@ -18,6 +16,7 @@ namespace LevelLoader
 	SpawnGroup * group = (SpawnGroup*)0;
 	Level * loadLevel = (Level*)0;
 	SpawnGroup * lastGroup = (SpawnGroup*)0;
+	int lineNumber = 0;
 
 	void Init() {
 		lastMessage = nullptr;
@@ -55,6 +54,11 @@ namespace LevelLoader
 			lastMessage = message;
 			message = nullptr;
 		} 
+	}
+
+	void SetGroupDefaults(SpawnGroup * sg) {
+		sg->lineNumber = lineNumber; // What line it corresponds to in the file :)
+		sg->pausesGameTime = loadLevel->spawnGroupsPauseGameTime;
 	}
 
 
@@ -100,7 +104,7 @@ namespace LevelLoader
 		for (int p = 1; p < spawnTimes.Size(); ++p)
 		{
 			SpawnGroup * newGroup = new SpawnGroup(*lastGroup);
-			SET_GROUP_DEFAULTS;
+			SetGroupDefaults(newGroup);
 			newGroup->SetSpawnTime(spawnTimes[p]);
 			newGroup->name = lastGroup->name + "_"+String(p+1);
 			loadLevel->spawnGroups.AddItem(newGroup);
@@ -229,6 +233,7 @@ bool Level::Load(String fromSource)
 	for (int i = 0; i < lines.Size(); ++i)
 	{
 		String line = lines[i];
+		LevelLoader::lineNumber = i + 1;
 		line.SetComparisonMode(String::NOT_CASE_SENSITIVE);
 		// Formation specific parsing.
 		List<String> tokens = line.Tokenize(" ()\t");
@@ -259,7 +264,8 @@ bool Level::Load(String fromSource)
 			AddMessageIfNeeded(loadLevel);
 			AddGroupsIfNeeded();
 			group = new SpawnGroup();
-			SET_GROUP_DEFAULTS;
+			group->lineNumber = i + 1; // What line it corresponds to in the file :)
+			SetGroupDefaults(group);
 			// Parse time.
 			ParseTimeStringsFromLine(line);
 			group->SetSpawnTime(spawnTimes[0]);
@@ -336,7 +342,7 @@ bool Level::Load(String fromSource)
 				AddGroupsIfNeeded();
 				// Copy last one.
 				group = new SpawnGroup(*lastGroup);
-				SET_GROUP_DEFAULTS;
+				SetGroupDefaults(group);
 				// Parse time.
 				ParseTimeStringsFromLine(line);
 				group->SetSpawnTime(spawnTimes[0]);
@@ -371,7 +377,7 @@ bool Level::Load(String fromSource)
 					continue;
 				}
 				group = new SpawnGroup(*named);
-				SET_GROUP_DEFAULTS;
+				SetGroupDefaults(group);
 				// Parse time.
 				ParseTimeStringsFromLine(line);
 				group->SetSpawnTime(spawnTimes[0]);
