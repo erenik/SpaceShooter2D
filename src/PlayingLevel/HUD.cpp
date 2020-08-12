@@ -267,13 +267,13 @@ void HUD::OpenInGameMenu()
 {
 	inGameMenuOpened = true;
 	PushUI(inGameMenuGui);
-	InputMan.ForceNavigateUI(true);
+	InputMan.SetForceNavigateUI(true);
 }
 
 void HUD::CloseInGameMenu()
 {
 	PopUI(inGameMenuGui);
-	InputMan.ForceNavigateUI(false);
+	InputMan.SetForceNavigateUI(false);
 }
 
 

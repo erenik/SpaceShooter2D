@@ -51,11 +51,15 @@ textAlignment Center
 
 IntegerInput MasterVolume
 text "Master Volume"
+Range 0 100
 
 IntegerInput BGMVolume
 text "BGM Volume"
+Range 0 100
+
 IntegerInput SFXVolume
 text "SFX Volume"
+Range 0 100
 
 
 Button Back

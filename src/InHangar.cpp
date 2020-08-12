@@ -18,7 +18,7 @@ void InHangar::OnEnter(AppState * previousState) {
 	QueueGraphics(GMPushUI::ToWindow(hangarGui));
 		
 	/// Enable Input-UI navigation via arrow-keys and Enter/Esc.
-	InputMan.ForceNavigateUI(true);
+	InputMan.SetForceNavigateUI(true);
 
 	// Set up some 3D scene with the ship?
 	SetUpScene();

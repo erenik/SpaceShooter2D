@@ -107,7 +107,7 @@ void PlayingLevel::OnEnter(AppState* previousState) {
 	testGroup.number = 1;
 
 	/// Enable Input-UI navigation via arrow-keys and Enter/Esc.
-	InputMan.ForceNavigateUI(false);
+	InputMan.SetForceNavigateUI(false);
 
 
 	SetPlayingFieldSize(Vector2f(50, 30));
@@ -275,6 +275,17 @@ void PlayingLevel::ProcessMessage(Message* message)
 			playerShip->SwitchToWeapon(playerShip->CurrentWeaponIndex() - 1);
 		if (gamepadMessage->rightButtonPressed)
 			playerShip->SwitchToWeapon(playerShip->CurrentWeaponIndex() + 1);
+
+		// Only with menu open.
+//		if (HUD::Get()->InGameMenuOpen()) {
+	//	}
+		// Only with menu closed.
+		//else {
+		
+		//}
+
+		if (gamepadMessage->gamepadState.menuButtonPressed && !gamepadMessage->previousState.menuButtonPressed)
+			ToggleInGameMenu();
 
 		SpaceShooter2D::ProcessMessage(message);
 		break;
@@ -745,18 +756,7 @@ void PlayingLevel::ProcessMessage(Message* message)
 		}
 		else if (msg == "ToggleMenu")
 		{
-			// Pause the game.
-			if (!paused)
-			{
-				Pause();
-				// Bring up the in-game menu.
-				HUD::Get()->OpenInGameMenu();
-			}
-			else
-			{
-				UpdateUI();
-				Resume();
-			}
+			ToggleInGameMenu();
 		}
 		else if (msg == "ToggleBlackness")
 		{
@@ -767,6 +767,22 @@ void PlayingLevel::ProcessMessage(Message* message)
 	}
 	// If not returned, process general messages from parent app state.
 	ProcessGeneralMessage(message);
+}
+
+void PlayingLevel::ToggleInGameMenu() {
+	// Pause the game.
+	if (!paused)
+	{
+		Pause();
+		// Bring up the in-game menu.
+		HUD::Get()->OpenInGameMenu();
+	}
+	else
+	{
+		HUD::Get()->CloseInGameMenu();
+		UpdateUI();
+		Resume();
+	}
 }
 
 void PlayingLevel::Cleanup()

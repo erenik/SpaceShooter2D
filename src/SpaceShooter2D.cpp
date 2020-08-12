@@ -130,7 +130,7 @@ void SpaceShooter2D::OnEnter(AppState * previousState)
 
 	WeaponScript::CreateDefault();
 	/// Enable Input-UI navigation via arrow-keys and Enter/Esc.
-	InputMan.ForceNavigateUI(true);
+	InputMan.SetForceNavigateUI(true);
 
 	/// Create game variables.
 	currentLevel = GameVars.CreateInt("currentLevel", 1);
