@@ -1,13 +1,19 @@
-Name,Price,Max HP,Toughness,Reactivity,Info
-Basic Armor,0,100,10,1,"Basic armor, providing moderate defense and a slight \nreactive coating to reduce impacts from projectiles."
-Reactive Armor,200,100,8,6,"An armor with a strong reactive coating to deter smaller \nprojectiles and explosives. Is more susceptible to ship-ship collisions."
-Basic Armor II,500,150,12,2,"Basic armor, providing moderate defense and a slight \nreactive coating to reduce impacts from projectiles."
-Reactive Armor II,750,150,9,8,"An armor with a strong reactive coating to deter smaller \nprojectiles and explosives. Is more susceptible to ship-ship collisions."
-Basic Armor III,1250,200,14,3,"Basic armor, providing moderate defense and a slight \nreactive coating to reduce impacts from projectiles."
-Reactive Armor III,1750,200,10,10,"An armor with a strong reactive coating to deter smaller \nprojectiles and explosives. Is more susceptible to ship-ship collisions."
-Basic Armor IV,3000,250,16,4,"Basic armor, providing moderate defense and a slight \nreactive coating to reduce impacts from projectiles."
-Reactive Armor IV,4500,250,11,12,"An armor with a strong reactive coating to deter smaller \nprojectiles and explosives. Is more susceptible to ship-ship collisions."
-Basic Armor V,9000,300,18,5,"Basic armor, providing moderate defense and a slight reactive coating to reduce impacts from projectiles."
-Reactive Armor V,12500,300,12,14,"An armor with a strong reactive coating to deter smaller \nprojectiles and explosives. Is more susceptible to ship-ship collisions."
-Reflective Ionized Titanium Armor,20000,350,15,25,"A ridiculously reactive armor, which almost reflects incoming \nexplosives. It is the best known armor against projectiles."
-Graphene Complex,35000,400,33,3,"A multi-layered Graphene-based armor using \nspecial honeycomb-formations for extra stability."
+Name,Price,Max HP,Toughness,Reactivity,ArmorRegen,Info
+Standard Armor,0,100,10,2,1,BasicArmorDesc
+Standard Armor II,500,125,12,4,2,BasicArmorDesc
+Standard Armor III,1250,150,14,6,3,BasicArmorDesc
+Standard Armor IV,3000,175,16,8,4,BasicArmorDesc
+Standard Armor V,9000,200,18,10,5,BasicArmorDesc
+Reactive Armor,200,110,3,15,1,ReactiveArmorDesc
+Reactive Armor II,750,130,4,20,2,ReactiveArmorDesc
+Reactive Armor III,1750,150,5,25,3,ReactiveArmorDesc
+Reactive Armor IV,4500,170,6,30,4,ReactiveArmorDesc
+Reactive Armor V,12500,190,7,35,5,ReactiveArmorDesc
+Regenerative Armor,500,50,12,3,5,RegenerativeArmorDesc
+Regenerative Armor II,1500,65,13,5,10,RegenerativeArmorDesc
+Regenerative Armor III,4000,80,14,7,15,RegenerativeArmorDesc
+Regenerative Armor IV,7500,100,15,9,20,RegenerativeArmorDesc
+Regenerative Armor V,15000,125,16,11,25,RegenerativeArmorDesc
+Reflective Ionized Titanium Armor,25000,350,15,25,6,TitaniumArmorDesc
+Graphene Complex,35000,400,33,5,7,GrapheneArmorDesc
+Xq 305.7,50000,500,25,20,15,

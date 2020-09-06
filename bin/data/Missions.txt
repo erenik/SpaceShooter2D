@@ -1,0 +1,17 @@
+
+// Requires = Requires completion of ... :)
+Campaign Story
+
+Name Tutorial
+Replay false
+Level Levels/tutorial/Tutorial.srl
+Reward 1000
+
+Name RedStar
+Requires Tutorial
+Replay false
+Level Levels/redstar/Tutorial.srl
+Reward 2000
+
+
+

@@ -26,7 +26,7 @@ WeaponSet::~WeaponSet()
 {
 	ClearAndDelete();
 }
-WeaponSet::WeaponSet(WeaponSet & otherWeaponSet)
+WeaponSet::WeaponSet(const WeaponSet & otherWeaponSet)
 {
 	// Create duplicates of all weapons!
 	for (int i = 0; i < otherWeaponSet.Size(); ++i)
@@ -75,6 +75,16 @@ String Weapon::TypeName() {
 	return GetTypeName(type);
 }
 
+List<Weapon> Weapon::GetAllOfType(Type type) {
+	List<Weapon> ofType;
+	for (int i = 0; i < types.Size(); ++i) {
+		if (types[i].type == type)
+			ofType.Add(types[i]);
+	}
+	return ofType;
+}
+
+
 String Weapon::GetTypeName(Type type) {
 	switch (type) {
 	case Type::MachineGun:
@@ -122,6 +132,17 @@ Weapon::Type Weapon::ParseType(String fromString) {
 	return Type::None;
 }
 
+// Checks type and level in GameVars
+bool Weapon::PlayerOwns(Weapon& weapon) {
+	GameVar * var = GameVars.Get(weapon.name);
+	if (var == nullptr)
+		return false;
+	return var->iValue > 0;
+}
+
+void Weapon::SetOwnedQuantity(Weapon& weapon, int ownedQuantity) {
+	GameVars.SetInt(weapon.name, ownedQuantity);
+}
 
 bool Weapon::Get(String byName, Weapon * weapon)
 {
@@ -665,7 +686,7 @@ void Weapon::ProcessLightning(PlayingLevel& playingLevel, ShipPtr owner, bool in
 		shipsStruckThisArc.AddItem(target);
 		assert(shipsStruckThisArc.Duplicates() == 0);
 		std::cout<<"\nThunderstruck! "<<target->entity->worldPosition;
-		target->Damage(playingLevel, (float)arc->damage, false);
+		target->Damage(playingLevel, (float)arc->damage, false, DamageSource::Projectile);
 		/// Span up a nice graphical entity to represent the bolt
 		EntitySharedPtr entity = EntityMan.CreateEntity("BoldPart", ModelMan.GetModel("cube.obj"), TexMan.GetTexture("0x00FFFF"));
 		entity->localPosition = (arc->position + newArc->position) * 0.5f;

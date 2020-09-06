@@ -1,0 +1,40 @@
+defaultTexture		null
+defaultTextColor	1 1 1 1
+
+// Make root active
+root
+name GearDescription
+texture 0x223344FF
+
+parent GearDescription
+
+List lGearDesc
+
+parent lGearDesc
+defaultSizeRatioY 0.12
+
+ColumnList NamePrice
+ColumnList DamageCooldown
+ColumnList RoundsReloadTime
+Label GearTextDescription
+textPadding 0.05
+sizeRatioY 0.4
+
+parent NamePrice
+defaultSizeRatioXY 0.5 1
+
+defaultDividerX 0.3
+
+StringLabel GearName "Name"
+IntegerLabel GearPrice "Price"
+
+parent DamageCooldown
+defaultSizeRatioXY 0.5 1
+IntegerLabel GearDamage "Damage"
+IntegerLabel GearBurstCooldown "Rate of fire"
+
+parent RoundsReloadTime
+defaultSizeRatioXY 0.5 1
+IntegerLabel GearRounds "Rounds"
+IntegerLabel GearCooldown "Reload time"
+

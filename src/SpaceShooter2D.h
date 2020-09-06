@@ -90,13 +90,15 @@ class GameVariable;
 #define rightEdge (playingLevel.levelEntity->worldPosition.x + playingLevel.playingFieldHalfSize.x)
 
 Vector2i WeaponTypeLevelFromString(String str); // For shop/UI-interaction.
-String WeaponTypeLevelToString(int type, int level);
+String WeaponTypeLevelToString(Weapon::Type type, int level);
 int DiffCost(String toUpgrade);
 
 /// In WeaponScriptEditing.cpp
 void ProcessMessageWSS(Message * message);
 /// Before killing 'em.
 void PrintEntityData(EntitySharedPtr entity);
+
+String DifficultyString(int diff);
 
 
 enum SSGameMode {
@@ -145,21 +147,15 @@ public:
 	/// Creates default key-bindings for the state.
 	virtual void CreateDefaultBindings();
 
+	// Upon save loaded, continue where the player last was. Probably in the hangar, but could also be elsewhere..?
+	void OnSaveLoaded();
+
 	/// Loads .csv's and data so as to know default gear and ships.
 	void LoadShipData();
 	/// UI stuffs. All implemented in UIHandling.cpp
 	virtual void UpdateUI();
-	void UpdateGearList();
 	/// Update UI parts
 	void UpdateHUDSkill();
-	void UpdateUpgradesLists();
-	void UpdateUpgradeStatesInList(); // Updates colors n stuff based on level
-	void UpdateHoverUpgrade(String upgrade, bool force = false);
-	void UpdateActiveUpgrade(String upgrade);
-	void UpdateUpgradesMoney();
-
-	/// Shop handling...
-	void BuySellToUpgrade(String upgrade);
 
 	void OpenJumpDialog();
 	/// Update ui
@@ -176,6 +172,14 @@ public:
 	GameVariable * LevelKills(String level = "current");
 	/// Level max kills possible.
 	GameVariable * LevelPossibleKills(String level = "current");
+
+	// Game variables abstracted away
+	int& TimesCompleted(String missionName);
+	String& FirstTimeCompletion();
+	String& RepeatCompletion();
+	Time& FlyTime();
+	int& Money();
+
 	/// Resets all the above.
 	void ResetLevelStats();
 // private:
@@ -218,13 +222,14 @@ public:
 
 	String levelSource;
 
+	const String PlayerName() const;
+
 	/// o.o
 	static GameVariable * currentLevel,
 		* currentStage,
 		* score,
-		* money,
 		* playTime,
-		* playerName,
+		* playerNameVar,
 		* gameStartDate,
 		* difficulty;
 	

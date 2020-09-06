@@ -348,8 +348,8 @@ void Movement::SetDirection(Vector2f dir)
 void Movement::SetWindowSpeed(Vector2f desiredAppearedSpeed)
 {
 	Vector2f totalSpeed = desiredAppearedSpeed;
-	if (totalSpeed.LengthSquared())
-		totalSpeed += spaceShooter->level.BaseVelocity();
+	//if (totalSpeed.LengthSquared())
+	//	totalSpeed -= spaceShooter->level.BaseVelocity();
 	if (totalSpeed.x != totalSpeed.x || totalSpeed.y != totalSpeed.y)
 	{
 		std::cout<<"\nCaught setting bad speeds!";

@@ -11,8 +11,11 @@ Event SetMessagesPauseGameTime(true)
 Event SetSpawnGroupsPauseGameTime(true)
 Event TutorialBaseGun
 
-Event PlayBGM Levels/Tutorial
+Event PlayBGM Levels/tutorial/Tutorial
+DontSkip
+
 Event SetBGMVolume 0.1
+DontSkip
 
 Message +:01
 TextID	TutorialStart
@@ -310,67 +313,82 @@ CopyGroup +:7
 Name Fighters_3
 ShipType Fighter
 Formation LINE_Y
+Size xy 5 5
 Number 3
-Position y -2.5
+Position y 0
 
-CopyGroup +:2
+CopyGroup +:1
 Name Bomber_1
 ShipType Bomber
 Number	1
 Position y 0
 
 CopyNamedGroup Fighters_3 +:7
-CopyNamedGroup Bomber_1 +:2
+CopyNamedGroup Bomber_1 +:1
 
 CopyNamedGroup Fighters_3 +:7
-CopyNamedGroup Bomber_1 +:2
+CopyNamedGroup Bomber_1 +:1
+
+CopyNamedGroup Fighters_3 +:7
+Name Fighters_Square_3
+Size xy 5 5
+Position y 5
+Formation Square 
+CopyNamedGroup Bomber_1 +:0
+Position y 5
+
+CopyNamedGroup Fighters_Square_3 +:5
+Position y -5
+CopyNamedGroup Bomber_1 +:0
+Position y -5
 
 
-CopyGroup +:7
-Name Fighters_6
+
+CopyGroup +:8
+Name Fighters_5
 ShipType Fighter
 Formation LINE_Y
 Size y 8
-Number 6
-Position y -4
+Number 5
+Position y 0
 
-CopyGroup +:2
+CopyGroup +:1
 Name Bombers_2
 ShipType Bomber
 Number	2
 Size y 4
-Position y -2
+Position y 0
 
-CopyNamedGroup Fighters_6 +:7
-CopyNamedGroup Bombers_2 +:2
+CopyNamedGroup Fighters_5 +:8
+Name TightFighters_5
+Size xy 5 5
+CopyNamedGroup Bombers_2 +:0.5
 
-CopyNamedGroup Fighters_6 +:7
-CopyNamedGroup Bombers_2 +:2
+CopyNamedGroup TightFighters_5 +:8
+CopyNamedGroup Bombers_2 +:0.5
 
-CopyGroup +:7
-Name Fighters_9
+CopyGroup +:9
+Name Fighters_7
 ShipType Fighter
 Formation LINE_Y
 Size y 11
-Position y -5.5
-Number 9
+Number 7
 
-CopyGroup +:2
+CopyGroup +:1
 Name Bombers_3
 ShipType Bomber
 Size y 8
-Position y -4
 Number	3
 
-CopyNamedGroup Fighters_9 +:7
-CopyNamedGroup Bombers_3 +:2
+CopyNamedGroup Fighters_7 +:9
+CopyNamedGroup Bombers_3 +:1
 
-CopyNamedGroup Fighters_9 +:7
-CopyNamedGroup Bombers_3 +:2
+CopyNamedGroup Fighters_7 +:9
+CopyNamedGroup Bombers_3 +:1
 
-CopyGroup +:7
+CopyGroup +:10
 Formation SWARM_BOX_XY
-Number 7
+Number 5
 Size xy 15 15
 Position xy 0 0
 
@@ -426,6 +444,9 @@ Message
 TextID FirstMissionComplete2
 Message 
 TextID RogerReturningToBase
+
+Event
+String SetInt(TutorialCleared, 1)
 
 Event +:1
 String GoToHangar

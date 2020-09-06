@@ -21,8 +21,12 @@
 #include "PlayingLevel/SpaceStars.h"
 #include "Properties/LevelProperty.h"
 #include "Input/Gamepad/GamepadMessage.h"
-
+#include "Application/Application.h"
+#include "Level/LevelMessage.h"
 #include "Level/SpawnGroup.h"
+#include "File/SaveFile.h"
+#include "Missions.h"
+#include "Base/PlayerShip.h"
 
 SpawnGroup testGroup;
 List<SpawnGroup> storedTestGroups;
@@ -36,11 +40,11 @@ void OnPlayerInvulnerabilityUpdated()
 
 }
 
-ShipPtr PlayerShip() {
+ShipPtr GetPlayerShip() {
 	return PlayingLevel::playerShip;
 }
 EntitySharedPtr PlayerShipEntity() {
-	return PlayerShip()->entity;
+	return GetPlayerShip()->entity;
 }
 PlayingLevel& PlayingLevelRef() {
 	return *PlayingLevel::singleton;
@@ -53,9 +57,8 @@ EntitySharedPtr PlayingLevel::levelEntity = nullptr;
 GameVariable* SpaceShooter2D::currentLevel = nullptr,
 * SpaceShooter2D::currentStage = nullptr,
 * SpaceShooter2D::score = nullptr,
-* SpaceShooter2D::money = nullptr,
 * SpaceShooter2D::playTime = nullptr,
-* SpaceShooter2D::playerName = nullptr,
+* SpaceShooter2D::playerNameVar = nullptr,
 * SpaceShooter2D::gameStartDate = nullptr,
 * SpaceShooter2D::difficulty = nullptr;
 
@@ -69,6 +72,8 @@ PlayingLevel::playingFieldSize = Vector2f();
 PlayingLevel::PlayingLevel()
 	: SpaceShooter2D()
 	, lastSpawnGroup(nullptr)
+	, playTutorial(true)
+	, currentMission(nullptr)
 {
 	assert(singleton == nullptr);
 	singleton = this;
@@ -102,11 +107,12 @@ void PlayingLevel::UpdateUI() {
 // Inherited via AppState
 void PlayingLevel::OnEnter(AppState* previousState) {
 
-	assert(playerName.Length() > 0);
+	assert(PlayerName().Length() > 0);
 
 	testGroup.number = 1;
 
 	/// Enable Input-UI navigation via arrow-keys and Enter/Esc.
+	InputMan.SetNavigateUI(false);
 	InputMan.SetForceNavigateUI(false);
 
 
@@ -127,8 +133,12 @@ void PlayingLevel::OnEnter(AppState* previousState) {
 	// Register it for rendering.
 	Graphics.QueueMessage(new GMRegisterParticleSystem(sparks, true));
 
-	// Load level upon entering.
-	LoadLevel();
+	// Check if we are playing a campaign mission
+	GameVar * currentMissionVar = GameVars.GetString("CurrentMission");
+	assert(currentMissionVar);
+	Mission * currentMission = MissionsMan.GetMissionByName(currentMissionVar->strValue);
+	assert(currentMission);
+	LoadLevel(currentMission->levelFilePath, currentMission);
 
 	// Play script for animation or whatever.
 	ScriptMan.PlayScript("scripts/NewGame.txt");
@@ -227,6 +237,24 @@ void PlayingLevel::Render(GraphicsState* graphicsState)
 
 
 void PlayingLevel::OnExit(AppState* nextState) {
+
+	// Mark the level as completed. Mark times completed as increased if done multiple times.
+	int& timesCompleted = TimesCompleted(currentMission->name);
+	if (timesCompleted == 0) {
+		FirstTimeCompletion() = currentMission->name;
+		RepeatCompletion() = "";
+	}
+	else {
+		FirstTimeCompletion() = "";
+		RepeatCompletion() = currentMission->name;
+	}
+	++timesCompleted;
+	FlyTime() += this->flyTime;
+
+	// Autosave!
+	SaveFile::AutoSave(Application::name, PlayerName()+" "+ DifficultyString(difficulty->GetInt())+ " "+FlyTime().ToString("H:m"));
+
+	level.Clear(*this);
 
 	MapMan.DeleteAllEntities();
 
@@ -346,6 +374,11 @@ void PlayingLevel::ProcessMessage(Message* message)
 			msg = msg.Part(0, found);
 		
 		if (false) {}
+		else if (msg.StartsWith("SetInt")) {
+			String name = msg.Tokenize("(,)")[1];
+			String value = msg.Tokenize("(,)")[2];
+			GameVars.SetInt(name, value.ParseInt());
+		}
 		else if (msg.StartsWith("SetMessagesPauseGameTime")) {
 			bool arg = msg.Tokenize("()")[1].ParseBool();
 			level.messagesPauseGameTime = arg;
@@ -648,45 +681,12 @@ void PlayingLevel::ProcessMessage(Message* message)
 				source = "Levels/" + source;
 			if (!source.Contains(".srl"))
 				source += ".srl";
-			LoadLevel(source);
+			LoadLevel(source, nullptr);
 		}
 
 		else if (msg == "ReloadLevel")
 		{
-			LoadLevel(level.source);
-		}
-
-		else if (msg == "NextLevel")
-		{
-			// Next level? Restart?
-			++currentLevel->iValue;
-			if (currentLevel->iValue > 4)
-			{
-				currentLevel->iValue = 4;
-			}
-			LoadLevel();
-		}
-		else if (msg == "NextStage")
-		{
-			if (currentStage->iValue >= 8)
-				return;
-			++currentStage->iValue;
-			currentLevel->iValue = 1;
-			if (currentLevel->iValue > 8)
-			{
-				currentLevel->iValue = 8;
-			}
-			LoadLevel();
-		}
-		else if (msg == "PreviousLevel")
-		{
-			--currentLevel->iValue;
-			if (currentLevel->iValue < 1)
-			{
-				std::cout << "\nCannot go to previous level, already at level 1. Try switching stage.";
-				currentLevel->iValue = 1;
-			}
-			LoadLevel();
+			LoadLevel(level.source, currentMission);
 		}
 		else if (msg == "ClearLevel")
 		{
@@ -702,18 +702,11 @@ void PlayingLevel::ProcessMessage(Message* message)
 		}
 		else if (msg == "FinishStage")
 		{
-			/// Add munny o.o
-			money->iValue += 1000 + (currentStage->iValue - 1) * 2000;
 			ScriptMan.PlayScript("scripts/FinishStage.txt");
 		}
 		if (msg.StartsWith("DisplayCenterText"))
 		{
 			String text = msg;
-			if (text.Contains("$-L"))
-			{
-				text.Replace("$-L", currentStage->ToString() + "-" + currentLevel->ToString());
-			}
-			text.Replace("Stage $", "Stage " + currentStage->ToString());
 			text.Remove("DisplayCenterText");
 			text.RemoveInitialWhitespaces();
 			GraphicsMan.QueueMessage(new GMSetUIs("CenterText", GMUI::TEXT, text));
@@ -723,33 +716,17 @@ void PlayingLevel::ProcessMessage(Message* message)
 
 		if (msg == "Continue")
 		{
+			assert(false);
+			/*
 			if (levelToLoad.Length())
 			{
 				LoadLevel(levelToLoad);
 				return;
 			}
-			// Set stage n level
-			if (currentStage->iValue == 0)
-			{
-				currentStage->iValue = 1;
-				currentLevel->iValue = 1;
-			}
-			else {
-				currentLevel->iValue += 1;
-				if (currentLevel->iValue == 4)
-				{
-					currentStage->iValue += 1;
-					currentLevel->iValue = 1;
-				}
-			}
-			// Load weapons?
-
-			// And load it.
 			LoadLevel();
-			// Play script for animation or whatever.
 			ScriptMan.PlayScript("scripts/NewGame.txt");
-			// Resume physics/graphics if paused.
 			Resume();
+			*/
 		}
 		else if (msg == "InGameMenuPopped") {
 			Resume();
@@ -776,10 +753,12 @@ void PlayingLevel::ToggleInGameMenu() {
 		Pause();
 		// Bring up the in-game menu.
 		HUD::Get()->OpenInGameMenu();
+		InputMan.SetNavigateUI(true);
 	}
 	else
 	{
 		HUD::Get()->CloseInGameMenu();
+		InputMan.SetNavigateUI(false);
 		UpdateUI();
 		Resume();
 	}
@@ -877,46 +856,16 @@ ShipPtr PlayingLevel::GetShip(EntitySharedPtr forEntity) {
 /// o.o
 void PlayingLevel::NewPlayer()
 {
-	if (!shipDataLoaded)
-		LoadShipData();
-
-	/// Creates new ship of specified type.
-	
-
-	playerShip = Ship::New("Default");
-
-	playerShip->enemy = false;
-	playerShip->allied = true;
-
-	playerShip->weapons = WeaponSet();
-	const Weapon * starterWeapon = Weapon::Get(Weapon::Type::MachineGun, 1);
-	Weapon * weapon = new Weapon();
-	*weapon = *starterWeapon;
-	assert(starterWeapon != nullptr);
-	playerShip->weapons.Add(weapon);
-
-	playerShip->armor = Gear::StartingArmor();
-	playerShip->shield = Gear::StartingShield();
-	playerShip->UpdateStatsFromGear();
-
-	playerShip->SetLevelOfAllWeaponsTo(0);
-
+	playerShip = std::shared_ptr<Ship>(new PlayerShip());
 }
 
 /// Loads target level. The source and separate .txt description have the same name, just different file-endings, e.g. "Level 1.png" and "Level 1.txt"
-void PlayingLevel::LoadLevel(String fromSource)
+void PlayingLevel::LoadLevel(String fromSource, Mission * forMission)
 {
-
+	currentMission = forMission;
 	lastSpawnGroup = nullptr;
 	levelTime = flyTime = Time(TimeType::MILLISECONDS_NO_CALENDER, 0);
 
-	bool nonStandardLevel = false;
-	if (fromSource != "CurrentStageLevel")
-	{
-		nonStandardLevel = true;
-		currentStage->SetInt(999);
-		currentLevel->SetInt(0);
-	}
 	// Reset stats for this specific level.
 	LevelKills()->iValue = 0;
 	LevelScore()->iValue = 0;
@@ -941,18 +890,13 @@ void PlayingLevel::LoadLevel(String fromSource)
 
 	String tutorialLevel = "Levels/Tutorial.srl";
 
-	if (fromSource == "CurrentStageLevel")
-	{
-		fromSource = "Levels/Stage " + currentStage->ToString() + "/Level " + currentStage->ToString() + "-" + currentLevel->ToString();
-		if (currentStage->GetInt() == 0)
-			fromSource = tutorialLevel;
-		bool success = level.Load(fromSource);
-		if (!success) {
-			LogMain("Unable to load level from source "+fromSource+".", ERROR);
-			return;
-		}
+	levelSource = fromSource;
+	level = Level(); // Reset all vars
+	bool success = level.Load(levelSource);
+	if (!success) {
+		LogMain("Unable to load level from source " + fromSource + ".", ERROR);
+		return;
 	}
-	this->levelSource = fromSource;
 
 	level.SetupCamera();
 	if (!playerShip)
@@ -1003,6 +947,15 @@ void PlayingLevel::LoadLevel(String fromSource)
 	this->Resume();
 
 	QueueGraphics(new GMRecompileShaders()); // Shouldn't be needed...
+
+	if (this->levelSource == tutorialLevel) {
+		if (!playTutorial) {
+			// Jump in time..!
+			LevelMessage * levelMessage = level.GetMessageWithTextId("TutorialConcluded");
+			assert(levelMessage);
+			JumpToAfterMessage(levelMessage);
+		}
+	}
 
 }
 
@@ -1109,17 +1062,30 @@ void PlayingLevel::RenderInLevel(GraphicsState * graphicsState)
 }
 
 
+void PlayingLevel::JumpToAfterMessage(LevelMessage * message) {
+	Time time = message->startTime;
+	time.AddSeconds(1);
+	JumpToTime(time);
+}
+
 void PlayingLevel::JumpToTime(String timeString)
 {
+	Time time(TimeType::MILLISECONDS_NO_CALENDER);
+	time.ParseFrom(timeString);
+	JumpToTime(time);
+}
+
+void PlayingLevel::JumpToTime(Time time) {
 	// Jump to target level-time. Adjust position if needed.
-	levelTime.ParseFrom(timeString);
+	levelTime = time;
 	HideLevelMessage();
 	level.SetSpawnGroupsFinishedAndDefeated(levelTime);
 	level.OnLevelTimeAdjusted(levelTime);
+	level.activeLevelMessage = nullptr;
 	playerShip->movementDisabled = false;
-
 	gameTimePausedDueToScriptableMessage = false;
 }
+
 
 Time PlayingLevel::SetTime(Time time) {
 	assert(time.Type() != TimeType::UNDEFINED);

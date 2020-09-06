@@ -11,9 +11,9 @@
 
 class Ship;
 class PlayingLevel;
+struct Mission;
 
-
-ShipPtr PlayerShip();
+ShipPtr GetPlayerShip();
 EntitySharedPtr PlayerShipEntity();
 PlayingLevel& PlayingLevelRef();
 
@@ -48,13 +48,15 @@ public:
 	void ToggleInGameMenu();
 
 	/// Loads target level. The source and separate .txt description have the same name, just different file-endings, e.g. "Level 1.png" and "Level 1.txt"
-	void LoadLevel(String levelSource = "CurrentStageLevel");
+	void LoadLevel(String levelSource, Mission * forMission);
 
 	void UpdateRenderArrows();
 
 	void RenderInLevel(GraphicsState* graphicsState);
 
+	void JumpToAfterMessage(LevelMessage * message);
 	void JumpToTime(String timeString);
+	void JumpToTime(Time time);
 
 	// Returns the new time set to.
 	Time SetTime(Time time);
@@ -94,7 +96,6 @@ public:
 	/// All ships, including player.
 	List< std::shared_ptr<Entity> > shipEntities;
 	List< std::shared_ptr<Entity> > projectileEntities;
-	String playerName;
 	String onDeath; // What happens when the player dies?
 
 
@@ -123,10 +124,13 @@ public:
 
 	void SetLastSpawnGroup(SpawnGroup * sg);
 
+	bool playTutorial;
+
 private:
 
 	SpawnGroup * lastSpawnGroup;
 	Vector3f requestedMovement;
+	Mission * currentMission;
 
 	Time now;
 	int timeDeadMs = 0;

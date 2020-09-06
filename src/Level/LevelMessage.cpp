@@ -74,7 +74,7 @@ bool LevelMessage::Trigger(PlayingLevel& playingLevel, Level * level)
 			PrintAll();
 		}
 		Text text = TextMan.GetText(textID); 
-		text.Replace("$Name", playingLevel.playerName);
+		text.Replace("$Name", playingLevel.PlayerName());
 		QueueGraphics(new GMSetUIs("LevelMessage", GMUI::TEXT, text));
 		QueueGraphics(new GMSetUIb("LevelMessage", GMUI::VISIBILITY, true));
 		displayed = true;

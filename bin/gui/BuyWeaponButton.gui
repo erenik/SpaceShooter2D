@@ -1,0 +1,41 @@
+// Main UI when starting up.
+
+defaultTexture	0x223344FF
+defaultTextColor	1 1 1 1
+
+// Make root active
+root
+name 	BuyWeaponButton
+texture 0x22FF44FF
+hoverable true
+activatable true
+highlightOnHover true
+highlightOnActive true
+sizeRatioXY 0.9 0.08
+
+parent BuyWeaponButton
+
+ColumnList clBuyWeaponButton
+hoverable false
+texture null
+padding 0.01
+topBorder ui/border_top_4
+rightBorder ui/border_right_4
+topRightCorner ui/top_right_corner_8x8
+
+
+parent clBuyWeaponButton
+defaultSizeRatioXY 0.25 1
+defaultTexture 0x0000
+
+Label WeaponName "Test"
+hoverable false
+sizeRatioX 0.5
+
+Label Price "100"
+hoverable false
+textAlignment right
+
+Label Owned ""
+hoverable false
+

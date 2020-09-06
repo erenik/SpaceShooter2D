@@ -5,6 +5,7 @@
 #include "Gear.h"
 #include "File/File.h"
 #include "String/StringUtil.h"
+#include "Game/GameVariableManager.h"
 
 /// Available to buy! .. what?
 List<Gear> Gear::availableGear;
@@ -82,6 +83,8 @@ bool Gear::Load(String fromFile)
 				gear.shieldRegen = value.ParseInt();
 			else if (column == "Max HP")
 				gear.maxHP = value.ParseInt();
+			else if (column == "ArmorRegen")
+				gear.armorRegen = value.ParseFloat();
 			else if (column == "Toughness")
 				gear.toughness = value.ParseInt();
 			else if (column == "Reactivity")
@@ -124,6 +127,18 @@ Gear Gear::Get(String byName)
 	return Gear();	
 }
 
+bool Gear::Get(String byName, Gear& gear) {
+	for (int i = 0; i < availableGear.Size(); ++i)
+	{
+		if (availableGear[i].name == byName) {
+			gear = availableGear[i];
+			return true;
+		}
+	}
+	return false;
+}
+
+
 Gear Gear::StartingWeapon()
 {
 	List<Gear> weapons = GetType(Gear::Type::WEAPON);
@@ -160,5 +175,47 @@ Gear Gear::StartingShield()
 	assert(false);
 	return Gear();
 }
+
+void Gear::SetEquipped(const Gear& gear) {
+	switch (gear.type) {
+	case Gear::Type::ARMOR:
+		Gear::SetEquippedArmor(gear);
+		break;
+	case Gear::Type::SHIELD_GENERATOR:
+		Gear::SetEquippedShield(gear);
+		break;
+	}
+}
+
+void Gear::SetOwned(const Gear& gear) {
+	GameVars.SetInt(gear.name, 1);
+}
+
+bool Gear::Owns(const Gear& gear) {
+	return GameVars.Get(gear.name) != nullptr;
+}
+
+void Gear::SetEquippedArmor(Gear armor) {
+	GameVars.SetString("EquippedArmor", armor.name);
+}
+void Gear::SetEquippedShield(Gear shield) {
+	GameVars.SetString("EquippedShield", shield.name);
+}
+
+Gear Gear::EquippedArmor() {
+	GameVar * equippedArmor = GameVars.GetString("EquippedArmor");
+	if (equippedArmor == nullptr)
+		return Gear::StartingArmor();
+	return Gear::Get(equippedArmor->strValue);
+}
+
+Gear Gear::EquippedShield() {
+	List<Gear> armors = GetType(Gear::Type::ARMOR);
+	GameVar * equippedShield = GameVars.GetString("EquippedShield");
+	if (equippedShield == nullptr)
+		return Gear::StartingShield();
+	return Gear::Get(equippedShield->strValue);
+}
+
 
 

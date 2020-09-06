@@ -528,6 +528,14 @@ void Level::HideLevelMessage(LevelMessage * levelMessage) {
 	}
 }
 
+LevelMessage * Level::GetMessageWithTextId(String id) {
+	for (int i = 0; i < messages.Size(); ++i)
+		if (messages[i]->textID == id)
+			return messages[i];
+	return nullptr;
+}
+
+
 List<ShipPtr> Level::PlayerShips(PlayingLevel& playingLevel)
 {
 	List<ShipPtr> playerShips;

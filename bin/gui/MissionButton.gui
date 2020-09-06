@@ -1,0 +1,18 @@
+// Main UI when starting up.
+
+defaultTexture	0x2244
+defaultTextColor	1 1 1 1
+
+// Make root active
+root
+name MissionButton
+texture 0x446688FF
+exitable true
+sizeRatioXY 0.8 0.1
+
+parent MissionButton
+
+ColumnList clMissionButton
+
+parent clMissionButton
+Button PlayMissionButton

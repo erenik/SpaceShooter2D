@@ -11,21 +11,45 @@ exitable false
 
 
 parent HangarScreen
+
+list Status
+sizeRatioXY 0.2 0.25
+alignmentXY 0.15 0.85
+padding 0.01
+
 list lHangar
 sizeRatioXY 0.2 0.5
-alignmentXY 0.2 0.5
+alignmentXY 0.15 0.45
+
+
+parent Status
+defaultSizeRatioXY 1 0.19
+
+StringLabel Name 
+IntegerLabel TotalScore "Total score"
+IntegerLabel Money 
+StringLabel Difficulty
+StringLabel FlyTime "Fly time"
 
 parent lHangar
+defaultTopBorder ui/border_top_4
+defaultRightBorder ui/border_right_4
+defaultTopRightCorner ui/top_right_corner_8x8
 
-defaultSizeRatioXY 1 0.2
 
-button Continue
+defaultSizeRatioXY 1 0.15
 
-button Workshop
+button Missions
+onActivate PushUI(gui/Missions.gui)
+
+button Shop
 onActivate PushUI(gui/Workshop.gui)
 // GoToWorkshop
 
-button bMainMenu
-text 	"Main Menu"
-onActivate GoToMainMenu
+button WeaponScripts "Weapon scripts"
+button Options
+
+button MainMenu
+text 	"Exit to Main Menu"
+onActivate PopUI(this)&GoToMainMenu
 

@@ -24,7 +24,7 @@ public:
 	/// Handles dynamic allocation of the weapons, both adding and clearing.
 	WeaponSet();
 	virtual ~WeaponSet();
-	WeaponSet(WeaponSet & otherWeaponSet);
+	WeaponSet(const WeaponSet & otherWeaponSet);
 };
 
 class LightningArc
@@ -56,14 +56,19 @@ public:
 		LaserBeam,
 		LaserBurst,
 		HeatWave,
-		IonCannon
+		IonCannon,
+		Types
 	};
 
 	Weapon();
 
 	String TypeName();
+	static List<Weapon> GetAllOfType(Type type);
 	static String GetTypeName(Type type);
 	static Weapon::Type ParseType(String fromString);
+	// Checks type and level in GameVars
+	static bool PlayerOwns(Weapon& weapon);
+	static void SetOwnedQuantity(Weapon& weapon, int quantity);
 
 	// Sets
 	static bool Get(String byName, Weapon * weapon);

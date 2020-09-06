@@ -1,12 +1,13 @@
 /// Emil Hedemalm
 /// 2015-01-20
 /// Space shooter.
-/// For the Karl-Emil SpaceShooter project, mainly 2014-2015/
+
+#include "SpaceShooter2D.h"
 
 #include "Message/FileEvent.h"
 #include "MovementPattern.h"
+#include "Missions.h"
 
-#include "SpaceShooter2D.h"
 #include "Base/WeaponScript.h"
 
 #include "Application/Application.h"
@@ -27,7 +28,6 @@
 
 #include "Input/Gamepad/GamepadMessage.h"
 #include "Message/MathMessage.h"
-#include "Base/Gear.h"
 
 // States
 #include "PlayingLevel.h"
@@ -37,6 +37,7 @@
 
 #include "Input/Action.h"
 #include "Input/InputManager.h"
+#include "Base/PlayerShip.h"
 
 List<Weapon> Weapon::types;
 List<ShipPtr> Ship::types;
@@ -48,7 +49,7 @@ bool introTest = false;
 
 void SetApplicationDefaults()
 {
-	Application::name = "SpaceShooter2D";
+	Application::name = "ErenikSpaceShooter";
 	TextFont::defaultFontSource = "img/fonts/font3.png";
 	PhysicsProperty::defaultUseQuaternions = false;
 	UIElement::defaultTextureSource = "0x22AA";
@@ -69,7 +70,6 @@ List< std::shared_ptr<Entity> > projectileEntities;
 String playerName;
 /// o.o
 String onDeath; // What happens when the player dies?
-String previousActiveUpgrade;
 
 String SSGameModeString(SSGameMode mode) {
 	switch (mode) {
@@ -111,33 +111,36 @@ SpaceShooter2D::SpaceShooter2D()
 SpaceShooter2D::~SpaceShooter2D()
 {
 	Ship::types.Clear();
+	MissionsManager::Deallocate();
 }
 
 /// Function when entering this state, providing a pointer to the previous StateMan.
 void SpaceShooter2D::OnEnter(AppState * previousState)
 {
+	SaveFile::LoadAutoSave(Application::name, "");
+
 	// Set some default 
 	// When clicking on it.
-	UIElement::onActiveHightlightFactor = 0.2f;
+	UIElement::onActiveHightlightFactor = 0.25f;
 	// When hovering on it.
-	UIElement::onHoverHighlightFactor = 0.1f;
+	UIElement::onHoverHighlightFactor = 0.20f;
 	// When toggled, additional factor
 	UIElement::onToggledHighlightFactor = 0.2f;
 
-
+	if (!shipDataLoaded)
+		LoadShipData();
 
 	QueuePhysics(new PMSeti(PT_AABB_SWEEPER_DIVISIONS, 1));// subdivisionsZ
 
 	WeaponScript::CreateDefault();
 	/// Enable Input-UI navigation via arrow-keys and Enter/Esc.
-	InputMan.SetForceNavigateUI(true);
+	InputMan.SetNavigateUI(true);
 
 	/// Create game variables.
 	currentLevel = GameVars.CreateInt("currentLevel", 1);
 	currentStage = GameVars.CreateInt("currentStage", 1);
-	playerName = GameVars.CreateString("playerName", "Cytine");
+	playerNameVar = GameVars.CreateString("playerName", "Cytine");
 	score = GameVars.CreateInt("score", 0);
-	money = GameVars.CreateInt("money", 200);
 	playTime = GameVars.CreateInt("playTime", 0);
 	gameStartDate = GameVars.CreateTime("gameStartDate");
 	difficulty = GameVars.CreateInt("difficulty", 1);
@@ -155,11 +158,6 @@ void SpaceShooter2D::OnEnter(AppState * previousState)
 	rs->type = RenderPass::RENDER_APP_STATE;
 	GraphicsMan.QueueMessage(new GMAddRenderPass(rs));
 
-	// Set folder to use for saves.
-	String homeFolder = OSUtil::GetHomeDirectory();
-	homeFolder.Replace('\\', '/');
-	SaveFile::saveFolder = homeFolder;
-
 	// Remove overlay.
 	// Set up ui.
 //	if (!ui)
@@ -168,6 +166,9 @@ void SpaceShooter2D::OnEnter(AppState * previousState)
 //	GraphicsMan.ProcessMessage(new GMSetUI(ui));
 	GraphicsMan.ProcessMessage(new GMSetOverlay(NULL));
 	UpdateUI();
+	QueueGraphics(new GMPopUI("gui/NewGame.gui", true));
+	QueueGraphics(new GMPopUI("gui/LoadScreen.gui", true));
+
 
 	// Load Space Race integrator
 	integrator = new SSIntegrator(0.f);
@@ -221,6 +222,9 @@ void SpaceShooter2D::Process(int timeInMs)
 /// Function when leaving this state, providing a pointer to the next StateMan.
 void SpaceShooter2D::OnExit(AppState * nextState)
 {
+	QueueGraphics(new GMPopUI("gui/MainMenu.gui", true));
+	QueueGraphics(new GMPopUI("gui/NewGame.gui", true));
+	QueueGraphics(new GMPopUI("gui/LoadScreen.gui", true));
 }
 
 /// Creates the user interface for this state
@@ -254,6 +258,15 @@ void PrintEntityData(EntitySharedPtr entity)
 	}
 }
 
+String DifficultyString(int diff)
+{
+	switch (diff) {
+	case 0: return "Easy";
+	case 1: return "Normal";
+	case 2: return "Hard";
+	}
+}
+
 /// Callback function that will be triggered via the MessageManager when messages are processed.
 void SpaceShooter2D::ProcessMessage(Message * message)
 {
@@ -262,6 +275,14 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 		ProcessMessageWSS(message);
 	switch(message->type)
 	{
+	case MessageType::BOOL_MESSAGE: {
+		BoolMessage * boolMessage = (BoolMessage*)message;
+		bool value = boolMessage->value;
+		if (msg.Contains("PlayTutorial")) {
+			playingLevel->playTutorial = value;
+		}
+		break;
+	}
 	case MessageType::GAMEPAD_MESSAGE: {
 		GamepadMessage * gamepadMessage = (GamepadMessage*)message;
 		Gamepad state = gamepadMessage->gamepadState;
@@ -306,9 +327,9 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 		case MessageType::SET_STRING:
 		{
 			SetStringMessage * strMes = (SetStringMessage *) message;
-			if (msg == "lall")
+			if (msg == "SetPlayerName")
 			{
-				playerName->strValue = strMes->value;
+				playerNameVar->strValue = strMes->value;
 			}
 			if (msg == "JumpToTime")
 			{
@@ -320,12 +341,7 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 		case MessageType::INTEGER_MESSAGE:
 		{
 			IntegerMessage * im = (IntegerMessage*) message;
-			if (msg == "SetGearCategory")
-			{
-				gearCategory = im->value == 0 ? Gear::Type::WEAPON : Gear::Type::ARMOR;
-				UpdateGearList();
-			}
-			else if (msg == "SetDifficulty")
+			if (msg == "SetDifficulty")
 			{
 				difficulty->iValue = im->value;
 			}
@@ -336,13 +352,10 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 			break;
 		}
 
-		case MessageType::ON_UI_ELEMENT_HOVER:
-		{
-			if (msg.StartsWith("SetHoverUpgrade:"))
-			{
-				String upgrade = msg.Tokenize(":")[1];
-				UpdateHoverUpgrade(upgrade);
-			}
+		case MessageType::ON_UI_PUSHED: {
+			OnUIPushed * onUIPushed = (OnUIPushed*)message;
+			if (onUIPushed->msg.StartsWith("LoadScreen"))
+				OpenLoadScreen();
 			break;
 		}
 		case MessageType::STRING:
@@ -351,6 +364,16 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 			int found = msg.Find("//");
 			if (found > 0)
 				msg = msg.Part(0,found);
+			if (msg.StartsWith("LoadGame(")) {
+				String saveName = msg.Tokenize("()")[1];
+				SaveFile fromFile(Application::name, saveName);
+				bool ok = fromFile.Load();
+				if (!ok) {
+					// Display error dialog?
+					assert(false);
+				}
+				OnSaveLoaded();
+			}
 
 			break;
 		}
@@ -395,15 +418,6 @@ void SpaceShooter2D::ProcessGeneralMessage(Message* message) {
 		{
 			onDeath = msg - "SetOnDeath:";
 		}
-		if (msg.StartsWith("ActiveUpgrade:"))
-		{
-			String upgrade = msg.Tokenize(":")[1];
-			//      if (previousActiveUpgrade == upgrade)
-			BuySellToUpgrade(upgrade);
-			UpdateHoverUpgrade(upgrade, true);
-			//      UpdateActiveUpgrade(upgrade);
-			previousActiveUpgrade = upgrade;
-		}
 		if (msg == "OpenJumpDialog")
 		{
 			Pause();
@@ -428,17 +442,6 @@ void SpaceShooter2D::ProcessGeneralMessage(Message* message) {
 		{
 			ResetCamera();
 		}
-
-		if (msg.StartsWith("ActiveUpgrade:"))
-		{
-			String upgrade = msg.Tokenize(":")[1];
-			//	if (previousActiveUpgrade == upgrade)
-			BuySellToUpgrade(upgrade);
-			UpdateHoverUpgrade(upgrade, true);
-			//	UpdateActiveUpgrade(upgrade);
-			previousActiveUpgrade = upgrade;
-		}
-
 		else if (msg == "Reload OnEnter")
 		{
 			// Run OnEnter.ini start script if such a file exists.
@@ -452,34 +455,6 @@ void SpaceShooter2D::ProcessGeneralMessage(Message* message) {
 			String text = msg;
 			text.Remove("ShowGearDesc:");
 			GraphicsMan.QueueMessage(new GMSetUIs("GearInfo", GMUI::TEXT, text));
-		}
-		else if (msg.StartsWith("BuyGear:"))
-		{
-			LogMain("Reimplement", INFO);
-			/*
-			String name = msg;
-			name.Remove("BuyGear:");
-			Gear gear = Gear::Get(name);
-			switch(gear.type)
-			{
-				case Gear::SHIELD_GENERATOR:
-					playerShip->shield = gear;
-					break;
-				case Gear::ARMOR:
-					playerShip->armor = gear;
-					break;
-			}
-			// Update stats.
-			playerShip->UpdateStatsFromGear();
-			/// Reduce munny
-			money->iValue -= gear.price;
-			/// Update UI to reflect reduced funds.
-			UpdateGearList();
-			// Play some SFX too?
-
-			// Auto-save.
-			MesMan.QueueMessages("AutoSave(silent)");
-			*/
 		}
 		else if (msg.Contains("ExitToMainMenu"))
 		{
@@ -652,6 +627,31 @@ GameVariable * SpaceShooter2D::LevelPossibleKills(String level)
 	GetVar("possibleKills");
 }
 
+
+
+// Game variables abstracted away
+int& SpaceShooter2D::TimesCompleted(String missionName) {
+	GameVar * timesCompleted = GameVars.CreateInt(missionName, 0);
+	return timesCompleted->iValue;
+}
+String& SpaceShooter2D::FirstTimeCompletion() {
+	GameVar * firstTimeCompletion = GameVars.CreateString("FirstTimeCompletion");
+	return firstTimeCompletion->strValue;
+}
+String& SpaceShooter2D::RepeatCompletion() {
+	GameVar * repeatCompletion = GameVars.CreateString("RepeatCompletion");
+	return repeatCompletion->strValue;
+}
+Time& SpaceShooter2D::FlyTime() {
+	GameVar * flyTime = GameVars.CreateTime("FlyTime", Time(TimeType::MILLISECONDS_NO_CALENDER));
+	return flyTime->timeValue;
+}
+int& SpaceShooter2D::Money(){
+	GameVar * money = GameVars.CreateInt("Money", 0);
+	return money->iValue;
+}
+
+
 /// Resets all the above.
 void SpaceShooter2D::ResetLevelStats()
 {
@@ -660,6 +660,15 @@ void SpaceShooter2D::ResetLevelStats()
 	LevelPossibleKills()->iValue = 0;
 }
 
+// Upon save loaded, continue where the player last was. Probably in the hangar, but could also be elsewhere..?
+void SpaceShooter2D::OnSaveLoaded() {
+	int location = GameVars.GetIntValue("Location", SSGameMode::IN_HANGAR);
+	switch (location) {
+	default:
+		// Default go to hangar
+		StateMan.QueueState(inHangar);
+	}
+}
 
 void SpaceShooter2D::LoadShipData()
 {
@@ -706,7 +715,6 @@ void SpaceShooter2D::NewGame()
 		
 	startDate = Time::Now();
 
-	playingLevel->playerName = playerName->strValue;
 	// Reset scores.
 	score->iValue = 0;
 	// Set stage n level
@@ -803,8 +811,8 @@ void SpaceShooter2D::EnterShipWorkshop()
 /// Saves current progress.
 bool SpaceShooter2D::SaveGame()
 {
-	SaveFile save(Application::name, playerName->strValue + gameStartDate->ToString());
-	String customHeaderData = "Name: "+playerName->strValue+"\nStage: "+currentStage->ToString()+" Level: "+currentLevel->ToString()+
+	SaveFile save(Application::name, PlayerName() + gameStartDate->ToString());
+	String customHeaderData = "Name: "+ PlayerName() +"\nStage: "+currentStage->ToString()+" Level: "+currentLevel->ToString()+
 		"\nScore: " + String(score->iValue) + 
 		"\nSave date: " + Time::Now().ToString("Y-M-D") + 
 		"\nStart date: " + startDate.ToString("Y-M-D");
@@ -857,6 +865,11 @@ void SpaceShooter2D::ResetCamera()
 	QueueGraphics(new GMSetCamera(levelCamera, CT_ZOOM, 15.0f));
 }
 
+const String SpaceShooter2D::PlayerName() const {
+	return playerNameVar->strValue;
+}
+
+
 List<SSGameMode> previousModes;
 /// Saves previousMode
 void SpaceShooter2D::SetMode(SSGameMode newMode, bool updateUI)
@@ -868,10 +881,11 @@ void SpaceShooter2D::SetMode(SSGameMode newMode, bool updateUI)
 	case SSGameMode::IN_HANGAR:
 		StateMan.QueueState(inHangar);
 		break;
+	case SSGameMode::PLAYING_LEVEL:
+		StateMan.QueueState(playingLevel);
+		break;
 	default:
-		// Update UI automagically?
-		if (updateUI)
-			UpdateUI();
+		break;
 	}
 
 	if (mode == newMode) {

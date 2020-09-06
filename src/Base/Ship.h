@@ -41,16 +41,28 @@ public:
 	}
 };
 
+enum class DamageSource {
+	Projectile, // Reactivity works well against these.
+	Explosion, // For bigger missiles creating larger spread impacts. Reactivity works less well against this.
+	Collision // Only Toughness helps here.
+};
+
 class alignas(16) Ship
 {
-private:
+protected:
 	Ship();
 	static ShipPtr NewShip();
 public:
-	static ShipPtr NewShip(Ship & ref);
+	static ShipPtr NewShip(const Ship& ref);
+
 	~Ship();
 	std::weak_ptr<Ship> selfPtr;
 	ShipPtr GetSharedPtr();
+
+	/// Returns nullptr if it was not found
+	static ShipPtr GetByType(String typeName);
+	void CopyStatsFrom(const Ship& ref);
+	void CopyWeaponsFrom(const Ship& ref);
 
 	/// Call on spawning.
 	void RandomizeWeaponCooldowns();
@@ -82,7 +94,7 @@ public:
 	void SetWeaponCooldownBonus(float newBonus); // Sets new bonus, updates weapons if needed.
 	void Damage(PlayingLevel& playingLevel, Weapon & usingWeapon);
 	/// Returns true if destroyed -> shouldn't touch any more.
-	bool Damage(PlayingLevel& playingLevel, float amount, bool ignoreShield);
+	bool Damage(PlayingLevel& playingLevel, float amount, bool ignoreShield, DamageSource source);
 	void Destroy(PlayingLevel& playingLevel);
 	// Load ship-types.
 	static bool LoadTypes(String file);
@@ -111,8 +123,7 @@ public:
 	/// Checks weapon's latest aim dir.
 	Vector3f WeaponTargetDir();
 
-	/// If using Armor and Shield gear (Player mainly).
-	void UpdateStatsFromGear();
+	
 	int CurrentWeaponIndex();
 	bool SwitchToWeapon(int index);
 
@@ -187,6 +198,7 @@ public:
 	/// Regen per millisecond
 	float shieldRegenRate;
 	float hp;
+	// Armor regen per second
 	float armorRegenRate;
 	int maxHP;
 	int collideDamage;

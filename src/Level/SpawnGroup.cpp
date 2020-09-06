@@ -38,6 +38,7 @@ Formation GetFormationByName(String name)
 	for (int i = 0; i < (int) Formation::FORMATIONS; ++i)
 	{
 		String n = GetName(Formation(i));
+		n.SetComparisonMode(String::NOT_CASE_SENSITIVE);
 		if (n == name)
 			return Formation(i);
 	}
@@ -277,10 +278,14 @@ void SpawnGroup::PrepareForSpawning(SpawnGroup * parent)
 //				position.y += size.y * 0.5f;
 				break;
 			case Formation::LINE_XY:
-			case Formation::LINE_Y:
 			case Formation::SWARM_BOX_XY:
 			case Formation::DOUBLE_LINE_X:
-				position.y -= size.y * 0.5f; // Center it.
+				if (number > 1)
+					position.y -= size.y * 0.5f; // Center it.
+				break;
+			case Formation::LINE_Y:
+				if (number > 1)
+					position.y -= size.y * 0.5f; // Center it.
 				break;
 			default:
 				;// std::cout<<"\nImplement";

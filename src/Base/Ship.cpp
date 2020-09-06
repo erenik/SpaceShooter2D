@@ -83,14 +83,16 @@ ShipPtr Ship::NewShip() {
 	return sp;
 }
 
-ShipPtr Ship::NewShip(Ship& ref)
+ShipPtr Ship::NewShip(const Ship& ref)
 {
-	Ship* ship = new Ship(ref);
+	Ship* ship = new Ship();
+	ship->CopyStatsFrom(ref);
+	ship->CopyWeaponsFrom(ref);
+
 	ShipPtr sp = ShipPtr(ship);
 	ship->selfPtr = sp;
 	return sp;
 }
-
 
 
 Ship::~Ship()
@@ -112,6 +114,23 @@ Ship::~Ship()
 
 ShipPtr Ship::GetSharedPtr() {
 	return selfPtr.lock();
+}
+
+ShipPtr Ship::GetByType(String typeName) {
+	List<String> typesNames;
+	for (int i = 0; i < types.Size(); ++i)
+	{
+		ShipPtr type = types[i];
+		if (type->name == typeName)
+		{
+			return type;
+		}
+		typesNames.Add(type->name);
+	}
+	String shipTypesStr = MergeLines(typesNames, ", ");
+	// For now, just add a default one.
+	LogMain("ERROR: Couldn't find ship by name \'" + typeName + "\'. Available ships types as follows:\n\t" + shipTypesStr, ERROR);
+	return nullptr;
 }
 
 Random cooldownRand;
@@ -541,13 +560,13 @@ void Ship::Damage(PlayingLevel& playingLevel, Weapon & weapon)
 		heatDamageTaken += damage;
 		damage += heatDamageTaken;
 	}
-	Damage(playingLevel, damage, ignoreShield);
+	Damage(playingLevel, damage, ignoreShield, DamageSource::Projectile);
 }
 
 extern bool playerInvulnerability;
 
 /// Returns true if destroyed -> shouldn't touch any more.
-bool Ship::Damage(PlayingLevel& playingLevel, float amount, bool ignoreShield)
+bool Ship::Damage(PlayingLevel& playingLevel, float amount, bool ignoreShield, DamageSource source)
 {
 	if (allied && playerInvulnerability)
 		return false;
@@ -558,7 +577,7 @@ bool Ship::Damage(PlayingLevel& playingLevel, float amount, bool ignoreShield)
 	//	std::cout<<"\nInvulnnnn!";
 	//	return;
 	}
-	int remainingDamage = amount;
+	int remainingDamage = (int) amount;
 	if (hasShield && !ignoreShield)
 	{
 		float oldShieldValue = shieldValue;
@@ -567,7 +586,7 @@ bool Ship::Damage(PlayingLevel& playingLevel, float amount, bool ignoreShield)
 		if (shieldValue < 0) {
 			shieldValue = 0;
 		}
-		remainingDamage = amount - oldShieldValue;
+		remainingDamage = (int) (amount - oldShieldValue);
 		if (this->allied)
 			HUD::Get()->UpdateUIPlayerShield(true);
 		// If no more dmg, no need to calc armor.
@@ -577,11 +596,25 @@ bool Ship::Damage(PlayingLevel& playingLevel, float amount, bool ignoreShield)
 	// Modulate amount depending on armor toughness and reactivity.
 	float activeToughness = (float)armor.toughness;
 	/// Projectile/explosion-type attacks, reactivity effects.
-	if (!ignoreShield)
-	{
+	switch (source) {
+	case DamageSource::Collision: // No addition, unless..?
+		break;
+	case DamageSource::Explosion:
+		activeToughness += armor.reactivity * 0.5f;
+		break;
+	case DamageSource::Projectile:
 		activeToughness += armor.reactivity;
+		break;
 	}
-	remainingDamage = (remainingDamage / (activeToughness / 10.f));
+	// 3 toughness = 333% damage 
+	// 5 toughness = 200% damage 
+	// 8 toughness = 125% damage
+	// 12 toughness = 83% 
+	// 16 toughness = 62% 
+	// 20 toughness = 50% 
+	// 30 toughness = 33% damage 
+	// 45 toughness = 22% damage 
+	remainingDamage = int(remainingDamage / (activeToughness / 10.f)); 
 
 	hp -= remainingDamage;
 	if (hp < 0)
@@ -738,34 +771,111 @@ void Ship::SetSpeed(PlayingLevel& playingLevel, float newSpeed)
 /// Creates new ship of specified type.
 ShipPtr Ship::New(String shipByName)
 {
-//	shipByName.Replace('_', ' '); // Move this elsewhere?
-	shipByName.RemoveSurroundingWhitespaces(); // Move this elsewhere?
-	List<String> typesNames;
-	for (int i = 0; i < types.Size(); ++i)
-	{
-		ShipPtr type = types[i];
-		if (type->name == shipByName)
-		{
-			ShipPtr newShip = Ship::NewShip(*type.get());
-			// Create copies of the weapons.
-			newShip->weapons.Clear();
-			for (int j = 0; j < type->weapons.Size(); ++j)
-			{
-				Weapon * refWeap = type->weapons[j];
-				Weapon * newWeap = new Weapon();
-				*newWeap = *refWeap; // Weapon::Get(refWeap->type, refWeap->level);
-				newShip->weapons.AddItem(newWeap);
-			}
-			return newShip;
-		}
-		typesNames.Add(type->name);
-	}
-	String shipTypesStr = MergeLines(typesNames, ", ");
-	// For now, just add a default one.
-	LogMain("ERROR: Couldn't find ship by name \'"+shipByName+"\'. Available ships types as follows:\n\t" + shipTypesStr, ERROR);
-	std::cout<<"\nERROR: Couldn't find ship by name \'"<<shipByName<<"\'";
-	return 0;
+	shipByName.RemoveSurroundingWhitespaces();
+	ShipPtr ref = GetByType(shipByName);
+	ShipPtr newShip = Ship::NewShip(*ref);
+	newShip->CopyWeaponsFrom(*ref);
+	return newShip;
 }
+
+
+void Ship::CopyWeaponsFrom(const Ship& ref) {
+	// Create copies of the weapons.
+	this->weapons.Clear();
+	for (int j = 0; j < ref.weapons.Size(); ++j)
+	{
+		Weapon * refWeap = ref.weapons[j];
+		Weapon * newWeap = new Weapon();
+		*newWeap = *refWeap; // Weapon::Get(refWeap->type, refWeap->level);
+		this->weapons.AddItem(newWeap);
+	}
+}
+
+void Ship::CopyStatsFrom(const Ship& ref) {
+	name = ref.name;
+	childrenDestroyed = ref.childrenDestroyed;
+	despawnOutsideFrame = ref.despawnOutsideFrame;
+	type = ref.type;
+	physicsModel = ref.physicsModel;
+	spawnGroup = ref.spawnGroup;
+	parent = ref.parent;
+	
+	// Created later on
+	shipProperty = nullptr;
+	children.Clear();
+
+	canMove = ref.canMove;
+	movementDisabled = ref.movementDisabled;
+	canShoot = ref.canShoot;
+	hasShield = ref.hasShield;
+	shoot = ref.shoot;
+
+	weaponScriptActive = ref.weaponScriptActive;
+	boss = ref.boss;
+	difficulty = ref.difficulty;
+	timeSinceLastSkillUseMs = ref.timeSinceLastSkillUseMs;
+	skill = ref.skill;
+	activeSkill = ref.activeSkill;
+
+	skillDurationMs = ref.skillDurationMs;
+	skillCooldownMultiplier = ref.skillCooldownMultiplier; 
+	onCollision = ref.onCollision;
+	spawned = ref.spawned;
+	destroyed = ref.destroyed;
+	despawned = ref.despawned;
+
+	/// In order to not take damage allllll the time (depending on processor speed, etc. too.)
+	lastShipCollision;
+	collisionDamageCooldown = ref.collisionDamageCooldown;
+	
+	// Default 0. Scriptable.
+	projectileSpeedBonus = ref.projectileSpeedBonus;
+	weaponCooldownBonus = ref.weaponCooldownBonus;
+	
+	/// Mooovemeeeeeeent
+	movements = ref.movements;
+	currentMovement = ref.currentMovement;
+	timeInCurrentMovement = ref.timeInCurrentMovement; 
+	rotations = ref.rotations;
+	currentRotation = ref.currentRotation;
+	timeInCurrentRotation = ref.timeInCurrentRotation;
+	/// Maximum amount of radians the ship may rotate per second.
+	maxRadiansPerSecond = ref.maxRadiansPerSecond;
+
+	// Parsed value divided by 5.
+	speed = ref.speed;
+	shieldValue = ref.shieldValue;
+	maxShieldValue = ref.maxShieldValue;
+	/// Regen per millisecond
+	shieldRegenRate = ref.shieldRegenRate;
+	hp = ref.hp;
+	armorRegenRate = ref.armorRegenRate;
+	maxHP = ref.maxHP;
+	collideDamage = ref.collideDamage;
+	heatDamageTaken = ref.heatDamageTaken;
+	abilities = ref.abilities;
+	abilityCooldown = ref.abilityCooldown;
+	graphicModel = ref.graphicModel;
+	other = ref.other;
+
+	weapons = WeaponSet(ref.weapons);
+	if (weapons.Size())
+		activeWeapon = weapons[0]; 
+
+	/// If allied or player, false for enemies.
+	allied = ref.allied;
+	/// If the ship.. is enemy ai? Should be renamed
+	enemy = ref.enemy;
+	spawnInvulnerability = ref.spawnInvulnerability;
+	/// Yielded when slaying it.
+	score = ref.score;
+
+	position = ref.position;
+	
+	WeaponScript * weaponScript;
+}
+
+
 
 /// Returns speed, accounting for active skills, weights, etc.
 float Ship::Speed()
@@ -797,15 +907,6 @@ Vector3f Ship::WeaponTargetDir()
 			return weapon->currentAim;
 	}
 	return Vector3f();
-}
-
-/// If using Armor and Shield gear (Player mainly).
-void Ship::UpdateStatsFromGear()
-{
-	this->maxHP = armor.maxHP;
-	hp = (float) maxHP;
-	shieldValue = 0; //  (float)(this->maxShieldValue = (float)shield.maxShield);
-	this->shieldRegenRate = shield.shieldRegen;
 }
 
 int Ship::CurrentWeaponIndex() {

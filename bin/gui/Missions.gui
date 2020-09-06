@@ -1,0 +1,49 @@
+// Main UI when starting up.
+
+defaultTexture	0x2244
+defaultTextColor	1 1 1 1
+
+// Make root active
+root
+name MissionsScreen
+texture NULL
+exitable true
+sizeRatioXY 0.8 0.8
+
+
+parent MissionsScreen
+
+List MissionsScreenMain
+texture 0x446688FF
+
+parent MissionsScreenMain
+
+label Missions
+sizeRatioY 0.1
+
+ColumnList MissionListAndDetails
+sizeRatioY 0.9
+
+parent MissionListAndDetails
+defaultSizeRatioXY 0.5 1.0
+
+List MissionsList
+topBorder ui/border_top_4
+rightBorder ui/border_right_4
+topRightCorner ui/top_right_corner_8x8
+
+List MissionDetails 
+
+parent MissionDetails
+defaultSizeRatioXY 1 0.1
+defaultTexture null
+
+StringLabel Name "Name"
+StringLabel Difficulty "Difficulty"
+IntegerLabel Bounty "Bounty"
+IntegerLabel Highscore "High score"
+Image PreviewPicture
+texture img/icons/SmallRockets
+sizeRatioY 0.3
+
+

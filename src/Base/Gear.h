@@ -28,7 +28,10 @@ public:
 	float shieldRegen;
 	// Armor stats
 	int maxHP;
+	float armorRegen;
+	// Default 10. Higher values will reduce collision damage. Lower values will increase collision damage.
 	int toughness;
+	// Default 0. Higher values will reduce incoming projectile damage
 	int reactivity;
 
 	String description;
@@ -38,9 +41,20 @@ public:
 	static List<Gear> GetType(Type type);
 	static Gear Get(String byName);
 
+	static bool Get(String byName, Gear& gear);
+
 	static Gear StartingWeapon();
 	static Gear StartingArmor();
 	static Gear StartingShield();
+
+	static void SetEquipped(const Gear& gear);
+	static void SetOwned(const Gear& gear);
+	static bool Owns(const Gear& gear);
+
+	static void SetEquippedArmor(Gear armor);
+	static void SetEquippedShield(Gear shield);
+	static Gear EquippedArmor();
+	static Gear EquippedShield();
 
 	/// Available to buy!
 	static List<Gear> availableGear;

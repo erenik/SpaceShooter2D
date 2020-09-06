@@ -136,7 +136,11 @@ namespace LevelLoader
 			{
 				Time lastTime = LastSpawnGroupOrMessageTime();
 				t = lastTime; 
-				t.AddSeconds(timeStr.Tokenize(":")[1].ParseInt());
+				Time timeToAdd = Time(TimeType::MILLISECONDS_NO_CALENDER);
+				String timeStrWithoutPlus = timeStr;
+				timeStrWithoutPlus.Replace('+', '0');
+				timeToAdd.ParseFrom(timeStrWithoutPlus);
+				t += timeToAdd; //.AddSeconds(timeStr.Tokenize(":")[1].ParseInt());
 			}
 			else {
 				bool ok = t.ParseFrom(timeStr);
@@ -389,8 +393,11 @@ bool Level::Load(String fromSource)
 				group->shoot = arg.ParseBool();
 			if (var == "Name")
 				group->name = arg;
-			if (var == "SpawnTime")
-				group->SetSpawnTime(ParseTimeFrom(arg));
+			if (var == "SpawnTime") {
+				Time spawnTime;
+				spawnTime.ParseFrom(arg);
+				group->SetSpawnTime(spawnTime);
+			}
 			if (var == "Position")
 				group->position.ParseFrom(line - "Position");
 			if (var == "ShipType")

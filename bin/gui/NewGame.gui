@@ -17,7 +17,10 @@ parent NewGame
 
 list lNewGame
 sizeRatioXY 0.5 0.5
-texture 	0x222222EE
+texture 	0x222222FF
+rightBorder ui/border_right_4
+topBorder ui/border_top_4
+topRightCorner ui/top_right_corner_8x8
 
 parent lNewGame
 
@@ -36,13 +39,15 @@ padding 0.03
 sizeRatioY 0.7
 
 parent NewGameDetails
-defaultSizeRatioY 0.22
+defaultSizeRatioY 0.17
 
 StringInput PlayerName "Player Name: "
 
 RadioButtons 3 Difficulty "Difficulty: "
 texts "Easy" "Medium" "Hard"
 texture 0x2244
+
+Checkbox PlayTutorial "Play Tutorial" Checked 
 
 Button NewGameButton
 onActivate PopUI(NewGame)&NewGame

@@ -68,7 +68,57 @@ FirstMissionComplete;Control tower: Great job $Name! Our scans show \nthat you h
 FirstMissionComplete2;Feel free to return to base at your leisure.
 RogerReturningToBase;$Name: Roger that. Returning to base.
 
+MissionCompleted;You have successfully completed the mission $missionName!
+MissionClearedFirstTime;As this is your first time clearing it, \nyou receive cash bounty of $moneyReward.
+MissionClearedRepeat;As you have cleared this previously, \nyou receive a repeat cash bounty of $moneyReward.
 
+
+Machine gun I;Machine gun I
+Machine gun IDesc;A light projectile weapon for rapid firing.
+Machine gun II;Machine gun II
+Machine gun IIDesc;A light projectile weapon for rapid firing.\nDenser bullets and a slightly larger cartridge.
+Machine gun III;Machine gun III
+Machine gun IV;Machine gun IV
+Machine gun V;Machine gun IV
+Small rockets I;Small rockets I
+Small rockets IDesc;Small rockets with explosive and auto-aiming\ncapacities.
+Small rockets II;Small rockets II
+Small rockets IIDesc;Small rockets with explosive and auto-aiming\ncapacities. Slighty larger payload than the mach 1.
+Small rockets III;Small rockets III
+Small rockets IV;Small rockets IV
+Big rockets I;Big rockets I
+Big rockets IDesc;Big rockets with large explosive and auto-aiming\ncapacities. Be sure to time their usage well as they\nare slow to reload and have few rounds.
+Big rockets II;Big rockets I
+Big rockets IIDesc;Big rockets with large explosive and auto-aiming\ncapacities. Be sure to time their usage well as they\nare slow to reload and have few rounds.\nPacks a heavier payload than the mach 1.
+Big rockets III;Big rockets I
+Big rockets IV;Big rockets I
+Lightning;
+Lightning II;
+Lightning III;
+Lightning IV;
+Lightning V;
+Laser Beam I;
+Laser Beam II;
+Laser Beam III;
+Laser Beam IV;
+Laser Burst I;
+Laser Burst II;
+Laser Burst III;
+Laser Burst IV;
+Heat Wave I;
+Heat Wave II;
+Heat Wave III;
+Heat Wave IV;
+Ion Flak I;
+Ion Flak II;
+Ion Flak III;
+Ion Flak IV;
+
+BasicArmorDesc;Basic armor, providing moderate defense and a slight \nreactive coating to reduce impacts from projectiles.
+ReactiveArmorDesc;An armor with a strong reactive coating to deter smaller \nprojectiles and explosives. Is more susceptible to ship-ship collisions.
+RegenerativeArmorDesc;An armor specializing on reconstructive nano-technology \nrobots repairing the armor as it is used and deformed actively in combat.
+TitaniumArmorDesc;A ridiculously reactive armor, which almost reflects incoming \nexplosives. It is the best known armor against projectiles.
+GrapheneArmorDesc;A multi-layered Graphene-based armor using \nspecial honeycomb-formations for extra stability to handle large collisions.
 ;
 ;
 /// Old shit;

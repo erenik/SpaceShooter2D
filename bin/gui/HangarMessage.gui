@@ -1,0 +1,26 @@
+// Message upon e.g. completing a level for the first time, receiving rewards.
+
+defaultTexture	0x2244
+defaultTextColor	1 1 1 1
+
+// Make root active
+root
+name HangarMessageRoot
+texture 0x2244
+exitable false
+deleteOnPop true
+
+
+parent HangarMessageRoot
+
+button	HangarMessage
+texture 	0x22FF
+text	"Replace me"
+textAlignment Center
+textPadding 0.1
+sizeRatioXY 0.8 0.3
+alignmentXY	0.5	0.3
+onActivate HangarMessageConfirmed&PopUI(HangarMessageRoot)
+topBorder ui/border_top
+rightBorder ui/border_right_4
+topRightCorner ui/message_top_right_corner_64x32

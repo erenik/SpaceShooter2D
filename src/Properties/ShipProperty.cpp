@@ -135,13 +135,13 @@ void ShipProperty::OnCollision(EntitySharedPtr withEntity)
 		// Check collision damage cooldown for if we should apply damage.
 		if (ship->lastShipCollision < pl.flyTime - ship->collisionDamageCooldown)
 		{
-			if (!ship->Damage(pl, float(sspp->ship->collideDamage), false))
+			if (!ship->Damage(pl, float(sspp->ship->collideDamage), false, DamageSource::Collision))
 				ship->lastShipCollision = pl.flyTime;
 		}
 		// Same for the other ship.
 		if (ship && sspp->ship->lastShipCollision < pl.flyTime - sspp->ship->collisionDamageCooldown)
 		{
-			if (!sspp->ship->Damage(pl, float(ship->collideDamage), false))
+			if (!sspp->ship->Damage(pl, float(ship->collideDamage), false, DamageSource::Collision))
 				sspp->ship->lastShipCollision = pl.flyTime;
 		}
 
@@ -202,7 +202,7 @@ void ShipProperty::OnCollision(EntitySharedPtr withEntity)
 	{
 		if (exp->ShouldDamage(ship))
 		{
-			ship->Damage(PlayingLevelRef(), exp->CurrentDamage(), false);
+			ship->Damage(PlayingLevelRef(), exp->CurrentDamage(), false, DamageSource::Explosion);
 			exp->damagedTargets.AddItem(ship);
 		}
 	}

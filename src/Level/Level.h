@@ -72,6 +72,8 @@ public:
 
 	void HideLevelMessage(LevelMessage * levelMessage);
 
+	LevelMessage * GetMessageWithTextId(String id);
+
 	/// Yes.
 	List<ShipPtr> PlayerShips(PlayingLevel& playingLevel);
 

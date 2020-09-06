@@ -1,0 +1,12 @@
+defaultTexture	0x2244
+defaultTextColor	1 1 1 1
+
+// Make root active
+root
+name BasicLabel
+texture NULL
+
+parent BasicLabel
+
+Label Label 
+sizeRatioY 0.2
