@@ -721,6 +721,10 @@ void SpaceShooter2D::NewGame()
 	currentStage->iValue = 0;
 	currentLevel->iValue = 0;
 
+	Weapon::SetOwnedQuantity(Weapon::StartingWeapon(), 1);
+	Gear::SetOwned(Gear::StartingArmor());
+	Gear::SetOwned(Gear::StartingShield());
+
 	StateMan.QueueState(playingLevel);
 }
 
@@ -815,7 +819,7 @@ bool SpaceShooter2D::SaveGame()
 	String customHeaderData = "Name: "+ PlayerName() +"\nStage: "+currentStage->ToString()+" Level: "+currentLevel->ToString()+
 		"\nScore: " + String(score->iValue) + 
 		"\nSave date: " + Time::Now().ToString("Y-M-D") + 
-		"\nStart date: " + startDate.ToString("Y-M-D");
+		"\nStart date: " + gameStartDate->timeValue.ToString("Y-M-D");
 	
 	bool ok = save.OpenSaveFileStream(customHeaderData, true);
 	if (!ok)

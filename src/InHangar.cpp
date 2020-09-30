@@ -6,6 +6,7 @@
 
 #include "Graphics/Messages/GMUI.h"
 #include "Input/InputManager.h"
+#include "Input/Gamepad/GamepadMessage.h"
 #include "UI/Input/UIStringInput.h"
 #include "UI/Input/UIIntegerInput.h"
 #include "Text/TextManager.h"
@@ -24,8 +25,7 @@ InHangar::~InHangar() {
 
 /// Function when entering this state, providing a pointer to the previous StateMan.
 void InHangar::OnEnter(AppState * previousState) {
-
-	relevantWeapons = GetRelevantWeapons();
+	relevantGear = GetRelevantGear();
 
 	// Push Hangar UI 
 	PushUI();
@@ -113,7 +113,10 @@ void InHangar::ProcessMessage(Message* message)
 	{
 		if (msg.StartsWith("SetHoverUpgrade:"))
 		{
-			String upgrade = msg.Tokenize(":")[1];
+			List<String> tokens = msg.Tokenize(":");
+			if (tokens.Size() < 2)
+				break;
+			String upgrade = tokens[1];
 			UpdateGearDetails(upgrade);
 		}
 		break;
@@ -124,7 +127,8 @@ void InHangar::ProcessMessage(Message* message)
 		if (msg == "SetGearCategory")
 		{
 			gearCategory = im->value == 0 ? Gear::Type::WEAPON : Gear::Type::ARMOR;
-			UpdateGearList();
+			assert(false);
+			//UpdateGearList();
 		}
 	}
 	case MessageType::STRING:
@@ -133,6 +137,54 @@ void InHangar::ProcessMessage(Message* message)
 			if (hangarMessageDisplayed) {
 				DisplayMessage(currentMessage);
 			}
+		}
+		else if (msg.StartsWith("UnequipGear")) {
+			String name = msg.Tokenize(":")[1];
+			Gear gear = Gear::Get(name);
+			playerShip->UnequipGear(gear);
+			OnGearChanged();
+		}
+		else if (msg.StartsWith("EquipGear")) {
+			String name = msg.Tokenize(":")[1];
+			Gear gear = Gear::Get(name);
+			if (replaceGear)
+				playerShip->Equip(gear, replaceGearIndex);
+			else 
+				playerShip->Equip(gear);
+			OnGearChanged();
+		}
+		else if (msg.StartsWith("OpenGearListEquipGear")) {
+			replaceGear = false;
+			String typeStr = msg.Tokenize(":")[1];
+			Gear::Type type = gearTypeFromString(typeStr);
+			FillSelectGearList("SelectGearList", type, Gear());
+		}
+		else if (msg.StartsWith("OpenGearListChangeGear")) {
+			replaceGear = true;
+			List<String> tokens = msg.Tokenize(":,");
+			String typeStr = tokens[1];
+			replaceGearIndex = tokens[2].ParseInt();
+			replaceGearType = gearTypeFromString(typeStr);
+			Gear currentlyEquipped = playerShip->Equipped(replaceGearType)[replaceGearIndex];
+			FillSelectGearList("SelectGearList", replaceGearType, currentlyEquipped);
+		}
+		else if (msg == "AllCategory") {
+			SetGearCategory(Gear::Type::All);
+		}
+		else if (msg == "WeaponsCategory") {
+			SetGearCategory(Gear::Type::Weapon);
+		}
+		else if (msg == "ArmorCategory") {
+			SetGearCategory(Gear::Type::Armor);
+		}
+		else if (msg == "ShieldCategory") {
+			SetGearCategory(Gear::Type::Shield);
+		}
+		else if (msg.StartsWith("ShowGearDesc:"))
+		{
+			String text = msg;
+			text.Remove("ShowGearDesc:");
+			GraphicsMan.QueueMessage(new GMSetUIs("GearInfo", GMUI::TEXT, text));
 		}
 		else if (msg.StartsWith("ActiveUpgrade:"))
 		{
@@ -155,32 +207,6 @@ void InHangar::ProcessMessage(Message* message)
 				Money() += currentMessage.gainMoney;
 			}
 		}
-		else if (msg.StartsWith("BuyGear:"))
-		{
-			LogMain("Reimplement", INFO);
-			String name = msg;
-			name.Remove("BuyGear:");
-			Gear gear = Gear::Get(name);
-			switch(gear.type)
-			{
-			case Gear::Type::SHIELD_GENERATOR:
-				Gear::SetEquippedShield(gear);
-				break;
-			case Gear::Type::ARMOR:
-				Gear::SetEquippedArmor(gear);
-				break;
-			}
-			// Update stats.
-			playerShip->UpdateStatsFromGear();
-			/// Reduce munny
-			Money() -= gear.price;
-			/// Update UI to reflect reduced funds.
-			UpdateGearList();
-			// Play some SFX too?
-
-			// Auto-save.
-			MesMan.QueueMessages("AutoSave(silent)");			
-		}
 		break;
 	case MessageType::ON_UI_PUSHED:
 		if (msg == "MissionsScreen") {
@@ -188,12 +214,33 @@ void InHangar::ProcessMessage(Message* message)
 			PopulateMissionsList();
 		}
 		else if (msg == "WorkshopScreen") {
-			UpdateGearList();
+			//UpdateGearList();
 			UpdateUpgradesLists();
 			//UpdateWeaponScriptUI();
 			break;
 		}
+		else if (msg == "EditShipScreen") {
+			UpdateEditShipScreen();
+		}
 		break;
+	case MessageType::GAMEPAD_MESSAGE: {
+		// No special logic
+		GamepadMessage * gm = (GamepadMessage*)message;
+		// Bumper switches
+		if (gm->leftButtonPressed) {
+			int index = (((int)gearCategory - 1) % (int)(Gear::Type::AllCategories));
+			if (index < 0)
+				index = int(Gear::Type::AllCategories) - 1;
+			SetGearCategory((Gear::Type) index);
+		}
+		else if (gm->rightButtonPressed) {
+			int index = int(gearCategory) + 1;
+			if (index >= int(Gear::Type::AllCategories))
+				index = int(Gear::Type::All);
+			SetGearCategory((Gear::Type) index);
+		}
+		break;
+	}
 	default:
 		std::cout << "Received unhandled message: "+ String(message->type);
 	}
@@ -201,6 +248,31 @@ void InHangar::ProcessMessage(Message* message)
 	SpaceShooter2D::ProcessMessage(message);
 }
 
+String GetButtonNameForCategory(Gear::Type category) {
+	switch (category) {
+	case Gear::Type::All:
+		return "AllCategory";
+	case Gear::Type::Weapon:
+		return "WeaponsCategory";
+	case Gear::Type::Armor:
+		return "ArmorCategory";
+	case Gear::Type::Shield:
+		return "ShieldCategory";
+	}
+
+}
+
+void InHangar::SetGearCategory(Gear::Type category) {
+	gearCategory = category;
+	for (int i = 0; i < int(Gear::Type::AllCategories); ++i) {
+		if (i == int(category))
+			QueueGraphics(new GMSetUIv4f(GetButtonNameForCategory(Gear::Type(i)), GMUI::COLOR, 1.0f * Vector4f(1, 1, 1, 1)));
+		else 
+			QueueGraphics(new GMSetUIv4f(GetButtonNameForCategory(Gear::Type(i)), GMUI::COLOR, 0.5f * Vector4f(1, 1, 1, 1)));
+	}
+
+	UpdateUpgradesLists();
+}
 
 void InHangar::PushUI() {
 	// Remove old ones first.
@@ -237,108 +309,244 @@ void InHangar::SetUpScene(){
 	MapMan.DeleteAllEntities();
 }
 
-List<Weapon> InHangar::GetRelevantWeapons() {
-	List<Weapon> relevantWeapons;
-	relevantWeapons.Add(Weapon::GetAllOfType(Weapon::Type::MachineGun));
-	relevantWeapons.Add(Weapon::GetAllOfType(Weapon::Type::SmallRockets));
-	relevantWeapons.Add(Weapon::GetAllOfType(Weapon::Type::BigRockets));
-	if (false)
-		relevantWeapons.Add(Weapon::GetAllOfType(Weapon::Type::LaserBeam));
-	if (false)
-		relevantWeapons.Add(Weapon::GetAllOfType(Weapon::Type::LaserBurst));
-	if (false)
-		relevantWeapons.Add(Weapon::GetAllOfType(Weapon::Type::Lightning));
-	if (false)
-		relevantWeapons.Add(Weapon::GetAllOfType(Weapon::Type::IonCannon));
-	if (false)
-		relevantWeapons.Add(Weapon::GetAllOfType(Weapon::Type::HeatWave));
+List<Gear> InHangar::GetRelevantGear() {
+	List<Gear> relevantGear;
+	relevantGear.Add(Gear::GetAllOfType(Gear::Type::Weapon));
+	relevantGear.Add(Gear::GetAllOfType(Gear::Type::Armor));
+	relevantGear.Add(Gear::GetAllOfType(Gear::Type::Shield));
 
 	// Pre-filter a bit.
-	for (int i = 0; i < relevantWeapons.Size(); ++i) {
-		Weapon& weapon = relevantWeapons[i];
+	for (int i = 0; i < relevantGear.Size(); ++i) {
+		Gear& gear = relevantGear[i];
 		bool skip = false;
-		if (weapon.cost > Money() * 2 + 1000) {
+		if (gear.price > Money() * 2 + 1000) {
 			skip = true;
 		}
-		if (Weapon::PlayerOwns(weapon)) {
+		if (Gear::Owns(gear)) {
 			skip = false;
 		}
 		if (skip) {
-			relevantWeapons.RemoveIndex(i, ListOption::RETAIN_ORDER);
+			relevantGear.RemoveIndex(i, ListOption::RETAIN_ORDER);
 			--i;
 		}
 	}
-	return relevantWeapons;
+	return relevantGear;
 }
+
 
 #include "UI/Lists/UIColumnList.h"
 #include "UI/UIButtons.h"
 
+struct StoreButtonData {
+	bool isWeapon = false;
+	Weapon weapon;
+	Gear gear;
+	String buttonName;
+	String isOwnedLabelName;
+	String productNameLabel;
+	String productPriceLabel;
+};
+
+List<StoreButtonData> storeButtonData;
+
 void InHangar::UpdateUpgradesLists()
 {
+	storeButtonData.Clear();
 	QueueGraphics(new GMClearUI("lWeaponCategories"));
 	/// Fill with column lists for each weapon.
-	List<UIElement*> weaponEntries;
-	List<Weapon> guns = relevantWeapons;
-	for (int i = 0; i < guns.Size(); ++i)
+	List<UIElement*> shopProductEntries;
+	UIElement * buyProductButtonTemplate = UserInterface::LoadUIAsElement("gui/BuyProductButton.gui");
+	List<Gear> gearToDisplay = relevantGear;
+	for (int i = 0; i < gearToDisplay.Size(); ++i)
 	{
-		Weapon weapon = guns[i];
+		Gear gear = gearToDisplay[i];
+		// Skip irrelevant gear depending on current filter.
+		if (gearCategory != gear.type && gearCategory != Gear::Type::All)
+			continue;
 		Color textColor = UIElement::defaultTextColor;
-		UIElement * buyWeaponButton = UserInterface::LoadUIAsElement("gui/BuyWeaponButton.gui");
-		
-		buyWeaponButton->activationMessage = "ActiveUpgrade:" + weapon.name;
-		if (Weapon::PlayerOwns(weapon)) { // Owned
-			buyWeaponButton->textureSource = "0x00FF00AA";
-			textColor = Vector4f(0.9f, 0.9f, 0.9f, 1);
+		UIElement * buyProductButton = buyProductButtonTemplate->Copy();
+		buyProductButton->name += gear.name;
+
+		buyProductButton->activationMessage = "ActiveUpgrade:" + gear.name;
+		if (Gear::Owns(gear)) { // Owned
 		}
 		else { // Not owned
-			buyWeaponButton->textureSource = "0x44AA";
-			if (weapon.cost > Money()) {
-				//buyWeaponButton->activateable = false;
-				//buyWeaponButton->textureSource = "0x55555555";
-				buyWeaponButton->textureSource = "0x34AA";
-				textColor = Vector4f(1, 1, 1, 1) * 0.5f;
-				buyWeaponButton->activationMessage = "PlayErrorSFX TODO";
+			if (gear.price > Money()) {
+				buyProductButton->activationMessage = "PlayErrorSFX TODO";
 			}
 			else {
 			}
 		}
+		buyProductButton->GetElementByName("ProductName")->SetText(Text(gear.name));
+		auto productLabelName = buyProductButton->GetElementByName("ProductName")->name += gear.name;
+		buyProductButton->GetElementByName("Price")->SetText(Text(gear.price));
+		auto priceLabelName = buyProductButton->GetElementByName("Price")->name += gear.name;
+		auto isOwnedLabel = buyProductButton->GetElementByName("Owned");
+		isOwnedLabel->name += gear.name;
+		
+		buyProductButton->onHover = "SetHoverUpgrade:" + gear.name;
+		shopProductEntries.Add(buyProductButton);
 
+		StoreButtonData data;
+		data.gear = gear;
+		data.buttonName = buyProductButton->name;
+		data.isOwnedLabelName = isOwnedLabel->name;
+		data.productNameLabel = productLabelName;
+		data.productPriceLabel = priceLabelName;
 
+		storeButtonData.Add(data);
 
-		buyWeaponButton->GetElementByName("WeaponName")->SetText(Text(weapon.name).WithColor(textColor));
-		buyWeaponButton->GetElementByName("Price")->SetText(Text(weapon.cost).WithColor(textColor));
-		buyWeaponButton->GetElementByName("Owned")->SetText(Weapon::PlayerOwns(weapon)? "Owned" : "");
-		buyWeaponButton->onHover = "SetHoverUpgrade:" + weapon.name;
-
-		weaponEntries.Add(buyWeaponButton);
 	}
-	QueueGraphics(new GMAddUI(weaponEntries, "lWeaponCategories"));
+	QueueGraphics(new GMAddUI(shopProductEntries, "lWeaponCategories"));
+
 	UpdateUpgradeStatesInList();
+
+	// Hover to the first element by default
+	assert(shopProductEntries.Size() > 0);
+	QueueGraphics(new GMSetHoverUI(shopProductEntries[0]->name));
+
+	GraphicsMan.QueueMessage(new GMSetUIi("WorkshopMoney", GMUI::INTEGER_INPUT, Money()));
+}
+
+void InHangar::FillSelectGearList(String list, Gear::Type type, Gear currentlyEquippedGearInSlot) {
+	QueueGraphics(new GMClearUI(list));
+	/// Fill with column lists for each weapon.
+	List<UIElement*> selectGearEntries;
+	UIElement * adjustEquippedItemButtonTemplate = UserInterface::LoadUIAsElement("gui/AdjustEquippedItemButton.gui");
+	List<Gear> gearToDisplayInList = Gear::GetAllOwnedOfType(type);
+	for (int i = -1; i < gearToDisplayInList.Size(); ++i)
+	{
+		Color textColor = UIElement::defaultTextColor;
+		UIElement * selectGearButton = adjustEquippedItemButtonTemplate->Copy();
+	
+		if (i == -1) {
+			// Skip if no actual gear to remove there.
+			if (currentlyEquippedGearInSlot.name.Length() == 0)
+				continue;
+			selectGearButton->GetElementByName("GearName")->SetText(Text(TextMan.GetText("Unequip") + " " + TextMan.GetText(currentlyEquippedGearInSlot.name)));
+			selectGearButton->onHover = "SetHoverUpgrade:" + currentlyEquippedGearInSlot.name;
+			selectGearButton->activationMessage = "UnequipGear:" + currentlyEquippedGearInSlot.name;
+		}
+		else {
+			Gear gear = gearToDisplayInList[i];
+			selectGearButton->name += gear.name;
+			selectGearButton->GetElementByName("GearName")->SetText(Text(TextMan.GetText(gear.name)));
+			selectGearButton->onHover = "SetHoverUpgrade:" + gear.name;
+			selectGearButton->activationMessage = "EquipGear:" + gear.name;
+		}
+		selectGearEntries.Add(selectGearButton);
+	}
+
+	if (selectGearEntries.Size() == 0) {
+		// Display error message at the bottom?
+		QueueGraphics(new GMSetUIs("BottomNotice", GMUI::TEXT, TextMan.GetText("NoAvailableGear")));
+		return;
+	}
+
+	QueueGraphics(new GMSetUIs("BottomNotice", GMUI::TEXT, ""));
+
+	QueueGraphics(new GMAddUI(selectGearEntries, list));
+
+	// Hover to the first element by default
+	assert(selectGearEntries.Size() > 0);
+	QueueGraphics(new GMSetHoverUI(selectGearEntries[0]->name));
+
+	QueueGraphics(GMPushUI::ToUI("SelectGearList"));
+}
+
+void InHangar::OnGearChanged() {
+	UpdateEditShipScreen();
+	QueueGraphics(new GMPopUI("SelectGearList", true));
+	SaveGame();
+}
+
+void InHangar::FillEditScreenEntries(String inList, Gear::Type type) {
+	QueueGraphics(new GMClearUI(inList));
+	/// Fill with column lists for each weapon.
+	List<UIElement*> equippedGearEntries;
+	UIElement * adjustEquippedItemButtonTemplate = UserInterface::LoadUIAsElement("gui/AdjustEquippedItemButton.gui");
+
+	playerShip->UpdateGearFromVars();
+
+	List<Gear> gearToDisplayInList = playerShip->Equipped(type);
+	for (int i = 0; i < gearToDisplayInList.Size() + 1; ++i)
+	{
+		Color textColor = UIElement::defaultTextColor;
+		UIElement * adjustEquippedItemButton = adjustEquippedItemButtonTemplate->Copy();
+		// For extra buttons to equip more.
+		if (i >= gearToDisplayInList.Size()) {
+			if (i >= playerShip->MaxGearForType(type))
+				continue;
+			adjustEquippedItemButton->activationMessage = "OpenGearListEquipGear:" + toString(type);
+			adjustEquippedItemButton->GetElementByName("GearName")->SetText(TextMan.GetText("AddEquipment"+ toString(type)));
+		}
+		// Show entries 
+		else {
+			Gear gear = gearToDisplayInList[i];
+			adjustEquippedItemButton->name += gear.name;
+			adjustEquippedItemButton->activationMessage = "OpenGearListChangeGear:" + toString(type)+","+String(i);
+			adjustEquippedItemButton->GetElementByName("GearName")->SetText(Text(TextMan.GetText("GearSlot")+" "+String(i+1)+"\n"+TextMan.GetText(gear.name)));
+			adjustEquippedItemButton->onHover = "SetHoverUpgrade:" + gear.name;
+		}
+
+		equippedGearEntries.Add(adjustEquippedItemButton);
+	}
+	QueueGraphics(new GMAddUI(equippedGearEntries, inList));
+
+	// Hover to the first element by default
+	assert(equippedGearEntries.Size() > 0);
+	QueueGraphics(new GMSetHoverUI(equippedGearEntries[0]->name));
+}
+
+void InHangar::UpdateEditShipScreen() {
+
+	FillEditScreenEntries("lWeapons", Gear::Type::Weapon);
+	FillEditScreenEntries("lArmors", Gear::Type::Armor);
+	FillEditScreenEntries("lShield", Gear::Type::Shield);
 }
 
 void InHangar::UpdateUpgradeStatesInList()
 {
-	List<Weapon> guns = relevantWeapons;
-	for (int i = 0; i < guns.Size(); ++i)
-	{
-		Weapon weapon = guns[i];
-		String buttonName = weapon.name;
-		String textureSource;
-		Vector4f color(1,1,1,1);
-		textureSource = "ui/SpaceShooterUpgrade_White";//textureSource = "0xFFFF00AA";
-		if (Weapon::PlayerOwns(weapon))
-			color = Vector4f(1,1,0,1);
-		// Orange?
-		// color = Color(102, 255, 0, 255);
-		if (weapon.cost > Money())
-			color = Vector4f(1, 0, 0, 1);
-		else
-			color = Vector4f(1, 1, 1, 1) * 0.25f;
 
-		QueueGraphics(new GMSetUIv4f(buttonName, GMUI::COLOR, color));
-		QueueGraphics(new GMSetUIs(buttonName, GMUI::TEXTURE_SOURCE, textureSource));
+	for (int i = 0; i < storeButtonData.Size(); ++i) {
+		StoreButtonData data = storeButtonData[i];
+		bool isOwned = false;
+		int price = 0;
+		String productName;
+		if (data.isWeapon) {
+			// Special treatment.
+			isOwned = Weapon::PlayerOwns(data.weapon);
+			price = data.weapon.cost;
+			productName = data.weapon.name;
+		}
+		else {
+			isOwned = Gear::Owns(data.gear);
+			price = data.gear.price;
+			productName = data.gear.name;
+		}
+
+		Vector4f textColor(1,1,1,1);
+		String activationMessage = "ActiveUpgrade:" + productName;
+		if (isOwned) {
+			// textColor = Vector4f(0.9f, 0.9f, 0.9f, 1);
+		}
+		else {
+			if (price > Money()) {
+				textColor = Vector4f(1, 1, 1, 1) * 0.5f;
+				activationMessage = "PlayErrorSFX TODO";
+				// buyProductButton->activationMessage = "PlayErrorSFX TODO";
+			}
+		}
+
+		QueueGraphics(new GMSetUIs(data.buttonName, GMUI::ACTIVATION_MESSAGE, activationMessage));
+		QueueGraphics(new GMSetUIt(data.isOwnedLabelName, GMUI::TEXT, isOwned ? "Owned" : ""));
+		QueueGraphics(new GMSetUIv4f(data.productNameLabel, GMUI::TEXT_COLOR, textColor));
+		QueueGraphics(new GMSetUIv4f(data.productPriceLabel, GMUI::TEXT_COLOR, textColor));
+		QueueGraphics(new GMSetUIs(data.buttonName, GMUI::TEXTURE_SOURCE, isOwned ? "0x334466AA" : price > Money() ? "0x34AA" : "0x44AA"));
 	}
+
+	GraphicsMan.QueueMessage(new GMSetUIi("WorkshopMoney", GMUI::INTEGER_INPUT, Money()));
+
 }
 
 String hoverUpgrade;
@@ -355,6 +563,14 @@ void InHangar::UpdateGearDetails(String upgrade)
 	Weapon weapon;
 	bool isWeapon = Weapon::Get(upgrade, &weapon);
 	QueueGraphics(new GMClearUI("SelectedStats"));
+	Gear gear;
+	bool isGear = Gear::Get(upgrade, gear);
+	bool isArmor = false,
+		isShield = false;
+	if (isGear) {
+		isArmor = gear.type == Gear::Type::Armor;
+		isShield = gear.type == Gear::Type::Shield;
+	}
 
 	UIElement* gearDesc = nullptr;
 	if (isWeapon) {
@@ -399,8 +615,27 @@ void InHangar::UpdateGearDetails(String upgrade)
 			break;*/
 		};
 	}
+	else if (isArmor) {
+		gearDesc = UserInterface::LoadUIAsElement("gui/GearArmorDescription.gui");
+		((UIStringInput*)gearDesc->GetElementByName("GearName"))->SetValue(TextMan.GetText(upgrade));
+		((UIIntegerInput*)gearDesc->GetElementByName("GearPrice"))->SetValue(gear.price);
+		((UIIntegerInput*)gearDesc->GetElementByName("GearHp"))->SetValue((int)gear.maxHP);
+		((UIIntegerInput*)gearDesc->GetElementByName("GearRegeneration"))->SetValue((int)gear.armorRegen);
+		((UIIntegerInput*)gearDesc->GetElementByName("GearToughness"))->SetValue(gear.toughness);
+		((UIIntegerInput*)gearDesc->GetElementByName("GearReactivity"))->SetValue(gear.reactivity);
+		gearDesc->GetElementByName("GearTextDescription")->SetText(TextMan.GetText(gear.name + "Desc"));
+	}
+	else if (isShield) {
+		gearDesc = UserInterface::LoadUIAsElement("gui/GearShieldDescription.gui");
+		((UIStringInput*)gearDesc->GetElementByName("GearName"))->SetValue(TextMan.GetText(upgrade));
+		((UIIntegerInput*)gearDesc->GetElementByName("GearPrice"))->SetValue(gear.price);
+		((UIIntegerInput*)gearDesc->GetElementByName("GearHp"))->SetValue((int)gear.maxShield);
+		((UIIntegerInput*)gearDesc->GetElementByName("GearRegeneration"))->SetValue((int)gear.shieldRegen);
+		gearDesc->GetElementByName("GearTextDescription")->SetText(TextMan.GetText(gear.name + "Desc"));
+	}
+
 	if (gearDesc != nullptr)
-		QueueGraphics(new GMAddUI(gearDesc, "SelectedStats"));
+		QueueGraphics(new GMAddUI(gearDesc, "SelectedStats", nullptr, UIFilter::Visible));
 }
 
 void InHangar::UpdateHoverUpgrade(String upgrade, bool force)
@@ -416,135 +651,26 @@ void InHangar::UpdateActiveUpgrade(String upgrade)
 {
 }
 
-void InHangar::UpdateGearList()
-{
-	GraphicsMan.QueueMessage(new GMSetUIs("wsMunny", GMUI::TEXT, "Money: " + String(Money())));
-
-	String gearListUI = "GearList";
-	GraphicsMan.QueueMessage(new GMClearUI(gearListUI));
-
-	List<Gear> gearList = Gear::GetType(gearCategory);
-	// Sort by price.
-	for (int i = 0; i < gearList.Size(); ++i)
-	{
-		Gear & gear = gearList[i];
-		for (int j = i + 1; j < gearList.Size(); ++j)
-		{
-			Gear & gear2 = gearList[j];
-			if (gear2.price < gear.price)
-			{
-				Gear tmp = gear;
-				gear = gear2;
-				gear2 = tmp;
-			}
-		}
-	}
-
-	List<UIElement*> toAdd;
-	for (int i = 0; i < gearList.Size(); ++i)
-	{
-		Gear & gear = gearList[i];
-		if (gear.name.Length() == 0)
-			continue;
-		UIColumnList * list = new UIColumnList();
-		if (gear.price < Money())
-		{
-			list->hoverable = true;
-			list->activateable = true;
-			list->textureSource = "0x3344";
-		}
-		else
-		{
-			list->textureSource = "0x1544";
-		}
-		list->sizeRatioY = 0.2f;
-		list->padding = 0.02f;
-		list->onHover = "ShowGearDesc:" + gear.description;
-		list->activationMessage = "BuyGear:" + gear.name;
-		// First a label with the name.
-		UILabel * label = new UILabel(gear.name);
-		label->sizeRatioX = 0.3f;
-		label->hoverable = false;
-		list->AddChild(nullptr, label);
-		assert(false);
-		// Add stats?
-		switch(gearCategory)
-		{
-			// Weapons:
-		
-			{
-				break;
-			}
-			// Shields
-			case Gear::Type::SHIELD_GENERATOR:
-			{
-				label = new UILabel("Max Shield: "+String(gear.maxShield));
-				label->hoverable = false;
-				label->sizeRatioX = 0.2f;
-				list->AddChild(nullptr, label);
-				label = new UILabel("Regen: "+String(gear.shieldRegen));
-				label->hoverable = false;
-				label->sizeRatioX = 0.1f;
-				list->AddChild(nullptr, label);
-				break;
-			}
-			// Armors
-			case Gear::Type::ARMOR:
-			{
-				label = new UILabel("Max HP: "+String(gear.maxHP));
-				label->hoverable = false;
-				label->sizeRatioX = 0.15f;
-				list->AddChild(nullptr, label);
-				label = new UILabel("Toughness: "+String(gear.toughness));
-				label->hoverable = false;
-				label->sizeRatioX = 0.1f;
-				list->AddChild(nullptr, label);
-				label = new UILabel("Reactivity: "+String(gear.reactivity));
-				label->hoverable = false;
-				label->sizeRatioX = 0.1f;
-				list->AddChild(nullptr, label);
-				break;		
-			}
-		}
-		// Add price.
-		label = new UILabel(String(gear.price));
-		label->hoverable = false;
-		label->sizeRatioX = 0.2f;
-		list->AddChild(nullptr, label);
-
-		// Add buy button
-		toAdd.Add(list);
-	}
-	GraphicsMan.QueueMessage(new GMAddUI(toAdd, gearListUI));
-}
-
 void InHangar::UpdateUpgradesMoney()
 {
 	QueueGraphics(new GMSetUIi("WorkshopMoney", GMUI::INTEGER_INPUT, Money()));
 }
 
-
 void InHangar::BuySellToUpgrade(String upgrade) {
 	Gear gear;
 	bool ok = Gear::Get(upgrade, gear);
 	if (ok) {
-		// Buy this one. Equip it also by default.
-		Gear::SetEquipped(gear);
-		Gear::SetOwned(gear);
-	}
-	Weapon weapon;
-	bool isWeapon = Weapon::Get(upgrade, &weapon);
-	if (isWeapon) {
-		// Sell it?
-		if (Weapon::PlayerOwns(weapon)) {
-			Money() += weapon.cost;
-			Weapon::SetOwnedQuantity(weapon, 0);
+		if (Gear::Owns(gear)) {
+			// Sell it!
+			Money() += gear.price;
+			Gear::SetOwned(gear, 0);
 		}
 		else {
-			Money() -= weapon.cost;
-			Weapon::SetOwnedQuantity(weapon, 1);
+			// Buy this one. Equip it also by default.
+			Gear::SetOwned(gear);
+			Money() -= gear.price;
 		}
-		UpdateUpgradesLists();
 	}
-
+	//UpdateUpgradesLists();
+	UpdateUpgradeStatesInList();
 }

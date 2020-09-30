@@ -70,6 +70,8 @@ public:
 	static bool PlayerOwns(Weapon& weapon);
 	static void SetOwnedQuantity(Weapon& weapon, int quantity);
 
+	static Weapon StartingWeapon();
+
 	// Sets
 	static bool Get(String byName, Weapon * weapon);
 	/** For player-based, returns pointer, but should be used as reference only (*-dereference straight away). 

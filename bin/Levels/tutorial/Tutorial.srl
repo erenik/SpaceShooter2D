@@ -11,7 +11,7 @@ Event SetMessagesPauseGameTime(true)
 Event SetSpawnGroupsPauseGameTime(true)
 Event TutorialBaseGun
 
-Event PlayBGM Levels/tutorial/Tutorial
+Event PlayBGM music/2020-09-29_Sidescroller.ogg
 DontSkip
 
 Event SetBGMVolume 0.1

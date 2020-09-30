@@ -227,10 +227,11 @@ public:
 	/// As loaded.
 	static List<ShipPtr>  types;
 
-	/// Used by player, mainly.
-	Gear weapon, shield, armor;
-
 	WeaponScript * weaponScript;
+
+	// Totals from equipped stuff.
+	float armorToughness; // Default 10?
+	float armorReactivity; // Default 1?
 
 private:
 	int shipID;

@@ -27,6 +27,7 @@
 ShipProperty::ShipProperty(ShipPtr ship, EntitySharedPtr owner)
 : EntityProperty("ShipProperty", ID(), owner), ship(ship)
 {
+	assert(ship != nullptr);
 	shouldDelete = false;
 	sleeping = false;
 	spawnInvulnerability = true;

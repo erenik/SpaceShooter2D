@@ -73,6 +73,13 @@ MissionClearedFirstTime;As this is your first time clearing it, \nyou receive ca
 MissionClearedRepeat;As you have cleared this previously, \nyou receive a repeat cash bounty of $moneyReward.
 
 
+AddEquipmentWeapon;Add weapon
+AddEquipmentArmor;Add armor layer
+AddEquipmentShield;Add shield generator
+GearSlot;Slot
+Unequip;Unequip
+NoAvailableGear;No gear available to equip!
+
 Machine gun I;Machine gun I
 Machine gun IDesc;A light projectile weapon for rapid firing.
 Machine gun II;Machine gun II
@@ -114,12 +121,24 @@ Ion Flak II;
 Ion Flak III;
 Ion Flak IV;
 
-BasicArmorDesc;Basic armor, providing moderate defense and a slight \nreactive coating to reduce impacts from projectiles.
-ReactiveArmorDesc;An armor with a strong reactive coating to deter smaller \nprojectiles and explosives. Is more susceptible to ship-ship collisions.
-RegenerativeArmorDesc;An armor specializing on reconstructive nano-technology \nrobots repairing the armor as it is used and deformed actively in combat.
-TitaniumArmorDesc;A ridiculously reactive armor, which almost reflects incoming \nexplosives. It is the best known armor against projectiles.
-GrapheneArmorDesc;A multi-layered Graphene-based armor using \nspecial honeycomb-formations for extra stability to handle large collisions.
+Standard Armor;Standard Armor
+Standard ArmorDesc;Basic armor, providing moderate defense and a slight \nreactive coating to reduce impacts from projectiles.
+Standard Armor II;Standard Armor II
+Standard Armor IIDesc;Stronger than the mach 1 standard armor.
+Reactive Armor;Reactive Armor
+Reactive ArmorDesc;An armor with a strong reactive coating to deter smaller \nprojectiles and explosives. Is more susceptible to ship-ship collisions.
+Regenerative Armor;Regenerative Armor
+Regenerative ArmorDesc;An armor specializing on reconstructive nano-technology \nrobots repairing the armor as it is used and deformed actively in combat.
+Reflective Ionized Titanium Armor;Reflective Ionized Titanium Armor
+Reflective Ionized Titanium ArmorDesc;A ridiculously reactive armor, which almost reflects incoming \nexplosives. It is the best known armor against projectiles.
+Graphene Complex;Graphene Complex;
+Graphene ComplexDesc;A multi-layered Graphene-based armor using \nspecial honeycomb-formations for extra stability to handle large collisions.
 ;
+Shield Generator I;Shield Generator I
+Shield Generator IDesc;Basic shield generator with some regenerative powers.
+Shield Generator II;Shield Generator II
+Shield Generator IIDesc;Tech II of the basic shield generator. \nHas increased renegerative capabilties.
+
 ;
 /// Old shit;
 11000;Move around using the WSAD keys.

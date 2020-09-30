@@ -39,10 +39,8 @@ topRightCorner ui/message_top_right_corner_64x32
 parent topStats
 defaultSizeRatioXY 1 0.5
 
-IntegerLabel Scorei
-text "Score"
-IntegerLabel Livesi
-text "Lives"
+IntegerLabel Scorei "Score"
+IntegerLabel Livesi "Lives"
 
 
 parent BottomPart

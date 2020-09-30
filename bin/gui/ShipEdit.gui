@@ -1,0 +1,135 @@
+// Main UI when starting up.
+
+defaultTexture	0x2244
+defaultTextColor	1 1 1 1
+
+// Make root active
+root
+name EditShipScreen
+texture 0x446688FF
+exitable true
+sizeRatioXY 0.8 0.8
+
+parent EditShipScreen
+
+list TitleAndContent
+padding 0.02
+
+parent TitleAndContent
+
+label	lMenuName "Hangar"
+texture null
+textAlignment Center
+sizeRatioY 0.1
+
+ColumnList MainContent
+sizeRatioXY 0.98 0.8
+alignmentXY 0.5 0.4
+
+label BottomNotice
+sizeRatioY 0.05
+text "Test"
+textAlignment Center
+
+parent MainContent
+
+Element LeftSide
+sizeRatioX 0.6
+
+list RightSide
+sizeRatioX 0.4
+padding 0.02
+
+/// Right side
+parent RightSide
+
+list lGeneralInfo
+sizeRatioY 0.3
+
+list Stats
+sizeRatioY 0.3
+
+label PreviewArea
+textColor 0x55FFFF22
+texture 0xFF15
+sizeRatioY 0.3
+
+parent Stats
+
+defaultSizeRatioXY 1 1
+list SelectedStats
+
+parent SelectedStats
+defaultSizeRatioXY 1 0.2
+
+label lSelectedStats
+text "Selected stats"
+
+
+/// Left side
+parent LeftSide
+defaultSizeRatioXY 1 1
+
+list listLeftSide
+padding 0.02
+
+parent listLeftSide
+ColumnList Categories 
+padding 0.02
+sizeRatioY 0.15
+
+ColumnList clGearToEquip
+padding 0.02
+sizeRatioY 0.80
+
+parent Categories
+defaultSizeRatioXY 0.31 1
+
+Label WeaponsCategory
+Text ""
+Texture img/icons/WeaponsCategory 
+retainAspectRatio true
+
+Label ArmorCategory
+Text ""
+Texture img/icons/ArmorCategory 
+retainAspectRatio true
+
+Label ShieldCategory
+Text ""
+Texture img/icons/ShieldCategory 
+retainAspectRatio true
+
+
+parent clGearToEquip
+defaultSizeRatioXY 0.31 1
+
+list lWeapons
+padding 0.001
+
+list lArmors
+padding 0.001
+
+list lShield
+padding 0.001
+
+// Example entry 
+parent lWeapons
+defaultSizeRatioXY 1 0.2
+
+button EquipWeapon "Slot 1: \nMachine Gun I"
+onActivate PushUI(SelectGearList)
+
+button EquipWeapon "Slot 2: \nBig Missile IV"
+onActivate PushUI(SelectGearList)
+
+// The Select-gear push menu 
+parent LeftSide
+
+list SelectGearList
+sizeRatioXY 0.8 0.8
+texture 0x112233
+visible false
+
+
+

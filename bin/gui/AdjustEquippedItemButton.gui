@@ -5,17 +5,17 @@ defaultTextColor	1 1 1 1
 
 // Make root active
 root
-name 	BuyWeaponButton
-texture 0x22FF44FF
+name 	AdjustEquippedItemButton
+texture 0x223344
 hoverable true
 activatable true
 highlightOnHover true
 highlightOnActive true
-sizeRatioXY 0.9 0.08
+sizeRatioXY 1 0.15
 
-parent BuyWeaponButton
+parent AdjustEquippedItemButton
 
-ColumnList clBuyWeaponButton
+ColumnList clBuyProductButton
 hoverable false
 texture null
 padding 0.01
@@ -24,18 +24,16 @@ rightBorder ui/border_right_4
 topRightCorner ui/top_right_corner_8x8
 
 
-parent clBuyWeaponButton
+parent clBuyProductButton
 defaultSizeRatioXY 0.25 1
 defaultTexture 0x0000
 
-Label WeaponName "Test"
+Label GearName "Test"
 hoverable false
-sizeRatioX 0.5
+sizeRatioX 0.75
 
-Label Price "100"
-hoverable false
-textAlignment right
-
-Label Owned ""
+Element ""
+texture 0xFF55FF
+retainAspectRatio true
 hoverable false
 

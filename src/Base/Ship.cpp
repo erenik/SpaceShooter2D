@@ -113,7 +113,9 @@ Ship::~Ship()
 }
 
 ShipPtr Ship::GetSharedPtr() {
-	return selfPtr.lock();
+	ShipPtr ptr = selfPtr.lock();
+	assert(ptr != nullptr);
+	return ptr;
 }
 
 ShipPtr Ship::GetByType(String typeName) {
@@ -594,16 +596,16 @@ bool Ship::Damage(PlayingLevel& playingLevel, float amount, bool ignoreShield, D
 			return false;
 	}
 	// Modulate amount depending on armor toughness and reactivity.
-	float activeToughness = (float)armor.toughness;
+	float activeToughness = (float)armorToughness;
 	/// Projectile/explosion-type attacks, reactivity effects.
 	switch (source) {
 	case DamageSource::Collision: // No addition, unless..?
 		break;
 	case DamageSource::Explosion:
-		activeToughness += armor.reactivity * 0.5f;
+		activeToughness += armorReactivity * 0.5f;
 		break;
 	case DamageSource::Projectile:
-		activeToughness += armor.reactivity;
+		activeToughness += armorReactivity;
 		break;
 	}
 	// 3 toughness = 333% damage 

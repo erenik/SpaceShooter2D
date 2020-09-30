@@ -144,6 +144,10 @@ void Weapon::SetOwnedQuantity(Weapon& weapon, int ownedQuantity) {
 	GameVars.SetInt(weapon.name, ownedQuantity);
 }
 
+Weapon Weapon::StartingWeapon() {
+	return types[0];
+}
+
 bool Weapon::Get(String byName, Weapon * weapon)
 {
 	for (int i = 0; i < types.Size(); ++i)
@@ -326,6 +330,23 @@ bool Weapon::LoadTypes(String fromFile)
 		}
 		LogMain("Weapon loaded: "+weapon.name, DEBUG);
 		types.Add(weapon);
+
+		switch (weapon.type) {
+			case Weapon::Type::None:
+				break;
+			default: {
+				LogMain("Adding loaded weapon to Gear list as well.", INFO);
+				Gear gear;
+				gear.name = weapon.name;
+				gear.type = Gear::Type::Weapon;
+				gear.weapon = weapon;
+				gear.price = weapon.cost;
+				Gear::weapons.Add(gear);
+				break;
+			}
+		}
+
+
 	}
 	return true;
 }

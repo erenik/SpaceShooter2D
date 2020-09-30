@@ -7,19 +7,31 @@
 
 #include "String/AEString.h"
 #include "Time/Time.h"
+#include "Weapon.h"
+
 
 class Gear 
 {
+	friend class Weapon;
 public:
 	Gear();
 	String name;
 	int price;
+#define WEAPON Weapon
+#define ARMOR Armor
+#define SHIELD_GENERATOR Shield
 	enum class Type {
-		WEAPON,
-		SHIELD_GENERATOR,
-		ARMOR,
+		All,
+		Weapon,
+		Armor,
+		Shield,
+		AllCategories
 	};
 	Type type;
+
+	// If type Weapon, may include the weapon info... hopefully.
+	Weapon weapon;
+
 	// Weapon stats?
 	int damage;
 	Time reloadTime;
@@ -40,24 +52,37 @@ public:
 	static bool Load(String fromFile);
 	static List<Gear> GetType(Type type);
 	static Gear Get(String byName);
+	static List<Gear> GetGearList(List<String> byNames);
 
 	static bool Get(String byName, Gear& gear);
+	static List<Gear> GetAllOfType(Type type);
+	static List<Gear> GetAllOwnedOfType(Type type);
 
 	static Gear StartingWeapon();
 	static Gear StartingArmor();
 	static Gear StartingShield();
 
-	static void SetEquipped(const Gear& gear);
 	static void SetOwned(const Gear& gear);
+	static void SetOwned(const Gear& gear, int count);
 	static bool Owns(const Gear& gear);
 
-	static void SetEquippedArmor(Gear armor);
-	static void SetEquippedShield(Gear shield);
-	static Gear EquippedArmor();
-	static Gear EquippedShield();
+	static void SetEquippedWeapons(List<Gear> weapons);
+	static void SetEquippedArmorLayers(List<Gear> armor);
+	static void SetEquippedShieldGenerators(List<Gear> shield);
+	static List<Gear> EquippedWeapons();
+	static List<Gear> EquippedArmorLayers();
+	static List<Gear> EquippedShieldGenerators();
 
-	/// Available to buy!
-	static List<Gear> availableGear;
+	/// Available to buy/use, etc. Basically all loaded content in the game.
+	static List<Gear> AvailableGear();
+
+private:
+	static List<Gear> weapons, armorAndShields;
 };
+
+String toString(Gear::Type type);
+Gear::Type gearTypeFromString(String str);
+
+bool operator ==(const Gear& one, const Gear& two);
 
 #endif

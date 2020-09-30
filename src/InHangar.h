@@ -39,19 +39,27 @@ private:
 
 	void SetUpScene();
 
-	List<Weapon> GetRelevantWeapons();
-	List<Weapon> relevantWeapons;
+	List<Gear> GetRelevantGear();
+	List<Gear> relevantGear;
 
 	void DisplayMessage(HangarMessage msg);
 
-	void UpdateUpgradesLists();
+	void UpdateUpgradesLists(); // Shop
+	void UpdateEditShipScreen(); // Edit ship
+	void FillEditScreenEntries(String listName, Gear::Type type);
+	void FillSelectGearList(String list, Gear::Type type, Gear currentlyEquippedGearInSlot);
+	void OnGearChanged(); // Update edit screen entries and save game.
+
+
 	void UpdateUpgradeStatesInList(); // Updates colors n stuff based on level
 	void UpdateHoverUpgrade(String upgrade, bool force = false);
 	void UpdateActiveUpgrade(String upgrade);
 	void UpdateUpgradesMoney();
 	/// Shop handling...
 	void BuySellToUpgrade(String upgrade);
-	void UpdateGearList();
+	//void UpdateGearList();
+
+	void SetGearCategory(Gear::Type category);
 
 	void UpdateGearDetails(String gearName);
 	void MoreStats(String upgrade, String inElement);
@@ -67,4 +75,9 @@ private:
 
 	String previousActiveUpgrade;
 	String previousHoveredUpgrade;
+
+	// Depends where you click.
+	bool replaceGear;
+	Gear::Type replaceGearType;
+	int replaceGearIndex;
 };

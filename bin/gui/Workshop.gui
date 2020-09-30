@@ -16,8 +16,7 @@ text	"Workshop"
 sizeRatioXY 0.5 0.15
 alignmentXY 0.5 0.95
 
-IntegerLabel WorkshopMoney
-text "Munny: "
+IntegerLabel WorkshopMoney "Money"
 sizeRatioXY 0.5 0.08
 alignmentXY 0.5 0.84
 
@@ -25,14 +24,9 @@ list lGeneralInfo
 sizeRatioXY 0.25 0.2
 alignmentXY 0.125 0.9
 
-list lWeaponCategories
-padding 0.001
+list CategoriesAndProducts
 sizeRatioXY 0.5 0.8
 alignmentXY 0.25 0.4
-
-ColumnList Skills
-sizeRatioXY 0.5 0.1
-alignmentXY 0.25 0.05
 
 label PreviewArea
 textColor 0x55FFFF22
@@ -48,16 +42,45 @@ list Stats
 sizeRatioXY 0.5 0.5
 alignmentXY 0.75 0.55
 
+parent CategoriesAndProducts
+ColumnList Categories 
+sizeRatioY 0.15
+
+list lWeaponCategories
+sizeRatioY 0.85
+padding 0.001
+
+parent Categories
+defaultSizeRatioXY 0.25 1
+defaultTopBorder ui/border_top_4
+defaultRightBorder ui/border_right_4
+defaultTopRightCorner ui/top_right_corner_8x8
+
+Button AllCategory
+Texture img/icons/AllCategory 
+retainAspectRatio true
+Text ""
+
+Button WeaponsCategory
+Text ""
+Texture img/icons/WeaponsCategory 
+retainAspectRatio true
+
+Button ArmorCategory
+Text ""
+Texture img/icons/ArmorCategory 
+retainAspectRatio true
+
+Button ShieldCategory
+Text ""
+Texture img/icons/ShieldCategory 
+retainAspectRatio true
 
 parent Stats
 
 defaultSizeRatioXY 1 1
 element SelectedStats
 
-/////////////////////////////////////////////////
-defaultSizeRatioXY 0.33 1
-parent Skills 
-label "Skills"
 
 parent SelectedStats
 defaultSizeRatioXY 1 0.2

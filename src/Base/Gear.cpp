@@ -8,7 +8,40 @@
 #include "Game/GameVariableManager.h"
 
 /// Available to buy! .. what?
-List<Gear> Gear::availableGear;
+List<Gear> Gear::AvailableGear() {
+	return weapons + armorAndShields;
+};
+List<Gear> Gear::weapons;
+List<Gear> Gear::armorAndShields;
+
+String toString(Gear::Type type) {
+	switch (type) {
+	case Gear::Type::All: return "All";
+	case Gear::Type::Weapon: return "Weapon";
+	case Gear::Type::Armor: return "Armor";
+	case Gear::Type::Shield: return "Shield";
+	case Gear::Type::AllCategories: return "AllGearTypes";
+	}
+	assert(false);
+	return "";
+}
+
+Gear::Type gearTypeFromString(String str) {
+	for (int i = 0; i < int(Gear::Type::AllCategories); ++i) {
+		Gear::Type type = Gear::Type(i);
+		if (str == toString(type))
+			return type;
+	}
+	assert(false);
+	return Gear::Type::AllCategories;
+}
+
+bool operator ==(const Gear& one, const Gear& two) {
+	if (one.name == two.name)
+		return true;
+	return false;
+}
+
 
 Gear::Gear()
 {
@@ -93,21 +126,22 @@ bool Gear::Load(String fromFile)
 				gear.description = value;
 		}
 		// Remove copies or old data.
-		for (int i = 0; i < availableGear.Size(); ++i)
+		for (int i = 0; i < armorAndShields.Size(); ++i)
 		{
-			if (availableGear[i].name == gear.name)
+			if (armorAndShields[i].name == gear.name)
 			{
-				availableGear.RemoveIndex(i);
+				armorAndShields.RemoveIndex(i);
 				--i;
 			}
 		}
-		availableGear.Add(gear);
+		armorAndShields.Add(gear);
 	}
 }
 
 List<Gear> Gear::GetType(Gear::Type type)
 {
 	List<Gear> list;
+	List<Gear> availableGear = AvailableGear();
 	for (int i = 0; i < availableGear.Size(); ++i)
 	{
 		if (availableGear[i].type == type)
@@ -118,6 +152,7 @@ List<Gear> Gear::GetType(Gear::Type type)
 
 Gear Gear::Get(String byName)
 {
+	List<Gear> availableGear = AvailableGear();
 	for (int i = 0; i < availableGear.Size(); ++i)
 	{
 		if (availableGear[i].name == byName)
@@ -128,6 +163,7 @@ Gear Gear::Get(String byName)
 }
 
 bool Gear::Get(String byName, Gear& gear) {
+	List<Gear> availableGear = AvailableGear();
 	for (int i = 0; i < availableGear.Size(); ++i)
 	{
 		if (availableGear[i].name == byName) {
@@ -138,6 +174,29 @@ bool Gear::Get(String byName, Gear& gear) {
 	return false;
 }
 
+List<Gear> Gear::GetAllOwnedOfType(Type type) {
+	List<Gear> allOfType = GetAllOfType(type);
+	List<Gear> owned;
+	for (int i = 0; i < allOfType.Size(); ++i) {
+		Gear gear = allOfType[i];
+		if (Owns(gear)) {
+			owned.Add(gear);
+		}
+	}
+	return owned;
+}
+
+
+List<Gear> Gear::GetAllOfType(Type type) {
+	List<Gear> allOfType;
+	List<Gear> availableGear = AvailableGear();
+	for (int i = 0; i < availableGear.Size(); ++i) {
+		if (availableGear[i].type == type) {
+			allOfType.Add(availableGear[i]);
+		}
+	}
+	return allOfType;
+}
 
 Gear Gear::StartingWeapon()
 {
@@ -176,46 +235,72 @@ Gear Gear::StartingShield()
 	return Gear();
 }
 
-void Gear::SetEquipped(const Gear& gear) {
-	switch (gear.type) {
-	case Gear::Type::ARMOR:
-		Gear::SetEquippedArmor(gear);
-		break;
-	case Gear::Type::SHIELD_GENERATOR:
-		Gear::SetEquippedShield(gear);
-		break;
-	}
-}
-
 void Gear::SetOwned(const Gear& gear) {
 	GameVars.SetInt(gear.name, 1);
 }
 
+void Gear::SetOwned(const Gear& gear, int count) {
+	GameVars.SetInt(gear.name, count);
+}
+
 bool Gear::Owns(const Gear& gear) {
-	return GameVars.Get(gear.name) != nullptr;
+	GameVar* var = GameVars.Get(gear.name);
+	if (var == nullptr)
+		return false;
+	return var->iValue > 0;
 }
 
-void Gear::SetEquippedArmor(Gear armor) {
-	GameVars.SetString("EquippedArmor", armor.name);
-}
-void Gear::SetEquippedShield(Gear shield) {
-	GameVars.SetString("EquippedShield", shield.name);
+List<String> GetGearNames(List<Gear> gear) {
+	List<String> names;
+	for (int i = 0; i < gear.Size(); ++i)
+		names.Add(gear[i].name);
+	return names;
 }
 
-Gear Gear::EquippedArmor() {
-	GameVar * equippedArmor = GameVars.GetString("EquippedArmor");
+const String VarEquippedWeapons = "EquippedWeapons",
+	VarEquippedArmor = "EquippedArmor",
+	VarEquippedShield = "EquippedShield";
+
+const String VarGlue = ";";
+
+void Gear::SetEquippedWeapons(List<Gear> weapons) {
+	GameVars.SetString(VarEquippedWeapons, MergeLines(GetGearNames(weapons), VarGlue));
+}
+void Gear::SetEquippedArmorLayers(List<Gear> armorLayers) {
+	GameVars.SetString(VarEquippedArmor, MergeLines(GetGearNames(armorLayers), VarGlue));
+}
+void Gear::SetEquippedShieldGenerators(List<Gear> shieldGenerators) {
+	GameVars.SetString(VarEquippedShield, MergeLines(GetGearNames(shieldGenerators), VarGlue));
+}
+
+List<Gear> Gear::GetGearList(List<String> fromNames) {
+	List<Gear> gearList;
+	for (int i = 0; i < fromNames.Size(); ++i) {
+		Gear gear = Gear::Get(fromNames[i]);
+		gearList.Add(gear);
+	}
+	return gearList;
+}
+
+List<Gear> Gear::EquippedWeapons() {
+	GameVar * equippedWeapon = GameVars.GetString(VarEquippedWeapons);
+	if (equippedWeapon == nullptr)
+		return Gear::StartingWeapon();
+	return GetGearList(equippedWeapon->strValue.Tokenize(VarGlue));
+}
+
+List<Gear> Gear::EquippedArmorLayers() {
+	GameVar * equippedArmor = GameVars.GetString(VarEquippedArmor);
 	if (equippedArmor == nullptr)
 		return Gear::StartingArmor();
-	return Gear::Get(equippedArmor->strValue);
+	return GetGearList(equippedArmor->strValue.Tokenize(VarGlue));
 }
 
-Gear Gear::EquippedShield() {
-	List<Gear> armors = GetType(Gear::Type::ARMOR);
-	GameVar * equippedShield = GameVars.GetString("EquippedShield");
+List<Gear> Gear::EquippedShieldGenerators() {
+	GameVar * equippedShield = GameVars.GetString(VarEquippedShield);
 	if (equippedShield == nullptr)
 		return Gear::StartingShield();
-	return Gear::Get(equippedShield->strValue);
+	return GetGearList(equippedShield->strValue.Tokenize(VarGlue));
 }
-
 
 
