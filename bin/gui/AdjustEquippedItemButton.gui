@@ -32,8 +32,9 @@ Label GearName "Test"
 hoverable false
 sizeRatioX 0.75
 
-Element ""
+Element GearIcon
 texture 0xFF55FF
 retainAspectRatio true
 hoverable false
+sizeRatioX 0.20
 

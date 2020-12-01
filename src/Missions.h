@@ -11,9 +11,12 @@
 struct Mission {
 	Mission();
 	bool RequirementsFulfilled();
+	bool Completed();
 
 	String name;
 	String levelFilePath;
+	// Minimum reward by just playing it, assuming 0 kills.
+	int bounty;
 	bool replay;
 	// Requires True for variables of given name - implying those Missions have been completed previously.
 	List<String> requires;

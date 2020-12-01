@@ -12,11 +12,17 @@
 #include "Graphics/GraphicsProperty.h"
 #include "Model/ModelManager.h"
 
+#include "PlayerShip.h"
+
 #include "Entity/EntityManager.h"
 #include "Entity/Entity.h"
 #include "PlayingLevel.h"
 
 Vector4f defaultAlliedProjectileColor = Vector4f(1.f, 0.5f, .1f, 1.f);
+
+String toString(Weapon::Type type) { 
+	return Weapon::GetTypeName(type); 
+};
 
 WeaponSet::WeaponSet()
 {
@@ -556,6 +562,9 @@ void Weapon::Shoot(PlayingLevel& playingLevel, ShipPtr ship)
 		if (createThrustEmitter)
 			projProp->CreateThrustEmitter(weaponWorldPosition);
 
+		if (ship->allied) {
+			++PlayingLevelRef().projectilesFired;
+		}
 
 	//	lastShot = flyTime;
 	}
@@ -569,6 +578,11 @@ void Weapon::QueueReload()
 		return;
 	reloading = true;
 	currCooldownMs = int (cooldown.Milliseconds());
+}
+
+// Path to icon
+String Weapon::Icon() {
+	return "img/icons/WeaponType/" + toString(type);
 }
 
 /// Called to update the various states of the weapon, such as reload time, making lightning arcs jump, etc.

@@ -14,8 +14,8 @@ parent lGearDesc
 defaultSizeRatioY 0.15
 
 ColumnList NamePrice
-ColumnList DamageCooldown
-ColumnList RoundsReloadTime
+ColumnList HpRegeneration
+ColumnList ToughnessReactivity
 Label GearTextDescription
 textPadding 0.05
 sizeRatioY 0.4
@@ -30,14 +30,14 @@ IntegerLabel GearPrice "Price"
 sizeRatioX 0.4
 dividerX 0.5
 
-parent DamageCooldown
+parent HpRegeneration
+defaultSizeRatioXY 0.5 1
 defaultDividerX 0.7
-defaultSizeRatioXY 0.5 1
-IntegerLabel GearDamage "Damage"
-IntegerLabel GearRounds "Rounds"
+IntegerLabel GearHp "Max HP"
+IntegerLabel GearRegeneration "Auto-repair"
 
-parent RoundsReloadTime
+parent ToughnessReactivity
 defaultSizeRatioXY 0.5 1
-IntegerLabel GearBurstCooldown "Rate of fire"
-IntegerLabel GearCooldown "Reload time"
+IntegerLabel GearToughness "Toughness"
+IntegerLabel GearReactivity "Reactivity"
 

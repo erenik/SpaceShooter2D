@@ -9,6 +9,7 @@ name InGameMenu
 removeOnPop true
 texture 0x1144
 onPop InGameMenuPopped
+exitable true
 
 parent InGameMenu
 
@@ -22,7 +23,7 @@ padding 0.01
 parent imList
 
 
-defaultSizeRatioXY 1 0.2
+defaultSizeRatioXY 1 0.15
 defaultTopBorder ui/border_top_4
 defaultRightBorder 0xAAFF
 defaultTexture	0x22FF
@@ -33,6 +34,10 @@ topRightCorner ui/message_top_right_corner_64x32
 
 Button Restart "Restart level"
 onActivate PopUI(InGameMenu)&RestartLevel
+topRightCorner ui/top_right_corner_8x8
+
+Button Restart "Abort mission"
+onActivate PopUI(InGameMenu)&AbortMission
 topRightCorner ui/top_right_corner_8x8
 
 Button	OptionsButton

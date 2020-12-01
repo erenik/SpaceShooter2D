@@ -86,6 +86,10 @@ public:
 	void Process(PlayingLevel& playingLevel, ShipPtr ship, int timeInMs);
 	void ProcessLightning(PlayingLevel& playingLevel, ShipPtr ship, bool initial = false);
 	void QueueReload();
+
+	// Path to icon
+	String Icon();
+
 	/// Based on ship.
 	Vector3f WorldPosition(EntitySharedPtr basedOnShipEntity);
 	Vector3f location;
@@ -171,5 +175,7 @@ public:
 	/// Recalculated every call to Aim()
 	Vector3f weaponWorldPosition;
 };
+
+String toString(Weapon::Type type);
 
 #endif

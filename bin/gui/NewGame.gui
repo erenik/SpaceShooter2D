@@ -25,6 +25,7 @@ topRightCorner ui/top_right_corner_8x8
 parent lNewGame
 
 defaultSizeRatioXY 1 0.1
+defaultTexture	0x6666
 
 label NewGame "New Game"
 sizeRatioY 0.2
@@ -32,27 +33,32 @@ textAlignment Center
 
 element Divider
 sizeRatioY 0.01
-texture 0xEEEE
+//texture 0xEEEE
 
 list NewGameDetails
 padding 0.03
 sizeRatioY 0.7
 
 parent NewGameDetails
-defaultSizeRatioY 0.17
+defaultSizeRatioXY 0.8 0.17
 
 StringInput PlayerName "Player Name: "
 
 RadioButtons 3 Difficulty "Difficulty: "
 texts "Easy" "Medium" "Hard"
-texture 0x2244
 
 Checkbox PlayTutorial "Play Tutorial" Checked 
 
 Button NewGameButton
 onActivate PopUI(NewGame)&NewGame
 text "Start"
+textAlignment center
+sizeRatioX 0.5
+topRightCorner ui/message_top_right_corner_64x32
 
 Button Back
 onActivate PopUI(NewGame)
+textAlignment center
+sizeRatioX 0.5
+topRightCorner ui/top_right_corner_64x32_red
 

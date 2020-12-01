@@ -11,6 +11,7 @@
 Mission::Mission() : 
 	replay(false)
 {
+	bounty = 100;
 };
 
 bool Mission::RequirementsFulfilled() {
@@ -23,6 +24,10 @@ bool Mission::RequirementsFulfilled() {
 			return false;
 	}
 	return true;
+}
+
+bool Mission::Completed(){
+	return GameVars.GetIntValue(name) > 0;
 }
 
 
@@ -83,6 +88,9 @@ void MissionsManager::LoadMissions() {
 		}
 		if (line.StartsWith("Level")) {
 			mission->levelFilePath = tp.ParseKeyValue(line, "Level");
+		}
+		if (line.StartsWith("Bounty")) {
+			mission->bounty = tp.ParseKeyValue(line, "Bounty").ParseInt();
 		}
 
 	}

@@ -6,6 +6,7 @@
 #include "SpaceShooter2D.h"
 #include "PlayingLevel.h"
 #include "File/LogFile.h"
+#include "PlayerShip.h"
 
 String Movement::ToString()
 {

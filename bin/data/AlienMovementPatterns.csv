@@ -1,12 +1,12 @@
-Name	ID	Movement	Rotation	Spawning Offset
-Straight	1	Straight(inf)	None	
-Straight-n-Up	1	Straight(500), MoveDir(xy -3 2, 500)	None	
-Straight-n-Down	1	Straight(500), MoveDir(xy -3 -2, 500)	None	
-Zag	2	Zag(xy -2 5, 2000, inf)	None	
-ZagRotate	3	Zag(xy -2 5, 2000, inf)	Spinning(1, inf)	
-Ratitate	4	Straight(inf)	Spinning(1.5, inf)	
-PowerCenter	5	MoveToCenter(inf)	None	
-DownLeft	6	MoveDir(xy -3 -2, inf)	None	Xy 0 10
-UpLeft		MoveDir(xy -3 2, inf)		Xy 0 -10
-DownLeftMore	6	MoveDir(xy -2 -2, inf)	None	Xy 0 20
-UpLeftMore		MoveDir(xy -2 2, inf)		Xy 0 -20
+Name;ID;Movement;Rotation;Spawning Offset
+Straight;1;Straight(inf);None;
+Straight-n-Up;1;Straight(500), MoveDir(xy -3 2, 500);None;
+Straight-n-Down;1;Straight(500), MoveDir(xy -3 -2, 500);None;
+Zag;2;Zag(xy -2 5, 2000, inf);None;
+ZagRotate;3;Zag(xy -2 5, 2000, inf);Spinning(1, inf);
+Ratitate;4;Straight(inf);Spinning(1.5, inf);
+PowerCenter;5;MoveToCenter(inf);None;
+DownLeft;6;MoveDir(xy -3 -2, inf);None;Xy 0 10
+UpLeft;;MoveDir(xy -3 2, inf);;Xy 0 -10
+DownLeftMore;6;MoveDir(xy -2 -2, inf);None;Xy 0 20
+UpLeftMore;;MoveDir(xy -2 2, inf);;Xy 0 -20

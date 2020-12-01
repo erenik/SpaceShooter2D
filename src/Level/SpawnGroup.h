@@ -81,7 +81,7 @@ public:
 	int lineNumber;
 	// See enum above.
 	Formation formation;
-	MovementPattern mp;
+	MovementPattern movementPattern;
 	void ParseFormation(String fromString);
 	/// Usually just 1 or 2 sizes are used (X,Y)
 	Vector3f size;

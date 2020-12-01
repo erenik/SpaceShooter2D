@@ -39,6 +39,8 @@ defaultTopRightCorner ui/top_right_corner_8x8
 
 defaultSizeRatioXY 1 0.15
 
+defaultTexture 0x223333FF
+
 button Missions
 onActivate PushUI(gui/Missions.gui)
 

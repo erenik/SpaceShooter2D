@@ -51,7 +51,7 @@ void ScriptAction::OnEnter(ShipPtr forShip)
 {
 	if (type == SWITCH_TO_WEAPON)
 	{
-		forShip->activeWeapon = forShip->weapons[weaponIndex];
+		forShip->activeWeapon = forShip->weaponSet[weaponIndex];
 		forShip->shoot = true;
 	}
 }

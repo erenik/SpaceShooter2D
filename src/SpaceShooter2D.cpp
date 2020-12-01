@@ -96,6 +96,7 @@ void RegisterStates()
 }
 
 bool SpaceShooter2D::shipDataLoaded = false;
+SSGameMode SpaceShooter2D::mode = SSGameMode::START_UP;
 
 SpaceShooter2D::SpaceShooter2D()
 {
@@ -117,15 +118,16 @@ SpaceShooter2D::~SpaceShooter2D()
 /// Function when entering this state, providing a pointer to the previous StateMan.
 void SpaceShooter2D::OnEnter(AppState * previousState)
 {
-	SaveFile::LoadAutoSave(Application::name, "");
+	SaveFile::LoadAutoSave(Application::name);
 
 	// Set some default 
 	// When clicking on it.
-	UIElement::onActiveHightlightFactor = 0.25f;
+	UIElement::onActiveHightlightFactor = 0.3f;
 	// When hovering on it.
-	UIElement::onHoverHighlightFactor = 0.20f;
+	UIElement::onHoverHighlightFactor = 0.1f;
+	UIElement::onIdleHighlightFactor = -0.4f;
 	// When toggled, additional factor
-	UIElement::onToggledHighlightFactor = 0.2f;
+	UIElement::onToggledHighlightFactor = 0.3f;
 
 	if (!shipDataLoaded)
 		LoadShipData();
@@ -139,11 +141,14 @@ void SpaceShooter2D::OnEnter(AppState * previousState)
 	/// Create game variables.
 	currentLevel = GameVars.CreateInt("currentLevel", 1);
 	currentStage = GameVars.CreateInt("currentStage", 1);
-	playerNameVar = GameVars.CreateString("playerName", "Cytine");
+	playerNameVar = GameVars.GetString("playerName");
 	score = GameVars.CreateInt("score", 0);
 	playTime = GameVars.CreateInt("playTime", 0);
 	gameStartDate = GameVars.CreateTime("gameStartDate");
 	difficulty = GameVars.CreateInt("difficulty", 1);
+
+	// Set default values.
+	playerNameVar->strValue = "Cytine";
 
 	AppWindow * w = MainWindow();
 	assert(w);
@@ -253,7 +258,7 @@ void PrintEntityData(EntitySharedPtr entity)
 		std::cout<<"\nSleeping: "<<(sp->sleeping? "Yes" : "No")
 			<<", HP: "<<ship->hp<<", Allied: "<<(ship->allied? "Yes" : "No")
 			<<"\nLastCollission: "<<ship->lastShipCollision.Seconds()<<", CollisionDmgCooldown: "<<ship->collisionDamageCooldown.Seconds()
-			<<"\nMovement pattern: "<<ship->spawnGroup->mp.name<<" CurrMove: "<<ship->movements[ship->currentMovement].Name()
+			<<"\nMovement pattern: "<<ship->spawnGroup->movementPattern.name<<" CurrMove: "<<ship->movements[ship->currentMovement].Name()
 			<<"\nSGFormation: "<<GetName(ship->spawnGroup->formation)<<" SGAmount: "<<ship->spawnGroup->number;
 	}
 }
@@ -660,6 +665,10 @@ void SpaceShooter2D::ResetLevelStats()
 	LevelPossibleKills()->iValue = 0;
 }
 
+void SpaceShooter2D::LoadAutoSave() {
+	SaveFile::LoadAutoSave(Application::name);
+}
+
 // Upon save loaded, continue where the player last was. Probably in the hangar, but could also be elsewhere..?
 void SpaceShooter2D::OnSaveLoaded() {
 	int location = GameVars.GetIntValue("Location", SSGameMode::IN_HANGAR);
@@ -772,15 +781,6 @@ void SpaceShooter2D::GameOver()
 		// Play script for animation or whatever.
 		ScriptMan.PlayScript("scripts/GameOver.txt");
 		// End script by going back to menu or playing a new game.
-	}
-}
-
-void SpaceShooter2D::OnLevelCleared()
-{
-	if (mode != LEVEL_CLEARED)
-	{
-		SetMode(LEVEL_CLEARED);
-		ScriptMan.PlayScript("scripts/LevelComplete.txt");
 	}
 }
 

@@ -45,8 +45,7 @@ bool operator ==(const Gear& one, const Gear& two) {
 
 Gear::Gear()
 {
-	toughness = 10;
-	reactivity = 0;
+	armorStats = ArmorStats();
 	price = -1;
 	maxHP = -1;
 	maxShield = -1;
@@ -60,6 +59,27 @@ Gear::Type ParseType(String fromString) {
 		return Gear::Type::ARMOR;
 	assert(false);
 }
+
+String Gear::TypeIcon(Type type) {
+	return "img/icons/GearType/"+toString(type);
+}
+
+String Gear::Icon() {
+	switch (type) {
+	case Type::Weapon: {
+		return weapon.Icon();
+	case Type::Armor:
+	case Type::Shield:
+		return TypeIcon(type);
+		break;
+	default:
+		return TypeIcon(type);
+	}
+	}
+	assert(false);
+	return "";
+}
+
 
 /// o.o
 bool Gear::Load(String fromFile)
@@ -119,9 +139,9 @@ bool Gear::Load(String fromFile)
 			else if (column == "ArmorRegen")
 				gear.armorRegen = value.ParseFloat();
 			else if (column == "Toughness")
-				gear.toughness = value.ParseInt();
+				gear.armorStats.toughness = value.ParseInt();
 			else if (column == "Reactivity")
-				gear.reactivity = value.ParseInt();
+				gear.armorStats.reactivity = value.ParseInt();
 			else if (column == "Info")
 				gear.description = value;
 		}

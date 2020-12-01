@@ -9,6 +9,7 @@
 #include "UI/UIInputs.h"
 #include "Message/MathMessage.h"
 #include "PlayingLevel.h"
+#include "Base/PlayerShip.h"
 
 List<UIElement*> tmp;
 String existingScripts = "lScripts",

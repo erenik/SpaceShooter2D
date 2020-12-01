@@ -5,17 +5,17 @@ defaultTextColor	1 1 1 1
 
 // Make root active
 root
-name 	BuyProductButton
-texture 0x22FF44FF
+name 	SelectMissionButton
+texture 0x446688FF
 hoverable true
 activatable true
 highlightOnHover true
 highlightOnActive true
 sizeRatioXY 0.9 0.1
 
-parent BuyProductButton
+parent SelectMissionButton
 
-ColumnList clBuyProductButton
+ColumnList clSelectMissionButton
 hoverable false
 texture null
 padding 0.01
@@ -24,7 +24,7 @@ rightBorder ui/border_right_4
 topRightCorner ui/top_right_corner_8x8
 
 
-parent clBuyProductButton
+parent clSelectMissionButton
 defaultSizeRatioXY 0.25 1
 defaultTexture 0x0000
 
@@ -32,16 +32,21 @@ Element Icon
 sizeRatioX 0.1
 retainAspectRatio true 
 
-Label ProductName "Test"
+Label MissionName "Test"
 hoverable false
-sizeRatioX 0.5
+sizeRatioX 0.35
 
-Label Price "100"
+Label BountyText "Bounty"
 hoverable false
 textAlignment right
-sizeRatioX 0.2
+sizeRatioX 0.15
 
-Label Owned ""
+Label Bounty "100"
+hoverable false
+textAlignment right
+sizeRatioX 0.15
+
+Label Completed ""
 hoverable false
 sizeRatioX 0.2
 

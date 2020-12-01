@@ -51,7 +51,7 @@ PlayingLevel& PlayingLevelRef() {
 }
 
 
-ShipPtr PlayingLevel::playerShip = nullptr;
+std::shared_ptr<PlayerShip> PlayingLevel::playerShip = nullptr;
 EntitySharedPtr PlayingLevel::levelEntity = nullptr;
 
 GameVariable* SpaceShooter2D::currentLevel = nullptr,
@@ -173,7 +173,12 @@ void PlayingLevel::Process(int timeInMs) {
 		HUD* hud = HUD::Get();
 		hud->UpdateActiveWeapon();
 		hud->UpdateCooldowns(); // Update HUD 10 times a sec.
-		hud->UpdateDebug();
+		// Update Debug once every 10 HUD updates?
+		++hudUpdates;
+		if (hudUpdates > 10) {
+			hud->UpdateDebug();
+			hudUpdates = 0;
+		}
 		hudUpdateMs = 0;
 	}
 	UpdateRenderArrows();
@@ -262,6 +267,8 @@ void PlayingLevel::OnExit(AppState* nextState) {
 
 	levelEntity = NULL;
 	playerShip = nullptr;
+
+	CloseSpawnWindow();
 
 	SleepThread(50);
 	// Register it for rendering.
@@ -404,6 +411,9 @@ void PlayingLevel::ProcessMessage(Message* message)
 			levelTime = flyTime = Time(TimeType::MILLISECONDS_NO_CALENDER, 0);
 			level.OnLevelTimeAdjusted(levelTime);
 		}
+		else if (msg == "AbortMission") {
+			SetMode(SSGameMode::IN_HANGAR);
+		}
 		else if (msg.StartsWith("AddLevelScoreToTotal")) {
 			// Add level score to total upon showing level stats. o.o
 			score->iValue += LevelScore()->iValue;
@@ -465,7 +475,24 @@ void PlayingLevel::ProcessMessage(Message* message)
 			Pause();
 			OpenJumpDialog();
 		}
-
+		if (msg == "LoadWeapons") {
+			// Um.. load the weapons..?
+			List<Gear> equippedWeapons = playerShip->EquippedWeapons();
+			playerShip->weaponSet.ClearAndDelete();
+			for (int i = 0; i < equippedWeapons.Size(); ++i) {
+				Gear equippedWeapon = equippedWeapons[i];
+				Weapon * weapon = new Weapon();
+				bool ok = Weapon::Get(equippedWeapon.name, weapon);
+				if (!ok) {
+					LogMain("Failed to load weapon by name: " + equippedWeapon.name, ERROR);
+					delete weapon;
+					continue;
+				}
+				playerShip->weaponSet.Add(weapon);
+			}
+			LogMain("Weapons locked and loaded", INFO);
+			HUD::Get()->UpdateHUDGearedWeapons();
+		}
 		if (msg == "ReloadWeapon")
 		{
 			if (playerShip->activeWeapon == nullptr)
@@ -523,18 +550,21 @@ void PlayingLevel::ProcessMessage(Message* message)
 		{
 			playerShip->SetLevelOfAllWeaponsTo(0);
 			playerShip->activeWeapon = playerShip->SetWeaponLevel(Weapon::Type::MachineGun, 1);
+			HUD::Get()->UpdateHUDGearedWeapons();
 		}
 		if (msg == "TutorialLevel1Weapons")
 		{
 			playerShip->SetWeaponLevel(Weapon::Type::MachineGun, 1);
 			playerShip->SetWeaponLevel(Weapon::Type::SmallRockets, 1);
 			playerShip->SetWeaponLevel(Weapon::Type::BigRockets, 1);
+			HUD::Get()->UpdateHUDGearedWeapons();
 		}
 		if (msg == "TutorialLevel3Weapons")
 		{
 			playerShip->SetWeaponLevel(Weapon::Type::MachineGun, 3);
 			playerShip->SetWeaponLevel(Weapon::Type::SmallRockets, 3);
 			playerShip->SetWeaponLevel(Weapon::Type::BigRockets, 3);
+			HUD::Get()->UpdateHUDGearedWeapons();
 		}
 		if (msg.StartsWith("DecreaseWeaponLevel:"))
 		{
@@ -781,6 +811,10 @@ void PlayingLevel::Cleanup()
 				)
 			)
 		{
+			if (pp->enemy) {
+				projectilesDodged.Add(true);
+				UpdateEnemyProjectilesDodgedString();
+			}
 			MapMan.DeleteEntity(proj);
 			projectileEntities.Remove(proj);
 			--i;
@@ -856,7 +890,7 @@ ShipPtr PlayingLevel::GetShip(EntitySharedPtr forEntity) {
 /// o.o
 void PlayingLevel::NewPlayer()
 {
-	playerShip = std::shared_ptr<Ship>(new PlayerShip());
+	playerShip = std::shared_ptr<PlayerShip>(new PlayerShip());
 	playerShip->selfPtr = playerShip;
 }
 
@@ -1105,6 +1139,8 @@ UserInterface* spawnUI = 0;
 
 void PlayingLevel::OpenSpawnWindow()
 {
+	return;
+
 	if (!spawnWindow)
 	{
 		spawnWindow = WindowMan.NewWindow("SpawnWindow", "Spawn Window");
@@ -1161,6 +1197,17 @@ bool PlayingLevel::DefeatedAllEnemiesInTheLastSpawnGroup() {
 
 void PlayingLevel::SetLastSpawnGroup(SpawnGroup * sg) {
 	lastSpawnGroup = sg;
+}
+
+void PlayingLevel::UpdateEnemyProjectilesDodgedString() {
+	if (projectilesDodged.Size() > 100) {
+		projectilesDodged.RemoveIndex(0, ListOption::RETAIN_ORDER);
+	}
+	int dodged = 0;
+	for (int i = 0; i < projectilesDodged.Size(); ++i)
+		dodged += projectilesDodged[i] ? 1 : 0;
+	int total = projectilesDodged.Size();
+	enemyProjectilesDodgedString = String(dodged) + " / " + String(total);
 }
 
 

@@ -10,6 +10,7 @@
 #include "Graphics/Particles/Stars.h"
 
 class Ship;
+class PlayerShip;
 class PlayingLevel;
 struct Mission;
 
@@ -86,7 +87,7 @@ public:
 	/// These will hopefully always be in AABB axes.
 	Vector3f frustumMin, frustumMax;
 
-	static ShipPtr playerShip;
+	static std::shared_ptr<PlayerShip> playerShip;
 	/// The level entity, around which the playing field and camera are based upon.
 	static EntitySharedPtr levelEntity;
 	static Vector2f playingFieldSize;
@@ -126,6 +127,18 @@ public:
 
 	bool playTutorial;
 
+
+	// Statistics for achievements
+	String enemyProjectilesDodgedString;
+	void UpdateEnemyProjectilesDodgedString();
+	List<bool> projectilesDodged;
+	int projectilesFired = 0;
+	int projectileDamageTaken = 0;
+	float armorRegenerated = 0;
+	float shieldRegenerated = 0;
+
+
+	int hudUpdates = 0;
 private:
 
 	SpawnGroup * lastSpawnGroup;
@@ -136,5 +149,6 @@ private:
 	int timeDeadMs = 0;
 
 	std::shared_ptr<ParticleEmitter> starEmitter = nullptr;
+
 };
 

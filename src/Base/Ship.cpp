@@ -15,7 +15,7 @@
 #include "SpaceShooterScript.h"
 #include "Properties/ShipProperty.h"
 #include "PlayingLevel.h"
-
+#include "Base/PlayerShip.h"
 #include "PlayingLevel/HUD.h"
 
 int Ship::shipIDEnumerator = 0;
@@ -97,7 +97,7 @@ ShipPtr Ship::NewShip(const Ship& ref)
 
 Ship::~Ship()
 {
-	weapons.ClearAndDelete();
+	weaponSet.ClearAndDelete();
 	if (spawnGroup)
 	{
 		spawnGroup->RemoveThis(this);
@@ -140,9 +140,9 @@ void Ship::RandomizeWeaponCooldowns()
 {
 //	if (!ai)
 //		return;
-	for (int i = 0; i < weapons.Size(); ++i)
+	for (int i = 0; i < weaponSet.Size(); ++i)
 	{
-		Weapon * weap = weapons[i];
+		Weapon * weap = weaponSet[i];
 		weap->currCooldownMs = (int) (weap->cooldown.Milliseconds() * cooldownRand.Randf());
 //		weap->lastShot = /*flyTime +*/ Time::Milliseconds(weap->cooldown.Milliseconds() * cooldownRand.Randf());
 	}
@@ -385,8 +385,11 @@ void Ship::Process(PlayingLevel& playingLevel, int timeInMs)
 	if (hasShield)
 	{
 		// Repair shield
-		if (shieldValue < MaxShield())
-			shieldValue += timeInMs * shieldRegenRate * (activeSkill == POWER_SHIELD? 0.1f : 0.001f) * (activeSkill == ATTACK_FRENZY? -1.0f : 1.0f);
+		if (shieldValue < MaxShield()) {
+			float toRegen = timeInMs * shieldRegenRate * (activeSkill == POWER_SHIELD ? 0.1f : 0.001f) * (activeSkill == ATTACK_FRENZY ? -1.0f : 1.0f);
+			playingLevel.shieldRegenerated += toRegen;
+			shieldValue += toRegen;
+		}
 		if (shieldValue > MaxShield())
 			shieldValue = shieldValue * 0.998f + 0.002f * MaxShield(); // If past the max, tune to max by 1% per frame?
 		if (allied)
@@ -394,10 +397,14 @@ void Ship::Process(PlayingLevel& playingLevel, int timeInMs)
 	}
 	if (allied)
 	{
-		hp += timeInMs * armorRegenRate * 0.001f;
-		if (hp > maxHP)
-			hp = (float) maxHP;
-		HUD::Get()->UpdateUIPlayerHP(false);
+		if (hp < maxHP) {
+			float toRegen = timeInMs * armorRegenRate * 0.001f;
+			playingLevel.armorRegenerated += toRegen;
+			hp += toRegen;
+			if (hp > maxHP)
+				hp = (float)maxHP;
+			HUD::Get()->UpdateUIPlayerHP(false);
+		}
 	}
 }
 
@@ -440,7 +447,7 @@ void Ship::ProcessAI(PlayingLevel& playingLevel, int timeInMs)
 
 void Ship::ProcessWeapons(PlayingLevel& playingLevel, int timeInMs)
 {
-	if (!weapons.Size())
+	if (!weaponSet.Size())
 		return;
 
 	if (weaponScriptActive && weaponScript)
@@ -449,21 +456,21 @@ void Ship::ProcessWeapons(PlayingLevel& playingLevel, int timeInMs)
 	}
 
 	/// Process ze weapons.
-	for (int i = 0; i < weapons.Size(); ++i)
-		weapons[i]->Process(playingLevel, GetSharedPtr(), timeInMs);
+	for (int i = 0; i < weaponSet.Size(); ++i)
+		weaponSet[i]->Process(playingLevel, GetSharedPtr(), timeInMs);
 
 	// enemy AI fire all weapons simultaneously for the time being.
 	if (enemy)
 	{
 		shoot = false;
-		if (weapons.Size() == 0)
+		if (weaponSet.Size() == 0)
 		{
 			std::cout<<"\nLacking weapons..";
 		}
 		// Do stuff.
-		for (int i = 0; i < weapons.Size(); ++i)
+		for (int i = 0; i < weaponSet.Size(); ++i)
 		{
-			Weapon * weapon = weapons[i];
+			Weapon * weapon = weaponSet[i];
 			// Aim.
 			weapon->Aim(playingLevel, GetSharedPtr());
 			// Dude..
@@ -476,7 +483,7 @@ void Ship::ProcessWeapons(PlayingLevel& playingLevel, int timeInMs)
 	if (!shoot)
 		return;
 	if (activeWeapon == 0)
-		activeWeapon = weapons.Size()? weapons[0] : 0;
+		activeWeapon = weaponSet.Size()? weaponSet[0] : 0;
 	// Shoot with current weapon for player.
 	if (activeWeapon)
 		activeWeapon->Shoot(playingLevel, GetSharedPtr());
@@ -511,9 +518,9 @@ void Ship::SetWeaponCooldownByID(int id, AETime newcooldown)
 /// Disables weapon in this and children ships.
 void Ship::DisableWeapon(String weaponName)
 {
-	for (int i = 0; i < weapons.Size(); ++i)
+	for (int i = 0; i < weaponSet.Size(); ++i)
 	{
-		Weapon * weap = weapons[i];
+		Weapon * weap = weaponSet[i];
 		if (weap->name == weaponName)
 			weap->enabled = false;
 	}
@@ -555,6 +562,11 @@ void Ship::OnSpeedUpdated(PlayingLevel& playingLevel)
 
 void Ship::Damage(PlayingLevel& playingLevel, Weapon & weapon)
 {
+	if (allied) {
+		playingLevel.projectilesDodged.Add(false);
+		playingLevel.UpdateEnemyProjectilesDodgedString();
+	}
+
 	float damage = weapon.damage * weapon.relativeStrength;
 	bool ignoreShield = false;
 	if (weapon.type == Weapon::Type::HeatWave)
@@ -596,16 +608,16 @@ bool Ship::Damage(PlayingLevel& playingLevel, float amount, bool ignoreShield, D
 			return false;
 	}
 	// Modulate amount depending on armor toughness and reactivity.
-	float activeToughness = (float)armorToughness;
+	float activeToughness = (float)armorStats.toughness;
 	/// Projectile/explosion-type attacks, reactivity effects.
 	switch (source) {
 	case DamageSource::Collision: // No addition, unless..?
 		break;
 	case DamageSource::Explosion:
-		activeToughness += armorReactivity * 0.5f;
+		activeToughness += armorStats.reactivity * 0.5f;
 		break;
 	case DamageSource::Projectile:
-		activeToughness += armorReactivity;
+		activeToughness += armorStats.reactivity;
 		break;
 	}
 	// 3 toughness = 333% damage 
@@ -737,16 +749,16 @@ bool Ship::EnableWeaponsByID(int id)
 
 
 void Ship::SetLevelOfAllWeaponsTo(int level) {
-	for (int i = 0; i < weapons.Size(); ++i)
-		weapons[i]->level = level;
+	for (int i = 0; i < weaponSet.Size(); ++i)
+		weaponSet[i]->level = level;
 }
 
 
 bool Ship::DisableAllWeapons()
 {
-	for (int i = 0; i < weapons.Size(); ++i)
+	for (int i = 0; i < weaponSet.Size(); ++i)
 	{
-		Weapon * weap = weapons[i];
+		Weapon * weap = weaponSet[i];
 		weap->enabled = false;
 	}
 	for (int i = 0; i < children.Size(); ++i)
@@ -783,13 +795,13 @@ ShipPtr Ship::New(String shipByName)
 
 void Ship::CopyWeaponsFrom(const Ship& ref) {
 	// Create copies of the weapons.
-	this->weapons.Clear();
-	for (int j = 0; j < ref.weapons.Size(); ++j)
+	this->weaponSet.Clear();
+	for (int j = 0; j < ref.weaponSet.Size(); ++j)
 	{
-		Weapon * refWeap = ref.weapons[j];
+		Weapon * refWeap = ref.weaponSet[j];
 		Weapon * newWeap = new Weapon();
 		*newWeap = *refWeap; // Weapon::Get(refWeap->type, refWeap->level);
-		this->weapons.AddItem(newWeap);
+		this->weaponSet.AddItem(newWeap);
 	}
 }
 
@@ -860,9 +872,9 @@ void Ship::CopyStatsFrom(const Ship& ref) {
 	graphicModel = ref.graphicModel;
 	other = ref.other;
 
-	weapons = WeaponSet(ref.weapons);
-	if (weapons.Size())
-		activeWeapon = weapons[0]; 
+	weaponSet = WeaponSet(ref.weaponSet);
+	if (weaponSet.Size())
+		activeWeapon = weaponSet[0]; 
 
 	/// If allied or player, false for enemies.
 	allied = ref.allied;
@@ -896,15 +908,15 @@ float Ship::MaxShield()
 {
 	if (activeSkill == POWER_SHIELD)
 		return maxShieldValue * 10;
-	return maxShieldValue;
+	return maxShieldValue * this->shieldGeneratorEfficiency;
 }
 
 /// Checks weapon's latest aim dir.
 Vector3f Ship::WeaponTargetDir()
 {
-	for (int i = 0; i < weapons.Size(); ++i)
+	for (int i = 0; i < weaponSet.Size(); ++i)
 	{
-		Weapon * weapon = weapons[i];
+		Weapon * weapon = weaponSet[i];
 		if (weapon->aim)
 			return weapon->currentAim;
 	}
@@ -912,21 +924,21 @@ Vector3f Ship::WeaponTargetDir()
 }
 
 int Ship::CurrentWeaponIndex() {
-	return weapons.GetIndexOf(activeWeapon);
+	return weaponSet.GetIndexOf(activeWeapon);
 }
 
 bool Ship::SwitchToWeapon(int index)
 {
 	if (index < 0)
-		index = weapons.Size() - 1;
-	if (index >= weapons.Size())
+		index = weaponSet.Size() - 1;
+	if (index >= weaponSet.Size())
 		index = 0;
-	if (index < 0 || index >= weapons.Size())
+	if (index < 0 || index >= weaponSet.Size())
 	{
 		std::cout<<"\nSwitchToWeapon bad index";
 		return false;
 	}
-	activeWeapon = weapons[index];
+	activeWeapon = weaponSet[index];
 	std::cout<<"\nSwitched to weapon: "<<activeWeapon->name;
 //	UpdateStatsFromGear();
 	// Update ui
@@ -973,17 +985,17 @@ Weapon * Ship::SetWeaponLevel(Weapon::Type weaponType, int level)
 
 Weapon * Ship::GetWeapon(Weapon::Type ofType)
 {
-	for (int i = 0; i < weapons.Size(); ++i)
+	for (int i = 0; i < weaponSet.Size(); ++i)
 	{
-		Weapon * weapon = weapons[i];
+		Weapon * weapon = weaponSet[i];
 		if (weapon->type == ofType)
 			return weapon;
 	}
 	Weapon * newWeapon = new Weapon();
 	newWeapon->type = ofType;
 	newWeapon->level = 0;
-	weapons.AddItem(newWeapon);
-	return weapons.Last();
+	weaponSet.AddItem(newWeapon);
+	return weaponSet.Last();
 }
 
 int Skill::Cooldown(SkillType skill) {

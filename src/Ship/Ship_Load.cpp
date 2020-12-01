@@ -78,28 +78,28 @@ bool Ship::LoadTypes(String file)
 					Weapon * weapon = new Weapon(); 
 					bool ok = Weapon::Get(name, weapon);
 					if (ok)
-						ship->weapons.Add(weapon);
+						ship->weaponSet.Add(weapon);
 					else {
 						LogMain("Unable to find weapon by name \'"+name+"\' when parsing ship \'"+ship->name+"\'", INFO);
 						delete weapon;
 					}	
 				}
-				if (ship->weapons.Size())
+				if (ship->weaponSet.Size())
 					ship->canShoot = true;
 			}
 			else if (column == "Weapon Locations")
 			{
 				List<String> locations = value.Tokenize(",");
 				int numLocations = locations.Size();
-				int numWeaps = ship->weapons.Size();
+				int numWeaps = ship->weaponSet.Size();
 				if (numLocations != numWeaps)
 				{
 					LogMain("Bad number of locations for weapons, "+String(numLocations)+" locations for "+String(numWeaps)+" weapons", INFO);
 					continue;
 				}
-				for (int i = 0; i < ship->weapons.Size(); ++i)
+				for (int i = 0; i < ship->weaponSet.Size(); ++i)
 				{
-					Weapon * weapon = ship->weapons[i];
+					Weapon * weapon = ship->weaponSet[i];
 					String locStr = locations[i];
 					weapon->location.ParseFrom(locStr);
 					std::cout<<"\nWeap "<<weapon->name<<" pos"<<weapon->location;
@@ -146,7 +146,7 @@ bool Ship::LoadTypes(String file)
 			}
 		}
 
-		ship->boss = isBoss;		LogMain("Ship loaded: "+ship->name+", weapons: "+ship->weapons.Size(), INFO);
+		ship->boss = isBoss;		LogMain("Ship loaded: "+ship->name+", weapons: "+ship->weaponSet.Size(), INFO);
 		// Check for pre-existing ship of same name, remove it if so.
 		for (int i = 0; i < types.Size(); ++i)
 		{

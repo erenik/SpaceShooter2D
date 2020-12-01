@@ -72,6 +72,8 @@ MissionCompleted;You have successfully completed the mission $missionName!
 MissionClearedFirstTime;As this is your first time clearing it, \nyou receive cash bounty of $moneyReward.
 MissionClearedRepeat;As you have cleared this previously, \nyou receive a repeat cash bounty of $moneyReward.
 
+RedStarMissionIntro;Control tower: $Name, this sector \nhas seen some pirate fighter activity.\nBe wary of ambushes.
+
 
 AddEquipmentWeapon;Add weapon
 AddEquipmentArmor;Add armor layer

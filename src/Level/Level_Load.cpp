@@ -398,6 +398,8 @@ bool Level::Load(String fromSource)
 				spawnTime.ParseFrom(arg);
 				group->SetSpawnTime(spawnTime);
 			}
+			if (var == "Movement")
+				group->movementPattern = MovementPattern::ByName(arg);
 			if (var == "Position")
 				group->position.ParseFrom(line - "Position");
 			if (var == "ShipType")

@@ -7,6 +7,7 @@
 #include "SpaceShooter2D.h"
 #include "File/LogFile.h"
 #include "PlayingLevel.h"
+#include "PlayerShip.h"
 
 String Rotation::ToString()
 {

@@ -8,9 +8,9 @@
 #include "String/AEString.h"
 #include "Time/Time.h"
 #include "Weapon.h"
+#include "ArmorStats.h"
 
-
-class Gear 
+class Gear
 {
 	friend class Weapon;
 public:
@@ -41,12 +41,18 @@ public:
 	// Armor stats
 	int maxHP;
 	float armorRegen;
-	// Default 10. Higher values will reduce collision damage. Lower values will increase collision damage.
-	int toughness;
-	// Default 0. Higher values will reduce incoming projectile damage
-	int reactivity;
+
+	ArmorStats armorStats;
+
+	// Default 10. Higher values will reduce all damage.
+	int Toughness() const { return armorStats.toughness; };
+	// Default 0. Higher values will reduce incoming projectile damage. Does not affect collision damage.
+	int Reactivity() const { return armorStats.reactivity; };
 
 	String description;
+
+	static String TypeIcon(Type type);
+	String Icon();
 
 	/// o.o
 	static bool Load(String fromFile);

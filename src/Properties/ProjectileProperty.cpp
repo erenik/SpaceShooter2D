@@ -163,13 +163,23 @@ void ProjectileProperty::Process(int timeInMs)
 		{
 			// Clean-up.
 			sleeping = true;
+			if (enemy) {
+				pl.projectilesDodged.Add(true);
+				pl.UpdateEnemyProjectilesDodgedString();
+			}
 			return;
 		}
 	}
 	else if (weapon.linearDamping < 1.f)
 	{
-		if (owner->Velocity().LengthSquared() < 0.1f && weapon.acceleration == 0)
+		// Clean-up also those projectiles who have stopped moving.
+		if (owner->Velocity().LengthSquared() < 0.1f && weapon.acceleration == 0) {
 			sleeping = true;
+			if (enemy) {
+				pl.projectilesDodged.Add(true);
+				pl.UpdateEnemyProjectilesDodgedString();
+			}
+		}
 	}
 	if (weapon.homingFactor > 0)
 	{

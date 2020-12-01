@@ -412,13 +412,13 @@ void SpawnGroup::AddShipAtPosition(ConstVec3fr position)
 	ship->speed *= relativeSpeed;
 	ship->position = position;
 	/// ....
-	if(mp.movements.Size())
+	if(movementPattern.movements.Size())
 	{
-		ship->movements = mp.movements;
+		ship->movements = movementPattern.movements;
 	}
-	if(mp.rotations.Size())
+	if(movementPattern.rotations.Size())
 	{
-		ship->rotations = mp.rotations;
+		ship->rotations = movementPattern.rotations;
 	}
 	ships.AddItem(ship);
 }

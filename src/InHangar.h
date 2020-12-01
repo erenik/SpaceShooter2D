@@ -49,6 +49,7 @@ private:
 	void FillEditScreenEntries(String listName, Gear::Type type);
 	void FillSelectGearList(String list, Gear::Type type, Gear currentlyEquippedGearInSlot);
 	void OnGearChanged(); // Update edit screen entries and save game.
+	void UpdateShipStats();
 
 
 	void UpdateUpgradeStatesInList(); // Updates colors n stuff based on level
@@ -60,6 +61,7 @@ private:
 	//void UpdateGearList();
 
 	void SetGearCategory(Gear::Type category);
+	void OnGearCategoryChanged();
 
 	void UpdateGearDetails(String gearName);
 	void MoreStats(String upgrade, String inElement);
@@ -80,4 +82,6 @@ private:
 	bool replaceGear;
 	Gear::Type replaceGearType;
 	int replaceGearIndex;
+
+	bool editingShip;
 };

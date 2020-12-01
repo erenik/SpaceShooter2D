@@ -5,7 +5,7 @@
 #include "SpaceShooter2D.h"
 #include "File/SaveFile.h"
 #include "Application/Application.h"
-
+#include "Base/PlayerShip.h"
 #include "Window/AppWindow.h"
 
 #undef TEXT
@@ -38,7 +38,7 @@ void SpaceShooter2D::UpdateUI()
 		case LOAD_SAVES: toPush = "gui/LoadScreen.gui"; break;
 		case GAME_OVER: 
 		case PLAYING_LEVEL:	toPush = "gui/HUD.gui"; break;
-		case LEVEL_CLEARED: toPush = "gui/LevelStats.gui"; break;
+//		case LEVEL_CLEARED: toPush = "gui/LevelStats.gui"; break;
 		case IN_LOBBY: toPush = "gui/Lobby.gui"; break;
 		case IN_HANGAR: toPush = "gui/Hangar.gui"; break;
 		case IN_WORKSHOP: toPush = "gui/Workshop.gui"; break;

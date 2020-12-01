@@ -169,6 +169,13 @@ public:
 
 	int SkillCooldown();
 
+	// Multiplier on weapon cooldowns, the lower, the faster reload.
+	float reloadMultiplier = 1.0f;
+	// Multiplier between weapon shot rounds, the lower, the faster the rate of fire.
+	float rateOfFireMultiplier = 1.0f;
+	// From gearing too much.
+	float shieldGeneratorEfficiency = 1.0f;
+
 	int skillDurationMs;
 	float skillCooldownMultiplier; // default 1, lower in situations or tutorial
 	String onCollision;
@@ -208,7 +215,7 @@ public:
 	String graphicModel;
 	String other;
 
-	WeaponSet weapons;
+	WeaponSet weaponSet;
 	Weapon * activeWeapon; // One active weapon at a time.. for the player at least.
 
 	/// If allied or player, false for enemies.
@@ -230,8 +237,7 @@ public:
 	WeaponScript * weaponScript;
 
 	// Totals from equipped stuff.
-	float armorToughness; // Default 10?
-	float armorReactivity; // Default 1?
+	ArmorStats armorStats;
 
 private:
 	int shipID;

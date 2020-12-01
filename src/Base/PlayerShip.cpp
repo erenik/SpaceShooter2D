@@ -36,6 +36,7 @@ int PlayerShip::MaxGearForType(Gear::Type type) const {
 
 List<Gear> PlayerShip::Equipped(Gear::Type byType) const {
 	switch (byType) {
+	case Gear::Type::All: return weapons + shieldGenerators + armorLayers;
 	case Gear::Type::Weapon: return EquippedWeapons();
 	case Gear::Type::Armor: return EquippedArmorLayers();
 	case Gear::Type::Shield: return EquippedShieldGenerators();
@@ -133,30 +134,48 @@ void PlayerShip::UpdateStatsFromGear()
 	// Armor stats
 	this->maxHP = 100;
 	this->armorRegenRate = 1;
-	this->armorReactivity = 1;
-	this->armorToughness = 10;
+	this->armorStats = ArmorStats();
+	this->speed = 20;
+	this->rateOfFireMultiplier = 1.0f;
+	this->reloadMultiplier = 1.0f;
+	this->shieldRegenRate = 1;
+	this->maxShieldValue = 50;
+	this->shieldGeneratorEfficiency = 1.0f;
+
+	for (int i = 1; i < weapons.Size(); ++i) {
+		reloadMultiplier *= 1.1f;
+		this->shieldGeneratorEfficiency *= 0.9f;
+		this->rateOfFireMultiplier *= 0.95f;
+	}
+
 	for (int i = 0; i < armorLayers.Size(); ++i) {
 		float factor = 1.0f;
-		if (i > 0)
+		this->speed -= 2; // Decrease speed regardless of armor?
+		if (i > 0) {
 			factor = 0.5f;
+			this->speed *= 0.8f; // -20% speed per extra layer of armor.
+		}
 		Gear armor = armorLayers[i];
 		this->maxHP += armor.maxHP * factor;
 		this->armorRegenRate += armor.armorRegen * factor;
-		this->armorReactivity += armor.reactivity * factor;
-		this->armorToughness += armor.toughness * factor;
+		this->armorStats.reactivity += armor.Reactivity() * factor;
+		this->armorStats.toughness += armor.Toughness() * factor;
 	}
 	hp = (float)maxHP;
 
 	// Shield stats
-	this->shieldRegenRate = 1;
-	this->maxShieldValue = 50;
 	for (int i = 0; i < shieldGenerators.Size(); ++i) {
 		float factor = 1.0f;
-		if (i > 0)
+		if (i > 0) {
 			factor = 0.5f;
+			this->speed *= 0.9f;
+			this->reloadMultiplier *= 1.1f;
+			this->rateOfFireMultiplier *= 0.95f;
+		}
 		Gear shield = shieldGenerators[i];
 		this->shieldRegenRate += shield.shieldRegen * factor;
 		this->maxShieldValue += shield.maxShield * factor;
 	}
 	this->shieldValue = this->MaxShield();
+	this->shieldRegenRate *= shieldGeneratorEfficiency;
 }

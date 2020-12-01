@@ -35,7 +35,10 @@ hoverable false
 parent lMainMenu
 defaultSizeRatioY 0.15
 
-defaultTexture	0x4444
+defaultTexture	0x6666
+defaultTopBorder ui/border_top_4
+defaultRightBorder ui/border_right_4
+defaultTopRightCorner ui/top_right_corner_8x8
 
 button NewGameButton
 text	"New game"

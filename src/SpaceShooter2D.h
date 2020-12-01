@@ -114,7 +114,7 @@ enum SSGameMode {
 	LOAD_SAVES,
 	PLAYING_LEVEL,
 	GAME_OVER,
-	LEVEL_CLEARED,
+//	LEVEL_CLEARED,
 	SHOWING_LEVEL_STATS,
 };
 
@@ -146,6 +146,8 @@ public:
 
 	/// Creates default key-bindings for the state.
 	virtual void CreateDefaultBindings();
+
+	void LoadAutoSave();
 
 	// Upon save loaded, continue where the player last was. Probably in the hangar, but could also be elsewhere..?
 	void OnSaveLoaded();
@@ -197,7 +199,6 @@ public:
 	void TogglePause();
 	
 	void GameOver();
-	void OnLevelCleared();
 
 	/// Opens main menu.
 	void OpenMainMenu();
@@ -214,7 +215,7 @@ public:
 
 	void ResetCamera();	
 
-	SSGameMode mode;
+	static SSGameMode mode;
 	SSIntegrator * integrator;
 	SpaceShooterCR * cr;
 	SpaceShooterCD * cd;

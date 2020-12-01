@@ -28,11 +28,13 @@ parent MissionListAndDetails
 defaultSizeRatioXY 0.5 1.0
 
 List MissionsList
+sizeRatioX 0.6
 topBorder ui/border_top_4
 rightBorder ui/border_right_4
 topRightCorner ui/top_right_corner_8x8
 
 List MissionDetails 
+sizeRatioX 0.4
 
 parent MissionDetails
 defaultSizeRatioXY 1 0.1

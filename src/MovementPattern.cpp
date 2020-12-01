@@ -9,7 +9,18 @@
 
 List<MovementPattern> MovementPattern::movementPatterns;
 
-void MovementPattern::LoadPatterns(String fromPath)
+/* static */ MovementPattern MovementPattern::ByName(String name)
+{
+	for (int i = 0; i < movementPatterns.Size(); ++i) {
+		MovementPattern movementPattern = movementPatterns[i];
+		if (movementPattern.name == name)
+			return movementPattern;
+	}
+	assert(false && "Failed to find movement pattern by name");
+	return MovementPattern();
+}
+
+/* static */ void MovementPattern::LoadPatterns(String fromPath)
 {
 	List<String> lines = File::GetLines(fromPath);
 	if (lines.Size() == 0) {
@@ -17,15 +28,13 @@ void MovementPattern::LoadPatterns(String fromPath)
 		return;
 	}
 	char delimiter = FindCSVDelimiter(lines[0]);
-	List<String> columns = TokenizeCSV(lines[0], delimiter);
-	
-	// Den kommer göra det mesta
-	for(int i = 1; i<lines.Size(); i++)
+	List<String> columns = TokenizeCSV(lines[0], delimiter);	
+	for(int i = 1; i < lines.Size(); ++i)
 	{
 
 		List<String> tokens = TokenizeCSV(lines[i], delimiter);
 		MovementPattern mp;
-		for( int o = 0; o<tokens.Size(); o++)
+		for(int o = 0; o < tokens.Size(); ++o)
 		{
 			String column = columns[o];
 			if(column == "Name")

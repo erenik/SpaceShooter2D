@@ -55,26 +55,43 @@ defaultSizeRatioXY 0.25 1
 defaultTopBorder ui/border_top_4
 defaultRightBorder ui/border_right_4
 defaultTopRightCorner ui/top_right_corner_8x8
+defaultTexture 0x446666FF
 
 Button AllCategory
-Texture img/icons/AllCategory 
-retainAspectRatio true
 Text ""
 
 Button WeaponsCategory
 Text ""
-Texture img/icons/WeaponsCategory 
-retainAspectRatio true
 
 Button ArmorCategory
 Text ""
-Texture img/icons/ArmorCategory 
-retainAspectRatio true
 
 Button ShieldCategory
 Text ""
-Texture img/icons/ShieldCategory 
+
+// Icons in the buttons above
+defaultSizeRatioXY 1 1
+
+parent AllCategory
+Element Icon
+Texture img/icons/AllCategory
 retainAspectRatio true
+
+parent ArmorCategory
+Element Icon
+Texture img/icons/ArmorCategory
+retainAspectRatio true
+
+parent WeaponsCategory
+Element Icon
+Texture img/icons/WeaponsCategory
+retainAspectRatio true
+
+parent ShieldCategory
+Element Icon
+Texture img/icons/ShieldCategory
+retainAspectRatio true
+
 
 parent Stats
 

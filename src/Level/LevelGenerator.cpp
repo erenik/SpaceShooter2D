@@ -78,8 +78,8 @@ void GenerateLevel (PlayingLevel & playingLevel, String arguments)
 		}
 
 		//Select movement pattern
-		sg->mp = MovementPattern::movementPatterns[selector.Randi(MovementPattern::movementPatterns.Size())];
-		std::cout<<"\n"<<sg->mp.name;
+		sg->movementPattern = MovementPattern::movementPatterns[selector.Randi(MovementPattern::movementPatterns.Size())];
+		std::cout<<"\n"<<sg->movementPattern.name;
 		
 		//Select Rotation pattern
 		// When it spawns
@@ -108,7 +108,7 @@ void GenerateLevel (PlayingLevel & playingLevel, String arguments)
 		Vector2f playingFieldHalfSize = playingFieldSize / 2;
 		sg->position = Vector2f(playingFieldHalfSize.x+5.f, selector.Randf(randomAmountY) - randomAmountY * 0.5f);
 		/// Add to position offsets if requested by the movement pattern
-		sg->position += sg->mp.spawnOffset;
+		sg->position += sg->movementPattern.spawnOffset;
 
 
 		// Cooldown between formation spawns

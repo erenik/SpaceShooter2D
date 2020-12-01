@@ -43,21 +43,16 @@ padding 0.02
 /// Right side
 parent RightSide
 
-list lGeneralInfo
-sizeRatioY 0.3
+list lEditScreenShipStats
+sizeRatioY 0.45
 
 list Stats
-sizeRatioY 0.3
-
-label PreviewArea
-textColor 0x55FFFF22
-texture 0xFF15
-sizeRatioY 0.3
+sizeRatioY 0.5
 
 parent Stats
 
 defaultSizeRatioXY 1 1
-list SelectedStats
+list EditShipSelectedGearStats
 
 parent SelectedStats
 defaultSizeRatioXY 1 0.2
@@ -85,17 +80,17 @@ sizeRatioY 0.80
 parent Categories
 defaultSizeRatioXY 0.31 1
 
-Label WeaponsCategory
+Label WeaponsCategoryIcon
 Text ""
 Texture img/icons/WeaponsCategory 
 retainAspectRatio true
 
-Label ArmorCategory
+Label ArmorCategoryIcon
 Text ""
 Texture img/icons/ArmorCategory 
 retainAspectRatio true
 
-Label ShieldCategory
+Label ShieldCategoryIcon
 Text ""
 Texture img/icons/ShieldCategory 
 retainAspectRatio true

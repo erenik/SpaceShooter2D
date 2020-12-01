@@ -13,6 +13,7 @@
 #include "UI/UIUtil.h"
 #include "Input/InputManager.h"
 #include "Level/SpawnGroup.h"
+#include "Base/PlayerShip.h"
 
 HUD HUD::hud = HUD();
 
@@ -57,8 +58,8 @@ void HUD::UpdateActiveWeapon() {
 	Weapon* activeWeapon = pl.playerShip->activeWeapon;
 	if (!activeWeapon)
 		return;
-	QueueGraphics(new GMSetUIs("ActiveWeaponName", GMUI::TEXT, activeWeapon->name));
 	String status;
+	/*
 	if (activeWeapon->reloading) {
 		status = "Reloading...";
   		float reloadRatio = activeWeapon->currCooldownMs / float(activeWeapon->cooldown.Milliseconds());
@@ -72,6 +73,28 @@ void HUD::UpdateActiveWeapon() {
 		QueueGraphics(new GMSetUIf("ActiveWeaponAmmo", GMUI::BAR_FILL_RATIO, shotsLeftRatio));
 	}
 	QueueGraphics(new GMSetUIs("ActiveWeaponStatus", GMUI::TEXT, status));
+	*/
+
+	for (int i = 0; i < pl.playerShip->weaponSet.Size(); ++i) {
+		Weapon * weapon = pl.playerShip->weaponSet[i];
+		const String loadedPassiveWeapon = "0x89A";
+		const String loadedActiveWeapon = "0xABC";
+		const String loadingActiveWeapon = "0x404550";
+		const String loadingPassiveWeapon = "0x253035";
+
+		//QueueGraphics(new GMSetUIs("HUDWeaponStatus" + String(i), GMUI::TEXTURE_SOURCE,
+		//	weapon->reloading? (activeWeapon == weapon? loadingActiveWeapon : loadingPassiveWeapon) :
+		//	activeWeapon == weapon ? loadedActiveWeapon : loadedPassiveWeapon));
+
+		String hudWeaponStatusName = "HUDWeaponStatus" + String(i);
+
+		QueueGraphics(new GMSetUIb(hudWeaponStatusName, GMUI::ACTIVE, activeWeapon == weapon));
+		QueueGraphics(new GMSetUIb(hudWeaponStatusName, GMUI::TOGGLED, !weapon->reloading));
+
+		QueueGraphics(new GMSetUIs("Ammunition" + String(i), GMUI::TEXT, String(weapon->shotsLeft)));
+		QueueGraphics(new GMSetUIs("Cooldown" + String(i), GMUI::TEXT, String(weapon->currCooldownMs / 1000.0f, 1)));
+	}
+
 }
 
 void RequeueHUDUpdate()
@@ -85,45 +108,26 @@ void RequeueHUDUpdate()
 /// Update UI
 void HUD::UpdateHUDGearedWeapons()
 {
-	return;
 
+	// Remove old ones first.
+	QueueGraphics(new GMClearUI("clWeapons"));
 
-	MutexHandle mh(uiMutex);
-	// Fetch the names of the checkboxes.
-	UserInterface* ui = MainWindow()->ui;
-	if (!ui)
-	{
-		RequeueHUDUpdate();
-		return;
+	ShipPtr ship = GetPlayerShip();
+	List<UIElement*> weaponStatuses;
+	for (int i = 0; i < ship->weaponSet.Size(); ++i) {
+		Weapon * weapon = ship->weaponSet[i];
+		UIElement * weaponStatus = UserInterface::LoadUIAsElement("gui/HUDWeaponStatus.gui");
+		weaponStatus->name += String(i);
+		weaponStatus->GetElementByName("Icon")->textureSource = weapon->Icon();
+		weaponStatus->GetElementByName("WeaponName")->SetText(weapon->name);
+		weaponStatus->GetElementByName("Ammunition")->SetText(String(weapon->shotsLeft));
+		weaponStatus->GetElementByName("Ammunition")->name += String(i);
+		weaponStatus->GetElementByName("Cooldown")->name += String(i);
+		weaponStatuses.Add(weaponStatus);
 	}
-	UIElement* activeWeapon = ui->GetElementByName("Weapons");
-	if (!activeWeapon)
-	{
-		RequeueHUDUpdate();
-		return;
-	}
+	QueueGraphics(new GMAddUI(weaponStatuses, "clWeapons"));
 
-	PlayingLevel& pl = PlayingLevelRef();
-
-	// Fetch children.
-	assert(activeWeapon);
-	List<UIElement*> children = activeWeapon->GetChildren();
-	List<Weapon*>& weapons = pl.playerShip->weapons;
-	for (int i = 0; i < children.Size(); ++i)
-	{
-		UIElement* child = children[i];
-		if (i >= weapons.Size())
-		{
-			QueueGraphics(new GMSetUIs(child->name, GMUI::TEXT, "."));
-			QueueGraphics(new GMSetUIb(child->name, GMUI::ACTIVATABLE, false));
-			QueueGraphics(new GMSetUIb(child->name, GMUI::HOVERABLE, false));
-			continue;
-		}
-		Weapon* weapon = weapons[i];
-		QueueGraphics(new GMSetUIs(child->name, GMUI::TEXT, weapon->name));
-		QueueGraphics(new GMSetUIb(child->name, GMUI::ACTIVATABLE, true));
-		QueueGraphics(new GMSetUIb(child->name, GMUI::HOVERABLE, true));
-
+		/*
 		String overlayName = "WeaponCooldownOverlay" + String(i);
 		String textureSource = "img/ui/Cooldown_37.png";
 		if (overlaysCreated) {
@@ -148,7 +152,7 @@ void HUD::UpdateHUDGearedWeapons()
 				QueueGraphics(new GMAddUI(ammunition, child->name));
 			}
 		}
-	}
+		*/
 }
 
 // Only if cooldowns not already created.
@@ -192,7 +196,7 @@ void HUD::UpdateCooldowns()
 	if (pl.playerShip == nullptr)
 		return;
 
-	List<Weapon*>& weapons = pl.playerShip->weapons;
+	List<Weapon*>& weapons = pl.playerShip->weaponSet;
 	for (int i = 0; i < weapons.Size(); ++i)
 	{
 		Weapon* weapon = weapons[i];
@@ -238,6 +242,21 @@ void HUD::UpdateDebug() {
 	SpawnGroup * nextSpawnGroup = pl.level.NextSpawnGroup();
 	QueueGraphics(new GMSetUIs("NextSpawnGroupTime", GMUI::STRING_INPUT, (nextSpawnGroup != nullptr? nextSpawnGroup->SpawnTime().ToString("m:S") : "N/A" )));
 	QueueGraphics(new GMSetUIi("NextSpawnGroupLine", GMUI::INTEGER_INPUT, nextSpawnGroup != nullptr ? nextSpawnGroup->lineNumber : 0));
+
+
+	/*
+	IntegerLabel EnemyProjectilesDodged "Enemy projectiles dodged"
+	IntegerLabel RoundsFired "Rounds fired"
+	IntegerLabel ProjectileDamageTaken "Projectile damage taken"
+	IntegerLabel ArmorRegenerated "Armor regenerated"
+	IntegerLabel ShieldRegenerated "Shield regenerated"
+	*/
+	QueueGraphics(new GMSetUIs("EnemyProjectilesDodged", GMUI::STRING_INPUT, PlayingLevelRef().enemyProjectilesDodgedString));
+	QueueGraphics(new GMSetUIi("RoundsFired", GMUI::INTEGER_INPUT, PlayingLevelRef().projectilesFired));
+	QueueGraphics(new GMSetUIi("ProjectileDamageTaken", GMUI::INTEGER_INPUT, PlayingLevelRef().projectileDamageTaken));
+	QueueGraphics(new GMSetUIi("ArmorRegenerated", GMUI::INTEGER_INPUT, PlayingLevelRef().armorRegenerated));
+	QueueGraphics(new GMSetUIi("ShieldRegenerated", GMUI::INTEGER_INPUT, PlayingLevelRef().shieldRegenerated));
+	
 }
 
 String levelStatsGui = "gui/LevelStats.gui";

@@ -13,6 +13,7 @@
 #include "../Properties/ExplosionProperty.h"
 #include "PlayingLevel.h"
 #include "OS/Sleep.h"
+#include "Base/PlayerShip.h"
 
 Camera * levelCamera = NULL;
 
@@ -140,8 +141,8 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 	/// Clearing the level
 	if (LevelCleared(playingLevel))
 	{
-		spaceShooter->OnLevelCleared();
-		return; // No more processing if cleared?
+		MesMan.QueueMessages("GoToHangar");
+		return;
 	}
 	if (playingLevel.GameTimePaused()) {
 		LogMain("Game time is paused", EXTENSIVE_DEBUG);
