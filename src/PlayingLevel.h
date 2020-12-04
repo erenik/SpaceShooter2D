@@ -139,6 +139,10 @@ public:
 
 
 	int hudUpdates = 0;
+
+	// Temporary mission score
+	int score = 0;
+
 private:
 
 	SpawnGroup * lastSpawnGroup;

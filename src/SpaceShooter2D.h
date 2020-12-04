@@ -166,10 +166,12 @@ public:
 	/// o.o
 	EntitySharedPtr OnShipDestroyed(ShipPtr ship);
 
+	// Hello!
+	void SetHighscore(String forMissionName, int score);
+	int GetHighscore(String forMissionName);
 
 	String GetLevelVarName(String level, String name);
-	/// Level score.
-	GameVariable * LevelScore(String level = "current");
+
 	/// Level kills. If -1, returns current.
 	GameVariable * LevelKills(String level = "current");
 	/// Level max kills possible.
@@ -244,6 +246,7 @@ public:
 	static Time startDate;
 	static String levelToLoad;
 	static bool paused;
+	float MissionRepeatClearBountyMultiplier() { return 0.25f; };
 
 protected:
 	static bool shipDataLoaded;

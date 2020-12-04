@@ -118,7 +118,7 @@ SpaceShooter2D::~SpaceShooter2D()
 /// Function when entering this state, providing a pointer to the previous StateMan.
 void SpaceShooter2D::OnEnter(AppState * previousState)
 {
-	SaveFile::LoadAutoSave(Application::name);
+	//SaveFile::LoadAutoSave(Application::name);
 
 	// Set some default 
 	// When clicking on it.
@@ -141,7 +141,7 @@ void SpaceShooter2D::OnEnter(AppState * previousState)
 	/// Create game variables.
 	currentLevel = GameVars.CreateInt("currentLevel", 1);
 	currentStage = GameVars.CreateInt("currentStage", 1);
-	playerNameVar = GameVars.GetString("playerName");
+	playerNameVar = GameVars.CreateString("playerName");
 	score = GameVars.CreateInt("score", 0);
 	playTime = GameVars.CreateInt("playTime", 0);
 	gameStartDate = GameVars.CreateTime("gameStartDate");
@@ -346,7 +346,7 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 		case MessageType::INTEGER_MESSAGE:
 		{
 			IntegerMessage * im = (IntegerMessage*) message;
-			if (msg == "SetDifficulty")
+			if (msg == "SetNewGameDifficulty")
 			{
 				difficulty->iValue = im->value;
 			}
@@ -601,6 +601,17 @@ EntitySharedPtr SpaceShooter2D::OnShipDestroyed(ShipPtr ship)
 	return NULL;
 }
 
+void SpaceShooter2D::SetHighscore(String forMissionName, int score) {
+	GameVars.GetInt(forMissionName)->iValue = score;
+}
+
+int SpaceShooter2D::GetHighscore(String forMissionName) {
+	GameVar * missionHighscore = GameVars.GetInt(forMissionName);
+	if (missionHighscore == nullptr)
+		return 0;
+	return missionHighscore->iValue;
+}
+
 String SpaceShooter2D::GetLevelVarName(String levelPath, String name)
 {
 	if (levelPath == "current")
@@ -614,12 +625,6 @@ String SpaceShooter2D::GetLevelVarName(String levelPath, String name)
 	if (!gv)\
 		gv = GameVars.CreateInt(name, 0);\
 	return gv;\
-
-/// Level score. If -1, returns current.
-GameVariable * SpaceShooter2D::LevelScore(String level)
-{
-	GetVar("score");
-}
 
 /// Level score. If -1, returns current.
 GameVariable * SpaceShooter2D::LevelKills(String level)
@@ -660,7 +665,6 @@ int& SpaceShooter2D::Money(){
 /// Resets all the above.
 void SpaceShooter2D::ResetLevelStats()
 {
-	LevelScore()->iValue = 0;
 	LevelKills()->iValue = 0;
 	LevelPossibleKills()->iValue = 0;
 }
@@ -723,6 +727,20 @@ void SpaceShooter2D::NewGame()
 	PopUI("MainMenu");
 		
 	startDate = Time::Now();
+
+	GameVar * currentMissionVar = GameVars.CreateString("CurrentMission");
+	currentMissionVar->strValue = MissionsMan.GetMissionByName("Tutorial")->name;
+
+	Weapon weapon;
+	Weapon::Get("Machine gun I", &weapon);
+	Weapon::SetOwnedQuantity(weapon, 1);
+	Weapon::Get("Small rockets I", &weapon);
+	Weapon::SetOwnedQuantity(weapon, 1);
+	Weapon::Get("Big rockets I", &weapon);
+	Weapon::SetOwnedQuantity(weapon, 1);
+
+	// Save game with stats before leaving screen and loading any other save...
+	SaveGame();
 
 	// Reset scores.
 	score->iValue = 0;

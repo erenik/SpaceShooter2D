@@ -8,7 +8,7 @@ root
 name HangarScreen
 texture NULL
 exitable false
-
+navigateUIOnPush
 
 parent HangarScreen
 

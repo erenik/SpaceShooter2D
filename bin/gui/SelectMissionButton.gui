@@ -34,8 +34,9 @@ retainAspectRatio true
 
 Label MissionName "Test"
 hoverable false
-sizeRatioX 0.35
+sizeRatioX 0.55
 
+/*
 Label BountyText "Bounty"
 hoverable false
 textAlignment right
@@ -45,6 +46,7 @@ Label Bounty "100"
 hoverable false
 textAlignment right
 sizeRatioX 0.15
+*/
 
 Label Completed ""
 hoverable false

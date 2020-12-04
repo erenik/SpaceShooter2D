@@ -39,232 +39,87 @@ DontSkip
 *Start*
 Fighter enemies (2 hits) grouped in different formations, firing (low damage) in succession. Moving straight forward, forward while traveling up/down.
 */
-SpawnGroup +:05
+SpawnGroup +:03
+Name Fighters_VX_5
 ShipType Fighter
-Formation LINE_Y
+Formation V_X
 Number	5
 Size xy 10 10
-Position xy 0 -5
-Movement UpLeft
-
-CopyGroup +:05
-Formation LINE_X
-Position xy 0 5
-Movement DownLeft
-
-CopyGroup +:05
-Formation LINE_XY
-Position xy 0 -5
-Movement UpLeft
-
-CopyGroup +:05
-Formation V_X
-Position xy 0 5
-Movement DownLeft
-
-CopyGroup +:05
-Formation V_Y
-Position xy 0 -10
-Movement UpLeft
-
-CopyGroup +:05
-Formation SWARM_BOX_XY
 Position xy 0 0
 Movement Straight
 
-CopyGroup +:05
-Formation SWARM_BOX_XY
-Position xy 0 10
-Movement Straight-n-Down
-
-CopyGroup +:05
-Formation SWARM_BOX_XY
-Position xy 0 -10
-Movement Straight-n-Up
-
-
-/* 00:30 - 01:45 (if too long/boring throw in whatever)
-
-Bombers (6 hits) carrying two missiles fired in succession escorted by fighters in different formations - fighters first, starting at three fighters for one bomber. Bombers increasing their speed as their missiles are fired. If bombers survive to the left edge of screen, they return later *Store 1*.
-
-3x: Unescorted bombers in vertical line formation spawn and after some delay all fire all their missiles simultaneously.
-*/
-
-
-CopyGroup +:7
-Name Fighters_3
-ShipType Fighter
-Formation LINE_Y
-Size xy 5 5
-Number 3
-Position y 0
-
-CopyGroup +:1
-Name Bomber_1
-ShipType Bomber
-Number	1
-Position y 0
-
-CopyNamedGroup Fighters_3 +:7
-CopyNamedGroup Bomber_1 +:1
-
-CopyNamedGroup Fighters_3 +:7
-CopyNamedGroup Bomber_1 +:1
-
-CopyNamedGroup Fighters_3 +:7
-Name Fighters_Square_3
-Size xy 5 5
-Position y 5
-Formation Square 
-CopyNamedGroup Bomber_1 +:0
-Position y 5
-
-CopyNamedGroup Fighters_Square_3 +:5
-Position y -5
-CopyNamedGroup Bomber_1 +:0
-Position y -5
-
-
-
-CopyGroup +:8
-Name Fighters_5
-ShipType Fighter
-Formation LINE_Y
-Size y 8
-Number 5
-Position y 0
-
-CopyGroup +:1
-Name Bombers_2
-ShipType Bomber
-Number	2
-Size y 4
-Position y 0
-
-CopyNamedGroup Fighters_5 +:8
-Name TightFighters_5
-Size xy 5 5
-CopyNamedGroup Bombers_2 +:0.5
-
-CopyNamedGroup TightFighters_5 +:8
-CopyNamedGroup Bombers_2 +:0.5
-
-CopyGroup +:9
-Name Fighters_7
-ShipType Fighter
-Formation LINE_Y
-Size y 11
-Number 7
-
-CopyGroup +:1
-Name Bombers_3
-ShipType Bomber
-Size y 8
+CopyGroup +:01
+ShipType Fighter2
 Number	3
+Size xy 5 5
 
-CopyNamedGroup Fighters_7 +:9
-CopyNamedGroup Bombers_3 +:1
+CopyGroup +:01
+ShipType Fighter3
+Formation V_X
+Number	1
 
-CopyNamedGroup Fighters_7 +:9
-CopyNamedGroup Bombers_3 +:1
 
-CopyGroup +:10
+// Lower attack!
+CopyNamedGroup Fighters_VX_5 +:5
+Position xy 0 -10
+Movement UpLeft
+
+CopyGroup +:01
+ShipType Fighter2
+Number	3
+Size xy 5 5
+
+CopyGroup +:01
+ShipType Fighter3
+Formation V_X
+Number	1
+
+
+// Upper attack!
+CopyNamedGroup Fighters_VX_5 +:5
+Position xy 0 10
+Movement DownLeft
+
+CopyGroup +:01
+ShipType Fighter2
+Number	3
+Size xy 5 5
+
+CopyGroup +:01
+ShipType Fighter3
+Formation V_X
+Number	1
+
+
+// Some break time
+// Some messages?
+
+
+// Stray fighters
+CopyGroup +:12
 Formation SWARM_BOX_XY
-Number 5
-Size xy 15 15
 Position xy 0 0
-
-/*
-01:45 - 02:30 (if too long/boring throw in whatever)
-
-Big fighters (x4 in size, 10 hits) escorted by fighters in different formations, smaller next to and behind the big ones. Big fighters stop in the middle of the screen for 10s before moving on, firing main weapon (aim, high damage, high reload) and two bursts (aim, 3 burst, low damage). Small fighters don’t stop. 
-
-Bomber survivors return with new payloads at 02:15. *Release 1*
-*/
-
-SpawnGroup +:15
-Name BigFighter_1_Escort
+Movement Straight-n-Up
+Size xy 30 20
 ShipType Fighter
-Formation DOUBLE_LINE_X
-Number	5
-Size xy 10 8
-Position xy 0 0
+Number 10
 
-CopyGroup +:5
-Name BigFighter_1
-ShipType BigFighter
-Formation LINE_Y
-Number 1
-Position y 0
+CopyGroup +:1
+Formation SWARM_BOX_XY
+Size xy 25 15
+ShipType Fighter2
+Number 5
 
-CopyNamedGroup BigFighter_1_Escort +:13
-Size y 10
-CopyNamedGroup BigFighter_1 +:5
+CopyGroup +:1
+Formation SWARM_BOX_XY
+Size xy 20 10
+ShipType Fighter3
+Number 3
 
-CopyNamedGroup BigFighter_1_Escort +:11
-Size y 12
-CopyNamedGroup BigFighter_1 +:5
-
-CopyNamedGroup BigFighter_1_Escort +:9
-Size y 14
-CopyNamedGroup BigFighter_1 +:5
-
-CopyNamedGroup BigFighter_1_Escort +:7
-Size y 16
-
-// Make sure we pause and let the player kill the last enemies before we finalize the level
-Event SetMessagesPauseGameTime(true)
-DontSkip
-Event SetSpawnGroupsPauseGameTime(true)
-DontSkip
-
-CopyNamedGroup BigFighter_1 +:5
-
-Message +:2
-TextID FirstMissionComplete
-Message 
-TextID FirstMissionComplete2
-Message 
-TextID RogerReturningToBase
-
-Event
-String SetInt(TutorialCleared, 1)
-
-Event +:1
-String GoToHangar
-DontSkip
+// Another break 
 
 
 
-/*
-02:30-03:00
-
-Turrets (5 hits) come in horizontal rows, firing bursts (aim, 4 burst, low damage). Fighters traveling up and down firing straight support them. 
-*/
-
-
-
-/*
-03:00 - 03:50
-*Traveling speed +200%* (player is chasing some ship that is escaping with an important bit of technology. Uses text box with no interaction. Story.)
-
-Fast enemies ramming player spawns at random positions on right side of screen, one at a time, increasing spawn rate over time. After some time they’re accompanied by fighters that slowly circle the player at up to half screen distance from player while shooting. 
-
-2x: The spawning of both enemies stop for a few seconds, and 5-7 volleys of 4 clustered ramming enemies spawn in rhombus formation with 1.71 second delay. Previous enemy spawning resumes after. Spawn rate never resets.
-*/
-
-/* 
-03:50 - 04:45
-*Traveling speed reset*
-
-Fighters in wavy and loopy patterns. Occasional bombers.
-*/
-
-/*
-04:45 - 05:00
-
-Three big fighters spawn, firing with low cooldown and no aim. They move slowly straight forward.
-*/
 
 
 

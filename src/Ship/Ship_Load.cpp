@@ -63,7 +63,7 @@ bool Ship::LoadTypes(String file)
 			else if (column == "Type")
 				ship->type = value;
 			else if (column == "Difficulty")
-				ship->difficulty = value.ParseInt();			
+				ship->difficulty = value.ParseInt();
 			else if (column == "OnCollision")
 				ship->onCollision = value;
 			else if (column == "Weapons")
@@ -75,14 +75,14 @@ bool Ship::LoadTypes(String file)
 					String name = weaponNames[i];
 					name.RemoveInitialWhitespaces();
 					name.RemoveTrailingWhitespaces();
-					Weapon * weapon = new Weapon(); 
+					Weapon * weapon = new Weapon();
 					bool ok = Weapon::Get(name, weapon);
 					if (ok)
 						ship->weaponSet.Add(weapon);
 					else {
-						LogMain("Unable to find weapon by name \'"+name+"\' when parsing ship \'"+ship->name+"\'", INFO);
+						LogMain("Unable to find weapon by name \'" + name + "\' when parsing ship \'" + ship->name + "\'", INFO);
 						delete weapon;
-					}	
+					}
 				}
 				if (ship->weaponSet.Size())
 					ship->canShoot = true;
@@ -94,7 +94,7 @@ bool Ship::LoadTypes(String file)
 				int numWeaps = ship->weaponSet.Size();
 				if (numLocations != numWeaps)
 				{
-					LogMain("Bad number of locations for weapons, "+String(numLocations)+" locations for "+String(numWeaps)+" weapons", INFO);
+					LogMain("Bad number of locations for weapons, " + String(numLocations) + " locations for " + String(numWeaps) + " weapons", INFO);
 					continue;
 				}
 				for (int i = 0; i < ship->weaponSet.Size(); ++i)
@@ -102,7 +102,7 @@ bool Ship::LoadTypes(String file)
 					Weapon * weapon = ship->weaponSet[i];
 					String locStr = locations[i];
 					weapon->location.ParseFrom(locStr);
-					std::cout<<"\nWeap "<<weapon->name<<" pos"<<weapon->location;
+					std::cout << "\nWeap " << weapon->name << " pos" << weapon->location;
 				}
 			}
 			else if (column == "Movement pattern")
@@ -125,11 +125,11 @@ bool Ship::LoadTypes(String file)
 			else if (column == "Has Shield")
 				ship->hasShield = value.ParseBool();
 			else if (column == "Shield Value")
-				ship->shieldValue = ship->maxShieldValue = (float) value.ParseInt();
+				ship->shieldValue = ship->maxShieldValue = (float)value.ParseInt();
 			else if (column == "Shield Regen Rate")
 				ship->shieldRegenRate = value.ParseInt() / 1000.f;
 			else if (column == "Hit points")
-				ship->maxHP = ship->hp = value.ParseInt();
+				ship->maxHP = int(ship->hp = int(value.ParseInt()));
 			else if (column == "Collide damage")
 				ship->collideDamage = value.ParseInt();
 			else if (column == "Script")
@@ -137,7 +137,9 @@ bool Ship::LoadTypes(String file)
 			else if (column == "Max rotation per second" || column == "Rotation Speed")
 				ship->maxRadiansPerSecond = DEGREES_TO_RADIANS(value.ParseInt());
 			else if (column == "Graphic model")
-				ship->graphicModel = value;
+				ship->visuals.graphicModel = value;
+			else if (column == "Texture")
+				ship->visuals.textureSource = value;
 			else if (column == "Physics Model")
 				ship->physicsModel = value;
 			else 

@@ -40,10 +40,11 @@ parent MissionDetails
 defaultSizeRatioXY 1 0.1
 defaultTexture null
 
-StringLabel Name "Name"
-StringLabel Difficulty "Difficulty"
-IntegerLabel Bounty "Bounty"
-IntegerLabel Highscore "High score"
+label MissionDetails 
+text "Mission details"
+StringLabel MissionDetailsName "Name"
+IntegerLabel MissionDetailsBounty "Bounty"
+IntegerLabel MissionDetailsHighscore "High score"
 Image PreviewPicture
 texture img/icons/SmallRockets
 sizeRatioY 0.3

@@ -40,7 +40,7 @@ void SpaceShooter2D::UpdateUI()
 		case PLAYING_LEVEL:	toPush = "gui/HUD.gui"; break;
 //		case LEVEL_CLEARED: toPush = "gui/LevelStats.gui"; break;
 		case IN_LOBBY: toPush = "gui/Lobby.gui"; break;
-		case IN_HANGAR: toPush = "gui/Hangar.gui"; break;
+		case IN_HANGAR: break;
 		case IN_WORKSHOP: toPush = "gui/Workshop.gui"; break;
 		case EDIT_WEAPON_SWITCH_SCRIPTS: toPush = "gui/WeaponScripts.gui"; break;
 		case BUYING_GEAR: toPush = "gui/Shop.gui"; break;
@@ -71,7 +71,7 @@ void LoadOptions()
 // Update ui
 void SpaceShooter2D::OnScoreUpdated()
 {
-	GraphicsMan.QueueMessage(new GMSetUIi("Scorei", GMUI::INTEGER_INPUT, LevelScore()->iValue));
+	GraphicsMan.QueueMessage(new GMSetUIi("Scorei", GMUI::INTEGER_INPUT, PlayingLevelRef().score));
 }
 
 void SpaceShooter2D::UpdateHUDSkill()

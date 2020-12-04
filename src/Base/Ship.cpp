@@ -64,7 +64,8 @@ Ship::Ship()
 	collideDamage = 1;
 	armorRegenRate = 2;
 	
-	graphicModel = "obj/Ships/Ship.obj";
+	visuals.graphicModel = "obj/Ships/Ship.obj";
+	visuals.textureSource = "0xFFFFFFFF";
 
 	timeSinceLastSkillUseMs = 0;
 	maxRadiansPerSecond = PI / 12;
@@ -172,7 +173,8 @@ List< std::shared_ptr<Entity> > Ship::Spawn(ConstVec3fr atWorldPosition, ShipPtr
 		parent->children.AddItem(GetSharedPtr());
 	}
 
-	EntitySharedPtr entity = EntityMan.CreateEntity(name, GetModel(), TexMan.GetTextureByColor(Color(0,255,0,255)));
+	Texture * texture = TexMan.GetTexture(visuals.textureSource);
+	EntitySharedPtr entity = EntityMan.CreateEntity(name, GetModel(), texture);
 	entity->localPosition = atPosition;
 	
 	PhysicsProperty * pp = new PhysicsProperty();
@@ -535,12 +537,12 @@ void Ship::DisableWeapon(String weaponName)
 Model * Ship::GetModel()
 {
 	String folder = "obj/";//Ships/";
-	Model * model = ModelMan.GetModel(graphicModel);
+	Model * model = ModelMan.GetModel(visuals.graphicModel);
 	if (!model)
 	{
-		std::cout<<"\nUnable to find ship model with name \'"<<graphicModel<<"\', using default model.";
-		graphicModel.SetComparisonMode(String::NOT_CASE_SENSITIVE);
-		if (graphicModel.Contains("turret"))
+		std::cout<<"\nUnable to find ship model with name \'"<< visuals.graphicModel<<"\', using default model.";
+		visuals.graphicModel.SetComparisonMode(String::NOT_CASE_SENSITIVE);
+		if (visuals.graphicModel.Contains("turret"))
 			model = ModelMan.GetModel("obj/Ships/Turret");
 		else
 			model = ModelMan.GetModel("obj/Ships/Ship");
@@ -664,7 +666,7 @@ void Ship::Destroy(PlayingLevel& playingLevel)
 		// Increase score and kills.
 		if (!allied)
 		{
-			spaceShooter->LevelScore()->iValue += this->score;
+			playingLevel.score += this->score;
 			std::cout<<"\nKills: "<<spaceShooter->LevelKills()->iValue++;
 			spaceShooter->OnScoreUpdated();
 		}
@@ -869,7 +871,7 @@ void Ship::CopyStatsFrom(const Ship& ref) {
 	heatDamageTaken = ref.heatDamageTaken;
 	abilities = ref.abilities;
 	abilityCooldown = ref.abilityCooldown;
-	graphicModel = ref.graphicModel;
+	visuals = ref.visuals;
 	other = ref.other;
 
 	weaponSet = WeaponSet(ref.weaponSet);

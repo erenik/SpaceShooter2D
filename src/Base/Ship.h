@@ -212,7 +212,12 @@ public:
 	float heatDamageTaken;
 	List<String> abilities;
 	List<float> abilityCooldown;
-	String graphicModel;
+
+	struct ShipVisuals{
+		String graphicModel;
+		String textureSource;
+	};
+	ShipVisuals visuals;
 	String other;
 
 	WeaponSet weaponSet;

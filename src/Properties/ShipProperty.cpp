@@ -63,14 +63,15 @@ void ShipProperty::Process(int timeInMs)
 	if (PlayingLevel::paused)
 		return;
 
-	/// o.o
 	if (spawnInvulnerability)
 	{
 		if (owner->worldPosition.x < PlayingLevelRef().removeInvuln)
 		{
-			// Change color.
-			QueueGraphics(new GMSetEntityTexture(owner, DIFFUSE_MAP | SPECULAR_MAP, TexMan.GetTextureByColor(Color(255,255,255,255))));
 			spawnInvulnerability = false;
+			/// Debug - change color of ships once they stop being invincible - should be done with a shield effect instead?
+			if (false) {
+				QueueGraphics(new GMSetEntityTexture(owner, DIFFUSE_MAP | SPECULAR_MAP, TexMan.GetTextureByColor(Color(255, 255, 255, 255))));
+			}
 		}
 	}
 	// Move?

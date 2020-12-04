@@ -44,7 +44,7 @@ defaultSizeRatioXY 0.8 0.17
 
 StringInput PlayerName "Player Name: "
 
-RadioButtons 3 Difficulty "Difficulty: "
+RadioButtons 3 NewGameDifficulty "Difficulty: "
 texts "Easy" "Medium" "Hard"
 
 Checkbox PlayTutorial "Play Tutorial" Checked 

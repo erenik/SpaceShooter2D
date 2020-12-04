@@ -270,8 +270,8 @@ void HUD::ShowLevelStats()
 	pl.mode = SHOWING_LEVEL_STATS;
 	GraphicsMan.QueueMessage(new GMSetUIs("LevelKills", GMUI::TEXT, pl.LevelKills()->ToString()));
 	QueueGraphics(new GMSetUIs("TotalKillsPossible", GMUI::TEXT, pl.LevelPossibleKills()->ToString()));
-	GraphicsMan.QueueMessage(new GMSetUIs("LevelScore", GMUI::TEXT, pl.LevelScore()->ToString()));
-	GraphicsMan.QueueMessage(new GMSetUIs("ScoreTotal", GMUI::TEXT, pl.score->ToString()));
+	GraphicsMan.QueueMessage(new GMSetUIs("LevelScore", GMUI::TEXT, String(pl.score)));
+	GraphicsMan.QueueMessage(new GMSetUIs("ScoreTotal", GMUI::TEXT, String(pl.score)));
 	showLevelStats = true;
 }
 

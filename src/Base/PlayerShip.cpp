@@ -156,10 +156,10 @@ void PlayerShip::UpdateStatsFromGear()
 			this->speed *= 0.8f; // -20% speed per extra layer of armor.
 		}
 		Gear armor = armorLayers[i];
-		this->maxHP += armor.maxHP * factor;
+		this->maxHP += (int) (armor.maxHP * factor);
 		this->armorRegenRate += armor.armorRegen * factor;
-		this->armorStats.reactivity += armor.Reactivity() * factor;
-		this->armorStats.toughness += armor.Toughness() * factor;
+		this->armorStats.reactivity += int( armor.Reactivity() * factor);
+		this->armorStats.toughness += int(armor.Toughness() * factor);
 	}
 	hp = (float)maxHP;
 

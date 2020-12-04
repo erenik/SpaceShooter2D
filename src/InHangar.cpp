@@ -61,7 +61,7 @@ void InHangar::OnEnter(AppState * previousState) {
 		}
 		else if (RepeatCompletion()) {
 			text = TextMan.GetText("MissionClearedRepeat");
-			reward = reward / 4; // 25% reward upon re-play to enable grinding?
+			reward = reward * MissionRepeatClearBountyMultiplier();
 		}
 		messageQueue.Add(HangarMessage(text.Replaced("$moneyReward", String(reward)), reward));
 	}
@@ -125,6 +125,22 @@ void InHangar::ProcessMessage(Message* message)
 				break;
 			String upgrade = tokens[1];
 			UpdateGearDetails(upgrade);
+		}
+		else if (msg.StartsWith("SetHoverMission:")) {
+			String name = msg.Tokenize(":")[1];
+			Mission * mission = MissionsMan.GetMissionByName(name);
+			if (mission == nullptr)
+				break;
+			QueueGraphics(new GMSetUIs("MissionDetailsName", GMUI::STRING_INPUT_TEXT, TextMan.GetText(mission->name)));
+			// int bounty = RepeatCompletion()
+			int highscore = GetHighscore(mission->name);
+			QueueGraphics(new GMSetUIs("MissionDetailsBounty", GMUI::INTEGER_INPUT_TEXT, highscore > 0? "Repeat bounty" : "Bounty"));
+			QueueGraphics(new GMSetUIi("MissionDetailsBounty", GMUI::INTEGER_INPUT, 
+				highscore > 0 ? 
+					mission->bounty * MissionRepeatClearBountyMultiplier() :
+					mission->bounty)
+			);
+			QueueGraphics(new GMSetUIi("MissionDetailsHighscore", GMUI::INTEGER_INPUT, GetHighscore(mission->name)));
 		}
 		break;
 	}
@@ -310,11 +326,13 @@ void InHangar::PopulateMissionsList() {
 		UIElement * missionButton = UserInterface::LoadUIAsElement("gui/SelectMissionButton.gui");
 		missionButton->GetElementByName("Icon")->textureSource = "0x334455";
 		missionButton->GetElementByName("Completed")->SetText(mission->Completed()? "Completed" : "");
-		missionButton->GetElementByName("MissionName")->SetText(mission->name);
-		(missionButton->GetElementByName("Bounty"))->SetText(String(mission->bounty));
+		missionButton->GetElementByName("MissionName")->SetText(TextMan.GetText(mission->name));
+//		(missionButton->GetElementByName("Bounty"))->SetText(String(mission->bounty));
 		(missionButton->GetElementByName("SelectMissionButton"))->activationMessage = "PlayMission "+ mission->name;
 		if (i == 0) // Hover to first one by default?
 			(missionButton->GetElementByName("SelectMissionButton"))->SetState(UIState::HOVER);
+
+		missionButton->onHover = "SetHoverMission:" + mission->name;
 		entries.Add(missionButton);
 	}
 	QueueGraphics(new GMAddUI(entries, "MissionsList"));

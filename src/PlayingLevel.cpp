@@ -256,6 +256,8 @@ void PlayingLevel::OnExit(AppState* nextState) {
 	++timesCompleted;
 	FlyTime() += this->flyTime;
 
+	SetHighscore(currentMission->name, score);
+
 	// Autosave!
 	SaveFile::AutoSave(Application::name, PlayerName()+" "+ DifficultyString(difficulty->GetInt())+ " "+FlyTime().ToString("H:m"));
 
@@ -416,7 +418,7 @@ void PlayingLevel::ProcessMessage(Message* message)
 		}
 		else if (msg.StartsWith("AddLevelScoreToTotal")) {
 			// Add level score to total upon showing level stats. o.o
-			score->iValue += LevelScore()->iValue;
+			// score += LevelScore()->iValue;
 		}
 		else if (msg == "SetupForTesting")
 		{
@@ -903,7 +905,7 @@ void PlayingLevel::LoadLevel(String fromSource, Mission * forMission)
 
 	// Reset stats for this specific level.
 	LevelKills()->iValue = 0;
-	LevelScore()->iValue = 0;
+	score = 0;
 	spaceDebrisCollected = 0;
 
 	QueueGraphics(new GMSetUIb("LevelMessage", GMUI::VISIBILITY, false));
