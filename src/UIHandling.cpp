@@ -122,9 +122,9 @@ void SpaceShooter2D::OpenLoadScreen()
 
 		UIElement * fromTemplate = UserInterface::LoadUIAsElement("gui/SaveEntry.gui");
 
-		fromTemplate->GetElementByName("SaveName")->text = h.saveName;
-		fromTemplate->GetElementByName("Date")->text = h.dateSaved.ToString("Y/M/D H:m");
-		fromTemplate->GetElementByName("CustomHeaderData")->text = h.customHeaderData;
+		fromTemplate->GetElementByName("SaveName")->SetText(h.saveName);
+		fromTemplate->GetElementByName("Date")->SetText(h.dateSaved.ToString("Y/M/D H:m"));
+		fromTemplate->GetElementByName("CustomHeaderData")->SetText(h.customHeaderData);
 
 		fromTemplate->GetElementByName("SaveEntry")->activationMessage = "LoadGame(" + h.saveName + ")";
 		

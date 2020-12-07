@@ -50,7 +50,9 @@ bool introTest = false;
 void SetApplicationDefaults()
 {
 	Application::name = "ErenikSpaceShooter";
-	TextFont::defaultFontSource = "img/fonts/font3.png";
+	TextFont::defaultFontSource = "img/fonts/Font_test_BW.png";
+	UIElement::forceUpperCase = true;
+	UIElement::defaultTextColor = Vector4f(0,1,1,1);
 	PhysicsProperty::defaultUseQuaternions = false;
 	UIElement::defaultTextureSource = "0x22AA";
 }

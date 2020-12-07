@@ -29,7 +29,7 @@ void UpdateScriptsUI()
 		// Add 'em.
 		// ...
 		UIButton * button = new UIButton("LoadScript: "+String(i));
-		button->text = weaponScripts[i]->name;
+		button->SetText(weaponScripts[i]->name);
 		button->sizeRatioY = 0.15f;
 		tmp.AddItem(button);
 	}
@@ -57,17 +57,17 @@ void UpdateEditScriptUI()
 			// ...
 			UIButton * cl = new UIButton("EditScriptAction:"+String(i));
 			cl->sizeRatioY = 0.1f;
-			cl->text = String(i+1)+". "+(action.name.Length()? action.name : ScriptAction::GetStringForType(action.type));
+			cl->SetText(String(i+1)+". "+(action.name.Length()? action.name : ScriptAction::GetStringForType(action.type)));
 			tmp.AddItem(cl);
 		}
 		/// Add some extra options.
 		UIButton * c2 = new UIButton("DuplicateScript");
 		c2->sizeRatioY = 0.1f;
-		c2->text = "Duplicate script";
+		c2->SetText("Duplicate script");
 		tmp.AddItem(c2);
 		c2 = new UIButton("DeleteScript");
 		c2->sizeRatioY = 0.1f;
-		c2->text = "Delete script";
+		c2->SetText("Delete script");
 		tmp.AddItem(c2);
 	}
 	else 
@@ -128,7 +128,7 @@ void UpdateToAddList()
 	for (int i = 0; i < ScriptAction::MAX_TYPES; ++i)
 	{
 		UIButton * button = new UIButton("AddScriptAction: "+String(i));
-		button->text = ScriptAction::GetStringForType(i);
+		button->SetText(ScriptAction::GetStringForType(i));
 		button->sizeRatioY = 0.15f;
 		button->textureSource = UIElement::defaultTextureSource;
 		tmp.AddItem(button);
