@@ -88,10 +88,12 @@ void HUD::UpdateActiveWeapon() {
 
 		String hudWeaponStatusName = "HUDWeaponStatus" + String(i);
 
-		QueueGraphics(new GMSetUIb(hudWeaponStatusName, GMUI::ACTIVE, activeWeapon == weapon));
-		QueueGraphics(new GMSetUIb(hudWeaponStatusName, GMUI::TOGGLED, !weapon->reloading));
-
+		//QueueGraphics(new GMSetUIb(hudWeaponStatusName, GMUI::HOVER_STATE, activeWeapon == weapon));
+		QueueGraphics(new GMSetUIb("WeaponName"+String(i), GMUI::HOVER_STATE, activeWeapon == weapon));
+		//QueueGraphics(new GMSetUIb(hudWeaponStatusName, GMUI::TOGGLED, !weapon->reloading));
+		
 		QueueGraphics(new GMSetUIs("Ammunition" + String(i), GMUI::TEXT, String(weapon->shotsLeft)));
+		QueueGraphics(new GMSetUIv4f("Ammunition" + String(i), GMUI::TEXT_COLOR, weapon->reloading ? Vector4f(0.6f, 0.6f, 0.6f,1) : Vector4f(0.9f, 0.9f, 0.9f,1)));
 		QueueGraphics(new GMSetUIs("Cooldown" + String(i), GMUI::TEXT, String(weapon->currCooldownMs / 1000.0f, 1)));
 	}
 
@@ -119,7 +121,11 @@ void HUD::UpdateHUDGearedWeapons()
 		UIElement * weaponStatus = UserInterface::LoadUIAsElement("gui/HUDWeaponStatus.gui");
 		weaponStatus->name += String(i);
 		weaponStatus->GetElementByName("Icon")->textureSource = weapon->Icon();
-		weaponStatus->GetElementByName("WeaponName")->SetText(weapon->name);
+		
+		UIElement * weaponName = weaponStatus->GetElementByName("WeaponName");
+		weaponName->SetText(weapon->name);
+		weaponName->name += String(i);
+
 		weaponStatus->GetElementByName("Ammunition")->SetText(String(weapon->shotsLeft));
 		weaponStatus->GetElementByName("Ammunition")->name += String(i);
 		weaponStatus->GetElementByName("Cooldown")->name += String(i);

@@ -1,25 +1,34 @@
 // Main UI when starting up.
 
-defaultTexture null
-defaultTextColor	1 1 1 1
+//defaultTexture null
+//defaultTextColor	1 1 1 1
 
 // Make root active
 root ToggleButton
 name	HUDWeaponStatus
 hoverable true
 activatable true
-highlightOnHover true
-topBorder ui/border_top_4
-rightBorder ui/border_right_4
-topRightCorner ui/top_right_corner_8x8
-texture 0x445566
-highlightOnActive true
+//highlightOnHover true
+//topBorder ui/border_top_4
+//rightBorder ui/border_right_4
+//topRightCorner ui/top_right_corner_8x8
+//texture 0x445566
+//highlightOnActive true
 sizeRatioXY 0.2 1
 
 parent HUDWeaponStatus
 
 
+list lNameIconDetails
+
+parent lNameIconDetails
+
+Label WeaponName "Test"
+sizeRatioY 0.3
+hoverable true
+
 ColumnList clIconDetails
+sizeRatioY 0.7
 
 parent clIconDetails
 
@@ -37,9 +46,6 @@ sizeRatioX 0.7
 parent Details
 defaultSizeRatioY 0.5
 
-Label WeaponName "Test"
-hoverable false
-
 ColumnList CooldownAmmo
 sizeRatioY 0.5
 
@@ -51,6 +57,6 @@ hoverable false
 textAlignment right
 
 Label Ammunition "100"
-hoverable false
+hoverable true
 textAlignment right
 

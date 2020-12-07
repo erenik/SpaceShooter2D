@@ -38,6 +38,7 @@ public:
 		case SPEED_BOOST: return "Speed Boost";
 		case POWER_SHIELD: return "Power Shield";
 		}
+		return "";
 	}
 };
 

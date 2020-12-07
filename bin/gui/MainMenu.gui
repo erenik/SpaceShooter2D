@@ -1,7 +1,7 @@
 // Main UI when starting up.
 
-defaultTexture	0x2244
-defaultTextColor	0 1 1 1
+//defaultTexture	0x2244
+//defaultTextColor	0 1 1 1
 
 // Make root active
 root
@@ -10,16 +10,21 @@ removeOnPop true
 texture 	NULL
 exitable 	false
 
+
 parent MainMenuScreen
 
-label title
-text "Space Shooter"
+Element background
+texture bgs/Menu_BG
+retainAspectRatio true
+
+element title 
+texture ui/title
+retainAspectRatio true
 sizeRatioXY 0.8 0.2
-alignmentXY 0.5 0.9
-textAlignment center
+alignmentXY 0.5 0.8
 
 list lMainMenu
-sizeRatioXY 0.3 0.8
+sizeRatioXY 0.3 0.6
 alignmentXY	0.5 0.3
 padding 0.025
 
@@ -34,11 +39,6 @@ hoverable false
 
 parent lMainMenu
 defaultSizeRatioY 0.15
-
-defaultTexture	0x6666
-defaultTopBorder ui/border_top_4
-defaultRightBorder ui/border_right_4
-defaultTopRightCorner ui/top_right_corner_8x8
 
 button NewGameButton
 text	"New game"

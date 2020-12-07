@@ -52,7 +52,12 @@ void SetApplicationDefaults()
 	Application::name = "ErenikSpaceShooter";
 	TextFont::defaultFontSource = "img/fonts/Font_test_BW.png";
 	UIElement::forceUpperCase = true;
-	UIElement::defaultTextColor = Vector4f(0,1,1,1);
+
+	UIElement::defaultTextColor = Color::ColorByHexName("#8f1767ff");
+
+	TextFont::idleColor = Color::ColorByHexName("#8f1767ff");
+	TextFont::onHoverColor = Color::ColorByHexName("#fb6b1dff");
+	TextFont::onActiveColor = Color::ColorByHexName("#ffffffff");
 	PhysicsProperty::defaultUseQuaternions = false;
 	UIElement::defaultTextureSource = "0x22AA";
 }
@@ -124,10 +129,10 @@ void SpaceShooter2D::OnEnter(AppState * previousState)
 
 	// Set some default 
 	// When clicking on it.
-	UIElement::onActiveHightlightFactor = 0.3f;
+	UIElement::onActiveHightlightFactor = 0.2f;
 	// When hovering on it.
-	UIElement::onHoverHighlightFactor = 0.1f;
-	UIElement::onIdleHighlightFactor = -0.4f;
+	UIElement::onHoverHighlightFactor = 0.2f;
+	UIElement::onIdleHighlightFactor = 0.0f;
 	// When toggled, additional factor
 	UIElement::onToggledHighlightFactor = 0.3f;
 

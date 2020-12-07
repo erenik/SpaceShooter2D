@@ -1,8 +1,8 @@
 // Main UI when starting up.
 
-defaultTexture	0x2244
-defaultTextColor	1 1 1 1
-defaultDividerX	0.4
+//defaultTexture	0x2244
+//defaultTextColor	1 1 1 1
+defaultDividerX	0.5
 // defaultSetDividerInMiddle true
 
 // Make root active
@@ -10,29 +10,26 @@ root
 name 		NewGame
 onPop 		GoToPreviousMode
 removeOnPop true
-texture 	0x222222EE
+texture 	bgs/Menu_BG
+retainAspectRatio true
 exitable 	true
 
 parent NewGame
 
 list lNewGame
-sizeRatioXY 0.5 0.5
-texture 	0x222222FF
-rightBorder ui/border_right_4
-topBorder ui/border_top_4
-topRightCorner ui/top_right_corner_8x8
+sizeRatioXY 0.9 0.5
 
 parent lNewGame
 
 defaultSizeRatioXY 1 0.1
-defaultTexture	0x6666
 
 label NewGame "New Game"
-sizeRatioY 0.2
+textColor #fb6b1dff
+sizeRatioY 0.15
 textAlignment Center
 
 element Divider
-sizeRatioY 0.01
+sizeRatioY 0.1
 //texture 0xEEEE
 
 list NewGameDetails
@@ -40,25 +37,24 @@ padding 0.03
 sizeRatioY 0.7
 
 parent NewGameDetails
-defaultSizeRatioXY 0.8 0.17
+defaultSizeRatioXY 0.9 0.17
 
-StringInput PlayerName "Player Name: "
+StringInput PlayerName "Player Name"
 
-RadioButtons 3 NewGameDifficulty "Difficulty: "
+RadioButtons 3 NewGameDifficulty "Difficulty"
 texts "Easy" "Medium" "Hard"
 
-Checkbox PlayTutorial "Play Tutorial" Checked 
+Checkbox PlayTutorial "Play Tutorial" Checked
+UseToggleTexts Yes No
 
 Button NewGameButton
 onActivate PopUI(NewGame)&NewGame
 text "Start"
 textAlignment center
 sizeRatioX 0.5
-topRightCorner ui/message_top_right_corner_64x32
 
 Button Back
 onActivate PopUI(NewGame)
 textAlignment center
 sizeRatioX 0.5
-topRightCorner ui/top_right_corner_64x32_red
 

@@ -1,6 +1,6 @@
 // Author: Emil Hedemalm
 // Date: 2012-10-29
-// Name: Simple UI Shader
+// Name: Simple UI Shader to paint the UI elements background textures
 #version 120
 
 // Uniforms

@@ -1,7 +1,7 @@
 // Main UI when starting up.
 
-defaultTexture	0x2244
-defaultTextColor	1 1 1 1
+//defaultTexture	0x2244
+//defaultTextColor	1 1 1 1
 
 // Make root active
 root
@@ -12,18 +12,27 @@ navigateUIOnPush
 
 parent HangarScreen
 
+list lLeftSide
+sizeRatioXY 0.4 0.8
+alignmentXY 0.3 0.5
+
+parent lLeftSide
+
 list Status
-sizeRatioXY 0.2 0.25
-alignmentXY 0.15 0.85
+sizeRatioY 0.25
+alignmentY 0.85
 padding 0.01
 
-list lHangar
-sizeRatioXY 0.2 0.5
-alignmentXY 0.15 0.45
+element padding 
+sizeRatioY 0.1
 
+list lHangar
+sizeRatioY 0.5
+alignmentY 0.45
 
 parent Status
 defaultSizeRatioXY 1 0.19
+defaultTextColor	0xFFFFFFFF
 
 StringLabel Name 
 IntegerLabel TotalScore "Total score"
@@ -32,14 +41,14 @@ StringLabel Difficulty
 StringLabel FlyTime "Fly time"
 
 parent lHangar
-defaultTopBorder ui/border_top_4
-defaultRightBorder ui/border_right_4
-defaultTopRightCorner ui/top_right_corner_8x8
+//defaultTopBorder ui/border_top_4
+//defaultRightBorder ui/border_right_4
+//defaultTopRightCorner ui/top_right_corner_8x8
 
-
+defaultTextColor	null
 defaultSizeRatioXY 1 0.15
 
-defaultTexture 0x223333FF
+//defaultTexture 0x223333FF
 
 button Missions
 onActivate PushUI(gui/Missions.gui)

@@ -61,7 +61,7 @@ void InHangar::OnEnter(AppState * previousState) {
 		}
 		else if (RepeatCompletion()) {
 			text = TextMan.GetText("MissionClearedRepeat");
-			reward = reward * MissionRepeatClearBountyMultiplier();
+			reward = (int)(reward * MissionRepeatClearBountyMultiplier());
 		}
 		messageQueue.Add(HangarMessage(text.Replaced("$moneyReward", String(reward)), reward));
 	}
@@ -136,9 +136,9 @@ void InHangar::ProcessMessage(Message* message)
 			int highscore = GetHighscore(mission->name);
 			QueueGraphics(new GMSetUIs("MissionDetailsBounty", GMUI::INTEGER_INPUT_TEXT, highscore > 0? "Repeat bounty" : "Bounty"));
 			QueueGraphics(new GMSetUIi("MissionDetailsBounty", GMUI::INTEGER_INPUT, 
-				highscore > 0 ? 
+				int(highscore > 0 ? 
 					mission->bounty * MissionRepeatClearBountyMultiplier() :
-					mission->bounty)
+					mission->bounty))
 			);
 			QueueGraphics(new GMSetUIi("MissionDetailsHighscore", GMUI::INTEGER_INPUT, GetHighscore(mission->name)));
 		}

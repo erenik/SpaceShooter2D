@@ -1,7 +1,8 @@
 // Main UI when starting up.
 
 defaultTexture	0x2244
-defaultTextColor	1 1 1 1
+defaultTextColor #0000ffff
+// #4d65b2ff
 
 // Make root active
 root
