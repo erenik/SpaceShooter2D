@@ -26,6 +26,8 @@
 #include "Graphics/Messages/GMRenderPass.h"
 #include "Render/RenderPass.h"
 
+#include "Test/TutorialTests.h"
+
 #include "Input/Gamepad/GamepadMessage.h"
 #include "Message/MathMessage.h"
 
@@ -212,6 +214,8 @@ void SpaceShooter2D::OnEnter(AppState * previousState)
 
 	// Remove initial cover screen.
 	QueueGraphics(new GMSetOverlay(NULL));
+
+	TutorialTests::RegisterTests();
 }
 
 
@@ -228,6 +232,12 @@ void SpaceShooter2D::Process(int timeInMs)
 
 	now = Time::Now();
 	timeElapsedMs = timeInMs;
+
+	TutorialTests::Update(timeInMs);
+
+	if (InputMan.KeyPressed(KEY::T) && InputMan.KeyPressed(KEY::R)) {
+		TutorialTests::RunAllTests();
+	}
 	
 }
 

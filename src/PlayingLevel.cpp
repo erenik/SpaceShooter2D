@@ -27,6 +27,9 @@
 #include "File/SaveFile.h"
 #include "Missions.h"
 #include "Base/PlayerShip.h"
+#include "Util/String/StringUtil.h"
+
+#include "Test/TutorialTests.h"
 
 SpawnGroup testGroup;
 List<SpawnGroup> storedTestGroups;
@@ -44,6 +47,9 @@ ShipPtr GetPlayerShip() {
 	return PlayingLevel::playerShip;
 }
 EntitySharedPtr PlayerShipEntity() {
+	auto playerShip = GetPlayerShip();
+	if (playerShip == nullptr)
+		return nullptr;
 	return GetPlayerShip()->entity;
 }
 PlayingLevel& PlayingLevelRef() {
@@ -125,6 +131,8 @@ void PlayingLevel::OnEnter(AppState* previousState) {
 	else
 		CloseSpawnWindow();
 
+	eventsTriggered.Clear();
+
 	NewPlayer();
 
 	// Create.. the sparks! o.o
@@ -152,11 +160,15 @@ void PlayingLevel::OnEnter(AppState* previousState) {
 
 void PlayingLevel::Process(int timeInMs) {
 
+	timeInMs = int(timeInMs * gameSpeed);
+
 	now = Time::Now();
 	timeElapsedMs += timeInMs;
 	hudUpdateMs += timeInMs;
 
 	SleepThread(5); // Updates 200 times a sec max?
+
+	TutorialTests::Update(timeInMs);
 
 	if (paused)
 		return;
@@ -405,6 +417,21 @@ void PlayingLevel::ProcessMessage(Message* message)
 			if (levelCamera->TargetZoom() > 30)
 				return;
 			QueueGraphics(new GMSetCamera(levelCamera, CT_ZOOM, levelCamera->TargetZoom() + 3.0f));
+		}
+		else if (msg.StartsWith("SetLevelTimeToMessage")) {
+			String msgName = msg.Tokenize(":")[1];
+			List<String> messageNames;
+			for (int i = 0; i < level.messages.Size(); ++i) {
+				auto msg = level.messages[i];
+				if (msg->name.Length() > 0)
+					messageNames.Add("- "+ msg->name);
+				if (msg->name == msgName) {
+					SetTime(msg->startTime);
+					return;
+				}
+			}
+			LogMain("No level message with name to jump to: " + msgName+"\nFull list of level messages: "+MergeLines(messageNames), ERROR);
+			assert(false && "No level message by name");
 		}
 		else if (msg == "SetRewindPoint") {
 			rewindPoint = levelTime;
@@ -852,6 +879,11 @@ void PlayingLevel::Cleanup()
 			ship->Despawn(*this, false);
 		}
 	}
+}
+
+void PlayingLevel::SetPlayerMovement(Vector3f inDirection) {
+	requestedMovement = inDirection;
+	UpdatePlayerVelocity();
 }
 
 void PlayingLevel::UpdatePlayerVelocity()

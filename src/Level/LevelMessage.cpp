@@ -8,6 +8,7 @@
 #include "LevelMessage.h"
 #include "File/LogFile.h"
 #include "PlayingLevel.h"
+#include "Test/TutorialTests.h"
 
 LevelMessage::LevelMessage()
 	: dontSkip(false)
@@ -39,6 +40,10 @@ bool LevelMessage::Trigger(PlayingLevel& playingLevel, Level * level)
 	bool trigger = true;
 	if (condition.Length())
 	{
+		if (condition.StartsWith("TriggeredEvent")) {
+			String eventName = condition.Tokenize(":")[1];
+			trigger = playingLevel.eventsTriggered.Exists(eventName);
+		}
 		if (condition == "FailedToDefeatAllEnemies")
 		{
 			trigger = playingLevel.DefeatedAllEnemiesInTheLastSpawnGroup() == false;
@@ -58,6 +63,13 @@ bool LevelMessage::Trigger(PlayingLevel& playingLevel, Level * level)
 		}
 		std::cout<<" trigger: "<<trigger;
 	}
+
+	// Add it to log of triggered events
+	if (trigger) {
+		if (name.Length() > 0)
+			playingLevel.eventsTriggered.Add(name);
+	}
+
 	if (!trigger)
 	{
 		// Mark it as if it has been displayed and triggered already?
@@ -65,6 +77,7 @@ bool LevelMessage::Trigger(PlayingLevel& playingLevel, Level * level)
 		return false;
 	}
 
+	TutorialTests::OnLevelMessageTriggered(this);
 
 	if (type == LevelMessage::TEXT_MESSAGE)
 	{
@@ -94,6 +107,7 @@ bool LevelMessage::Trigger(PlayingLevel& playingLevel, Level * level)
 		if (goToRewindPoint) {
 			level->SetTime(playingLevel.rewindPoint);
 			LogMain("Rewinding to time: " + String(playingLevel.rewindPoint.Seconds()), INFO);
+			return false; // Return as if it failed, so the event is not saved as a currently active one. (instantaneous).
 		}
 	}
 	return true;

@@ -143,6 +143,14 @@ public:
 	// Temporary mission score
 	int score = 0;
 
+	// Name of events
+	List<String> eventsTriggered;
+
+	// Simulation speed
+	float gameSpeed = 1.0f;
+
+	void SetPlayerMovement(Vector3f inDirection);
+
 private:
 
 	SpawnGroup * lastSpawnGroup;

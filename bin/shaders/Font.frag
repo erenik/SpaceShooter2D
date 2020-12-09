@@ -36,8 +36,55 @@ void main(void)
 	vec4 baseFrag = texture2D(baseImage, UV_Coord);
 	
 	gl_FragColor = baseFrag;
-	gl_FragColor *= primaryColorVec4;
-	gl_FragColor += highlightColorVec4;	
+
+	if (baseFrag.w == 0)
+		return;
+
+	if (primaryColorVec4.x > 0.9 && primaryColorVec4.y > 0.9) {
+		// Selected: c7dcd0, 9babb2, 7f708a
+		if (baseFrag.x > 0.8)
+			gl_FragColor = vec4(0.7804, 0.8627, 0.8157, 1);
+		else if (baseFrag.x > 0.5)
+			gl_FragColor = vec4(0.6078, 0.6706, 0.6980, 1);
+		else
+			gl_FragColor = vec4(0.4980, 0.4392, 0.5412, 1);
+	}
+	else if (primaryColorVec4.x > 0.90){
+		// Orange 
+		// Highlight: #f9c22b
+		// Color: #fb6b1d
+		// Shadow: #ae2334
+		if (baseFrag.x > 0.8)
+			gl_FragColor = vec4(0.9765, 0.7608, 0.1686,1);
+		else if (baseFrag.x > 0.5)
+			gl_FragColor = vec4(0.9843, 0.4196, 0.1137,1);
+		else
+			gl_FragColor = vec4(0.6824, 0.1373, 0.2039,1);
+	}
+	else if (primaryColorVec4.x < 0.6 && primaryColorVec4.z < 0.8){
+		// Purple, f45d92, 8f1767, 5e1c5a
+		if (baseFrag.x > 0.8)
+			gl_FragColor = vec4(0.9569, 0.3647, 0.5725, 1);
+		else if (baseFrag.x > 0.5)
+			gl_FragColor = vec4(0.5608, 0.0902, 0.4039, 1);
+		else
+			gl_FragColor = vec4(0.3686, 0.1098, 0.3529, 1);
+	}
+	else if (primaryColorVec4.x > 0.3) {
+		// Deselected 7f708a, 625565, 3e3546
+		if (baseFrag.x > 0.8)
+			gl_FragColor = vec4(0.4980, 0.4392, 0.5412, 1);
+		else if (baseFrag.x > 0.5)
+			gl_FragColor = vec4(0.3843, 0.3333, 0.3961, 1);
+		else
+			gl_FragColor = vec4(0.2431, 0.2078, 0.2745, 1);
+	}
+	else {
+		gl_FragColor *= primaryColorVec4 * 0.5 + 0.5;
+		gl_FragColor += highlightColorVec4;	
+	}
+	// fb6b1dff
+
 	//gl_FragColor.x = 0.5;
 	
 	if (debugColor.x > 0)

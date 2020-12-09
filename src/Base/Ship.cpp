@@ -360,6 +360,8 @@ bool Ship::ArrivedAtDestination()
 
 void Ship::Process(PlayingLevel& playingLevel, int timeInMs)
 {
+	timeInMs *= PlayingLevelRef().gameSpeed;
+
 	/// If destroyed from elsewhere..?
 	if (entity == 0)
 		return;

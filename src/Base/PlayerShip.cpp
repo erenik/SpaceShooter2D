@@ -4,6 +4,7 @@
 
 #include "Base/PlayerShip.h"
 #include "File/LogFile.h"
+#include "PlayingLevel.h"
 
 // Fetches player ship along with gear and updated stats.
 PlayerShip::PlayerShip()
@@ -22,6 +23,32 @@ PlayerShip::PlayerShip()
 	UpdateGearFromVars();
 	UpdateStatsFromGear();
 	SetLevelOfAllWeaponsTo(0);
+	autoAim = false;
+}
+
+void PlayerShip::ProcessAI(PlayingLevel& playingLevel, int timeInMs) {
+	if (!autoAim)
+		return;
+
+	auto target = playingLevel.level.ClosestTarget(playingLevel, true, this->entity->worldPosition);
+	if (target == nullptr)
+		return;
+
+	Vector3f vector = Vector3f(0, target->worldPosition.y - this->entity->worldPosition.y, 0);
+	float magnitude = vector.Length();
+	ClampFloat(magnitude, 0, 2.0f);
+	playingLevel.SetPlayerMovement(vector.NormalizedCopy() * magnitude);
+
+	if (activeWeapon == nullptr) {
+		this->SwitchToWeapon(CurrentWeaponIndex() + 1);
+	}
+	else if (activeWeapon->reloading) {
+		this->SwitchToWeapon(CurrentWeaponIndex() + 1);
+	}
+}
+
+void PlayerShip::SetAutoAim(bool value) {
+	autoAim = value;
 }
 
 int PlayerShip::MaxGearForType(Gear::Type type) const {

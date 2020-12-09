@@ -76,7 +76,7 @@ public:
 	/// Checks current movement. Will only return true if movement is target based and destination is within threshold.
 	bool ArrivedAtDestination();
 	void Process(PlayingLevel& playingLevel, int timeInMs);
-	void ProcessAI(PlayingLevel& playingLevel, int timeInMs);
+	virtual void ProcessAI(PlayingLevel& playingLevel, int timeInMs);
 	void ProcessWeapons(PlayingLevel& playingLevel, int timeInMs);
 
 	/// Disables weapon in this and children ships.

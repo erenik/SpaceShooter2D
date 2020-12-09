@@ -10,6 +10,9 @@ class PlayerShip : public Ship {
 public:
 	PlayerShip();
 
+	virtual void ProcessAI(PlayingLevel& playingLevel, int timeInMs) override;
+
+	void SetAutoAim(bool value);
 	int MaxGearForType(Gear::Type type) const;
 
 	List<Gear> Equipped(Gear::Type byType) const;
@@ -36,6 +39,8 @@ public:
 	int maxShieldGenerators = 3;
 
 private:
+	bool autoAim;
+
 	/// Used by player, mainly.
 	List<Gear> weapons;
 	List<Gear> shieldGenerators;

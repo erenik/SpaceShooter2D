@@ -8,6 +8,8 @@
 #include "Base/Ship.h"
 #include "Color.h"
 
+class Level;
+
 class LevelMessage 
 {
 public:
@@ -17,6 +19,7 @@ public:
 	bool Trigger(PlayingLevel& playingLevel, Level * level);
 	void Hide(PlayingLevel& playingLevel);
 	
+	String name;
 	enum {
 		TEXT_MESSAGE,
 		EVENT,

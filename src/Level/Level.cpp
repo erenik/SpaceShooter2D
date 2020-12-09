@@ -14,6 +14,7 @@
 #include "PlayingLevel.h"
 #include "OS/Sleep.h"
 #include "Base/PlayerShip.h"
+#include "Test/TutorialTests.h"
 
 Camera * levelCamera = NULL;
 
@@ -245,8 +246,9 @@ void Level::ProcessLevelMessages(Time levelTime) {
 
 			if (activeLevelMessage)
 				continue;
-			if (lm->Trigger(PlayingLevelRef(), this))
+			if (lm->Trigger(PlayingLevelRef(), this)) {
 				activeLevelMessage = lm;
+			}
 		}
 	}
 }
@@ -300,6 +302,7 @@ void Level::ProceedMessage()
 
 void Level::SetTime(Time newTime)
 {
+	activeLevelMessage = nullptr;
 	PlayingLevelRef().SetTime(newTime);
 	OnLevelTimeAdjusted(newTime);
 }
@@ -307,6 +310,7 @@ void Level::SetTime(Time newTime)
 /// enable respawing on shit again.
 void Level::OnLevelTimeAdjusted(Time levelTime)
 {
+	activeLevelMessage = nullptr;
 	for (int i = 0; i < spawnGroups.Size(); ++i)
 	{
 		SpawnGroup * sg = spawnGroups[i];

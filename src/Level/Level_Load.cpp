@@ -69,6 +69,10 @@ namespace LevelLoader
 		}
 		else if (arg.IsNumber())
 			message->startTime.ParseFrom(arg);
+		else {
+			// Auto-increment at least 100 ms
+			message->startTime.AddMs(100);
+		}
 		LogMain("Message start time set to: " + message->startTime.ToString("m:S"), INFO);
 		message->stopTime = message->startTime + Time(TimeType::MILLISECONDS_NO_CALENDER, 5000); // Default 5 seconds?
 	}
@@ -307,6 +311,10 @@ bool Level::Load(String fromSource)
 		}
 		if (parseMode == PARSE_MODE_MESSAGES)
 		{
+			if (var == "Name") {
+				message->name = line - "Name";
+				message->name.RemoveSurroundingWhitespaces();
+			}
 			if (var == "Condition") {
 				message->condition = line - "Condition";
 				message->condition.RemoveSurroundingWhitespaces();
