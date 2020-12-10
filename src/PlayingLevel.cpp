@@ -121,7 +121,6 @@ void PlayingLevel::OnEnter(AppState* previousState) {
 	InputMan.SetNavigateUI(false);
 	InputMan.SetForceNavigateUI(false);
 
-
 	SetPlayingFieldSize(Vector2f(50, 30));
 
 	HUD::Get()->Show();
@@ -156,6 +155,10 @@ void PlayingLevel::OnEnter(AppState* previousState) {
 	TextMan.LoadFromDir();
 	TextMan.SetLanguage("English");
 
+	if (!playTutorial) {
+		LevelMessage * message = level.GetMessageWithTextId("TutorialConcluded");
+		JumpToAfterMessage(message);
+	}
 };
 
 void PlayingLevel::Process(int timeInMs) {

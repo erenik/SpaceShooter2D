@@ -2,6 +2,8 @@
 
 //defaultTexture null
 //defaultTextColor	1 1 1 1
+defaultFont Small_font
+
 
 // Make root active
 root ToggleButton

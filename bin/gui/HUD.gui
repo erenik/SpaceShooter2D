@@ -1,7 +1,8 @@
 // Main UI when starting up.
 
-defaultTexture	0x2244
-defaultTextColor	0xaaaaaaff
+defaultTexture	null
+defaultTextColor 0xffffff
+defaultFont Small_font
 
 // Make root active
 root
@@ -17,10 +18,10 @@ List topStats
 alignment LEFT
 sizeRatioXY 0.2 0.1
 alignmentXY 0 0.95
-topBorder ui/border_top_4
-rightBorder ui/border_right_4
+noBorders
 
 list BottomPart
+noBorders
 sizeRatioXY	1 0.15
 alignmentXY	0.5 0.075
 
@@ -29,18 +30,24 @@ texture 	0x22AA
 text	"Level message"
 sizeRatioXY 0.9 0.2
 alignmentXY	0.5	0.3
+textPadding 32
 visible false
-topBorder ui/border_top
-rightBorder ui/border_right_4
+topBorder ui/Orange2
+rightBorder ui/Orange2
 topRightCorner ui/message_top_right_corner_64x32
 
 
 // Top stats now.
 parent topStats
-defaultSizeRatioXY 1 0.5
+defaultSizeRatioXY 1 0.45
+defaultTopBorder ui/OrangeBorder2
+defaultRightBorder ui/Orange2
 
 IntegerLabel Scorei "Score"
+InputTexture null
+
 IntegerLabel Livesi "Lives"
+InputTexture null
 
 
 parent BottomPart
@@ -49,11 +56,16 @@ ColumnList clHPShield
 sizeRatioXY 0.5 0.25
 alignmentXY 0.5 0.8
 padding 0.01
+noBorders
 
-ColumnList clWeaponSkillBar
-sizeRatioXY 0.9 0.7
-alignmentXY 0.5 0.35
-topBorder ui/border_top_4
+ColumnList clWeapons
+sizeRatioXY 0.5 0.7
+alignmentY 0.45
+padding 0.01
+onEnterScope ActiveWeaponsShown
+onPop ActiveWeaponsHidden
+noBorders
+
 
 parent clHPShield
 defaultSizeRatioXY 0.485 1
@@ -61,25 +73,26 @@ defaultTexture null
 
 element HPFrame
 texture 0x880000FF
-topBorder ui/border_top_4
-rightBorder ui/border_right_4
 topRightCorner ui/top_right_corner_8x8
 
 element ShieldFrame
 texture 0x000088FF
-topBorder ui/border_top_4
-rightBorder ui/border_right_4
 topRightCorner ui/top_right_corner_8x8
 
 parent HPFrame
 defaultSizeRatioXY 1 1
+
+
+////////////////////////////////////////
+// Make the Bars!
+defaultRightBorder null
 
 Bar HPBar
 texture 0xFF0000FF
 
 IntegerLabel HP
 texture null
-
+InputTexture null
 
 parent ShieldFrame
 
@@ -87,28 +100,12 @@ Bar ShieldBar
 texture 0x0000FFFF
 
 IntegerLabel Shield
+InputTexture null
 
 parent clWeaponSkillBar
 
 List ActiveWeaponList
 sizeRatioX 0.2
-
-Button Skill
-sizeRatioX 0.1
-
-Element WeaponSlots
-texture 0x2277
-sizeRatioX 0.7
-
-
-parent WeaponSlots
-
-ColumnList clWeapons
-sizeRatioY 0.9
-alignmentY 0.45
-padding 0.01
-onEnterScope ActiveWeaponsShown
-onPop ActiveWeaponsHidden
 
 
 ///////////////////////////////////
@@ -117,12 +114,16 @@ onPop ActiveWeaponsHidden
 parent HUD 
 defaultTexture NULL
 defaultSizeRatioXY 1 1 
+defaultRightBorder ui/Orange2
+
 
 element Debug
 sizeRatioXY 1 1  
+noBorders
 
 parent Debug
 list DebugRight 
+noBorders
 sizeRatioXY 0.3 1
 alignmentXY 0.85 0.5
 
@@ -130,6 +131,7 @@ parent DebugRight
 
 defaultSizeRatioXY 1 0.04
 StringLabel LevelTime "Level time" 
+
 IntegerLabel SpawnGroupsRemaining "Spawngroups remaining" 
 IntegerLabel SpawnGroupsActive "Spawngroups active" 
 StringLabel NextSpawnGroupTime "Next spawn group at" 

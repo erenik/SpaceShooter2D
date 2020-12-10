@@ -1,33 +1,10 @@
 // Main UI when starting up.
 
-defaultTexture	0x4422
-defaultTextColor	1 1 1 1
-
 // Make root active
-root
+root	Button
 name 	SaveEntry
-texture 0x55FF
 hoverable true
 activatable true
 highlightOnHover true
 highlightOnActive true
-sizeRatioX 0.3
-
-parent SaveEntry
-
-List SaveEntryList
-padding 0.01
-topBorder ui/border_top_4
-rightBorder ui/border_right_4
-topRightCorner ui/top_right_corner_8x8
-
-
-parent SaveEntryList
-defaultSizeRatioXY 1 0.31
-defaultTexture 0x0000
-
-label CustomHeaderData
-
-Label SaveName
-Label Date
-
+sizeRatioXY 1 0.2

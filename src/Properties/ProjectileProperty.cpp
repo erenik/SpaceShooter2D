@@ -248,8 +248,8 @@ void ProjectileProperty::Process(int timeInMs)
 		float rotationSpeed = ClampedFloat(rotationSpeedPreClamping, -0.5f, 0.5f) * 10.0f * weapon.homingFactor;
 
 		if (enemy) {}
-		else 
-			std::cout << "\nPlayer proj seconds to target: " << secondsToTarget << " Rotation speed: " << rotationSpeed<< " DiffLookAtCurTraj: "<< diffLookingAtCurrentTrajectory.Radians();
+		//else 
+		//	std::cout << "\nPlayer proj seconds to target: " << secondsToTarget << " Rotation speed: " << rotationSpeed<< " DiffLookAtCurTraj: "<< diffLookingAtCurrentTrajectory.Radians();
 
 		// Add some rotational velocity to address this need.
 		QueuePhysics(new PMSetEntity(owner, PT_ANGULAR_VELOCITY, Vector3f(0, rotationSpeed, 0)));

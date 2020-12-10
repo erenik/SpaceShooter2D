@@ -131,119 +131,123 @@ Message
 TextID WeaponScriptToggleWithE
 
 
-// Weapon upgrades
-Message +:01
-TextID 130
-Event
-String TutorialLevel3Weapons
-Message
-TextID 131
+/*
 
-Event SetRewindPoint
+	// Weapon upgrades
+	Message +:01
+	TextID 130
+	Event
+	String TutorialLevel3Weapons
+	Message
+	TextID 131
 
-Message +:01
-Condition FailedToDefeatAllEnemies
-TextID 132
+	Event SetRewindPoint
 
-SpawnGroup +:01
-Number 10
-ShipType ImmobilePracticeTargetTougher
-Formation LINE_Y
-Size xy 2 10
-Position xy 0 -5
+	Message +:01
+	Condition FailedToDefeatAllEnemies
+	TextID 132
 
-Event +:01
-Condition FailedToDefeatAllEnemies
-GoToRewindPoint
+	SpawnGroup +:01
+	Number 10
+	ShipType ImmobilePracticeTargetTougher
+	Formation LINE_Y
+	Size xy 2 10
+	Position xy 0 -5
 
-Event +:01
-String TutorialLevel1Weapons
+	Event +:01
+	Condition FailedToDefeatAllEnemies
+	GoToRewindPoint
 
-// Abilities/Skills
-Event 
-String TutorialSkillCooldowns
-Message 
-TextID 140
-Message
-TextID 141
-Event
-String SetSkill:AttackFrenzy
-Message
-TextID 142
+	Event +:01
+	String TutorialLevel1Weapons
 
-Event SetRewindPoint
+	// Abilities/Skills
+	Event 
+	String TutorialSkillCooldowns
+	Message 
+	TextID 140
+	Message
+	TextID 141
+	Event
+	String SetSkill:AttackFrenzy
+	Message
+	TextID 142
 
-Message +:01
-Condition FailedToDefeatAllEnemies
-TextID 147
+	Event SetRewindPoint
 
-SpawnGroup +:01
-Number 5
-ShipType ImmobilePracticeTargetTougher
-Formation LINE_Y
-Size xy 2 10
-Position xy 0 0
+	Message +:01
+	Condition FailedToDefeatAllEnemies
+	TextID 147
 
-Event +:01
-Condition FailedToDefeatAllEnemies
-GoToRewindPoint
+	SpawnGroup +:01
+	Number 5
+	ShipType ImmobilePracticeTargetTougher
+	Formation LINE_Y
+	Size xy 2 10
+	Position xy 0 0
 
-Message +:01 
-TextID WellDoneNext
-// Speed boost
-Event
-String SetSkill:SpeedBoost
-Message 
-TextID CatchDebrisWithSpeedBoost
+	Event +:01
+	Condition FailedToDefeatAllEnemies
+	GoToRewindPoint
 
-
-Event SetRewindPoint
-
-Message +:01
-Condition FailedToDefeatAllEnemies
-TextID 147
-
-SpawnGroup +:01
-Number 3
-ShipType SpeedDebris
-Formation LINE_Y
-Size xy 2 20
-Position xy 0 0
-
-Event +:01
-Condition SpaceDebrisNotCollected(3)
-GoToRewindPoint
-
-// Shield info
-Message +:01
-TextID WellDoneNext
-Message
-TextID UsePowerShield
-Event 
-String SetSkill:PowerShield
+	Message +:01 
+	TextID WellDoneNext
+	// Speed boost
+	Event
+	String SetSkill:SpeedBoost
+	Message 
+	TextID CatchDebrisWithSpeedBoost
 
 
-Event SetRewindPoint
+	Event SetRewindPoint
 
-// Retry text
-Message +:01
-Condition FailedToSurvive
-TextID TryAgainActivateSkill
-Message 
-TextID MovementeWillBeDisabled
+	Message +:01
+	Condition FailedToDefeatAllEnemies
+	TextID 147
 
-// Spawn bomb and set onDeath stuff.
-Event +:01
-String DisablePlayerMovement
-String ResetFailedToSurvive
+	SpawnGroup +:01
+	Number 3
+	ShipType SpeedDebris
+	Formation LINE_Y
+	Size xy 2 20
+	Position xy 0 0
 
-Event +:01
-String PauseGameTime
-String SpawnTutorialBomb
-String SetOnDeath:RespawnAt(RewindPoint)
+	Event +:01
+	Condition SpaceDebrisNotCollected(3)
+	GoToRewindPoint
 
-Message +:01
-TextID SurvivedBomb
+	// Shield info
+	Message +:01
+	TextID WellDoneNext
+	Message
+	TextID UsePowerShield
+	Event 
+	String SetSkill:PowerShield
+
+
+	Event SetRewindPoint
+
+	// Retry text
+	Message +:01
+	Condition FailedToSurvive
+	TextID TryAgainActivateSkill
+	Message 
+	TextID MovementeWillBeDisabled
+
+	// Spawn bomb and set onDeath stuff.
+	Event +:01
+	String DisablePlayerMovement
+	String ResetFailedToSurvive
+
+	Event +:01
+	String PauseGameTime
+	String SpawnTutorialBomb
+	String SetOnDeath:RespawnAt(RewindPoint)
+
+	Message +:01
+	TextID SurvivedBomb
+
+*/
 
 Event
 String EnablePlayerMovement

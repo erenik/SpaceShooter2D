@@ -6,7 +6,7 @@
 // Make root active
 root
 name HangarScreen
-texture NULL
+texture bgs/Menu_BG_withLines
 exitable false
 navigateUIOnPush
 
@@ -33,6 +33,9 @@ alignmentY 0.45
 parent Status
 defaultSizeRatioXY 1 0.19
 defaultTextColor	0xFFFFFFFF
+defaultTopBorder ui/Orange2
+defaultRightBorder ui/Orange2
+
 
 StringLabel Name 
 IntegerLabel TotalScore "Total score"
@@ -44,6 +47,10 @@ parent lHangar
 //defaultTopBorder ui/border_top_4
 //defaultRightBorder ui/border_right_4
 //defaultTopRightCorner ui/top_right_corner_8x8
+defaultTopBorder null
+defaultRightBorder null
+
+
 
 defaultTextColor	null
 defaultSizeRatioXY 1 0.15

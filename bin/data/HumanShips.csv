@@ -1,9 +1,9 @@
-Type,Name,Weapons,Movement pattern,Speed,Has Shield,Shield Value,Shield Regen Rate,Hit Points,Graphic Model,Collide damage,OnCollision,Difficulty
-H-Fighter,Default,Default,n/a,100,Yes,100,0,100,H-Fighter,5,,90
-ImmobilePracticeTarget,ImmobilePracticeTarget,0,0,0,Yes,25,,10,Ships/1x1,25,,25
-ImmobilePracticeTargetTougher,ImmobilePracticeTargetTougher,0,0,0,Yes,33,,50,Ships/1x1	,35,,40
-SpeedDebris,SpeedDebris,0,Straight,10,0,0,,100000,Ships/Debris,0,RemoveThis&SpeedDebrisCollected,
-,,,,,,,,,,5,,
-,,,,,,,,,,5,,
-,,,,,,,,,,5,,
-,,,,,,,,,,5,,
+Type,Name,Weapons,Movement pattern,Speed,Has Shield,Shield Value,Shield Regen Rate,Hit Points,Graphic Model,Texture,Collide damage,OnCollision,Difficulty
+H-Fighter,Default,Default,n/a,100,Yes,100,0,100,H-Fighter,Ships/Ship_texture_2,5,,90
+ImmobilePracticeTarget,ImmobilePracticeTarget,0,0,0,Yes,25,,10,Asteroids/Asteroid_1,Asteroids/Asteroid_texture_1,25,,25
+ImmobilePracticeTargetTougher,ImmobilePracticeTargetTougher,0,0,0,Yes,33,,50,Asteroids/Asteroid_1,Asteroids/Asteroid_texture_1,35,,40
+SpeedDebris,SpeedDebris,0,Straight,10,0,0,,100000,Ships/Debris,,0,RemoveThis&SpeedDebrisCollected,
+,,,,,,,,,,,5,,
+,,,,,,,,,,,5,,
+,,,,,,,,,,,5,,
+,,,,,,,,,,,5,,

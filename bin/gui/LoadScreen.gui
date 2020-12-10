@@ -1,7 +1,5 @@
 // Main UI when starting up.
 
-defaultTexture	0x2244
-defaultTextColor #0000ffff
 // #4d65b2ff
 
 // Make root active
@@ -9,35 +7,27 @@ root
 name 		LoadScreen
 onPop 		GoToPreviousMode
 removeOnPop true
-texture 	NULL
-texture 0x22FF
+texture bgs/Menu_BG_withLines
+exitable true
 
 parent LoadScreen
 
+list lLoadScreen
+sizeRatioXY 0.8 0.8
+alignmentXY 0.5 0.5
+
+parent lLoadScreen
+
 Label	"Load Game"
+textColor #fb6b1dff
 sizeRatioXY 0.5 0.2
 alignmentXY 0.5 0.9
 
 list Saves
-sizeRatioXY 0.8 0.8
+sizeRatioXY 0.8 0.7
+texture #44444444
 alignmentXY 0.5 0.4
-
-//////////////////////////////
-/// Saves/Load game menu
-parent Saves
-sizeRatioXY 0.5 0.1
-
-ColumnList	SavesCList
-texture 0x33FF
-sizeRatioXY	1.0	0.3
-alignmentXY	0.5 0.6
 
 Button	Back
 onActivate PopUI(LoadScreen)
-topBorder ui/border_top_4
-rightBorder ui/border_right_4
-topRightCorner ui/top_right_corner_8x8
-texture 0x33FF
 sizeRatioXY 0.2 0.1
-alignmentX 0.5
-

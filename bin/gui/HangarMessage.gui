@@ -9,7 +9,11 @@ name HangarMessageRoot
 texture 0x11AA
 exitable false
 deleteOnPop true
+noBorders
 
+defaultTopBorder ui/Orange2
+defaultRightBorder ui/Orange2
+topRightCorner ui/message_top_right_corner_64x32
 
 parent HangarMessageRoot
 
@@ -17,10 +21,7 @@ button	HangarMessage
 texture 	0x22FF
 text	"Replace me"
 textAlignment Center
-textPadding 0.1
+textPadding 32
 sizeRatioXY 0.8 0.3
 alignmentXY	0.5	0.3
 onActivate HangarMessageConfirmed&PopUI(HangarMessageRoot)
-topBorder ui/border_top
-rightBorder ui/border_right_4
-topRightCorner ui/message_top_right_corner_64x32

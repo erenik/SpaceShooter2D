@@ -76,6 +76,7 @@ void SpaceShooter2D::OnScoreUpdated()
 
 void SpaceShooter2D::UpdateHUDSkill()
 {
+	return;
 	PlayingLevel& pl = PlayingLevelRef();
 	QueueGraphics(new GMSetUIs("Skill", GMUI::TEXT, Skill::Name(pl.playerShip->skill)));
 	QueueGraphics(new GMSetUIs("Skill", GMUI::TEXTURE_SOURCE, pl.playerShip->activeSkill != NO_SKILL? "0x00FF00FF" : "0x44AA"));
@@ -97,7 +98,8 @@ void SpaceShooter2D::OpenLoadScreen()
 	/// Returns list of all saves, in the form of their SaveFileHeader objects, which should include all info necessary to judge which save to load!
 	headers = SaveFile::GetSaves(Application::name);
 	// Clear old list.
-	GraphicsMan.QueueMessage(new GMClearUI("SavesCList"));
+	String savesList = "Saves";
+	GraphicsMan.QueueMessage(new GMClearUI(savesList));
 	/// Sort saves by date?
 	for (int i = 0; i < headers.Size(); ++i)
 	{
@@ -122,15 +124,29 @@ void SpaceShooter2D::OpenLoadScreen()
 
 		UIElement * fromTemplate = UserInterface::LoadUIAsElement("gui/SaveEntry.gui");
 
-		fromTemplate->GetElementByName("SaveName")->SetText(h.saveName);
-		fromTemplate->GetElementByName("Date")->SetText(h.dateSaved.ToString("Y/M/D H:m"));
-		fromTemplate->GetElementByName("CustomHeaderData")->SetText(h.customHeaderData);
+		// h.saveName = filename, not so interesting.
+		List<String> additionalData = h.customHeaderData.Tokenize("\n");
 
-		fromTemplate->GetElementByName("SaveEntry")->activationMessage = "LoadGame(" + h.saveName + ")";
+		String nameStr, scoreStr, saveDateStr;
+		for (int i = 0; i < additionalData.Size(); ++i) {
+			String s = additionalData[i];
+			if (s.Contains("Name:"))
+				nameStr = s - "Name:";
+			else if (s.Contains("Score"))
+				scoreStr = s;
+			else if (s.Contains("Save"))
+				saveDateStr = s;
+		}
+		if (nameStr == "")
+			nameStr = "Autosave";
+
+		Text text = nameStr +"  "+ h.dateSaved.ToString("Y/M/D H:m");
+		fromTemplate->SetText(text);
+		fromTemplate->activationMessage = "LoadGame(" + h.saveName + ")";
 		
 		saves.Add(fromTemplate);
 	}
-	GraphicsMan.QueueMessage(new GMAddUI(saves, "SavesCList"));
+	GraphicsMan.QueueMessage(new GMAddUI(saves, savesList));
 	/// Move cursor to first save in the list.
 	if (saves.Size())
 	{
