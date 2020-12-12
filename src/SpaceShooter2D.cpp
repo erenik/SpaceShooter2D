@@ -49,23 +49,12 @@ Time SpaceShooter2D::startDate;
 /// If true, queues up messages so the player automatically starts a new game with the default name and difficulty.
 bool introTest = false;
 
-#include "UI/Buttons/UIToggleButton.h"
 
 void SetApplicationDefaults()
 {
 	Application::name = "ErenikSpaceShooter";
-	TextFont::defaultFontSource = "img/fonts/Font_test_BW.png";
-	UIElement::forceUpperCase = true;
-
-	UIElement::defaultTextColor = Color::ColorByHexName("#8f1767ff");
-	UIToggleButton::defaultOnToggledTexture = "";
-	UIToggleButton::defaultOnNotToggledTexture = "";
-
-	TextFont::idleColor = Color::ColorByHexName("#8f1767ff");
-	TextFont::onHoverColor = Color::ColorByHexName("#fb6b1dff");
-	TextFont::onActiveColor = Color::ColorByHexName("#ffffffff");
+	SpaceShooter2D::SetupUIStyling();
 	PhysicsProperty::defaultUseQuaternions = false;
-	UIElement::defaultTextureSource = "0x22AA";
 }
 
 // Global variables.

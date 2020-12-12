@@ -1,43 +1,35 @@
-defaultTexture		null
 defaultTextColor	1 1 1 1
+defaultFont Small_font
 
 // Make root active
 root
 name GearDescription
-texture 0x223344FF
 
 parent GearDescription
 
 List lGearDesc
+padding 0.01
 
 parent lGearDesc
-defaultSizeRatioY 0.15
+defaultSizeRatioXY 1 0.1
 
-ColumnList NamePrice
-ColumnList HpRegeneration
-ColumnList ToughnessReactivity
-Label GearTextDescription
-textPadding 0.05
-sizeRatioY 0.4
-
-parent NamePrice
-defaultSizeRatioXY 0.5 1
+//parent NamePrice
 
 StringLabel GearName "Name"
-sizeRatioX 0.6
 dividerX 0.3
 IntegerLabel GearPrice "Price"
-sizeRatioX 0.4
 dividerX 0.5
 
-parent HpRegeneration
-defaultSizeRatioXY 0.5 1
+//parent HpRegeneration
 defaultDividerX 0.7
 IntegerLabel GearHp "Max HP"
 IntegerLabel GearRegeneration "Auto-repair"
 
-parent ToughnessReactivity
-defaultSizeRatioXY 0.5 1
+//parent ToughnessReactivity
 IntegerLabel GearToughness "Toughness"
 IntegerLabel GearReactivity "Reactivity"
 
+
+Label GearTextDescription
+textPadding 0.05
+sizeRatioY 0.2

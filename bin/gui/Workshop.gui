@@ -1,62 +1,79 @@
 // Main UI when starting up.
 
-defaultTexture	0x2244
+//defaultTexture	0x2244
 //defaultTextColor	1 1 1 1
 
 // Make root active
 root
 name WorkshopScreen
 texture 	bgs/Menu_BG
-retainAspectRatio true
 exitable true
 sizeRatioXY 1 1
 
 parent WorkshopScreen
+List lWorkshop
+sizeRatioXY 0.8 0.8
+alignmentXY 0.5 0.5
+
+parent lWorkshop
+
 label	lMenuName
 text	"Workshop"
-sizeRatioXY 0.5 0.1
+textColor #fb6b1dff
+textAlignment Center
+sizeRatioXY 1 0.1
 alignmentXY 0.5 0.95
 
-IntegerLabel WorkshopMoney "Money"
-sizeRatioXY 0.5 0.08
-alignmentXY 0.5 0.84
+element padding 
+sizeRatioY 0.05
 
-list lGeneralInfo
-sizeRatioXY 0.25 0.2
-alignmentXY 0.125 0.9
+IntegerLabel WorkshopMoney "Money"
+textColor #fffffff
+sizeRatioXY 0.3 0.05
+alignmentY 0.84
+
+Element padding 
+sizeRatioY 0.05
+
+ColumnList clListsDetails
+sizeRatioY 0.75
+
+parent clListsDetails
+defaultSizeRatioXY 0.49 1
+
+List LeftSide
+Element padding 
+sizeRatioX 0.02
+List RightSide
+
+parent LeftSide
+defaultSizeRatioX 1
+
+//list lGeneralInfo
+//sizeRatioY 0.1
 
 list CategoriesAndProducts
-sizeRatioXY 0.5 0.8
-alignmentXY 0.25 0.4
+sizeRatioY 0.9
 
-label PreviewArea
-textColor 0x55FFFF22
-//texture 0xFF15
-sizeRatioXY 0.5 0.3
-alignmentXY 0.75 0.15
-
-list lMenuButtons
-sizeRatioXY 0.25 0.2
-alignmentXY 0.875 0.9
+parent RightSide
 
 list Stats
-sizeRatioXY 0.5 0.5
-alignmentXY 0.75 0.55
+sizeRatioY 0.7
 
 parent CategoriesAndProducts
 ColumnList Categories 
-sizeRatioY 0.15
+sizeRatioY 0.10
 
-list lWeaponCategories
-sizeRatioY 0.85
-padding 0.001
+list ProductsList
+sizeRatioY 0.9
+padding 0.005
 
 parent Categories
 defaultSizeRatioXY 0.25 1
-defaultTopBorder ui/border_top_4
-defaultRightBorder ui/border_right_4
-defaultTopRightCorner ui/top_right_corner_8x8
-defaultTexture 0x446666FF
+//defaultTopBorder ui/border_top_4
+//defaultRightBorder ui/border_right_4
+//defaultTopRightCorner ui/top_right_corner_8x8
+defaultTexture 0x8855
 
 Button AllCategory
 Text ""
@@ -69,6 +86,8 @@ Text ""
 
 Button ShieldCategory
 Text ""
+
+defaultTexture null
 
 // Icons in the buttons above
 defaultSizeRatioXY 1 1

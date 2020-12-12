@@ -6,21 +6,27 @@ defaultTextColor	1 1 1 1
 // Make root active
 root
 name EditShipScreen
-texture 0x446688FF
+texture 	bgs/Menu_BG
 exitable true
-sizeRatioXY 0.8 0.8
+sizeRatioXY 1 1
 
 parent EditShipScreen
 
 list TitleAndContent
+sizeRatioXY 0.8 0.8
+alignmentXY 0.5 0.5
 padding 0.02
 
 parent TitleAndContent
 
-label	lMenuName "Hangar"
+label	lMenuName "Ship Customization"
+textColor #fb6b1dff
 texture null
 textAlignment Center
-sizeRatioY 0.1
+sizeRatioXY 1 0.1
+alignmentXY 0.5 0.95
+
+defaultFont Small_font
 
 ColumnList MainContent
 sizeRatioXY 0.98 0.8
@@ -34,17 +40,21 @@ textAlignment Center
 parent MainContent
 
 Element LeftSide
-sizeRatioX 0.6
+sizeRatioX 0.5
 
 list RightSide
-sizeRatioX 0.4
+sizeRatioX 0.5
 padding 0.02
 
 /// Right side
 parent RightSide
 
 list lEditScreenShipStats
-sizeRatioY 0.45
+sizeRatioY 0.4
+
+label lSelectedStats
+text "Selected stats"
+sizeRatioY 0.05
 
 list Stats
 sizeRatioY 0.5
@@ -57,8 +67,6 @@ list EditShipSelectedGearStats
 parent SelectedStats
 defaultSizeRatioXY 1 0.2
 
-label lSelectedStats
-text "Selected stats"
 
 
 /// Left side
@@ -71,7 +79,7 @@ padding 0.02
 parent listLeftSide
 ColumnList Categories 
 padding 0.02
-sizeRatioY 0.15
+sizeRatioY 0.12
 
 ColumnList clGearToEquip
 padding 0.02

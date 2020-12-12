@@ -30,7 +30,7 @@ void main(void)
 	
 	gl_FragColor = color;
 	gl_FragColor *= primaryColorVec4;
-	float highlightFactor = 1.0 + highlightColorVec4.x;
+	float highlightFactor = 1.0 + highlightColorVec4.x * 0.0001;
 	gl_FragColor.xyz *= highlightFactor;
 }
 

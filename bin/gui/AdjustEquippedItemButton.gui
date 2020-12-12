@@ -1,12 +1,13 @@
 // Main UI when starting up.
 
-defaultTexture	0x223344FF
+defaultTexture	0x2288
 defaultTextColor	1 1 1 1
+defaultFont Small_font
 
 // Make root active
 root
 name 	AdjustEquippedItemButton
-texture 0x223344
+texture 0x44FF
 hoverable true
 activatable true
 highlightOnHover true
@@ -15,26 +16,24 @@ sizeRatioXY 1 0.15
 
 parent AdjustEquippedItemButton
 
-ColumnList clBuyProductButton
-hoverable false
-texture null
-padding 0.01
-topBorder ui/border_top_4
-rightBorder ui/border_right_4
-topRightCorner ui/top_right_corner_8x8
-
-
-parent clBuyProductButton
-defaultSizeRatioXY 0.25 1
-defaultTexture 0x0000
+ColumnList clIconSlot
+sizeRatioXY 1 0.5
+alignmentY 0.75
 
 Label GearName "Test"
 hoverable false
-sizeRatioX 0.75
+sizeRatioXY 1 0.5
+alignmentY 0.25
+
+parent clIconSlot
 
 Element GearIcon
 texture 0xFF55FF
 retainAspectRatio true
 hoverable false
 sizeRatioX 0.20
+
+Label GearSlot "Slot X"
+
+
 

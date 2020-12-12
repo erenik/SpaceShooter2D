@@ -1,50 +1,32 @@
 defaultTexture		null
 defaultTextColor	1 1 1 1
+defaultFont Small_font
 
 // Make root active
 root
 name ShipStatsDescription
-texture 0x223344FF
 
 parent ShipStatsDescription
 
 List lGearDesc
+padding 0.02
 
 parent lGearDesc
-defaultSizeRatioY 0.19
+defaultSizeRatioY 0.12
 
-ColumnList NamePrice
-ColumnList ReloadTimeROF
-ColumnList Agility
-ColumnList MaxHPArmorRegen
-ColumnList MaxShieldAndRegen
-
-parent NamePrice
-defaultSizeRatioXY 0.5 1
-
-defaultDividerX 0.3
-
-StringLabel ShipName "Name"
-IntegerLabel ShipPrice "Price"
-
-defaultSizeRatioXY 0.5 1
 defaultDividerX 0.7
 
-parent ReloadTimeROF
 FloatLabel ReloadTime "Reload time"
 maxDecimals 2
 FloatLabel RateOfFire "Rate of fire"
 maxDecimals 2
 
-parent Agility
 IntegerLabel ShipSpeed "Thrust"
 
-parent MaxHPArmorRegen
 IntegerLabel MaxArmor "Max Armor HP"
 FloatLabel ArmorRegen "Armor Regen"
 maxDecimals 2
 
-parent MaxShieldAndRegen
 IntegerLabel MaxShield "Max shield"
 FloatLabel ShieldRegen "Shield regen"
 maxDecimals 2

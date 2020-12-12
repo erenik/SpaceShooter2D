@@ -247,12 +247,14 @@ public:
 	static String levelToLoad;
 	static bool paused;
 	float MissionRepeatClearBountyMultiplier() { return 0.25f; };
+	static void SetupUIStyling();
 
 protected:
 	static bool shipDataLoaded;
 
 private:
 	
+
 	bool firstTimeEntering = true;
 
 	/// Called each app frame to remove projectiles and ships outside the relevant area.

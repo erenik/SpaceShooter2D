@@ -64,7 +64,7 @@ button Shop
 onActivate PushUI(gui/Workshop.gui)
 // GoToWorkshop
 
-button Hangar
+button Customize
 onActivate PushUI(gui/ShipEdit.gui)
 
 button WeaponScripts "Weapon scripts"
