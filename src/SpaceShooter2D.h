@@ -100,6 +100,7 @@ void PrintEntityData(EntitySharedPtr entity);
 
 String DifficultyString(int diff);
 
+extern std::shared_ptr<Color> ssActiveTextColor;
 
 enum SSGameMode {
 	START_UP,

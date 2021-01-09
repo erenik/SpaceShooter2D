@@ -5,7 +5,7 @@ defaultTextColor	1 1 1 1
 defaultFont Small_font
 
 // Make root active
-root
+root    CompositeButton
 name 	AdjustEquippedItemButton
 texture 0x44FF
 hoverable true

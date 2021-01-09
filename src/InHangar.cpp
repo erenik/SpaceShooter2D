@@ -413,7 +413,7 @@ void InHangar::UpdateUpgradesLists()
 		}
 		UIElement * productName = buyProductButton->GetElementByName("ProductName");
 		productName->SetText(Text(gear.name));
-		productName->SetOnHoverTextColor(Color::ColorByHexName("#fb6b1dff"));
+		productName->SetOnHoverTextColor(ssActiveTextColor);
 
 		auto productLabelName = buyProductButton->GetElementByName("ProductName")->name += gear.name;
 		buyProductButton->GetElementByName("Price")->SetText(Text(gear.price));
@@ -465,12 +465,14 @@ void InHangar::FillSelectGearList(String list, Gear::Type type, Gear currentlyEq
 	for (int i = -1; i < gearToDisplayInList.Size(); ++i)
 	{
 		UIElement * selectGearButton = adjustEquippedItemButtonTemplate->Copy();
-	
+
+		UIElement* gearNameLabel = selectGearButton->GetElementByName("GearName");
+
 		if (i == -1) {
 			// Skip if no actual gear to remove there.
 			if (currentlyEquippedGearInSlot.name.Length() == 0)
 				continue;
-			selectGearButton->GetElementByName("GearName")->SetText(Text(TextMan.GetText("Unequip") + " " + TextMan.GetText(currentlyEquippedGearInSlot.name)));
+			gearNameLabel->SetText(Text(TextMan.GetText("Unequip") + " " + TextMan.GetText(currentlyEquippedGearInSlot.name)));
 			selectGearButton->onHover = "SetHoverUpgrade:" + currentlyEquippedGearInSlot.name;
 			selectGearButton->activationMessage = "UnequipGearInActiveSlot";
 			selectGearButton->textureSource = "0x661122";
@@ -479,11 +481,14 @@ void InHangar::FillSelectGearList(String list, Gear::Type type, Gear currentlyEq
 		else {
 			Gear gear = gearToDisplayInList[i];
 			selectGearButton->name += gear.name;
-			selectGearButton->GetElementByName("GearName")->SetText(Text(TextMan.GetText(gear.name)));
+			gearNameLabel->SetText(Text(TextMan.GetText(gear.name)));
 			selectGearButton->onHover = "SetHoverUpgrade:" + gear.name;
 			selectGearButton->activationMessage = "EquipGear:" + gear.name;
 			selectGearButton->GetElementByName("GearIcon")->textureSource = gear.Icon();
 		}
+
+		gearNameLabel->SetOnHoverTextColor(ssActiveTextColor);
+
 		selectGearEntries.Add(selectGearButton);
 	}
 
@@ -544,6 +549,8 @@ void InHangar::FillEditScreenEntries(String inList, Gear::Type type) {
 	for (int i = 0; i < gearToDisplayInList.Size() + 1; ++i)
 	{
 		UIElement * adjustEquippedItemButton = adjustEquippedItemButtonTemplate->Copy();
+		UIElement* adjustOrEquipNameLabel = adjustEquippedItemButton->GetElementByName("GearName");
+
 		// For extra buttons to equip more.
 		if (i >= gearToDisplayInList.Size()) {
 			if (i >= playerShip->MaxGearForType(type))
@@ -552,7 +559,7 @@ void InHangar::FillEditScreenEntries(String inList, Gear::Type type) {
 			adjustEquippedItemButton->activationMessage = "OpenGearListEquipGear:" + toString(type) + ","+String(i);
 			// TODO: Set text color of all.
 			adjustEquippedItemButton->GetElementByName("GearSlot")->SetText(TextMan.GetText("GearSlot") + " " + String(i + 1));
-			adjustEquippedItemButton->GetElementByName("GearName")->SetText(TextMan.GetText("AddEquipment"+ toString(type)));
+			adjustOrEquipNameLabel->SetText(TextMan.GetText("AddEquipment"+ toString(type)));
 			adjustEquippedItemButton->GetElementByName("GearIcon")->textureSource = Gear::TypeIcon(type);
 			adjustEquippedItemButton->GetElementByName("GearIcon")->color = Vector4f(1,1,1,1) * 0.8f;
 		}
@@ -562,10 +569,12 @@ void InHangar::FillEditScreenEntries(String inList, Gear::Type type) {
 			adjustEquippedItemButton->name += gear.name;
 			adjustEquippedItemButton->activationMessage = "OpenGearListChangeGear:" + toString(type)+","+String(i);
 			adjustEquippedItemButton->GetElementByName("GearSlot")->SetText(TextMan.GetText("GearSlot") + " " + String(i + 1));
-			adjustEquippedItemButton->GetElementByName("GearName")->SetText(TextMan.GetText(gear.name));
+			adjustOrEquipNameLabel->SetText(TextMan.GetText(gear.name));
 			adjustEquippedItemButton->onHover = "SetHoverUpgrade:" + gear.name;
 			adjustEquippedItemButton->GetElementByName("GearIcon")->textureSource = gear.Icon();
 		}
+
+		adjustOrEquipNameLabel->SetOnHoverTextColor(ssActiveTextColor);
 
 		equippedGearEntries.Add(adjustEquippedItemButton);
 	}

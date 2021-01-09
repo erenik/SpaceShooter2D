@@ -876,6 +876,7 @@ void Ship::CopyStatsFrom(const Ship& ref) {
 	visuals = ref.visuals;
 	other = ref.other;
 
+	activeWeapon = nullptr;
 	weaponSet = WeaponSet(ref.weaponSet);
 	if (weaponSet.Size())
 		activeWeapon = weaponSet[0]; 

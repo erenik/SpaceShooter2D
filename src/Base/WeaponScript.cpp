@@ -4,6 +4,7 @@
 /// Editable user-scripts
 
 #include "WeaponScript.h"
+#include "File/LogFile.h"
 
 List<WeaponScript*> weaponScripts;
 
@@ -51,6 +52,10 @@ void ScriptAction::OnEnter(ShipPtr forShip)
 {
 	if (type == SWITCH_TO_WEAPON)
 	{
+		if (weaponIndex >= forShip->weaponSet.Size()) {
+			LogMain("Unable to switch to weapon. Given index is not present in the active weapon-set.", INFO);
+			return;
+		}
 		forShip->activeWeapon = forShip->weaponSet[weaponIndex];
 		forShip->shoot = true;
 	}

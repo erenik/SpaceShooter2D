@@ -41,6 +41,8 @@
 #include "Input/InputManager.h"
 #include "Base/PlayerShip.h"
 
+std::shared_ptr<Color> ssActiveTextColor = Color::ColorByHexName("#fb6b1dff");
+
 List<Weapon> Weapon::types;
 List<ShipPtr> Ship::types;
 
