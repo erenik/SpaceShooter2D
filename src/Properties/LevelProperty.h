@@ -24,6 +24,7 @@ public:
 	void MoveTo(Vector3f position);
 	void SetVelocity(Vector3f velocity);
 	void CreateBlackness();
+	void CreateBackground();
 	void ToggleBlackness();
 	Vector3f Velocity();
 

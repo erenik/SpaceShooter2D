@@ -42,6 +42,7 @@ EntitySharedPtr LevelProperty::Create(Vector2f playingFieldSize, float playingFi
 	pp->type = PhysicsType::KINEMATIC;
 
 	lp->CreateBlackness();
+	lp->CreateBackground();
 
 	// Finalize details before registering.
 	levelEntity->localPosition = Vector3f();
@@ -89,6 +90,20 @@ void LevelProperty::CreateBlackness() {
 	}
 	// Register blackness entities for rendering.
 	QueueGraphics(new GMRegisterEntities(blacknessEntities));
+}
+
+void LevelProperty::CreateBackground() {
+	Texture * texture = TexMan.GetTexture("bgs/purple_space");
+	EntitySharedPtr backgroundEntity = EntityMan.CreateEntity("Background", ModelMan.GetModel("sprite.obj"), texture);
+	// Ensure it covers the playing field.
+	Vector2f scale = Vector2f(texture->Width() / float(texture->Height()), 1);
+	Vector2f requiredScaleFactor = playingFieldSize.ElementDivision(scale);
+	scale *= requiredScaleFactor.MaxPart() + 2;
+	backgroundEntity->scale = Vector3f(scale, 1);
+	Vector3f position(0, 0, -5);
+	backgroundEntity->localPosition = position;
+	levelEntity->AddChild(backgroundEntity);
+	QueueGraphics(new GMRegisterEntity(backgroundEntity));
 }
 
 void LevelProperty::ToggleBlackness() {
