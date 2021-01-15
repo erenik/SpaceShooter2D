@@ -16,6 +16,13 @@ sizeRatioXY 0.8 0.8
 alignmentXY 0.5 0.5
 padding 0.02
 
+Label Notice "Notice me senpai!"
+textColor #fb6b1dff
+textAlignment Center
+sizeRatioXY 1.0 0.05
+alignmentXY 0.5 0.1
+text ""
+
 parent TitleAndContent
 
 label	lMenuName "Ship Customization"
@@ -37,24 +44,36 @@ alignmentXY 0.5 0.4
 parent MainContent
 
 Element LeftSide
-sizeRatioX 0.5
+sizeRatioX 0.6
 
 list RightSide
-sizeRatioX 0.5
+sizeRatioXY 0.4 1
 padding 0.02
 
 /// Right side
 parent RightSide
-
-list lEditScreenShipStats
-sizeRatioXY 0.8 0.4
 
 label lSelectedStats
 text "Selected stats"
 sizeRatioY 0.05
 
 list Stats
-sizeRatioY 0.5
+sizeRatioXY 0.8 0.5
+alignmentXY 0.5 0.5
+
+element ShipStats
+sizeRatioXY 0.8 0.4
+
+parent ShipStats
+
+label labelShipStats "Ship statistics"
+sizeRatioXY 1 0.12
+alignmentXY 0.5 0.94
+
+list lEditScreenShipStats
+sizeRatioXY 0.8 0.86
+alignmentXY 0.5 0.44
+
 
 parent Stats
 

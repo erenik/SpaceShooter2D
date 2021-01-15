@@ -1,40 +1,43 @@
 // Main UI when starting up.
 
-defaultTexture	0x2244
 defaultTextColor	1 1 1 1
 
 // Make root active
 root
 name MissionsScreen
-texture NULL
+texture bgs/Menu_BG_withLines
 exitable true
-sizeRatioXY 0.8 0.8
+sizeRatioXY 1 1
 
 
 parent MissionsScreen
 
 List MissionsScreenMain
-texture 0x446688FF
+sizeRatioXY 0.8 0.8
 
 parent MissionsScreenMain
 
 label Missions
-sizeRatioY 0.1
+textColor #fb6b1dff
+textAlignment Center
+sizeRatioXY 1 0.1
+alignmentXY 0.5 0.95
+
+element padding 
+sizeRatioY 0.05
 
 ColumnList MissionListAndDetails
-sizeRatioY 0.9
+sizeRatioY 0.85
+
 
 parent MissionListAndDetails
 defaultSizeRatioXY 0.5 1.0
 
 List MissionsList
-sizeRatioX 0.6
-topBorder ui/border_top_4
-rightBorder ui/border_right_4
-topRightCorner ui/top_right_corner_8x8
+sizeRatioX 0.5
 
 List MissionDetails 
-sizeRatioX 0.4
+sizeRatioX 0.5
 
 parent MissionDetails
 defaultSizeRatioXY 1 0.1
@@ -42,6 +45,8 @@ defaultTexture null
 
 label MissionDetails 
 text "Mission details"
+
+defaultSizeRatioXY 1 0.07
 StringLabel MissionDetailsName "Name"
 IntegerLabel MissionDetailsBounty "Bounty"
 IntegerLabel MissionDetailsHighscore "High score"

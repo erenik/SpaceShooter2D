@@ -326,7 +326,9 @@ void InHangar::PopulateMissionsList() {
 		UIElement * missionButton = UserInterface::LoadUIAsElement("gui/SelectMissionButton.gui");
 		missionButton->GetElementByName("Icon")->textureSource = "0x334455";
 		missionButton->GetElementByName("Completed")->SetText(mission->Completed()? "Completed" : "");
-		missionButton->GetElementByName("MissionName")->SetText(TextMan.GetText(mission->name));
+		UIElement * missionName = missionButton->GetElementByName("MissionName");
+		missionName->SetText(TextMan.GetText(mission->name));
+		missionName->SetOnHoverTextColor(ssActiveTextColor);
 //		(missionButton->GetElementByName("Bounty"))->SetText(String(mission->bounty));
 		(missionButton->GetElementByName("SelectMissionButton"))->activationMessage = "PlayMission "+ mission->name;
 		if (i == 0) // Hover to first one by default?
@@ -494,11 +496,11 @@ void InHangar::FillSelectGearList(String list, Gear::Type type, Gear currentlyEq
 
 	if (selectGearEntries.Size() == 0) {
 		// Display error message at the bottom?
-		QueueGraphics(new GMSetUIs("BottomNotice", GMUI::TEXT, TextMan.GetText("NoAvailableGear")));
+		QueueGraphics(new GMSetUIs("Notice", GMUI::TEXT, TextMan.GetText("NoAvailableGear")));
 		return;
 	}
 
-	QueueGraphics(new GMSetUIs("BottomNotice", GMUI::TEXT, ""));
+	QueueGraphics(new GMSetUIs("Notice", GMUI::TEXT, ""));
 
 	QueueGraphics(new GMAddUI(selectGearEntries, list));
 

@@ -69,7 +69,7 @@ FirstMissionComplete2;Feel free to return to base at your leisure.
 RogerReturningToBase;$Name: Roger that. Returning to base.
 
 MissionCompleted;You have successfully completed the mission $missionName!
-MissionClearedFirstTime;As this is your first time clearing it, \nyou receive cash bounty of $moneyReward.
+MissionClearedFirstTime;As this is your first time clearing it, \nyou receive a cash bounty of $moneyReward.
 MissionClearedRepeat;As you have cleared this previously, \nyou receive a repeat cash bounty of $moneyReward.
 
 Tutorial;Tutorial

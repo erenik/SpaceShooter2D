@@ -1,13 +1,12 @@
 // Main UI when starting up.
 
-defaultTexture	0x2288
 defaultTextColor	1 1 1 1
 defaultFont Small_font
 
 // Make root active
 root    CompositeButton
 name 	AdjustEquippedItemButton
-texture 0x44FF
+// texture 0x44FF
 hoverable true
 activatable true
 highlightOnHover true
@@ -22,18 +21,19 @@ alignmentY 0.75
 
 Label GearName "Test"
 hoverable false
-sizeRatioXY 1 0.5
+sizeRatioXY 1 0.4
 alignmentY 0.25
 
 parent clIconSlot
 
 Element GearIcon
-texture 0xFF55FF
+// texture 0xFF55FF
 retainAspectRatio true
 hoverable false
 sizeRatioX 0.20
 
 Label GearSlot "Slot X"
+sizeRatioY 0.6
 
 
 

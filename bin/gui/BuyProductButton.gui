@@ -1,6 +1,5 @@
 // Main UI when starting up.
 
-//defaultTexture	0x8844
 defaultTextColor	1 1 1 1
 defaultFont Small_font
 

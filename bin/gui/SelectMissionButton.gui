@@ -1,12 +1,11 @@
 // Main UI when starting up.
 
-defaultTexture	0x223344FF
 defaultTextColor	1 1 1 1
+// defaultFont Small_font
 
 // Make root active
-root
+root	CompositeButton
 name 	SelectMissionButton
-texture 0x446688FF
 hoverable true
 activatable true
 highlightOnHover true
@@ -15,26 +14,18 @@ sizeRatioXY 0.9 0.1
 
 parent SelectMissionButton
 
-ColumnList clSelectMissionButton
-hoverable false
-texture null
-padding 0.01
-topBorder ui/border_top_4
-rightBorder ui/border_right_4
-topRightCorner ui/top_right_corner_8x8
-
-
-parent clSelectMissionButton
 defaultSizeRatioXY 0.25 1
 defaultTexture 0x0000
 
 Element Icon
 sizeRatioX 0.1
+alignmentX 0.05
 retainAspectRatio true 
 
 Label MissionName "Test"
 hoverable false
-sizeRatioX 0.55
+sizeRatioX 0.6
+alignmentX 0.4
 
 /*
 Label BountyText "Bounty"
@@ -50,5 +41,8 @@ sizeRatioX 0.15
 
 Label Completed ""
 hoverable false
-sizeRatioX 0.2
+sizeRatioXY 0.3 0.5
+alignmentX 0.85
+font Small_font
+textColor #fb6b1dff
 
