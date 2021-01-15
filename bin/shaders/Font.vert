@@ -7,7 +7,7 @@
 // Projection matrix provided by the client.
 uniform mat4 projectionMatrix = mat4(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
 uniform mat4 viewMatrix = mat4(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
-uniform mat4 modelMatrix = mat4(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
+//uniform mat4 modelMatrix = mat4(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
 
 // Input data for the shader
 // in_Position was bound to attribute index 0, UV to index 1 and Normals to index 2.
@@ -20,6 +20,8 @@ varying vec3 position;
 
 /// Which character in the font we are to render.
 uniform int character = 65;
+uniform float scale = 1;
+
 uniform vec2 pivot = vec2(0,0);
 
 varying vec3 debugColor;
@@ -27,16 +29,20 @@ varying vec3 debugColor;
 void main(void) 
 {
 	debugColor = vec3(0,0,0);
+	
 	// Calculate matrices
+	float scaleToUse = scale * 1.0;
+	mat4 scaleMatrix = mat4(scaleToUse, 0.0, 0.0, 0.0, 0.0, scaleToUse, 0.0, 0.0, 0.0, 0.0, scaleToUse, 0.0, 0.0, 0.0, 0.0, 1.0);
+	mat4 translationMatrix = mat4(1.0, 0.0, 0.0, 0.0,  0.0, 1.0, 0.0, 0.0,  0.0, 0.0, 1.0, 0.0, pivot.xy, 0, 1.0);
+
+	mat4 modelMatrix = translationMatrix * scaleMatrix;
+
 	mat4 mvp = projectionMatrix * viewMatrix * modelMatrix;
-	
-	// Multiple position with text scale.
-	vec3 pos = in_Position;
-	pos.xy += pivot;
-	
-	// Multiply mvp matrix onto the vertex coordinates.
-	gl_Position = mvp * vec4(pos, 1);
-	position = pos;
+		
+	// Multiply mvp matrix onto the vertex coordinates.	
+	gl_Position = mvp * vec4(in_Position, 1);
+
+	position = in_Position;
 
 	float characterX = mod(character, 16);
 	float characterY = character / 16;

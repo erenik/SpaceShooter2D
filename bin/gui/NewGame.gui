@@ -11,7 +11,7 @@ name 		NewGame
 onPop 		GoToPreviousMode
 removeOnPop true
 texture 	bgs/Menu_BG
-retainAspectRatio true
+retainAspectRatio false
 exitable 	true
 
 parent NewGame
@@ -37,7 +37,7 @@ padding 0.03
 sizeRatioY 0.7
 
 parent NewGameDetails
-defaultSizeRatioXY 0.9 0.17
+defaultSizeRatioXY 0.9 0.12
 
 StringInput PlayerName "Player Name"
 

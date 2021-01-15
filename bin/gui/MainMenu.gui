@@ -24,7 +24,7 @@ sizeRatioXY 0.8 0.2
 alignmentXY 0.5 0.8
 
 list lMainMenu
-sizeRatioXY 0.4 0.6
+sizeRatioXY 1 0.6
 alignmentXY	0.5 0.3
 padding 0.025
 
@@ -38,7 +38,7 @@ texture NULL
 hoverable false
 
 parent lMainMenu
-defaultSizeRatioY 0.15
+defaultSizeRatioY 0.10
 defaultTextAlignment Center
 
 button NewGameButton
