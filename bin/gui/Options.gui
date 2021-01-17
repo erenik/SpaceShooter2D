@@ -1,28 +1,22 @@
-// Main UI when starting up.
-
-defaultTexture	0x2277
 defaultTextColor	1 1 1 1
 
 // Make root active
 root
-sizeRatioXY 0.5 0.5
+sizeRatioXY 1 1
 name 		Options
-onPop 		GoToPreviousMode
 removeOnPop true
 exitable 	true
-defaultTexture	0x22FF
+texture	bgs/Menu_BG
 
 parent Options
 
+
+defaultSizeRatioXY 0.8 0.8
+defaultAlignmentXY 0.5 0.5
+
 list lOptions
-list lAudioOptions
-texture 0x22EE
-visible false
-padding 0.01
 
 parent lOptions
-defaultTopBorder ui/border_top_4
-defaultRightBorder 0xAAFF
 defaultSizeRatioY 0.15
 
 label Options 
@@ -30,39 +24,17 @@ topBorder 0x0000
 rightBorder 0x0000
 textAlignment Center  
 
+element padding 
+sizeRatioY 0.1
+
+defaultSizeRatioY 0.12
+
 button AudioOptionsButton
+OnHoverTextColor #fb6b1dff
 text "Audio options"
-onActivate	PushUI(lAudioOptions)
+onActivate	PushUI(gui/AudioOptions.gui)
 
 button Back
+OnHoverTextColor #fb6b1dff
 onActivate PopUI(Options)
-
-
-/// Audio options
-parent lAudioOptions
-
-defaultSizeRatioY 0.15
-
-label "Audio options"
-topBorder 0x0000
-rightBorder 0x0000
-textAlignment Center  
-
-
-IntegerInput MasterVolume
-text "Master Volume"
-Range 0 100
-
-IntegerInput BGMVolume
-text "BGM Volume"
-Range 0 100
-
-IntegerInput SFXVolume
-text "SFX Volume"
-Range 0 100
-
-
-Button Back
-onActivate PopUI(lAudioOptions)
-
 

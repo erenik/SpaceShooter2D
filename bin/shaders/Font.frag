@@ -89,6 +89,8 @@ void main(void)
 	
 	if (debugColor.x > 0)
 		gl_FragColor = vec4(debugColor.xyz, 1);
+
+	gl_FragColor.w = primaryColorVec4.w;
 }
 
 

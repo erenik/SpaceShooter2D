@@ -1,0 +1,56 @@
+defaultTextColor	1 1 1 1
+
+// Make root active
+root
+sizeRatioXY 1 1
+name 		AudioOptions
+removeOnPop true
+exitable 	true
+texture	bgs/Menu_BG
+
+parent AudioOptions
+
+defaultSizeRatioXY 1 1
+defaultAlignmentXY 0.5 0.5
+
+list lAudioOptions
+padding 0.01
+sizeRatioXY 0.8 0.8
+alignmentXY 0.5 0.5
+
+/// Audio options
+parent lAudioOptions
+
+defaultSizeRatioY 0.15
+
+label "Audio options"
+topBorder 0x0000
+rightBorder 0x0000
+textAlignment Center
+
+element padding 
+sizeRatioY 0.1
+
+
+defaultSizeRatioY 0.10
+
+IntegerInput MasterVolume
+text "Master Volume"
+Range 0 100
+OnHoverTextColor #fb6b1dff
+
+IntegerInput BGMVolume
+text "BGM Volume"
+Range 0 100
+OnHoverTextColor #fb6b1dff
+
+IntegerInput SFXVolume
+text "SFX Volume"
+Range 0 100
+OnHoverTextColor #fb6b1dff
+
+Button Back
+OnHoverTextColor #fb6b1dff
+onActivate PopUI(AudioOptions)
+
+

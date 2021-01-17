@@ -51,7 +51,7 @@ onActivate PushUI(gui/LoadScreen.gui)&OpenLoadScreen
 
 button OptionsButton
 text "Options"
-onActivate OpenOptionsScreen
+onActivate PushUI(gui/Options.gui)
 
 button QuitButton
 text "Quit"

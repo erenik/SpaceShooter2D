@@ -13,6 +13,7 @@ OpenMainMenu
 // Mute
 // NewGame
 
+PlayBGM music/2014-10-04_Techno.ogg
 
 
 EndScript

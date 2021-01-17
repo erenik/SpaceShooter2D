@@ -373,6 +373,12 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 			OnUIPushed * onUIPushed = (OnUIPushed*)message;
 			if (onUIPushed->msg.StartsWith("LoadScreen"))
 				OpenLoadScreen();
+			if (onUIPushed->msg.StartsWith("AudioOptions")) {
+				// Update some options values.
+				QueueGraphics(new GMSetUIi("MasterVolume", GMUI::INTEGER_INPUT, 100 * AudioMan.MasterVolume()));
+				QueueGraphics(new GMSetUIi("BGMVolume", GMUI::INTEGER_INPUT, 100 * AudioMan.BGMVolume()));
+				QueueGraphics(new GMSetUIi("SFXVolume", GMUI::INTEGER_INPUT, 100 * AudioMan.SFXVolume()));
+			}
 			break;
 		}
 		case MessageType::STRING:
