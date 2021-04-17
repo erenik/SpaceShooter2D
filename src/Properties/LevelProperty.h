@@ -20,7 +20,8 @@ public:
 	static LevelProperty* GetSingleton() { return singleton; };
 
 	// Creates the entity and property, as well as darkness entities to show where the player cannot proceed beyond.
-	static EntitySharedPtr Create(Vector2f playingFieldSize, float playingFieldPadding, Camera*  levelCamera);
+	// createBlackness = false in editor, true in game, creates the border of gameplay.
+	static EntitySharedPtr Create(Vector2f playingFieldSize, float playingFieldPadding, bool createBlackness);
 	void MoveTo(Vector3f position);
 	void SetVelocity(Vector3f velocity);
 	void CreateBlackness();

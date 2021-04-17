@@ -30,7 +30,7 @@ LevelProperty::LevelProperty(EntitySharedPtr owner, Vector2f playingFieldSize, f
 }
 
 
-EntitySharedPtr LevelProperty::Create(Vector2f playingFieldSize, float playingFieldPadding, Camera * levelCamera)
+EntitySharedPtr LevelProperty::Create(Vector2f playingFieldSize, float playingFieldPadding, bool createBlackness)
 {
 	levelEntity = EntityMan.CreateEntity("LevelEntity", NULL, NULL);
 	LevelProperty* lp = new LevelProperty(levelEntity, playingFieldSize, playingFieldPadding);
@@ -41,7 +41,8 @@ EntitySharedPtr LevelProperty::Create(Vector2f playingFieldSize, float playingFi
 	pp->collisionsEnabled = false;
 	pp->type = PhysicsType::KINEMATIC;
 
-	lp->CreateBlackness();
+	if (createBlackness)
+		lp->CreateBlackness();
 	lp->CreateBackground();
 
 	// Finalize details before registering.

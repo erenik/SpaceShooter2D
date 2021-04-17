@@ -20,27 +20,29 @@ sizeRatioXY 0.5 0.05
 alignmentXY 0.25 0.95
 
 list lMainMenu
-sizeRatioXY 0.5 0.4
-alignmentXY	0.25 0.6
+sizeRatioXY 0.2 0.4
+alignmentXY	0.1 0.6
 padding 0.025
 
 label bottomInfoText
 text "Info"
-sizeRatioXY 1 0.03
+sizeRatioXY 0.3 0.03
+alignmentXY 0.15 0.02
+
+
+label centerInfoText
+text "CenterInfo"
+sizeRatioXY 0.3 0.03
 alignmentXY 0.5 0.02
 
-// To be abused.. everywhere :3
-label	CenterText
-alignmentXY	0.5 0.3
-sizeRatioXY 1 0.5
-textSizeRatio 0.2
-text	""
-texture NULL
-hoverable false
 
 parent lMainMenu
 defaultSizeRatioY 0.1
 defaultTextAlignment Left
+
+button ReloadLevelButton
+text "Reload level"
+onActivate ReloadLevel
 
 button NewLevelButton
 text	"New level"

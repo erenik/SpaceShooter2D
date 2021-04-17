@@ -46,11 +46,6 @@ void HUD::UpdateUI() {
 	UpdateHUDGearedWeapons();
 	UpdateUIPlayerHP(true);
 	UpdateUIPlayerShield(true);
-
-	if (PlayingLevelRef().mode == PLAYING_LEVEL)
-		PlayingLevelRef().OpenSpawnWindow();
-	else
-		PlayingLevelRef().CloseSpawnWindow();
 }
 
 void HUD::UpdateActiveWeapon() {

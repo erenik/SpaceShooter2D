@@ -75,6 +75,7 @@ public:
 	String shipType;
 	bool playerSurvived; // player survived the way?
 	Vector3f position;
+	Vector3f spawnedAtPosition; // Used in editor for selection.
 	/// Number along the formation bounds. Before PrepareForSpawning is called, this is an arbitrary argument, which may or may not be the same after preparing for spawning (e.g. it may multiply for generating a SQUARE formation).
 	int number;
 	// What line number it corresponds to in the parsed level file for dev iteration purposes.
@@ -98,6 +99,8 @@ public:
 	int ShipsDespawned();
 	int ShipsDefeated();
 	int shipsSpawned;
+
+	void Despawn();
 
 private:
 

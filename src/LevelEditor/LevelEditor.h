@@ -19,10 +19,19 @@ public:
 
 	void LoadMission(Mission * mission);
 
+	void OpenSpawnWindow();
+	void CloseSpawnWindow();
+
 private:
 	Mission * editedMission;
 	Level editedLevel;
 
 	std::shared_ptr<Entity> levelEntity;
+
+	SpawnGroup* editedSpawnGroup;
+
+	bool movingCamera = false;
+	Vector2i previousMousePosition;
+	float zoomSpeed = 0;
 };
 

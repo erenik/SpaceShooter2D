@@ -113,10 +113,6 @@ public:
 	String onDeath; // What happens when the player dies?
 
 
-	void OpenSpawnWindow();
-	void CloseSpawnWindow();
-
-
 	bool GameTimePausedDueToActiveSpawnGroup();
 	bool GameTimePausedDueToActiveLevelMessage();
 	bool GameTimePaused();

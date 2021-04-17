@@ -52,6 +52,7 @@ public:
 	void SetupCamera();
 	/// o.o
 	void Process(PlayingLevel& playingLevel, int timeInMs);
+	void UpdateSpawnDespawnLimits(std::shared_ptr<Entity> levelEntity);
 	void ProcessMessage(PlayingLevel& playingLevel, Message * message);
 	void ProceedMessage();
 	// Dialogue, tutorials

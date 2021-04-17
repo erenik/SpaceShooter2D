@@ -130,13 +130,7 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 
 	activeLevel = this;
 
-	PlayingLevelRef().removeInvuln = playingLevel.levelEntity->worldPosition[0] + playingFieldHalfSize[0] + playingFieldPadding + 1.f;
-	assert(PlayingLevelRef().removeInvuln > -1000);
-	PlayingLevelRef().spawnPositionRight = PlayingLevelRef().removeInvuln + 10.f;
-	assert(PlayingLevelRef().spawnPositionRight > -1000);
-	PlayingLevelRef().despawnPositionLeft = playingLevel.levelEntity->worldPosition[0] - playingFieldHalfSize[0] - 1.f;
-	assert(PlayingLevelRef().despawnPositionLeft > -1000);
-	PlayingLevelRef().despawnPositionRight = PlayingLevelRef().spawnPositionRight + 100.0f;
+	UpdateSpawnDespawnLimits(playingLevel.levelEntity);
 
 	playingLevel.flyTime.AddMs(timeInMs);
 
@@ -223,6 +217,17 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 			continue;
 		}
 	}
+}
+
+void Level::UpdateSpawnDespawnLimits(std::shared_ptr<Entity> levelEntity) {
+	PlayingLevel& playingLevel = PlayingLevelRef();
+	playingLevel.removeInvuln = levelEntity->worldPosition[0] + playingFieldHalfSize[0] + playingFieldPadding + 1.f;
+	assert(playingLevel.removeInvuln > -1000);
+	playingLevel.spawnPositionRight = playingLevel.removeInvuln + 10.f;
+	assert(playingLevel.spawnPositionRight > -1000);
+	playingLevel.despawnPositionLeft = levelEntity->worldPosition[0] - playingFieldHalfSize[0] - 1.f;
+	assert(playingLevel.despawnPositionLeft > -1000);
+	playingLevel.despawnPositionRight = playingLevel.spawnPositionRight + 100.0f;
 }
 
 // Dialogue, tutorials

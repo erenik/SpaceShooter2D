@@ -102,6 +102,7 @@ void SpawnGroup::SpawnAllShips(std::shared_ptr<PlayerShip> playerShip) {
 	{
 		ShipPtr ship = ships[i];
 		ship->Spawn(ship->position + Vector3f(PlayingLevelRef().spawnPositionRight, 0, 0), 0, playerShip);
+		spawnedAtPosition = ship->entity->worldPosition;
 		activeLevel->ships.AddItem(ship);
 		++shipsSpawned;
 	}
@@ -146,6 +147,8 @@ bool SpawnGroup::Spawn(const Time& levelTime, std::shared_ptr<PlayerShip> player
 		if (lastSpawn.Seconds() == 0 || (levelTime - lastSpawn).Milliseconds() > spawnIntervalMsBetweenEachShipInFormation)
 		{
 			ship->Spawn(ship->position + Vector3f(PlayingLevelRef().spawnPositionRight, 0, 0), 0, playerShip);
+			spawnedAtPosition = ship->entity->worldPosition;
+
 			activeLevel->ships.AddItem(ship);
 			lastSpawn = levelTime;
 		}
@@ -380,6 +383,9 @@ end:
 	{
 		ships[i]->spawnGroup = this;
 	}
+}
+
+void SpawnGroup::Despawn() {
 }
 
 // Number of ships active and alive (not despawned or destroyed).

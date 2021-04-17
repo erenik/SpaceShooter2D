@@ -117,11 +117,6 @@ void PlayingLevel::OnEnter(AppState* previousState) {
 
 	HUD::Get()->Show();
 
-	if (mode == PLAYING_LEVEL)
-		OpenSpawnWindow();
-	else
-		CloseSpawnWindow();
-
 	eventsTriggered.Clear();
 
 	NewPlayer();
@@ -320,8 +315,6 @@ void PlayingLevel::OnExit(AppState* nextState) {
 
 	levelEntity = NULL;
 	playerShip = nullptr;
-
-	CloseSpawnWindow();
 
 	SleepThread(50);
 	// Register it for rendering.
@@ -1053,7 +1046,7 @@ void PlayingLevel::LoadLevel(String fromSource, Mission * forMission)
 	/// Add entity to track for both the camera, blackness and player playing field.
 	if (levelEntity == nullptr)
 	{
-		levelEntity = LevelEntity->Create(level.playingFieldSize, playingFieldPadding, levelCamera);
+		levelEntity = LevelEntity->Create(level.playingFieldSize, playingFieldPadding, true);
 		LevelEntity->SetVelocity(level.BaseVelocity());
 	}
 
@@ -1242,46 +1235,6 @@ void PlayingLevel::HideLevelMessage() {
 }
 
 #include "Level/SpawnGroup.h"
-AppWindow* spawnWindow = 0;
-UserInterface* spawnUI = 0;
-
-void PlayingLevel::OpenSpawnWindow()
-{
-	return;
-
-	if (!spawnWindow)
-	{
-		spawnWindow = WindowMan.NewWindow("SpawnWindow", "Spawn Window");
-		spawnWindow->SetRequestedSize(Vector2i(400, 300));
-		spawnWindow->Create();
-		UserInterface* ui = spawnUI = spawnWindow->CreateUI();
-		ui->Load("gui/SpawnWindow.gui");
-	}
-	spawnWindow->Show();
-	/// Update lists inside.
-	List<String> shipTypes;
-	for (int i = 0; i < Ship::types.Size(); ++i)
-	{
-		ShipPtr type = Ship::types[i];
-		if (type->allied)
-			continue;
-		shipTypes.AddItem(type->name);
-	}
-	QueueGraphics(new GMSetUIContents(spawnUI, "ShipTypeToSpawn", shipTypes));
-	List<String> spawnFormations;
-	for (int i = 0; i < (int)Formation::FORMATIONS; ++i)
-	{
-		spawnFormations.AddItem(GetName(Formation(i)));
-	}
-	QueueGraphics(new GMSetUIContents(spawnUI, "SpawnFormation", spawnFormations));
-}
-
-void PlayingLevel::CloseSpawnWindow()
-{
-	if (spawnWindow)
-		spawnWindow->Close();
-}
-
 
 bool PlayingLevel::GameTimePausedDueToActiveSpawnGroup() {
 	return level.spawnGroupsPauseGameTime && level.SpawnGroupsActive() > 0;
