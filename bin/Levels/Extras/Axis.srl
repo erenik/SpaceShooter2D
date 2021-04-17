@@ -1,5 +1,5 @@
 // The tutorial level, written as Level 1-0 due to laziness in code.
-MillisecondsPerPixel 300
+
 
 StarSpeed XY 0 0
 StarColor RGBA 1 1 1 0.3

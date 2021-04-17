@@ -153,7 +153,7 @@ void Rotation::OnEnter(ShipPtr forShip)
 	}
 }
 
-void Rotation::OnFrame(PlayingLevel& playingLevel, int timeInMs)
+void Rotation::OnFrame(std::shared_ptr<PlayerShip> playerShip, int timeInMs)
 {
 	EntitySharedPtr targetEntity = NULL;
 	switch(type)
@@ -168,7 +168,7 @@ void Rotation::OnFrame(PlayingLevel& playingLevel, int timeInMs)
 			target.SetComparisonMode(String::NOT_CASE_SENSITIVE);
 			if (target == "Player")
 			{
-				targetEntity = playingLevel.playerShip->entity;
+				targetEntity = playerShip->entity;
 				if (targetEntity)
 					RotateToFace(targetEntity->worldPosition);
 			}

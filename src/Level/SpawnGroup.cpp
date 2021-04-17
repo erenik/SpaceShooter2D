@@ -97,16 +97,16 @@ ShipPtr SpawnGroup::GetNextShipToSpawn() {
 	return nullptr;
 }
 
-void SpawnGroup::SpawnAllShips(PlayingLevel& playingLevel) {
+void SpawnGroup::SpawnAllShips(std::shared_ptr<PlayerShip> playerShip) {
 	for (int i = 0; i < ships.Size(); ++i)
 	{
 		ShipPtr ship = ships[i];
-		ship->Spawn(ship->position + Vector3f(playingLevel.spawnPositionRight, 0, 0), 0, playingLevel);
+		ship->Spawn(ship->position + Vector3f(PlayingLevelRef().spawnPositionRight, 0, 0), 0, playerShip);
 		activeLevel->ships.AddItem(ship);
 		++shipsSpawned;
 	}
 	finishedSpawning = true;
-	OnFinishedSpawning(playingLevel);
+	OnFinishedSpawning();
 }
 
 Random spawnGroupRand;
@@ -115,14 +115,14 @@ Random spawnGroupRand;
 	Returns true if it has finished spawning. 
 	Call again until it returns true each iteration (required for some formations).
 */
-bool SpawnGroup::Spawn(PlayingLevel& playingLevel)
+bool SpawnGroup::Spawn(const Time& levelTime, std::shared_ptr<PlayerShip> playerShip)
 {
 	/// Prepare spawning.
 	if (!preparedForSpawning)
 		PrepareForSpawning();
 
 	// Shouldn't spawn yet, this check might be better placed before this call though?
-	if (playingLevel.levelTime < spawnTime) {
+	if (levelTime < spawnTime) {
 		assert(false && "Shouldn't be here.");
 		return false;
 	}
@@ -130,7 +130,7 @@ bool SpawnGroup::Spawn(PlayingLevel& playingLevel)
 	// Spawn all?
 	if (spawnIntervalMsBetweenEachShipInFormation == 0)
 	{
-		SpawnAllShips(playingLevel);
+		SpawnAllShips(playerShip);
 		return true;
 	}
 	/// Spawn one at a time?
@@ -140,21 +140,21 @@ bool SpawnGroup::Spawn(PlayingLevel& playingLevel)
 		// Finished spawning
 		if (!ship) {
 			finishedSpawning = true;
-			OnFinishedSpawning(playingLevel);
+			OnFinishedSpawning();
 			return true;
 		}
-		if (lastSpawn.Seconds() == 0 || (playingLevel.levelTime - lastSpawn).Milliseconds() > spawnIntervalMsBetweenEachShipInFormation)
+		if (lastSpawn.Seconds() == 0 || (levelTime - lastSpawn).Milliseconds() > spawnIntervalMsBetweenEachShipInFormation)
 		{
-			ship->Spawn(ship->position, 0, playingLevel);
+			ship->Spawn(ship->position + Vector3f(PlayingLevelRef().spawnPositionRight, 0, 0), 0, playerShip);
 			activeLevel->ships.AddItem(ship);
-			lastSpawn = playingLevel.levelTime;
+			lastSpawn = levelTime;
 		}
 	}
 	/// o.o
 	return false;
 }
 
-void SpawnGroup::OnFinishedSpawning(PlayingLevel& playingLevel) {
+void SpawnGroup::OnFinishedSpawning() {
 	LogMain("Spawngroup "+name+ " finished spawning", INFO);
 }
 

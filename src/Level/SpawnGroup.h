@@ -47,10 +47,10 @@ public:
 		Returns true if it has finished spawning. 
 		Call again until it returns true each iteration (required for some formations).
 	*/	
-	bool Spawn(PlayingLevel& playingLevel);
+	bool Spawn(const Time& levelTime, std::shared_ptr<PlayerShip> playerShip);
 	/// To avoid spawning later.
 	void SetFinishedSpawning();
-	void OnFinishedSpawning(PlayingLevel& playingLevel);
+	void OnFinishedSpawning();
 	void SetDefeated();
 	bool FinishedSpawning() { return finishedSpawning;};
 
@@ -104,7 +104,7 @@ private:
 	Time spawnTime;
 
 	ShipPtr GetNextShipToSpawn();
-	void SpawnAllShips(PlayingLevel& playingLevel);
+	void SpawnAllShips(std::shared_ptr<PlayerShip> playerShip);
 
 	bool finishedSpawning;
 	AETime lastSpawn;

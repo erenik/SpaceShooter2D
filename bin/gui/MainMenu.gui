@@ -53,6 +53,10 @@ button OptionsButton
 text "Options"
 onActivate PushUI(gui/Options.gui)
 
+button LevelEditor
+text "Level editor"
+onActivate OpenLevelEditor
+
 button QuitButton
 text "Quit"
 onActivate	QuitApplication

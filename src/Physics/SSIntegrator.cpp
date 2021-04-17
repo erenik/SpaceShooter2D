@@ -19,7 +19,7 @@ SSIntegrator::SSIntegrator(float zPlane)
 void SSIntegrator::IntegrateDynamicEntities(List< std::shared_ptr<Entity> > & dynamicEntities, float timeInSeconds)
 {
 	EntitySharedPtr levelEntity = LevelEntity->owner;
-	auto playingFieldHalfSize = PlayingLevel::playingFieldHalfSize;
+	auto playingFieldHalfSize = PlayingLevelRef().PlayingFieldHalfSize();
 	if (levelEntity)
 	{
 		frameMin = levelEntity->worldPosition - playingFieldHalfSize;

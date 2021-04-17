@@ -147,9 +147,14 @@ namespace LevelLoader
 				t += timeToAdd; //.AddSeconds(timeStr.Tokenize(":")[1].ParseInt());
 			}
 			else {
-				bool ok = t.ParseFrom(timeStr);
-				if (!ok)
+				try {
+					bool ok = t.ParseFrom(timeStr);
+					if (!ok)
+						continue;
+				}
+				catch (...){
 					continue;
+				}
 			}
 			LogMain("Adding spawn group at time " + t.ToString("m:S"), INFO);
 			/*			if (t.Milliseconds() == 0) /// Spawning at 0:0.0 should be possible - used in generator.

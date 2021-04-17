@@ -374,7 +374,8 @@ void Weapon::Aim(PlayingLevel& playingLevel, ShipPtr ship)
 	}
 	else 
 	{
-		target = playingLevel.playerShip->entity;
+		if (playingLevel.playerShip)
+			target = playingLevel.playerShip->entity;
 	}
 	if (target == NULL)
 		return;
@@ -664,7 +665,7 @@ void Weapon::ProcessLightning(PlayingLevel& playingLevel, ShipPtr owner, bool in
 		if (nextTarget == 0)
 		{
 			List<float> distances;
-			List<ShipPtr> possibleTargets = spaceShooter->level.GetShipsAtPoint(arc->position, maxRange, distances);
+			List<ShipPtr> possibleTargets = PlayingLevelRef().GetLevel().GetShipsAtPoint(arc->position, maxRange, distances);
 			if (!initial)
 				std::cout<<"\nPossible targets: "<<possibleTargets.Size();
 			possibleTargets.RemoveUnsorted(shipsStruckThisArc);

@@ -10,8 +10,9 @@ class PlayerShip : public Ship {
 public:
 	PlayerShip();
 
-	virtual void ProcessAI(PlayingLevel& playingLevel, int timeInMs) override;
+	virtual void ProcessAI(std::shared_ptr<PlayerShip> playerShip, int timeInMs) override;
 
+	bool AutoAim() const { return autoAim; }
 	void SetAutoAim(bool value);
 	int MaxGearForType(Gear::Type type) const;
 
@@ -24,8 +25,16 @@ public:
 	bool Equip(const Gear& gear);
 	// Equip given gear, replacing the other gear.
 	void Equip(const Gear& gear, const int replacingGearIndex);
+
+	void UnequipWeapons();
+	void EquipTutorialLevel1Weapons();
+	void EquipTutorialLevel3Weapons();
+
 	// Unequips given gear, assuming it's already equipped.
 	bool UnequipGear(const Gear& gear);
+
+	// For AIs, limits it linearly when within 10 distance
+	void SetAIVelocityVector(PlayingLevel& playingLevel, Vector3f vector);
 
 	// Updates weapon levels, armor upgrades, shield upgrades, etc. based on save game vars
 	void UpdateGearFromVars();

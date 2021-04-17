@@ -41,6 +41,7 @@ void SpaceShooter2D::UpdateUI()
 //		case LEVEL_CLEARED: toPush = "gui/LevelStats.gui"; break;
 		case IN_LOBBY: toPush = "gui/Lobby.gui"; break;
 		case IN_HANGAR: break;
+		case LEVEL_EDITOR: break;
 		case IN_WORKSHOP: toPush = "gui/Workshop.gui"; break;
 		case EDIT_WEAPON_SWITCH_SCRIPTS: toPush = "gui/WeaponScripts.gui"; break;
 		case BUYING_GEAR: toPush = "gui/Shop.gui"; break;

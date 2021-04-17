@@ -1,5 +1,7 @@
-// The tutorial level
-MillisecondsPerPixel 300
+// Checkpoint 0327, 3rd level, showcases new background, music, tougher enemies and more projectiles/shooting patterns
+// Figher2 introduced, Bomber2 introduced, BigFighter2 at the end.
+
+
 
 // StarSpeed XY 0 0
 StarColor RGBA 1 0.9 0.9 0.3
@@ -9,7 +11,6 @@ StarColor RGBA 1 0.9 0.9 0.3
 
 Event SetMessagesPauseGameTime(true)
 Event SetSpawnGroupsPauseGameTime(true)
-Event TutorialBaseGun
 
 Event PlayBGM music/2020-09-29_Sidescroller.ogg
 DontSkip
@@ -17,251 +18,12 @@ DontSkip
 Event SetBGMVolume 0.1
 DontSkip
 
-Message +:01
-TextID	TutorialStart
-
-// Introduction messages concerning movement. See /data/Texts_English.csv for the actual contents of these.
-Message	+:01
-TextID	GreetingsPilot
-Message
-TextID	FirstTask
-Message
-TextID	FireWithSpacebar
-Message 
-TextID 	MoveWithWASD
+Event LoadWeapons
 
 Event SetRewindPoint
 
 Message +:01
-Name FailInitialTutorialMessage
-Condition TriggeredEvent:FailedInitialTutorialEvent
-TextID TryAgainToFire
-
-
-/// All spawn groups spawn outside of screen to the right at the specified time.
-SpawnGroup +:01
-ShipType ImmobilePracticeTarget
-Formation LINE_Y
-Number	3
-Size xy 2 5
-Position xy 0 0
-
-Event +:01
-Name FailedInitialTutorialEvent
-Condition FailedToDefeatAllEnemies
-GoToRewindPoint
-
-Message +:01
-Name FirstImmobileTargetsCleared
-TextID	WellDone
-
-// Weapon switching
-Message +:01
-TextID	WeaponSwitchingIntro
-Message 
-TextID	WeaponSwitchingIntro2
-Message
-TextID	WeaponSwitchingIntro3
-Message
-TextID SecondTask
-
-Event 
-String TutorialLevel1Weapons
-DontSkip
-
-Event SetRewindPoint
-
-Message +:01
-Condition TriggeredEvent:FailedWeaponSwitchTutorialEvent
-TextID TryAgainWeaponSwitch
-
-SpawnGroup +:01
-Number 3
-ShipType ImmobilePracticeTargetTougher
-Formation LINE_Y
-Size xy 2 5
-Position xy 0 0
-
-Event +:01
-Name FailedWeaponSwitchTutorialEvent
-Condition FailedToDefeatAllEnemies
-GoToRewindPoint
-
-Message +:01
-Name SecondTutorialCompleteMessage
-TextID WellDone
-
-// Weapon-scripts
-Message
-TextID WeaponScriptsIntro
-Message 
-TextID WeaponScriptsIntro2
-Message 
-TextID WeaponScriptsIntro3
-Event
-String ActivateWeaponScript
-Message
-TextID EngagingWeaponScript
-
-Event SetRewindPoint
-
-Message +:01
-Condition TriggeredEvent:FailedToKillWeaponScriptTargets
-TextID TryAgainWeaponScript
-
-SpawnGroup +:01
-Number 4
-ShipType ImmobilePracticeTargetTougher
-Formation LINE_Y
-Size xy 2 6
-Position xy 0 0
-
-Event +:01
-Name FailedToKillWeaponScriptTargets
-Condition FailedToDefeatAllEnemies
-GoToRewindPoint
-
-Event +:01
-String DeactivateWeaponScript
-
-Message 
-TextID DeactivatingWeaponScript
-
-Message 
-TextID WeaponScriptToggleWithE
-
-
-/*
-
-	// Weapon upgrades
-	Message +:01
-	TextID 130
-	Event
-	String TutorialLevel3Weapons
-	Message
-	TextID 131
-
-	Event SetRewindPoint
-
-	Message +:01
-	Condition FailedToDefeatAllEnemies
-	TextID 132
-
-	SpawnGroup +:01
-	Number 10
-	ShipType ImmobilePracticeTargetTougher
-	Formation LINE_Y
-	Size xy 2 10
-	Position xy 0 -5
-
-	Event +:01
-	Condition FailedToDefeatAllEnemies
-	GoToRewindPoint
-
-	Event +:01
-	String TutorialLevel1Weapons
-
-	// Abilities/Skills
-	Event 
-	String TutorialSkillCooldowns
-	Message 
-	TextID 140
-	Message
-	TextID 141
-	Event
-	String SetSkill:AttackFrenzy
-	Message
-	TextID 142
-
-	Event SetRewindPoint
-
-	Message +:01
-	Condition FailedToDefeatAllEnemies
-	TextID 147
-
-	SpawnGroup +:01
-	Number 5
-	ShipType ImmobilePracticeTargetTougher
-	Formation LINE_Y
-	Size xy 2 10
-	Position xy 0 0
-
-	Event +:01
-	Condition FailedToDefeatAllEnemies
-	GoToRewindPoint
-
-	Message +:01 
-	TextID WellDoneNext
-	// Speed boost
-	Event
-	String SetSkill:SpeedBoost
-	Message 
-	TextID CatchDebrisWithSpeedBoost
-
-
-	Event SetRewindPoint
-
-	Message +:01
-	Condition FailedToDefeatAllEnemies
-	TextID 147
-
-	SpawnGroup +:01
-	Number 3
-	ShipType SpeedDebris
-	Formation LINE_Y
-	Size xy 2 20
-	Position xy 0 0
-
-	Event +:01
-	Condition SpaceDebrisNotCollected(3)
-	GoToRewindPoint
-
-	// Shield info
-	Message +:01
-	TextID WellDoneNext
-	Message
-	TextID UsePowerShield
-	Event 
-	String SetSkill:PowerShield
-
-
-	Event SetRewindPoint
-
-	// Retry text
-	Message +:01
-	Condition FailedToSurvive
-	TextID TryAgainActivateSkill
-	Message 
-	TextID MovementeWillBeDisabled
-
-	// Spawn bomb and set onDeath stuff.
-	Event +:01
-	String DisablePlayerMovement
-	String ResetFailedToSurvive
-
-	Event +:01
-	String PauseGameTime
-	String SpawnTutorialBomb
-	String SetOnDeath:RespawnAt(RewindPoint)
-
-	Message +:01
-	TextID SurvivedBomb
-
-*/
-
-Event
-String EnablePlayerMovement
-
-Message +:01
-TextID TutorialConcluded
-
-Event 
-String TutorialLevel1Weapons
-DontSkip
-
-/// Start first mission
-Message +:01
-TextID FirstMission
+TextID RedStarMissionIntro
 Message
 TextID Eliminate
 Message 
@@ -284,32 +46,43 @@ ShipType Fighter
 Formation LINE_Y
 Number	5
 Size xy 10 10
-Position xy 0 0
+Position xy 0 -5
+Movement UpLeft
 
 CopyGroup +:05
 Formation LINE_X
+Position xy 0 5
+Movement DownLeft
 
 CopyGroup +:05
 Formation LINE_XY
+Position xy 0 -5
+Movement UpLeft
 
 CopyGroup +:05
 Formation V_X
+Position xy 0 5
+Movement DownLeft
 
 CopyGroup +:05
 Formation V_Y
 Position xy 0 -10
+Movement UpLeft
 
 CopyGroup +:05
 Formation SWARM_BOX_XY
 Position xy 0 0
+Movement Straight
 
 CopyGroup +:05
 Formation SWARM_BOX_XY
 Position xy 0 10
+Movement Straight-n-Down
 
 CopyGroup +:05
 Formation SWARM_BOX_XY
 Position xy 0 -10
+Movement Straight-n-Up
 
 
 /* 00:30 - 01:45 (if too long/boring throw in whatever)

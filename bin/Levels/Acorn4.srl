@@ -1,5 +1,8 @@
+// Acorn4, 4th level, showcases new background, music, more simultaneous enemies and projectiels, as well as the first boss!
+// All previous ships are present, more at the same time. Less breaks between them. First boss after 50-100 ships defeated/passed.
+
 // The tutorial level
-MillisecondsPerPixel 300
+
 
 // StarSpeed XY 0 0
 StarColor RGBA 1 0.9 0.9 0.3
@@ -10,7 +13,7 @@ StarColor RGBA 1 0.9 0.9 0.3
 Event SetMessagesPauseGameTime(true)
 Event SetSpawnGroupsPauseGameTime(true)
 
-Event PlayBGM music/2020-09-29_Sidescroller.ogg
+Event PlayBGM music/Burning_bits.ogg
 DontSkip
 
 Event SetBGMVolume 0.1

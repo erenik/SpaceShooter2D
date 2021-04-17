@@ -4,13 +4,13 @@ Campaign Story
 
 Name Tutorial
 Replay false
-Level Levels/tutorial/Tutorial.srl
+Level Levels/Tutorial.srl
 Bounty 1000
 
 Name RedStar
 Requires Tutorial
 Replay false
-Level Levels/redstar/RedStar.srl
+Level Levels/RedStar.srl
 Bounty 2000
 
 

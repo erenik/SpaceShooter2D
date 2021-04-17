@@ -68,15 +68,18 @@ public:
 	/// Call on spawning.
 	void RandomizeWeaponCooldowns();
 	/// Spawns at local position according to window/player area, creating entities, registering for movement, etc. Returns it and all children spawned with it.
-	List< std::shared_ptr<Entity> > Spawn(ConstVec3fr atWorldPosition, ShipPtr parent, PlayingLevel & playingLevel);
+	List< std::shared_ptr<Entity> > Spawn(
+		ConstVec3fr atWorldPosition,
+		ShipPtr parent,
+		std::shared_ptr<PlayerShip> playerShip);
 	/// Handles spawning of children as needed.
-	List< std::shared_ptr<Entity> > SpawnChildren(PlayingLevel& playingLevel);
+	List< std::shared_ptr<Entity> > SpawnChildren(std::shared_ptr<PlayerShip> playerShip);
 	void Despawn(PlayingLevel& playingLevel, bool doExplodeEffectsForChildren);
 	void ExplodeEffects(PlayingLevel& playingLevel);
 	/// Checks current movement. Will only return true if movement is target based and destination is within threshold.
 	bool ArrivedAtDestination();
-	void Process(PlayingLevel& playingLevel, int timeInMs);
-	virtual void ProcessAI(PlayingLevel& playingLevel, int timeInMs);
+	void Process(PlayingLevel& playingLevel, std::shared_ptr<PlayerShip> playerShip, int timeInMs);
+	virtual void ProcessAI(std::shared_ptr<PlayerShip> playerShip, int timeInMs);
 	void ProcessWeapons(PlayingLevel& playingLevel, int timeInMs);
 
 	/// Disables weapon in this and children ships.
@@ -104,7 +107,7 @@ public:
 	/// E.g. "DoveDir(3), RotateToFace(player, 5)"
 	void ParseRotation(String fromString);
 	/// Sets movement. Clears any other existing movements.
-	void SetMovement(PlayingLevel& playingLevel, Movement & movement);
+	void SetMovement(std::shared_ptr<PlayerShip> playerShip, Movement & movement);
 	void SetSpeed(PlayingLevel& playingLevel, float speed);
 	/// Creates new ship of specified type.
 	static ShipPtr New(String shipByName);
@@ -129,7 +132,7 @@ public:
 	bool SwitchToWeapon(int index);
 
 	/// Calls OnEnter for the initial movement pattern.
-	void StartMovement(PlayingLevel& playingLevel);
+	void StartMovement(std::shared_ptr<PlayerShip> playerShip);
 
 	/// For player ship.
 	Weapon * SetWeaponLevel(Weapon::Type ofType, int level);

@@ -28,6 +28,7 @@ alignmentXY	0.5 0.075
 label	LevelMessage
 texture 	0x22AA
 text	"Level message"
+font	Font_test_BW
 sizeRatioXY 0.9 0.2
 alignmentXY	0.5	0.3
 textPadding 32
@@ -46,8 +47,8 @@ defaultRightBorder ui/Orange2
 IntegerLabel Scorei "Score"
 InputTexture null
 
-IntegerLabel Livesi "Lives"
-InputTexture null
+// IntegerLabel Livesi "Lives"
+// InputTexture null
 
 
 parent BottomPart

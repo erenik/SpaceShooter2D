@@ -219,6 +219,7 @@ void InHangar::ProcessMessage(Message* message)
 		}
 		else if (msg.StartsWith("PlayMission")) {
 			// Play the given mission!
+			GameVars.SetInt("PlayTutorial", 0);
 			GameVars.SetString("CurrentMission", (msg - "PlayMission").WithSurroundingWhitespacesRemoved());
 			SetMode(SSGameMode::PLAYING_LEVEL);
 		}

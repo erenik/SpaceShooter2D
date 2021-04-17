@@ -1,0 +1,171 @@
+// Red Star, 2nd level, 
+// showcases new background, music, 
+// +asteroids within the level,
+// +more movement to enemies
+// All ships retain stats from Tutorial, but 
+// +move at higher speeds,
+// +in new patterns
+
+
+
+
+// StarSpeed XY 0 0
+StarColor RGBA 1 0.9 0.9 0.3
+
+// MessagesPauseGameTime true
+// SpawnGroupsPauseGameTime true
+
+Event SetMessagesPauseGameTime(true)
+Event SetSpawnGroupsPauseGameTime(true)
+
+Event PlayBGM music/2013-07-15_Summer_dance.ogg
+DontSkip
+
+Event SetBGMVolume 0.1
+DontSkip
+
+Event LoadWeapons
+
+Event SetRewindPoint
+
+Message +:01
+TextID RedStarMissionIntro
+Message
+TextID Eliminate
+Message 
+TextID RogerThat
+
+Event SetMessagesPauseGameTime(false)
+DontSkip
+Event SetSpawnGroupsPauseGameTime(false)
+DontSkip
+
+Event SetRewindPoint
+DontSkip
+
+SpawnGroup +:01
+Name SmallAsteroidsField
+ShipType	SmallAsteroid
+Formation SWARM_BOX_XY
+Size xy 50 30
+Position xy 0 0
+Number 20
+
+/* 0+:00 - 0+:30
+*Start*
+Fighter enemies (2 hits) grouped in different formations, firing (low damage) in succession. Moving straight forward, forward while traveling up/down.
+*/
+SpawnGroup +:03
+Name Fighters_VX_5
+ShipType Fighter
+Formation V_X
+Number	5
+Size xy 10 10
+Position xy 0 0
+Movement Straight
+
+CopyGroup +:01
+ShipType Fighter
+Number	3
+Size xy 5 5
+
+CopyGroup +:01
+ShipType Bomber
+Formation V_X
+Number	1
+
+
+// Lower attack!
+CopyNamedGroup Fighters_VX_5 +:5
+Position xy 0 -10
+Movement UpLeft
+
+CopyGroup +:01
+ShipType Fighter
+Number	3
+Size xy 5 5
+
+CopyGroup +:01
+ShipType Bomber
+Formation V_X
+Number	1
+
+
+CopyNamedGroup SmallAsteroidsField +:1
+
+// Upper attack!
+CopyNamedGroup Fighters_VX_5 +:5
+Position xy 0 10
+Movement DownLeft
+
+CopyGroup +:01
+ShipType Fighter
+Number	3
+Size xy 5 5
+
+CopyGroup +:01
+ShipType Bomber
+Formation V_X
+Number	1
+
+
+// Some break time
+// Some messages?
+
+
+CopyNamedGroup SmallAsteroidsField +:5
+
+
+// Stray fighters
+CopyGroup +:5
+Formation SWARM_BOX_XY
+Position xy 0 0
+Movement Straight-n-Up
+Size xy 30 20
+ShipType Fighter
+Number 10
+
+CopyGroup +:1
+Formation SWARM_BOX_XY
+Size xy 25 15
+ShipType Fighter
+Number 5
+
+CopyGroup +:1
+Formation SWARM_BOX_XY
+Size xy 20 10
+ShipType Bomber
+Number 3
+
+// Another break 
+CopyNamedGroup SmallAsteroidsField +:5
+
+
+CopyGroup +:5
+Formation SWARM_BOX_XY
+Size xy 20 15
+ShipType Fighter
+Number 4
+
+CopyGroup +:1
+Formation SWARM_BOX_XY
+Size xy 20 20
+ShipType Fighter
+Number 5
+
+
+
+
+
+
+Event +:44
+String GoToHangar
+// String GoToWorkshop
+
+// Event	1:10
+// String 	EndLevel 
+
+// Old shit below.
+StopLoading // Makes it stop loading past this point.
+
+

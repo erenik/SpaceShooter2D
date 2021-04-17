@@ -33,6 +33,7 @@
 
 // States
 #include "PlayingLevel.h"
+#include "LevelEditor/LevelEditor.h"
 #include "InHangar.h"
 
 #include "SpaceShooter2D.h"
@@ -65,9 +66,9 @@ String SpaceShooter2D::levelToLoad = String();
 bool SpaceShooter2D::paused = false;
 
 PlayingLevel* playingLevel = nullptr;
+LevelEditor* levelEditor = nullptr;
 InHangar * inHangar = nullptr;
 
-float playingFieldPadding;
 /// All ships, including player.
 List< std::shared_ptr<Entity> > shipEntities;
 List< std::shared_ptr<Entity> > projectileEntities;
@@ -94,8 +95,10 @@ void RegisterStates()
 	spaceShooter = new SpaceShooter2D();
 	playingLevel = new PlayingLevel();
 	inHangar = new InHangar();
+	levelEditor = new LevelEditor();
 	StateMan.RegisterState(spaceShooter);
 	StateMan.RegisterState(playingLevel);
+	StateMan.RegisterState(levelEditor);
 	StateMan.QueueState(spaceShooter);
 }
 
@@ -105,7 +108,6 @@ SSGameMode SpaceShooter2D::mode = SSGameMode::START_UP;
 SpaceShooter2D::SpaceShooter2D()
 {
 	levelCamera = NULL;
-	playingFieldPadding = 1.f;
 	gearCategory = Gear::Type::WEAPON;
 	previousMode = mode = SSGameMode::START_UP;
 	// Default vel smoothing.
@@ -296,15 +298,8 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 		BoolMessage * boolMessage = (BoolMessage*)message;
 		bool value = boolMessage->value;
 		if (msg.Contains("PlayTutorial")) {
-			playingLevel->playTutorial = value;
+			GameVars.SetInt("PlayTutorial", value);
 		}
-		break;
-	}
-	case MessageType::GAMEPAD_MESSAGE: {
-		GamepadMessage * gamepadMessage = (GamepadMessage*)message;
-		Gamepad state = gamepadMessage->gamepadState;
-		if (gamepadMessage->aButtonPressed)
-			level.ProceedMessage();
 		break;
 	}
 		case MessageType::RAYCAST: 
@@ -331,8 +326,9 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 					playingLevel->gameTimePausedDueToScriptableMessage = false;
 					playingLevel->failedToSurvive = false;
 					
-					level.Load(file);
-					level.OnEnter();
+					assert(false && "Move to PlayingLevel/LevelEditor respectively");
+					//level.Load(file);
+					//level.OnEnter();
 				}
 				if (file.Contains(".csv"))
 				{
@@ -369,18 +365,6 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 			break;
 		}
 
-		case MessageType::ON_UI_PUSHED: {
-			OnUIPushed * onUIPushed = (OnUIPushed*)message;
-			if (onUIPushed->msg.StartsWith("LoadScreen"))
-				OpenLoadScreen();
-			if (onUIPushed->msg.StartsWith("AudioOptions")) {
-				// Update some options values.
-				QueueGraphics(new GMSetUIi("MasterVolume", GMUI::INTEGER_INPUT, 100 * AudioMan.MasterVolume()));
-				QueueGraphics(new GMSetUIi("BGMVolume", GMUI::INTEGER_INPUT, 100 * AudioMan.BGMVolume()));
-				QueueGraphics(new GMSetUIi("SFXVolume", GMUI::INTEGER_INPUT, 100 * AudioMan.SFXVolume()));
-			}
-			break;
-		}
 		case MessageType::STRING:
 		{
 			msg.RemoveSurroundingWhitespaces();
@@ -407,7 +391,19 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 
 // Process messages which can be sent from any game state really.
 void SpaceShooter2D::ProcessGeneralMessage(Message* message) {
-	if (message->type == MessageType::STRING) {
+
+	if (message->type == MessageType::ON_UI_PUSHED) {
+		OnUIPushed * onUIPushed = (OnUIPushed*)message;
+		if (onUIPushed->msg.StartsWith("LoadScreen"))
+			OpenLoadScreen();
+		if (onUIPushed->msg.StartsWith("AudioOptions")) {
+			// Update some options values.
+			QueueGraphics(new GMSetUIi("MasterVolume", GMUI::INTEGER_INPUT, 100 * AudioMan.MasterVolume()));
+			QueueGraphics(new GMSetUIi("BGMVolume", GMUI::INTEGER_INPUT, 100 * AudioMan.BGMVolume()));
+			QueueGraphics(new GMSetUIi("SFXVolume", GMUI::INTEGER_INPUT, 100 * AudioMan.SFXVolume()));
+		}
+	}
+	else if (message->type == MessageType::STRING) {
 		String msg = message->msg;
 		msg.RemoveSurroundingWhitespaces();
 		int found = msg.Find("//");
@@ -418,9 +414,10 @@ void SpaceShooter2D::ProcessGeneralMessage(Message* message) {
 		{
 			SetMode(EDITING_OPTIONS);
 		}
-		if (msg == "ProceedMessage")
+		if (msg == "OpenLevelEditor")
 		{
-			level.ProceedMessage();
+			SetMode(LEVEL_EDITOR);
+			StateMan.QueueState(levelEditor);
 		}
 		if (msg == "NewGame")
 			NewGame();
@@ -554,24 +551,6 @@ void SpaceShooter2D::CreateDefaultBindings()
 {
 	List<Binding*>& bindings = this->inputMapping.bindings;
 #define BINDING(a,b) bindings.Add(new Binding(a,b));
-	BINDING(Action::FromString("TogglePlayerInvulnerability"), KEY::I);
-	BINDING(Action::CreateStartStopAction("MoveShipUp"), KEY::W);
-	BINDING(Action::CreateStartStopAction("MoveShipDown"), KEY::S);
-	BINDING(Action::CreateStartStopAction("MoveShipLeft"), KEY::A);
-	BINDING(Action::CreateStartStopAction("MoveShipRight"), KEY::D);
-	BINDING(Action::FromString("ReloadWeapon"), KEY::R);
-	BINDING(Action::FromString("ToggleWeaponScript"), KEY::E);
-	BINDING(Action::FromString("ActivateSkill"), KEY::Q);
-	BINDING(Action::FromString("ResetCamera"), KEY::HOME);
-	BINDING(Action::FromString("ZoomIn"), KEY::PG_UP);
-	BINDING(Action::FromString("ZoomOut"), KEY::PG_DOWN);
-	BINDING(Action::FromString("NewGame"), List<int>(KEY::N, KEY::G));
-	BINDING(Action::FromString("ClearLevel"), List<int>(KEY::C, KEY::L));
-	BINDING(Action::FromString("ListEntitiesAndRegistrations"), List<int>(KEY::L, KEY::E));
-	BINDING(Action::FromString("ToggleBlackness"), List<int>(KEY::T, KEY::B));
-	BINDING(Action::FromString("NextLevel"), List<int>(KEY::N, KEY::L));
-	BINDING(Action::FromString("PreviousLevel"), List<int>(KEY::P, KEY::L));
-	BINDING(Action::FromString("ToggleMenu"), KEY::ESCAPE);
 	BINDING(Action::FromString("ToggleMute"), KEY::M);
 #define BIND BINDING
 	BIND(Action::FromString("AdjustMasterVolume(0.05)", ACTIVATE_ON_REPEAT), List<int>(KEY::CTRL, KEY::V, KEY::PLUS));
@@ -596,8 +575,6 @@ void SpaceShooter2D::CreateDefaultBindings()
 	BIND(Action::FromString("Weapon:4"), KEY::FOUR);
 	BIND(Action::FromString("Weapon:5"), KEY::FIVE);
 	*/
-	BIND(Action::CreateStartStopAction("Shooting"), KEY::SPACE);
-	BIND(Action::FromString("OpenJumpDialog"), List<int>(KEY::CTRL, KEY::G));
 	BIND(Action::FromString("ProceedMessage"), KEY::ENTER);
 
 }
@@ -633,7 +610,7 @@ int SpaceShooter2D::GetHighscore(String forMissionName) {
 String SpaceShooter2D::GetLevelVarName(String levelPath, String name)
 {
 	if (levelPath == "current")
-		levelPath = level.source;
+		levelPath = PlayingLevelRef().GetLevel().source;
 	return "Level_"+ levelPath +"_"+ name;
 }
 

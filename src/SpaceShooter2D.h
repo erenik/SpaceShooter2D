@@ -86,8 +86,8 @@ class SpaceShooterCD;
 class GameVariable;
 
 // Macros
-#define leftEdge (playingLevel.levelEntity->worldPosition.x - playingLevel.playingFieldHalfSize.x)
-#define rightEdge (playingLevel.levelEntity->worldPosition.x + playingLevel.playingFieldHalfSize.x)
+#define leftEdge (playingLevel.LeftEdge())
+#define rightEdge (playingLevel.RightEdge())
 
 Vector2i WeaponTypeLevelFromString(String str); // For shop/UI-interaction.
 String WeaponTypeLevelToString(Weapon::Type type, int level);
@@ -106,6 +106,7 @@ enum SSGameMode {
 	START_UP,
 	MAIN_MENU,
 	EDITING_OPTIONS,
+	LEVEL_EDITOR,
 	NEW_GAME,
 	IN_LOBBY,
 	IN_HANGAR,
@@ -146,7 +147,7 @@ public:
 	virtual void KeyPressed(int keyCode, bool downBefore);
 
 	/// Creates default key-bindings for the state.
-	virtual void CreateDefaultBindings();
+	virtual void CreateDefaultBindings() override;
 
 	void LoadAutoSave();
 
@@ -222,7 +223,6 @@ public:
 	SSIntegrator * integrator;
 	SpaceShooterCR * cr;
 	SpaceShooterCD * cd;
-	Level level;
 
 	String levelSource;
 

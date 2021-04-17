@@ -197,7 +197,7 @@ void ProjectileProperty::Process(int timeInMs)
 		// Values above 1.0 will try and compensate for target velocity and not just current position?
 		EntitySharedPtr target = targetLock;
 		if (target == nullptr)
-			target = spaceShooter->level.ClosestTarget(PlayingLevelRef(), !enemy, owner->worldPosition);
+			target = pl.GetLevel().ClosestTarget(PlayingLevelRef(), !enemy, owner->worldPosition);
 		Vector3f vecToTarget;
 		Vector3f targetPosition;
 		Vector3f targetVelocity;

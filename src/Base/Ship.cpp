@@ -149,10 +149,10 @@ void Ship::RandomizeWeaponCooldowns()
 	}
 }
 
-List< std::shared_ptr<Entity> > Ship::Spawn(ConstVec3fr atWorldPosition, ShipPtr in_parent, PlayingLevel & playingLevel)
+List< std::shared_ptr<Entity> > Ship::Spawn(ConstVec3fr atWorldPosition, ShipPtr in_parent, std::shared_ptr<PlayerShip> playerShip)
 {	
 
-	std::cout<<"\nPossible kills: "<<++spaceShooter->LevelPossibleKills()->iValue;
+	LogMain("Possible kills : "+ String(++spaceShooter->LevelPossibleKills()->iValue), DEBUG);
 
 	/// Reset stuffs if not already done so.
 	movementDisabled = false;
@@ -194,7 +194,7 @@ List< std::shared_ptr<Entity> > Ship::Spawn(ConstVec3fr atWorldPosition, ShipPtr
 	/// Allied
 	else 
 	{
-		pp->velocity = spaceShooter->level.BaseVelocity();
+		pp->velocity = PlayingLevelRef().GetLevel().BaseVelocity();
 		assert(!pp->velocity.IsInfinite());
 		pp->collisionCategory = CC_PLAYER;
 		pp->collisionFilter = CC_ALL_ENEMY;
@@ -219,10 +219,10 @@ List< std::shared_ptr<Entity> > Ship::Spawn(ConstVec3fr atWorldPosition, ShipPtr
 	entity->properties.Add(sp);
 	this->entity = entity;
 	this->spawned = true;
-	this->StartMovement(playingLevel);
+	this->StartMovement(playerShip);
 
 	/// Spawn children if applicable.
-	List< std::shared_ptr<Entity> > children = SpawnChildren(playingLevel);
+	List< std::shared_ptr<Entity> > children = SpawnChildren(playerShip);
 	/// Set up parenting.
 	if (parent)
 	{
@@ -234,7 +234,7 @@ List< std::shared_ptr<Entity> > Ship::Spawn(ConstVec3fr atWorldPosition, ShipPtr
 	else 
 	{
 		List< std::shared_ptr<Entity> > all = children + entity;
-		playingLevel.shipEntities.Add(all);
+		PlayingLevelRef().shipEntities.Add(all);
 		MapMan.AddEntities(all);
 		/// Recalculate matrix and all children matrices.
 		entity->RecalculateMatrix(Entity::ALL_PARTS, true);
@@ -247,7 +247,7 @@ List< std::shared_ptr<Entity> > Ship::Spawn(ConstVec3fr atWorldPosition, ShipPtr
 		script->entity = entity;
 		/// Add custom variables based on who started the script.
 		script->variables.AddItem(Variable("self", shipID));
-		script->variables.AddItem(Variable("player", playingLevel.playerShip->shipID));
+		script->variables.AddItem(Variable("player", playerShip->shipID));
 		script->variables.Add(Movement::GetTypesAsVariables());
 		script->functionEvaluators.AddItem(&spaceShooterEvaluator);
 		script->OnBegin();
@@ -257,7 +257,7 @@ List< std::shared_ptr<Entity> > Ship::Spawn(ConstVec3fr atWorldPosition, ShipPtr
 }
 
 /// Handles spawning of children as needed.
-List< std::shared_ptr<Entity> > Ship::SpawnChildren(PlayingLevel & playingLevel)
+List< std::shared_ptr<Entity> > Ship::SpawnChildren(std::shared_ptr<PlayerShip> playerShip)
 {
 	/// Translate strings.
 	List<String> childStrings;
@@ -296,7 +296,7 @@ List< std::shared_ptr<Entity> > Ship::SpawnChildren(PlayingLevel & playingLevel)
 		ship->allied = this->allied;
 		ship->RandomizeWeaponCooldowns();
 		ship->spawnGroup = this->spawnGroup;
-		ship->Spawn(Vector3f(), GetSharedPtr(), playingLevel);
+		ship->Spawn(Vector3f(), GetSharedPtr(), playerShip);
 		childrenSpawned.AddItem(ship->entity);
 		/// Apply spawn group properties.
 //		ship->shoot &= shoot;
@@ -358,7 +358,7 @@ bool Ship::ArrivedAtDestination()
 	return false;
 }
 
-void Ship::Process(PlayingLevel& playingLevel, int timeInMs)
+void Ship::Process(PlayingLevel& playingLevel, std::shared_ptr<PlayerShip> playerShip, int timeInMs)
 {
 	timeInMs *= PlayingLevelRef().gameSpeed;
 
@@ -380,9 +380,9 @@ void Ship::Process(PlayingLevel& playingLevel, int timeInMs)
 		script->Process(timeInMs);
 	// Increment time in movement if applicable.
 	if (movements.Size())
-		movements[currentMovement].OnFrame(playingLevel, timeInMs);
+		movements[currentMovement].OnFrame(playerShip, timeInMs);
 	// AI
-	ProcessAI(playingLevel, timeInMs);
+	ProcessAI(playerShip, timeInMs);
 	// Weapon systems.
 	ProcessWeapons(playingLevel, timeInMs);
 	// Shield
@@ -412,7 +412,7 @@ void Ship::Process(PlayingLevel& playingLevel, int timeInMs)
 	}
 }
 
-void Ship::ProcessAI(PlayingLevel& playingLevel, int timeInMs)
+void Ship::ProcessAI(std::shared_ptr<PlayerShip> playerShip, int timeInMs)
 {
 	// Don't process inactive ships..
 	if (!enemy)
@@ -421,7 +421,7 @@ void Ship::ProcessAI(PlayingLevel& playingLevel, int timeInMs)
 		return;
 	// Rotate accordingly.
 	Rotation & rota = rotations[currentRotation];
-	rota.OnFrame(playingLevel, timeInMs);
+	rota.OnFrame(playerShip, timeInMs);
 	// Increase time spent in this state accordingly.
 	timeInCurrentRotation += timeInMs;
 	if (timeInCurrentRotation > rota.durationMs && rota.durationMs > 0)
@@ -436,7 +436,7 @@ void Ship::ProcessAI(PlayingLevel& playingLevel, int timeInMs)
 	// Move?
 	EntitySharedPtr shipEntity = entity;
 	Movement & move = movements[currentMovement];
-	move.OnFrame(playingLevel, timeInMs);
+	move.OnFrame(playerShip, timeInMs);
 	// Increase time spent in this state accordingly.
 	timeInCurrentMovement += timeInMs;
 	if (timeInCurrentMovement > move.durationMs && move.durationMs > 0)
@@ -444,7 +444,7 @@ void Ship::ProcessAI(PlayingLevel& playingLevel, int timeInMs)
 		currentMovement = (currentMovement + 1) % movements.Size();
 		timeInCurrentMovement = 0;
 		Movement & newMove = movements[currentMovement];
-		newMove.OnEnter(playingLevel, GetSharedPtr());
+		newMove.OnEnter(playerShip, GetSharedPtr());
 	}
 }
 
@@ -771,13 +771,11 @@ bool Ship::DisableAllWeapons()
 }
 
 
-void Ship::SetMovement(PlayingLevel& playingLevel, Movement & movement)
+void Ship::SetMovement(std::shared_ptr<PlayerShip> playerShip, Movement & movement)
 {
 	this->movements.Clear();
-//		move.vec = Vector2f(-10.f, targetEntity->worldPosition.y); 
 	this->movements.AddItem(movement);
-	movements[0].OnEnter(playingLevel, GetSharedPtr());
-//	.OnEnter(ship);
+	movements[0].OnEnter(playerShip, GetSharedPtr());
 }
 
 void Ship::SetSpeed(PlayingLevel& playingLevel, float newSpeed)
@@ -944,23 +942,23 @@ bool Ship::SwitchToWeapon(int index)
 		return false;
 	}
 	activeWeapon = weaponSet[index];
-	std::cout<<"\nSwitched to weapon: "<<activeWeapon->name;
+	LogMain("Switched to weapon : "+activeWeapon->name, DEBUG);
 //	UpdateStatsFromGear();
 	// Update ui
 	if (!enemy)
 	{
-		QueueGraphics(new GMSetUIi("Weapons", GMUI::INTEGER_INPUT, index));
+		//QueueGraphics(new GMSetUIi("Weapons", GMUI::INTEGER_INPUT, index));
 	}
 	return true;
 }
 
 /// Calls OnEnter for the initial movement pattern.
-void Ship::StartMovement(PlayingLevel& playingLevel)
+void Ship::StartMovement(std::shared_ptr<PlayerShip> playerShip)
 {
 	if (rotations.Size())
 		rotations[0].OnEnter(GetSharedPtr());
 	if (movements.Size())
-		movements[0].OnEnter(playingLevel, GetSharedPtr());
+		movements[0].OnEnter(playerShip, GetSharedPtr());
 }
 
 /// For player ship.

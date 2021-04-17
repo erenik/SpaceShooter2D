@@ -14,8 +14,8 @@ AETime levelDuration(TimeType::MILLISECONDS_NO_CALENDER);
 
 void GenerateLevel (PlayingLevel & playingLevel, String arguments)
 {
-	Vector2f playingFieldSize = playingLevel.playingFieldSize;
-	Level & level = spaceShooter -> level;
+	Level & level = playingLevel.GetLevel();
+	Vector2f playingFieldSize = level.playingFieldSize;
 	level.Clear(playingLevel);
 	
 	level.endCriteria = Level::NO_MORE_ENEMIES;

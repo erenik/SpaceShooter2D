@@ -75,7 +75,7 @@ void ShipProperty::Process(int timeInMs)
 		}
 	}
 	// Move?
-	ship->Process(PlayingLevelRef(), timeInMs);
+	ship->Process(PlayingLevelRef(), PlayingLevelRef().playerShip, timeInMs);
 }
 	
 /// If reacting to collisions...

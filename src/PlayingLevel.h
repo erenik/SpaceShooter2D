@@ -23,11 +23,12 @@ class PlayingLevel : public SpaceShooter2D
 public:
 	PlayingLevel();
 
+	Level& GetLevel() { return level; };
+
 	/// Searches among actively spawned ships.
 	ShipPtr GetShip(EntitySharedPtr forEntity);
 
 	ShipPtr GetShipByID(int id);
-	void SetPlayingFieldSize(Vector2f newSize);
 	void UpdateUI();
 	// Inherited via AppState
 	virtual void OnEnter(AppState* previousState) override;
@@ -47,6 +48,20 @@ public:
 
 	void SpawnPlayer();
 	void ToggleInGameMenu();
+
+	float LeftEdge() const {
+		return levelEntity->worldPosition.x - level.playingFieldHalfSize.x;
+	}
+	float RightEdge() const {
+		return levelEntity->worldPosition.x + level.playingFieldHalfSize.x;
+	}
+
+	const Vector2f& PlayingFieldSize() const {
+		return level.playingFieldSize;
+	}
+	const Vector2f& PlayingFieldHalfSize() const {
+		return level.playingFieldHalfSize;
+	}
 
 	/// Loads target level. The source and separate .txt description have the same name, just different file-endings, e.g. "Level 1.png" and "Level 1.txt"
 	void LoadLevel(String levelSource, Mission * forMission);
@@ -90,10 +105,8 @@ public:
 	static std::shared_ptr<PlayerShip> playerShip;
 	/// The level entity, around which the playing field and camera are based upon.
 	static EntitySharedPtr levelEntity;
-	static Vector2f playingFieldSize;
-	static Vector2f playingFieldHalfSize;
-	// What is this...?
-	const float playingFieldPadding = 1;
+	//static Vector2f playingFieldSize;
+	//static Vector2f playingFieldHalfSize;
 	/// All ships, including player.
 	List< std::shared_ptr<Entity> > shipEntities;
 	List< std::shared_ptr<Entity> > projectileEntities;
@@ -125,8 +138,7 @@ public:
 
 	void SetLastSpawnGroup(SpawnGroup * sg);
 
-	bool playTutorial;
-
+	void LoadWeapons();
 
 	// Statistics for achievements
 	String enemyProjectilesDodgedString;
@@ -151,7 +163,11 @@ public:
 
 	void SetPlayerMovement(Vector3f inDirection);
 
+	virtual void CreateDefaultBindings() override;
+
 private:
+
+	Level level;
 
 	SpawnGroup * lastSpawnGroup;
 	Vector3f requestedMovement;
@@ -159,6 +175,7 @@ private:
 
 	Time now;
 	int timeDeadMs = 0;
+	bool autoProceedMessages = false;
 
 	std::shared_ptr<ParticleEmitter> starEmitter = nullptr;
 

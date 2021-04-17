@@ -12,6 +12,9 @@
 
 void GenerateLevel (PlayingLevel& playingLevel, String arguments);
 
+// What is this...?
+const float playingFieldPadding = 1;
+
 struct ShipColorCoding 
 {
 	String ship;
@@ -56,6 +59,7 @@ public:
 	void SetTime(Time newTime);
 	/// enable respawing on shit again.
 	void OnLevelTimeAdjusted(Time levelTime);
+	EntitySharedPtr ClosestShipOrObstacle(PlayingLevel& playingLevel, bool enemy, ConstVec3fr position, float& distanceOut);
 	EntitySharedPtr ClosestTarget(PlayingLevel& playingLevel, bool enemy, ConstVec3fr position);
 	/// o.o'
 	void Explode(Weapon & weapon, EntitySharedPtr causingEntity, bool enemy);
@@ -96,6 +100,10 @@ public:
 	};
 	int endCriteria;
 
+
+	// How big area the player can move about in. Also dictates how you design the level and spawn group locations, etc.
+	Vector2f playingFieldSize;
+	Vector2f playingFieldHalfSize; // Half of the above, only used for convenience.
 
 	/// New spawn style.
 	List<SpawnGroup*> spawnGroups;

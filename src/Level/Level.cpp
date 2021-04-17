@@ -27,6 +27,9 @@ Level::Level()
 	endCriteria = NO_MORE_ENEMIES;
 	levelCleared = false;
 	activeLevelMessage = 0;
+
+	playingFieldSize = Vector2f(50, 30);
+	playingFieldHalfSize = playingFieldSize * 0.5f;
 }
 
 Level::~Level()
@@ -63,7 +66,7 @@ Vector3f Level::BaseVelocity()
 /// Creates player entity within this level. (used for spawning)
 EntitySharedPtr Level::SpawnPlayer(PlayingLevel& playingLevel, ShipPtr playerShip, ConstVec3fr atPosition)
 {	
-	EntitySharedPtr entity = playerShip->Spawn(atPosition, 0, playingLevel);
+	EntitySharedPtr entity = playerShip->Spawn(atPosition, 0, playingLevel.playerShip);
 	playingLevel.OnPlayerSpawned();
 	return entity;
 }
@@ -127,11 +130,11 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 
 	activeLevel = this;
 
-	PlayingLevelRef().removeInvuln = playingLevel.levelEntity->worldPosition[0] + playingLevel.playingFieldHalfSize[0] + playingLevel.playingFieldPadding + 1.f;
+	PlayingLevelRef().removeInvuln = playingLevel.levelEntity->worldPosition[0] + playingFieldHalfSize[0] + playingFieldPadding + 1.f;
 	assert(PlayingLevelRef().removeInvuln > -1000);
 	PlayingLevelRef().spawnPositionRight = PlayingLevelRef().removeInvuln + 10.f;
 	assert(PlayingLevelRef().spawnPositionRight > -1000);
-	PlayingLevelRef().despawnPositionLeft = playingLevel.levelEntity->worldPosition[0] - playingLevel.playingFieldHalfSize[0] - 1.f;
+	PlayingLevelRef().despawnPositionLeft = playingLevel.levelEntity->worldPosition[0] - playingFieldHalfSize[0] - 1.f;
 	assert(PlayingLevelRef().despawnPositionLeft > -1000);
 	PlayingLevelRef().despawnPositionRight = PlayingLevelRef().spawnPositionRight + 100.0f;
 
@@ -216,7 +219,7 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 		{
 			LogMain("Spawning group " + sg->name + " at time " + spawnTime, INFO);
 			playingLevel.SetLastSpawnGroup(sg);
-			sg->Spawn(playingLevel);
+			sg->Spawn(playingLevel.levelTime, playingLevel.playerShip);
 			continue;
 		}
 	}
@@ -359,6 +362,32 @@ bool Level::LevelCleared(PlayingLevel& playingLevel)
 	return false;
 }
 
+EntitySharedPtr Level::ClosestShipOrObstacle(PlayingLevel& playingLevel, bool enemy, ConstVec3fr position, float& outDistance) 
+{
+	if (!enemy)
+	{
+		return playingLevel.playerShip->entity;
+	}
+	EntitySharedPtr closest = NULL;
+	float closestDist = 100000.f;
+	for (int i = 0; i < playingLevel.shipEntities.Size(); ++i)
+	{
+		EntitySharedPtr e = playingLevel.shipEntities[i];
+		ShipProperty * sp = e->GetProperty<ShipProperty>();
+		if (sp->IsEnemy() != enemy)
+			continue;
+
+		float dist = (e->worldPosition - position).LengthSquared();
+		if (dist < closestDist)
+		{
+			closest = e;
+			closestDist = dist;
+			outDistance = dist;
+		}
+	}
+	return closest;
+}
+
 EntitySharedPtr Level::ClosestTarget(PlayingLevel & playingLevel, bool enemy, ConstVec3fr position)
 {
 	if (!enemy)
@@ -371,6 +400,9 @@ EntitySharedPtr Level::ClosestTarget(PlayingLevel & playingLevel, bool enemy, Co
 	{
 		EntitySharedPtr e = playingLevel.shipEntities[i];
 		ShipProperty * sp = e->GetProperty<ShipProperty>();
+		// Ignore asteroids here, only want killable enemies in this function.
+		if (sp->GetShip()->type == "Asteroid")
+			continue;
 		if (sp->IsEnemy() != enemy)
 			continue;
 

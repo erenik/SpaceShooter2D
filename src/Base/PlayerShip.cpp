@@ -26,18 +26,47 @@ PlayerShip::PlayerShip()
 	autoAim = false;
 }
 
-void PlayerShip::ProcessAI(PlayingLevel& playingLevel, int timeInMs) {
+// For AIs, limits it linearly when within 10 distance
+void PlayerShip::SetAIVelocityVector(PlayingLevel& playingLevel, Vector3f vector) {
+	float distance = vector.Length();
+	float magnitude = distance;
+	// Clamp from 0 to 1 already?
+	ClampFloat(magnitude, 0, 1.0f);
+	// and if below X distance, scale down linearly for smooth approach
+	if (distance < 5.0f) {
+		magnitude *= distance / 5.0f;
+	}
+	playingLevel.SetPlayerMovement(vector.NormalizedCopy() * magnitude);
+}
+
+void PlayerShip::ProcessAI(std::shared_ptr<PlayerShip> playerShip, int timeInMs) {
 	if (!autoAim)
 		return;
 
-	auto target = playingLevel.level.ClosestTarget(playingLevel, true, this->entity->worldPosition);
-	if (target == nullptr)
+	PlayingLevel& playingLevel = PlayingLevelRef();
+
+	// Dodge the closest enemy if too close?
+	float distance;
+	auto closestShipOrObstacle = playingLevel.GetLevel().ClosestShipOrObstacle(playingLevel, true, this->entity->worldPosition, distance);
+	if (closestShipOrObstacle && distance < (this->entity->Radius() * 2 + 10.0f)) {
+		Vector3f fromTarget = playingLevel.levelEntity->worldPosition - closestShipOrObstacle->worldPosition;
+		SetAIVelocityVector(playingLevel, fromTarget);
+		shoot = false;
 		return;
+	}
+
+	auto target = playingLevel.GetLevel().ClosestTarget(playingLevel, true, this->entity->worldPosition);
+	if (target == nullptr){
+		shoot = false;
+		// Move to the middle when no mobs, also a bit forward?
+		Vector3f vector = playingLevel.levelEntity->worldPosition - entity->worldPosition;
+		SetAIVelocityVector(playingLevel, vector);
+		return;
+	}
+	shoot = true;
 
 	Vector3f vector = Vector3f(0, target->worldPosition.y - this->entity->worldPosition.y, 0);
-	float magnitude = vector.Length();
-	ClampFloat(magnitude, 0, 2.0f);
-	playingLevel.SetPlayerMovement(vector.NormalizedCopy() * magnitude);
+	SetAIVelocityVector(playingLevel, vector);
 
 	if (activeWeapon == nullptr) {
 		this->SwitchToWeapon(CurrentWeaponIndex() + 1);
@@ -82,6 +111,12 @@ List<Gear> PlayerShip::EquippedArmorLayers() const {
 	return armorLayers;
 }
 
+void PlayerShip::UnequipWeapons() {
+	while (EquippedWeapons().Size() > 0) {
+		this->UnequipGear(EquippedWeapons()[0]);
+	}
+}
+
 // Equip given gear, if possible.
 bool PlayerShip::Equip(const Gear& gear) {
 	switch (gear.type) {
@@ -104,6 +139,20 @@ bool PlayerShip::Equip(const Gear& gear) {
 	SaveGearToVars();
 	UpdateStatsFromGear();
 	return true;
+}
+
+void PlayerShip::EquipTutorialLevel1Weapons() {
+	UnequipWeapons();
+	Equip(Gear::Get("Machine gun I"));
+	Equip(Gear::Get("Small rockets I"));
+	Equip(Gear::Get("Big rockets I"));
+}
+
+void PlayerShip::EquipTutorialLevel3Weapons() {
+	UnequipWeapons();
+	Equip(Gear::Get("Machine gun III"), 0);
+	Equip(Gear::Get("Small rockets III"), 1);
+	Equip(Gear::Get("Big rockets III"), 2);
 }
 
 // Equip given gear, replacing the other gear.

@@ -1,0 +1,57 @@
+
+Approx 3 minutes of gameplay per mission, with re-playability (increased difficulty > increased rewards)
+
+Tutorial.srl
+	// The tutorial level
+	// Introduces the player to movement, shooting, changing weapons 
+	// Introduces Fighters, Bombers, and BigFighters 
+
+RedStar.srl
+	// Red Star, 2nd level, showcases new background, music, asteroids within the level, and more movement to enemies
+	// All ships retain stats from Tutorial, but move at higher speeds, in new patterns
+
+Checkpoint0327.srl
+	// Checkpoint 0327, 3rd level, showcases new background, music, tougher enemies and more projectiles/shooting patterns
+	// Figher2 introduced, Bomber2 introduced, BigFighter2 at the end.
+
+Acorn4.srl
+	// Acorn4, 4th level, showcases new background, music, more simultaneous enemies and projectiels, as well as the first boss!
+	// All previous ships are present, more at the same time. Less breaks between them. First boss after 50-100 ships defeated/passed.
+	// Completing it triggers a cut-scene with some story about the new alien threat (play Onwards, https://www.newgrounds.com/audio/listen/575570)
+
+SplitSecond.srl 
+	// 5th level, showcasing numerous asteroids and other obstacles and shipwrecks between the player and the next space station
+	// Should be quite difficult
+	// Arriving at the destination triggers another cut-scene about the alien infestation in the region (play Threats, https://www.newgrounds.com/audio/listen/614259)
+
+AlienRecon.srl
+	// 6th level, Chill tempo, new background, new music, 
+	// Fight good ol' human ships, some asteroids, introduces some new alien ships, their weapons and ways
+	// Dialogue after mission informing of tracking alien ships to a base.
+
+Agitation.srl
+	// 7th Level
+	// Attack alien ships, introduces destruction of alien structures (turrets, spawners)
+	// Chill to destroy the structures, but after each destruction a rather large wave attacks
+	// play Swarm: https://www.newgrounds.com/audio/listen/607531
+
+Swarm.srl
+	// 8th level, Aliens are attacking your base - time to defend. (All your bass are belong to us)
+	// Features a circling level, where the base and surroundings in the background is cycled as if ship is circling it.
+	// Features level 2 Alien Ships, as well as new Alien weapons such as webbers/tractor-beams to slow/disrupt player movement.
+	// Defend the bass, Echoes from Beyond: https://www.newgrounds.com/audio/listen/630938
+
+HiveMind.srl
+	// 9th level: Big bad alien complex
+	// Features several alien structures, many alien ships, and a big "motherbrain" alien ship as 3rd and last boss.
+	// Completing triggers fanfare and Victory screen, play SpaceShooter: https://www.newgrounds.com/audio/listen/584740 
+
+
+Other notable music to include:
+	Surfing the waves: https://www.newgrounds.com/audio/listen/615330
+
+
+Testing:
+- R+T = Run Tests 
+- CTRL + A = AutoAim 
+- Ctrl + S + Plus = Speed up 

@@ -28,12 +28,14 @@
 #include "Missions.h"
 #include "Base/PlayerShip.h"
 #include "Util/String/StringUtil.h"
+#include "Input/Binding.h"
+#include "Input/InputMapping.h"
+#include "Input/Action.h"
 
 #include "Test/TutorialTests.h"
 
 SpawnGroup testGroup;
 List<SpawnGroup> storedTestGroups;
-
 
 /// Each other being original position, clamped position, orig, clamp, orig3, clamp3, etc.
 List<Vector3f> renderPositions;
@@ -72,13 +74,12 @@ GameVariable* SpaceShooter2D::currentLevel = nullptr,
 PlayingLevel* PlayingLevel::singleton = nullptr;
 
 
-Vector2f PlayingLevel::playingFieldHalfSize = Vector2f(),
-PlayingLevel::playingFieldSize = Vector2f();
+//Vector2f PlayingLevel::playingFieldHalfSize = Vector2f(),
+//PlayingLevel::playingFieldSize = Vector2f();
 
 PlayingLevel::PlayingLevel()
 	: SpaceShooter2D()
 	, lastSpawnGroup(nullptr)
-	, playTutorial(true)
 	, currentMission(nullptr)
 {
 	assert(singleton == nullptr);
@@ -98,13 +99,6 @@ ShipPtr PlayingLevel::GetShipByID(int id)
 	return 0;
 }
 
-
-void PlayingLevel::SetPlayingFieldSize(Vector2f newSize)
-{
-	playingFieldSize = newSize;
-	playingFieldHalfSize = newSize * .5f;
-}
-
 /// UI stuffs. All implemented in UIHandling.cpp
 void PlayingLevel::UpdateUI() {
 	HUD::Get()->UpdateUI();
@@ -121,8 +115,6 @@ void PlayingLevel::OnEnter(AppState* previousState) {
 	InputMan.SetNavigateUI(false);
 	InputMan.SetForceNavigateUI(false);
 
-	SetPlayingFieldSize(Vector2f(50, 30));
-
 	HUD::Get()->Show();
 
 	if (mode == PLAYING_LEVEL)
@@ -133,6 +125,7 @@ void PlayingLevel::OnEnter(AppState* previousState) {
 	eventsTriggered.Clear();
 
 	NewPlayer();
+	LoadWeapons();
 
 	// Create.. the sparks! o.o
 // New global sparks system.
@@ -155,11 +148,43 @@ void PlayingLevel::OnEnter(AppState* previousState) {
 	TextMan.LoadFromDir();
 	TextMan.SetLanguage("English");
 
-	if (!playTutorial) {
+	if (!GameVars.GetInt("PlayTutorial")->iValue == 1) {
 		LevelMessage * message = level.GetMessageWithTextId("TutorialConcluded");
-		JumpToAfterMessage(message);
+		if (message != nullptr)
+			JumpToAfterMessage(message);
 	}
+
 };
+
+void PlayingLevel::CreateDefaultBindings() {
+	List<Binding*>& bindings = this->inputMapping.bindings;
+#define BIND(a,b) bindings.Add(new Binding(a,b));
+	BIND(Action::FromString("AutoAim"), List<int>(KEY::CTRL, KEY::A));
+	BIND(Action::FromString("SpeedUp"), List<int>(KEY::CTRL, KEY::S, KEY::PLUS));
+	BIND(Action::FromString("SpeedDown"), List<int>(KEY::CTRL, KEY::S, KEY::MINUS));
+	BIND(Action::FromString("TogglePlayerInvulnerability"), KEY::I);
+	BIND(Action::CreateStartStopAction("MoveShipUp"), KEY::W);
+	BIND(Action::CreateStartStopAction("MoveShipDown"), KEY::S);
+	BIND(Action::CreateStartStopAction("MoveShipLeft"), KEY::A);
+	BIND(Action::CreateStartStopAction("MoveShipRight"), KEY::D);
+	BIND(Action::FromString("ReloadWeapon"), KEY::R);
+	BIND(Action::FromString("ToggleWeaponScript"), KEY::E);
+	BIND(Action::FromString("ActivateSkill"), KEY::Q);
+	BIND(Action::FromString("ResetCamera"), KEY::HOME);
+	BIND(Action::FromString("ZoomIn"), KEY::PG_UP);
+	BIND(Action::FromString("ZoomOut"), KEY::PG_DOWN);
+	BIND(Action::FromString("NewGame"), List<int>(KEY::N, KEY::G));
+	BIND(Action::FromString("ClearLevel"), List<int>(KEY::C, KEY::L));
+	BIND(Action::FromString("ListEntitiesAndRegistrations"), List<int>(KEY::L, KEY::E));
+	BIND(Action::FromString("ToggleBlackness"), List<int>(KEY::T, KEY::B));
+	BIND(Action::FromString("NextLevel"), List<int>(KEY::N, KEY::L));
+	BIND(Action::FromString("PreviousLevel"), List<int>(KEY::P, KEY::L));
+	BIND(Action::FromString("ToggleMenu"), KEY::ESCAPE);
+	BIND(Action::CreateStartStopAction("Shooting"), KEY::SPACE);
+	BIND(Action::FromString("OpenJumpDialog"), List<int>(KEY::CTRL, KEY::G));
+
+	SpaceShooter2D::CreateDefaultBindings();
+}
 
 void PlayingLevel::Process(int timeInMs) {
 
@@ -172,6 +197,14 @@ void PlayingLevel::Process(int timeInMs) {
 	SleepThread(5); // Updates 200 times a sec max?
 
 	TutorialTests::Update(timeInMs);
+
+	if (autoProceedMessages) {
+		static Random random;
+		if (level.activeLevelMessage != nullptr && random.Randf(1.0f) > 0.95f) {
+			MesMan.QueueMessages("ProceedMessage");
+			SleepThread(50); // spam less.
+		}
+	}
 
 	if (paused)
 		return;
@@ -273,6 +306,9 @@ void PlayingLevel::OnExit(AppState* nextState) {
 
 	SetHighscore(currentMission->name, score);
 
+	// Save weapons based on currently equipped ones (including damage taken, stats or other stuff)
+	playerShip->SaveGearToVars();
+
 	// Autosave!
 	SaveFile::AutoSave(Application::name, PlayerName()+" "+ DifficultyString(difficulty->GetInt())+ " "+FlyTime().ToString("H:m"));
 
@@ -311,6 +347,10 @@ void PlayingLevel::ProcessMessage(Message* message)
 	case MessageType::GAMEPAD_MESSAGE: {
 		GamepadMessage * gamepadMessage = (GamepadMessage*)message;
 		Gamepad state = gamepadMessage->gamepadState;
+
+		if (gamepadMessage->aButtonPressed)
+			level.ProceedMessage();
+
 		if (!playerShip->weaponScriptActive)
 			playerShip->shoot = state.rightTrigger > 0.5f;
 		if (state.leftStick.MaxPart() < 0.15f) // Make it 0 if near it to avoid unwanted drift
@@ -398,6 +438,24 @@ void PlayingLevel::ProcessMessage(Message* message)
 			msg = msg.Part(0, found);
 		
 		if (false) {}
+		else if (msg == "AutoAim") {
+			bool wasOn = playerShip->AutoAim();
+			playerShip->SetAutoAim(!wasOn);
+			autoProceedMessages = !wasOn;
+		}
+		else if (msg == "AutoProceedMessages") {
+			autoProceedMessages = !autoProceedMessages;
+		}
+		else if (msg == "SpeedUp") {
+			gameSpeed += 1;
+			QueuePhysics(new PMSet(PT_SIMULATION_SPEED, gameSpeed));
+		}
+		else if (msg == "SpeedDown") {
+			gameSpeed -= 1;
+			if (gameSpeed < 1.0f)
+				gameSpeed = 1.0f;
+			QueuePhysics(new PMSet(PT_SIMULATION_SPEED, gameSpeed));
+		}
 		else if (msg.StartsWith("SetInt")) {
 			String name = msg.Tokenize("(,)")[1];
 			String value = msg.Tokenize("(,)")[2];
@@ -442,6 +500,8 @@ void PlayingLevel::ProcessMessage(Message* message)
 		else if (msg == "RestartLevel") {
 			levelTime = flyTime = Time(TimeType::MILLISECONDS_NO_CALENDER, 0);
 			level.OnLevelTimeAdjusted(levelTime);
+			// Reload weapons
+			LoadWeapons();
 		}
 		else if (msg == "AbortMission") {
 			SetMode(SSGameMode::IN_HANGAR);
@@ -467,7 +527,7 @@ void PlayingLevel::ProcessMessage(Message* message)
 				String str = sg.GetLevelCreationString(flyTime);
 				File::AppendToFile(SPAWNED_ENEMIES_LOG, str);
 				LogMain(str, INFO);
-				sg.Spawn(PlayingLevelRef());
+				sg.Spawn(levelTime, playerShip);
 			}
 			storedTestGroups.Clear();
 		}
@@ -508,22 +568,7 @@ void PlayingLevel::ProcessMessage(Message* message)
 			OpenJumpDialog();
 		}
 		if (msg == "LoadWeapons") {
-			// Um.. load the weapons..?
-			List<Gear> equippedWeapons = playerShip->EquippedWeapons();
-			playerShip->weaponSet.ClearAndDelete();
-			for (int i = 0; i < equippedWeapons.Size(); ++i) {
-				Gear equippedWeapon = equippedWeapons[i];
-				Weapon * weapon = new Weapon();
-				bool ok = Weapon::Get(equippedWeapon.name, weapon);
-				if (!ok) {
-					LogMain("Failed to load weapon by name: " + equippedWeapon.name, ERROR);
-					delete weapon;
-					continue;
-				}
-				playerShip->weaponSet.Add(weapon);
-			}
-			LogMain("Weapons locked and loaded", INFO);
-			HUD::Get()->UpdateHUDGearedWeapons();
+			LoadWeapons();
 		}
 		if (msg == "ReloadWeapon")
 		{
@@ -580,23 +625,29 @@ void PlayingLevel::ProcessMessage(Message* message)
 		//			std::cout<<"\n"<<msg;
 		if (msg == "TutorialBaseGun")
 		{
-			playerShip->SetLevelOfAllWeaponsTo(0);
-			playerShip->activeWeapon = playerShip->SetWeaponLevel(Weapon::Type::MachineGun, 1);
-			HUD::Get()->UpdateHUDGearedWeapons();
+			playerShip->UnequipWeapons();
+			playerShip->Equip(Gear::StartingWeapon());
+			LoadWeapons();
 		}
 		if (msg == "TutorialLevel1Weapons")
 		{
-			playerShip->SetWeaponLevel(Weapon::Type::MachineGun, 1);
-			playerShip->SetWeaponLevel(Weapon::Type::SmallRockets, 1);
-			playerShip->SetWeaponLevel(Weapon::Type::BigRockets, 1);
-			HUD::Get()->UpdateHUDGearedWeapons();
+			playerShip->EquipTutorialLevel1Weapons();
+			LoadWeapons();
+
+//			playerShip->SetWeaponLevel(Weapon::Type::MachineGun, 1);
+	//		playerShip->SetWeaponLevel(Weapon::Type::SmallRockets, 1);
+		//	playerShip->SetWeaponLevel(Weapon::Type::BigRockets, 1);
+			//HUD::Get()->UpdateHUDGearedWeapons();
 		}
 		if (msg == "TutorialLevel3Weapons")
 		{
-			playerShip->SetWeaponLevel(Weapon::Type::MachineGun, 3);
-			playerShip->SetWeaponLevel(Weapon::Type::SmallRockets, 3);
-			playerShip->SetWeaponLevel(Weapon::Type::BigRockets, 3);
-			HUD::Get()->UpdateHUDGearedWeapons();
+			playerShip->EquipTutorialLevel3Weapons();
+			LoadWeapons();
+
+//			playerShip->SetWeaponLevel(Weapon::Type::MachineGun, 3);
+	///		playerShip->SetWeaponLevel(Weapon::Type::SmallRockets, 3);
+		//	playerShip->SetWeaponLevel(Weapon::Type::BigRockets, 3);
+			//HUD::Get()->UpdateHUDGearedWeapons();
 		}
 		if (msg.StartsWith("DecreaseWeaponLevel:"))
 		{
@@ -808,6 +859,26 @@ void PlayingLevel::ProcessMessage(Message* message)
 	ProcessGeneralMessage(message);
 }
 
+void PlayingLevel::LoadWeapons() {
+	// Um.. load the weapons..?
+	List<Gear> equippedWeapons = playerShip->EquippedWeapons();
+	playerShip->weaponSet.ClearAndDelete();
+	for (int i = 0; i < equippedWeapons.Size(); ++i) {
+		Gear equippedWeapon = equippedWeapons[i];
+		Weapon * weapon = new Weapon();
+		bool ok = Weapon::Get(equippedWeapon.name, weapon);
+		if (!ok) {
+			LogMain("Failed to load weapon by name: " + equippedWeapon.name, ERROR);
+			delete weapon;
+			continue;
+		}
+		playerShip->weaponSet.Add(weapon);
+	}
+	LogMain("Weapons locked and loaded", INFO);
+	HUD::Get()->UpdateHUDGearedWeapons();
+
+}
+
 void PlayingLevel::ToggleInGameMenu() {
 	// Pause the game.
 	if (!paused)
@@ -982,14 +1053,14 @@ void PlayingLevel::LoadLevel(String fromSource, Mission * forMission)
 	/// Add entity to track for both the camera, blackness and player playing field.
 	if (levelEntity == nullptr)
 	{
-		levelEntity = LevelEntity->Create(playingFieldSize, playingFieldPadding, levelCamera);
+		levelEntity = LevelEntity->Create(level.playingFieldSize, playingFieldPadding, levelCamera);
 		LevelEntity->SetVelocity(level.BaseVelocity());
 	}
 
 	/// Add emitter for stars at player start.
 	ClearStars();
 	NewStars(level.starSpeed.NormalizedCopy(), level.starSpeed.Length(), 0.2f, level.starColor);
-	LetStarsTrack(levelEntity, Vector3f(playingFieldSize.x + 10.f, 0, 0));
+	LetStarsTrack(levelEntity, Vector3f(level.playingFieldSize.x + 10.f, 0, 0));
 
 
 	// Reset position of level entity if already created.
@@ -1021,7 +1092,7 @@ void PlayingLevel::LoadLevel(String fromSource, Mission * forMission)
 	QueueGraphics(new GMRecompileShaders()); // Shouldn't be needed...
 
 	if (this->levelSource == tutorialLevel) {
-		if (!playTutorial) {
+		if (GameVars.Get("PlayTutorial")->iValue == 0) {
 			// Jump in time..!
 			LevelMessage * levelMessage = level.GetMessageWithTextId("TutorialConcluded");
 			assert(levelMessage);
@@ -1032,15 +1103,15 @@ void PlayingLevel::LoadLevel(String fromSource, Mission * forMission)
 }
 
 void PlayingLevel::SpawnPlayer() {
-	level.SpawnPlayer(*this, playerShip, Vector3f(levelEntity->worldPosition.x - playingFieldHalfSize.x, 0, 0));
+	level.SpawnPlayer(*this, playerShip, Vector3f(levelEntity->worldPosition.x - level.playingFieldHalfSize.x, 0, 0));
 
 }
 
 
 void PlayingLevel::UpdateRenderArrows()
 {
-	Vector2f minField = levelEntity->worldPosition - playingFieldHalfSize - Vector2f(1,1);
-	Vector2f maxField = levelEntity->worldPosition + playingFieldHalfSize + Vector2f(1,1);
+	Vector2f minField = levelEntity->worldPosition - level.playingFieldHalfSize - Vector2f(1,1);
+	Vector2f maxField = levelEntity->worldPosition + level.playingFieldHalfSize + Vector2f(1,1);
 
 	List<Vector3f> newPositions;
 	for (int i = 0; i < shipEntities.Size(); ++i)
@@ -1064,8 +1135,8 @@ void PlayingLevel::UpdateRenderArrows()
 //// Renders data updated via Render-thread.
 void PlayingLevel::RenderInLevel(GraphicsState * graphicsState)
 {
-	Vector2f minField = levelEntity->worldPosition - playingFieldHalfSize - Vector2f(1,1);
-	Vector2f maxField = levelEntity->worldPosition + playingFieldHalfSize + Vector2f(1,1);
+	Vector2f minField = levelEntity->worldPosition - level.playingFieldHalfSize - Vector2f(1,1);
+	Vector2f maxField = levelEntity->worldPosition + level.playingFieldHalfSize + Vector2f(1,1);
 
 	// Load default shader?
 	ShadeMan.SetActiveShader(graphicsState, NULL);

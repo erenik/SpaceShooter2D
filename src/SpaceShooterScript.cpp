@@ -38,7 +38,7 @@ void SpaceShooterScript::EvaluateLine(String & line)
 			return;
 		
 		/// Update speed based on progression.
-		float distance = (targetEntity->worldPosition.x - (levelEntity->worldPosition.x - pl.playingFieldHalfSize.x)) / pl.playingFieldSize.x;
+		float distance = (targetEntity->worldPosition.x - (levelEntity->worldPosition.x - pl.PlayingFieldHalfSize().x)) / pl.PlayingFieldSize().x;
 	//	std::cout<<"\nDistance "<<distance;
 		ClampFloat(distance, -1.f, 1.f);
 		ShipPtr ship = pl.GetShip(targetEntity);
@@ -51,7 +51,7 @@ void SpaceShooterScript::EvaluateLine(String & line)
 			/// Enter charging movement if not already there.
 			Movement move(Movement::MOVE_TO);
 			move.location = Location::LEFT_EDGE; 
-			ship->SetMovement(pl, move);
+			ship->SetMovement(playerShip, move);
 			sssState = 1;
 		}
 		/// Update speed.
@@ -81,8 +81,8 @@ void SpaceShooterScript::EvaluateLine(String & line)
 			return;
 		
 		/// Update speed based on progression.
-		float targetX = pl.playingFieldHalfSize.x - 5.f;
-		float distance = ((levelEntity->worldPosition.x + targetX) - targetEntity->worldPosition.x) / pl.playingFieldSize.x;
+		float targetX = pl.PlayingFieldHalfSize().x - 5.f;
+		float distance = ((levelEntity->worldPosition.x + targetX) - targetEntity->worldPosition.x) / pl.PlayingFieldSize().x;
 	//	std::cout<<"\nDistance "<<distance;
 //		ClampFloat(distance, -1.f, 1.f);
 		ShipPtr ship = pl.GetShip(targetEntity);
@@ -94,7 +94,7 @@ void SpaceShooterScript::EvaluateLine(String & line)
 			Movement move(Movement::MOVE_TO);
 			move.location = Location::VECTOR;
 			move.vec = Vector2f(targetX, 0); // Compared to center 0,0 of screen.
-			ship->SetMovement(pl, move);
+			ship->SetMovement(playerShip, move);
 			sssState = 1;
 		}		
 		// Mark as complete when we are at the left side.
@@ -222,7 +222,7 @@ bool SpaceShooterEvaluator::EvaluateFunction(String byName, List<String> argumen
 		Movement move(pattern);
 		move.vec = Vector2f(arguments[2].ParseFloat(), arguments[3].ParseFloat());
 		move.vec.Normalize();
-		ship->SetMovement(pl, move);
+		ship->SetMovement(playerShip, move);
 		result = ExpressionResult::Boolean(true);
 		return true;
 	}

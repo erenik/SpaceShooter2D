@@ -6,6 +6,8 @@
 #define ROTATION_H
 
 class Ship;
+class PlayerShip;
+
 #define ShipPtr std::shared_ptr<Ship>
 
 #include "Entity/Entity.h"
@@ -33,7 +35,7 @@ public:
 	static List<Rotation> ParseFrom(String);
 
 	void OnEnter(ShipPtr ship);
-	void OnFrame(PlayingLevel& playingLevel, int timeInMs);
+	void OnFrame(std::shared_ptr<PlayerShip> playerShip, int timeInMs);
 
 
 	// See enum above.

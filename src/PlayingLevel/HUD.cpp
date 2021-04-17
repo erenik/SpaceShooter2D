@@ -241,11 +241,13 @@ void HUD::UpdateCooldowns()
 
 void HUD::UpdateDebug() {
 	PlayingLevel& pl = PlayingLevelRef();
+	Level& level = pl.GetLevel();
+
 	QueueGraphics(new GMSetUIs("LevelTime", GMUI::STRING_INPUT, pl.levelTime.ToString("m:S")));
-	QueueGraphics(new GMSetUIi("SpawnGroupsRemaining", GMUI::INTEGER_INPUT, pl.level.SpawnGroupsRemaining()));
-	QueueGraphics(new GMSetUIi("SpawnGroupsActive", GMUI::INTEGER_INPUT, pl.level.SpawnGroupsActive()));
+	QueueGraphics(new GMSetUIi("SpawnGroupsRemaining", GMUI::INTEGER_INPUT, level.SpawnGroupsRemaining()));
+	QueueGraphics(new GMSetUIi("SpawnGroupsActive", GMUI::INTEGER_INPUT, level.SpawnGroupsActive()));
 	
-	SpawnGroup * nextSpawnGroup = pl.level.NextSpawnGroup();
+	SpawnGroup * nextSpawnGroup = level.NextSpawnGroup();
 	QueueGraphics(new GMSetUIs("NextSpawnGroupTime", GMUI::STRING_INPUT, (nextSpawnGroup != nullptr? nextSpawnGroup->SpawnTime().ToString("m:S") : "N/A" )));
 	QueueGraphics(new GMSetUIi("NextSpawnGroupLine", GMUI::INTEGER_INPUT, nextSpawnGroup != nullptr ? nextSpawnGroup->lineNumber : 0));
 

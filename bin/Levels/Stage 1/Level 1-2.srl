@@ -1,5 +1,5 @@
 
-MillisecondsPerPixel 300
+
 ShipType V-Turret_1 RGB 10 0 0
 ShipType V-Assault_1 RGB 20 0 0
 ShipType V-Fighter_3_A	 RGB 30 0 0
@@ -24,7 +24,7 @@ StopLoading // Makes it stop loading past this point.
 
 // Back-up of the stuff above since I need to test rotations. - Emil
 
-MillisecondsPerPixel 300
+
 ShipType V-Fighter_2 RGB 10 0 0
 ShipType V-Fighter_1 RGB 20 0 0
 ShipType V-Fighter_3_A	 RGB 30 0 0
