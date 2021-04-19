@@ -10,6 +10,16 @@
 
 class Level;
 
+// LevelMessage-type
+enum class LMType {
+	TEXT_MESSAGE,
+	EVENT,
+};
+
+
+Time GetSpawnTime(Time lastMessageOrSpawnGroupTime, int secondsToAdd);
+
+
 class LevelMessage 
 {
 public:
@@ -20,13 +30,16 @@ public:
 	void Hide(PlayingLevel& playingLevel);
 	
 	String name;
-	enum {
-		TEXT_MESSAGE,
-		EVENT,
-	};
+	
+	/// Set and used only in the editor.
+	Vector3f editorPosition;
+	// Depends on type, and stuff.
+	String GetEditorText(int maxChars);
+
+
 	String condition;
 	List<String> strings;
-	int type; 
+	LMType type;
 	int eventType;
 	enum {
 		STRING_EVENT,
@@ -34,6 +47,11 @@ public:
 		GO_TO_REWIND_POINT,
 	};
 	bool displayed, hidden;
+	
+	// # of seconds after previous spawn group or message that this message should be presented. 
+	int startTimeOffsetSeconds;
+
+	// In LevelTime
 	Time startTime;
 	Time stopTime;
 	String textID;
@@ -41,6 +59,14 @@ public:
 	bool goToRewindPoint;
 	// If true, will trigger even when jumping forward in time while testing.
 	bool dontSkip;
+};
+
+#include "Entity/EntityProperty.h"
+
+class LevelMessageProperty : public EntityProperty {
+public:
+	LevelMessageProperty(std::shared_ptr<Entity> owner, LevelMessage * levelMessage);
+	LevelMessage * levelMessage;
 };
 
 #endif // LEVEL_MSG_H

@@ -21,6 +21,18 @@ Camera * levelCamera = NULL;
 
 Level * activeLevel = NULL;
 
+LevelElement::LevelElement(): sg(nullptr), lm(nullptr) {}
+
+LevelElement::LevelElement(SpawnGroup* sg)
+: sg(sg), lm(nullptr){
+}
+LevelElement::LevelElement(LevelMessage* lm)
+: lm(lm), sg(nullptr){
+}
+LevelElement::~LevelElement() {
+}
+
+
 Level::Level()
 {
 	height = 20.f;
@@ -34,8 +46,9 @@ Level::Level()
 
 Level::~Level()
 {
-	spawnGroups.ClearAndDelete();
-	messages.ClearAndDelete();
+	//spawnGroups.ClearAndDelete();
+	//messages.ClearAndDelete();
+	levelElements.Clear();
 	enemyShips.Clear();
 	alliedShips.Clear();
 }
@@ -195,6 +208,7 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 	*/
 
 	/// Check spawn-groups to spawn.
+	List<SpawnGroup*> spawnGroups = SpawnGroups();
 	for (int i = 0; i < spawnGroups.Size(); ++i)
 	{
 		SpawnGroup * sg = spawnGroups[i];
@@ -219,6 +233,24 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 	}
 }
 
+List<SpawnGroup*> Level::SpawnGroups() {
+	List<SpawnGroup*> sgs;
+	for (int i = 0; i < levelElements.Size(); ++i) {
+		if (levelElements[i].sg != nullptr)
+			sgs.Add(levelElements[i].sg);
+	}
+	return sgs;
+}
+
+List<LevelMessage*> Level::Messages(){
+	List<LevelMessage*> lms;
+	for (int i = 0; i < levelElements.Size(); ++i) {
+		if (levelElements[i].lm != nullptr)
+			lms.Add(levelElements[i].lm);
+	}
+	return lms;
+}
+
 void Level::UpdateSpawnDespawnLimits(std::shared_ptr<Entity> levelEntity) {
 	PlayingLevel& playingLevel = PlayingLevelRef();
 	playingLevel.removeInvuln = levelEntity->worldPosition[0] + playingFieldHalfSize[0] + playingFieldPadding + 1.f;
@@ -233,6 +265,7 @@ void Level::UpdateSpawnDespawnLimits(std::shared_ptr<Entity> levelEntity) {
 // Dialogue, tutorials
 void Level::ProcessLevelMessages(Time levelTime) {
 	/// Check messages.
+	auto messages = Messages();
 	if (messages.Size())
 	{
 		for (int i = 0; i < messages.Size(); ++i)
@@ -319,6 +352,8 @@ void Level::SetTime(Time newTime)
 void Level::OnLevelTimeAdjusted(Time levelTime)
 {
 	activeLevelMessage = nullptr;
+	auto spawnGroups = SpawnGroups();
+	auto messages = Messages();
 	for (int i = 0; i < spawnGroups.Size(); ++i)
 	{
 		SpawnGroup * sg = spawnGroups[i];
@@ -356,7 +391,7 @@ bool Level::LevelCleared(PlayingLevel& playingLevel)
 				return false;
 			if (!FinishedSpawning())
 				return false;
-			if (messages.Size())
+			if (Messages().Size())
 				return false;
 			return true;
 		case EVENT_TRIGGERED:
@@ -483,6 +518,7 @@ List<ShipPtr> Level::GetShipsAtPoint(ConstVec3fr position, float maxRadius, List
 // # of spawn groups yet to start spawning. (may be 0 while spawning last one or enemies still on screen).
 int Level::SpawnGroupsRemaining() {
 	int num = 0;
+	auto spawnGroups = SpawnGroups();
 	for (int i = 0; i < spawnGroups.Size(); ++i) {
 		SpawnGroup * sg = spawnGroups[i];
 		if (sg->FinishedSpawning())
@@ -496,6 +532,7 @@ int Level::SpawnGroupsRemaining() {
 
 // Null if none after this one.
 SpawnGroup* Level::NextSpawnGroup() {
+	auto spawnGroups = SpawnGroups();
 	SpawnGroup * nextOneToSpawn = nullptr;
 	for (int i = 0; i < spawnGroups.Size(); ++i) {
 		SpawnGroup * spawnGroup = spawnGroups[i];
@@ -516,6 +553,7 @@ SpawnGroup* Level::NextSpawnGroup() {
 
 void Level::RemoveRemainingSpawnGroups()
 {
+	auto spawnGroups = SpawnGroups();
 	for (int i = 0; i < spawnGroups.Size(); ++i)
 	{
 		SpawnGroup * sg = spawnGroups[i];
@@ -524,6 +562,7 @@ void Level::RemoveRemainingSpawnGroups()
 }
 
 void Level::SetSpawnGroupsFinishedAndDefeated(Time beforeLevelTime) {
+	auto spawnGroups = SpawnGroups();
 	for (int i = 0; i < spawnGroups.Size(); ++i)
 	{
 		SpawnGroup * sg = spawnGroups[i];
@@ -571,6 +610,7 @@ void Level::HideLevelMessage(LevelMessage * levelMessage) {
 }
 
 LevelMessage * Level::GetMessageWithTextId(String id) {
+	auto messages = Messages();
 	for (int i = 0; i < messages.Size(); ++i)
 		if (messages[i]->textID == id)
 			return messages[i];
@@ -583,4 +623,12 @@ List<ShipPtr> Level::PlayerShips(PlayingLevel& playingLevel)
 	List<ShipPtr> playerShips;
 	playerShips.AddItem(playingLevel.playerShip);
 	return playerShips;
+}
+
+int Level::GetElementIndexOf(SpawnGroup* sg) {
+	for (int i = 0; i < levelElements.Size(); ++i) {
+		if (levelElements[i].sg == sg)
+			return i;
+	}
+	return -1;
 }

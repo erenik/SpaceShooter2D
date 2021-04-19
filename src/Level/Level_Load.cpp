@@ -8,6 +8,7 @@
 #include "LevelMessage.h"
 #include "File/LogFile.h"
 #include "PlayingLevel.h"
+#include <optional>
 
 namespace LevelLoader 
 {
@@ -27,7 +28,7 @@ namespace LevelLoader
 	}
 
 	/// Additional spawn times for duplicates of the same group (times specified at start)
-	List<Time> spawnTimes;
+	List<String> spawnTimeStrings;
 
 	Vector3i goalColor;
 
@@ -45,15 +46,44 @@ namespace LevelLoader
 
 	// AddMessageIfNeeded(this)
 	void AddMessageIfNeeded(Level * level) {
-		if (message) { 
+		if (message) {
 			String prefix = "Message";
-			if (message->type == LevelMessage::EVENT)
+			if (message->type == LMType::EVENT)
 				prefix = "Event";
-			LogMain(prefix+" "+ message->textID+" added at time: "+ message->startTime.ToString("m:S"), INFO);
-			level->messages.Add(message); 
+			LogMain(prefix + " " + message->textID + " added at time: " + message->startTime.ToString("m:S"), INFO);
+			level->levelElements.Add(LevelElement(message));
 			lastMessage = message;
 			message = nullptr;
-		} 
+		}
+	}
+
+	void AddGroupsIfNeeded()
+	{
+		if (group) {
+			lastGroup = group;
+			LogMain("Setting spawn time to group from " + group->spawnTimeString + " to " + spawnTimeStrings[0], DEBUG);
+			group->SetSpawnTimeString(spawnTimeStrings[0], LastSpawnGroupOrMessageTime()); // Set spawn time if not already done so.
+			if (group->name.Length() == 0)
+				group->name = group->SpawnTime().ToString("m:S.n");
+			loadLevel->AddSpawnGroup(group);
+			LogMain("SpawnGroup " + String(loadLevel->SpawnGroups().Size() + 1) + " added " + group->name + "\t" + group->SpawnTime().ToString("m:S.n"), DEBUG);
+		}
+		for (int p = 1; p < spawnTimeStrings.Size(); ++p)
+		{
+			SpawnGroup * newGroup = new SpawnGroup(*lastGroup);
+			SetGroupDefaults(newGroup);
+			newGroup->SetSpawnTimeString(spawnTimeStrings[p], LastSpawnGroupOrMessageTime());
+			newGroup->name = lastGroup->name + "_" + String(p + 1);
+			loadLevel->AddSpawnGroup(newGroup);
+			LogMain("SpawnGroup " + String(loadLevel->SpawnGroups().Size() + 1) + " added " + newGroup->name + "\t" + newGroup->SpawnTime().ToString("m:S.n"), DEBUG);
+		}
+		spawnTimeStrings.Clear();
+		group = NULL;
+	}
+
+	void AddMessageOrSpawnGroupIfNeeded(Level* level) {
+		AddMessageIfNeeded(level);
+		AddGroupsIfNeeded();
 	}
 
 	void SetGroupDefaults(SpawnGroup * sg) {
@@ -65,10 +95,15 @@ namespace LevelLoader
 	void ParseMessageStartTime(String arg) {
 		message->startTime = LastSpawnGroupOrMessageTime();
 		if (arg.StartsWith("+")) {
-			message->startTime.AddSeconds(arg.Tokenize(":")[1].ParseInt());
+			message->startTimeOffsetSeconds = arg.Tokenize(":")[1].ParseInt();
+			message->startTime.AddSeconds(message->startTimeOffsetSeconds);
 		}
-		else if (arg.IsNumber())
-			message->startTime.ParseFrom(arg);
+		else if (arg.IsNumber()) {
+			message->startTimeOffsetSeconds = arg.ParseInt();
+			message->startTime.AddSeconds(message->startTimeOffsetSeconds);
+		}
+		//else if (arg.IsNumber())
+		//			message->startTime.ParseFrom(arg);
 		else {
 			// Auto-increment at least 100 ms
 			message->startTime.AddMs(100);
@@ -89,79 +124,43 @@ namespace LevelLoader
 			bestSoFar = lastMessageTime;
 		if (messageTime > bestSoFar)
 			bestSoFar = messageTime;
-		if (spawnGroupTime > bestSoFar)
-			bestSoFar = spawnGroupTime;
+		if (spawnGroupTime.Type() != TimeType::UNDEFINED) {
+			if (spawnGroupTime > bestSoFar)
+				bestSoFar = spawnGroupTime;
+		}
 		return bestSoFar;
 	}
 
-	void AddGroupsIfNeeded() 
-	{ 
-		if (group) {
-			lastGroup = group; 
-			LogMain("Setting spawn time to group from "+group->SpawnTime().ToString("m:S.n")+" to "+spawnTimes[0].ToString("m:S.n"), DEBUG);
-			group->SetSpawnTime(spawnTimes[0]); // Set spawn time if not already done so.
-			if (group->name.Length() == 0)
-				group->name = group->SpawnTime().ToString("m:S.n");
-			loadLevel->spawnGroups.AddItem(group);
-			LogMain("SpawnGroup "+String(loadLevel->spawnGroups.Size()+1)+" added "+group->name+"\t"+group->SpawnTime().ToString("m:S.n"), DEBUG);
-		} 
-		for (int p = 1; p < spawnTimes.Size(); ++p)
-		{
-			SpawnGroup * newGroup = new SpawnGroup(*lastGroup);
-			SetGroupDefaults(newGroup);
-			newGroup->SetSpawnTime(spawnTimes[p]);
-			newGroup->name = lastGroup->name + "_"+String(p+1);
-			loadLevel->spawnGroups.AddItem(newGroup);
-			LogMain("SpawnGroup "+String(loadLevel->spawnGroups.Size()+1)+" added "+newGroup->name+"\t"+newGroup->SpawnTime().ToString("m:S.n"), DEBUG);
-		}
-		spawnTimes.Clear();
-		group = NULL;
-	}
 	void ParseTimeStringsFromLine(String line)
 	{
-		spawnTimes.Clear();
-		List<String> timeStrs = line.Tokenize(" \t,");
-		timeStrs.RemoveIndex(0, ListOption::RETAIN_ORDER);
-		for (int i = 0; i < timeStrs.Size(); ++i)
+		spawnTimeStrings.Clear();
+		List<String> tokens = line.Tokenize(" \t,");
+		String firstToken = tokens[0];
+		// Remove the first word
+		tokens.RemoveIndex(0, ListOption::RETAIN_ORDER);
+		// If CopyNamedGroup, remove the 2nd one as well.
+		if (firstToken == "CopyNamedGroup")
+			tokens.RemoveIndex(0, ListOption::RETAIN_ORDER);
+		for (int i = 0; i < tokens.Size(); ++i)
 		{
-			String timeStr = timeStrs[i];
-			if (timeStr.StartsWith("x"))
+			String token = tokens[i];
+			if (token.StartsWith("x"))
 			{
-				int duplicates = timeStr.Tokenize("x")[0].ParseInt();
+				int duplicates = token.Tokenize("x")[0].ParseInt();
 				// Since previous one is already there, add it 11 more times.
-				String timeStrPrev = timeStrs[i-1];
+				String timeStrPrev = tokens[i-1];
 				for (int j = 1; j < duplicates; ++j)
-					timeStrs.AddItem(timeStrPrev);
+					tokens.AddItem(timeStrPrev);
 				/// Parse them as usual next iterations.
 				continue;
 			}
-			Time t(TimeType::MILLISECONDS_NO_CALENDER);
-			if (timeStr.StartsWith("+"))
-			{
-				Time lastTime = LastSpawnGroupOrMessageTime();
-				t = lastTime; 
-				Time timeToAdd = Time(TimeType::MILLISECONDS_NO_CALENDER);
-				String timeStrWithoutPlus = timeStr;
-				timeStrWithoutPlus.Replace('+', '0');
-				timeToAdd.ParseFrom(timeStrWithoutPlus);
-				t += timeToAdd; //.AddSeconds(timeStr.Tokenize(":")[1].ParseInt());
-			}
-			else {
-				try {
-					bool ok = t.ParseFrom(timeStr);
-					if (!ok)
-						continue;
-				}
-				catch (...){
-					continue;
-				}
-			}
-			LogMain("Adding spawn group at time " + t.ToString("m:S"), INFO);
+			if (token == "")
+			LogMain("Adding spawn group at time " + token, INFO);
 			/*			if (t.Milliseconds() == 0) /// Spawning at 0:0.0 should be possible - used in generator.
 				continue;*/
-			spawnTimes.AddItem(t);
+			spawnTimeStrings.AddItem(token);
 		}
-		assert(spawnTimes.Size());
+		assert(spawnTimeStrings.Size());
 	}
 };
 
@@ -181,14 +180,21 @@ using namespace LevelLoader;
 
 int Level::SpawnGroupsActive() {
 	int numActive = 0;
-	for (int i = 0; i < spawnGroups.Size(); ++i) {
-		SpawnGroup * spawnGroup = spawnGroups[i];
+	for (int i = 0; i < SpawnGroups().Size(); ++i) {
+		SpawnGroup * spawnGroup = SpawnGroups()[i];
 		if (spawnGroup->shipsSpawned == 0) // Ignore those not yet spawned.
 			continue;
 		if (spawnGroup->ShipsActive() > 0) 
 			++numActive;
 	}
 	return numActive;
+}
+
+void Level::AddSpawnGroup(SpawnGroup* sg) {
+	levelElements.Add(LevelElement(sg));
+}
+void Level::AddMessage(LevelMessage* lm) {
+	levelElements.Add(LevelElement(lm));
 }
 
 /// Deletes all ships, spawngroups, resets variables to defaults.
@@ -201,9 +207,9 @@ void Level::Clear(PlayingLevel& playingLevel)
 
 bool Level::FinishedSpawning()
 {
-	for (int i = 0; i < spawnGroups.Size(); ++i)
+	for (int i = 0; i < SpawnGroups().Size(); ++i)
 	{
-		SpawnGroup * sg = spawnGroups[i];
+		SpawnGroup * sg = SpawnGroups()[i];
 		if (!sg->FinishedSpawning())
 			return false;
 	}
@@ -226,8 +232,11 @@ bool Level::Load(String fromSource)
 
 	/// Clear old stuff.
 	ships.Clear();
-	spawnGroups.ClearAndDelete();
-	messages.ClearAndDelete();
+	for (int i = 0; i < levelElements.Size(); ++i) {
+		SAFE_DELETE(levelElements[i].sg);
+		SAFE_DELETE(levelElements[i].lm);
+	}
+	levelElements.Clear();
 
 	/// Set end criteria..
 	endCriteria = Level::NO_MORE_ENEMIES;
@@ -274,14 +283,13 @@ bool Level::Load(String fromSource)
 			spawnGroupsPauseGameTime = arg.ParseBool();
 		else if (line.StartsWith("SpawnGroup"))
 		{
-			AddMessageIfNeeded(loadLevel);
-			AddGroupsIfNeeded();
+			AddMessageOrSpawnGroupIfNeeded(loadLevel);
 			group = new SpawnGroup();
 			group->lineNumber = i + 1; // What line it corresponds to in the file :)
 			SetGroupDefaults(group);
 			// Parse time.
 			ParseTimeStringsFromLine(line);
-			group->SetSpawnTime(spawnTimes[0]);
+			group->SetSpawnTimeString(spawnTimeStrings[0], LastSpawnGroupOrMessageTime());
 	//		group->spawnTime.PrintData();
 //			String timeStr = line.Tokenize(" \t")[1];
 //			group->spawnTime.ParseFrom(timeStr);
@@ -299,18 +307,27 @@ bool Level::Load(String fromSource)
 		}
 		else if (line.StartsWith("Message"))
 		{
-			AddMessageIfNeeded(this);
+			AddMessageOrSpawnGroupIfNeeded(loadLevel);
 			message = new LevelMessage();
 			ParseMessageStartTime(arg);
 			parseMode = PARSE_MODE_MESSAGES;
 		}
 		else if (line.StartsWith("Event"))
 		{
-			AddMessageIfNeeded(this);
+			AddMessageOrSpawnGroupIfNeeded(loadLevel);
 			message = new LevelMessage();
-			message->type = LevelMessage::EVENT;
-			message->strings.Add(line - "Event "); // By default, add argument to be invoked on passing it.
-			message->textID = arg; // By default, for logging, add arg as textId.
+			message->type = LMType::EVENT;
+			
+			// If the line contains a time addition, then don't add the rest as a string, it will be added later.
+			String lineWithoutEvent = (line - "Event");
+			lineWithoutEvent.RemoveSurroundingWhitespaces();
+			if (lineWithoutEvent.Length() > 0) {
+				if (!line.Contains("+")) {
+					message->strings.Add(lineWithoutEvent); // By default, add argument to be invoked on passing it.
+				}
+			}			
+
+			//message->textID = arg; // By default, for logging, add arg as textId. what?
 			ParseMessageStartTime(arg);
 			parseMode = PARSE_MODE_MESSAGES;
 		}
@@ -356,18 +373,18 @@ bool Level::Load(String fromSource)
 				parenthesisContents = tokens[1];
 			if (var == "CopyGroup")
 			{
-				AddGroupsIfNeeded();
+				AddMessageOrSpawnGroupIfNeeded(loadLevel);
 				// Copy last one.
 				group = new SpawnGroup(*lastGroup);
 				SetGroupDefaults(group);
 				// Parse time.
 				ParseTimeStringsFromLine(line);
-				group->SetSpawnTime(spawnTimes[0]);
+				group->SetSpawnTimeString(spawnTimeStrings[0], LastSpawnGroupOrMessageTime());
 				parseMode = PARSE_MODE_FORMATIONS;
 			}
 			if (var == "CopyNamedGroup")
 			{
-				AddGroupsIfNeeded();
+				AddMessageOrSpawnGroupIfNeeded(loadLevel);
 				// Copy last one.
 				SpawnGroup * named = 0;
 				List<String> tokens = line.Tokenize(" \t");
@@ -378,9 +395,9 @@ bool Level::Load(String fromSource)
 					continue;
 				}
 				String name = tokens[1];
-				for (int j = 0; j < spawnGroups.Size(); ++j)
+				for (int j = 0; j < SpawnGroups().Size(); ++j)
 				{
-					SpawnGroup * sg = spawnGroups[j];
+					SpawnGroup * sg = SpawnGroups()[j];
 					if (sg->name == name)
 					{
 						named = sg;
@@ -397,7 +414,7 @@ bool Level::Load(String fromSource)
 				SetGroupDefaults(group);
 				// Parse time.
 				ParseTimeStringsFromLine(line);
-				group->SetSpawnTime(spawnTimes[0]);
+				group->SetSpawnTimeString(spawnTimeStrings[0], LastSpawnGroupOrMessageTime());
 				parseMode = PARSE_MODE_FORMATIONS;
 			}
 			if (var == "RelativeSpeed")
@@ -480,13 +497,73 @@ bool Level::Load(String fromSource)
 	// No gravity
 	PhysicsMan.QueueMessage(new PMSet(PT_GRAVITY, Vector3f(0,0,0)));
 
-	
+
+	/*
 	for (int i = 0; i < messages.Size(); ++i)
 	{
-	//	messages[i]->PrintAll();
+		messages[i]->PrintAll();
 	}
+	*/
 
 	// Add player? - Done later via script
 	return true;
+}
+
+bool Level::Save(String toFile) {
+	// Write initial stuff like StarColor, level size
+
+	// Start writing Events, Messages and SpawnGroups in the order they came, stepping 10ms per loop.
+	Time levelTime = Time(TimeType::MILLISECONDS_NO_CALENDER);
+
+	List<LevelElement> levelElementsToWrite = this->levelElements;
+
+	String toWrite;
+
+	File outFile(toFile);
+	bool ok = outFile.OpenForWritingText();
+	if (!ok) {
+		LogMain("Failed to save level", ERROR);
+		return false;
+	}
+	outFile.WriteLine("// Auto-generated file from saving level in the editor.");
+	for (int i = 0; i < levelElementsToWrite.Size(); ++i) {
+		LevelElement& le = levelElementsToWrite[i];
+
+		SpawnGroup * sg = le.sg;
+		if (sg) {
+			// Write it.
+			outFile.WriteLine("SpawnGroup "+sg->spawnTimeString);
+			outFile.WriteLine("Name " + sg->name);
+			outFile.WriteLine("ShipType " + sg->shipType);
+			outFile.WriteLine("Number " + String(sg->number));
+			outFile.WriteLine("Formation " + GetName(sg->formation));
+			outFile.WriteLine("Size xy " + VectorString(sg->size));
+			outFile.WriteLine("Position xy " + VectorString(sg->position));
+		}
+
+		if (le.lm) {
+			LevelMessage * levelMessage = le.lm;
+			outFile.WriteLine((levelMessage->type == LMType::EVENT? "Event " : "Message ") + String(levelMessage->startTimeOffsetSeconds));
+			
+			if (levelMessage->name.Length() > 0)
+				outFile.WriteLine("Name " + levelMessage->name);
+			if (levelMessage->strings.Size() > 0)
+				outFile.WriteLine("String " + levelMessage->strings[0]);
+			if (levelMessage->textID.Length() > 0)
+				outFile.WriteLine("TextID " + levelMessage->textID);
+			if (levelMessage->dontSkip)
+				outFile.WriteLine("DontSkip");
+			if (levelMessage->condition.Length() > 0)
+				outFile.WriteLine("Condition " + levelMessage->condition);
+			if (levelMessage->goToRewindPoint)
+				outFile.WriteLine("GoToRewindPoint");
+
+			// e.g: Condition TriggeredEvent : FailedInitialTutorialEvent
+;		}
+
+		outFile.WriteLine(""); // empty line for readability between elements
+	}
+
+	outFile.Close();
 }
 

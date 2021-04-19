@@ -475,8 +475,8 @@ void PlayingLevel::ProcessMessage(Message* message)
 		else if (msg.StartsWith("SetLevelTimeToMessage")) {
 			String msgName = msg.Tokenize(":")[1];
 			List<String> messageNames;
-			for (int i = 0; i < level.messages.Size(); ++i) {
-				auto msg = level.messages[i];
+			for (int i = 0; i < level.Messages().Size(); ++i) {
+				auto msg = level.Messages()[i];
 				if (msg->name.Length() > 0)
 					messageNames.Add("- "+ msg->name);
 				if (msg->name == msgName) {

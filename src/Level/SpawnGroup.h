@@ -54,6 +54,8 @@ public:
 	void SetDefeated();
 	bool FinishedSpawning() { return finishedSpawning;};
 
+	List<std::shared_ptr<Entity>> GetEntities();
+
 	/// Gathers all ships internally for spawning. Returns lsit of all ships (used internally)
 	void PrepareForSpawning(SpawnGroup * parent = 0);
 
@@ -68,7 +70,11 @@ public:
 	String GetLevelCreationString(Time t);
 
 	Time SpawnTime() const { return spawnTime;  }
+	void InvalidateSpawnTime() { spawnTime = Time(); };
+	String spawnTimeString;
+	void SetSpawnTimeString(String spawnTimeStr, Time lastMessageOrSpawnGroupTime);
 	void SetSpawnTime(Time newSpawnTime);
+	static Time SpawnTimeFromString(String spawnTimeStr, Time lastMessageOrSpawnGroupTime);
 
 	/// o.o
 	String name;
@@ -76,6 +82,7 @@ public:
 	bool playerSurvived; // player survived the way?
 	Vector3f position;
 	Vector3f spawnedAtPosition; // Used in editor for selection.
+	Vector3f CalcGroupSpawnPosition();
 	/// Number along the formation bounds. Before PrepareForSpawning is called, this is an arbitrary argument, which may or may not be the same after preparing for spawning (e.g. it may multiply for generating a SQUARE formation).
 	int number;
 	// What line number it corresponds to in the parsed level file for dev iteration purposes.
@@ -85,7 +92,7 @@ public:
 	MovementPattern movementPattern;
 	void ParseFormation(String fromString);
 	/// Usually just 1 or 2 sizes are used (X,Y)
-	Vector3f size;
+	Vector2f size;
 
 	/// Time-spacing for spawning a flying incoming formation. Enables "line" of ships flying with similar characteristics but one arriving briefly after the other. If 0 is normal formation spawned instantaneously.
 	int spawnIntervalMsBetweenEachShipInFormation;
@@ -102,9 +109,10 @@ public:
 
 	void Despawn();
 
+	Time spawnTime;
+
 private:
 
-	Time spawnTime;
 
 	ShipPtr GetNextShipToSpawn();
 	void SpawnAllShips(std::shared_ptr<PlayerShip> playerShip);

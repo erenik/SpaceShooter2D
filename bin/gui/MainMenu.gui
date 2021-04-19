@@ -3,6 +3,8 @@
 //defaultTexture	0x2244
 //defaultTextColor	0 1 1 1
 
+defaultFontShader FontStylizedTripleColors
+
 // Make root active
 root
 name 		MainMenuScreen
@@ -60,5 +62,3 @@ onActivate OpenLevelEditor
 button QuitButton
 text "Quit"
 onActivate	QuitApplication
-
-

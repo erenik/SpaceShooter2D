@@ -23,6 +23,16 @@ public:
 	void CloseSpawnWindow();
 
 private:
+
+	// Spawns spawn group at appropriate place in the editor for manipulation.
+	void Spawn(SpawnGroup * sg);
+	void Respawn(SpawnGroup * sg);
+
+	Time LastMessageOrSpawnGroupTime();
+
+	void UpdatePositionsOfSpawnGroupsAfterIndex(int index);
+	void UpdateWorldEntityForLevelTime(Time levelTime);
+
 	Mission * editedMission;
 	Level editedLevel;
 

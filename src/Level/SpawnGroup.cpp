@@ -101,13 +101,17 @@ void SpawnGroup::SpawnAllShips(std::shared_ptr<PlayerShip> playerShip) {
 	for (int i = 0; i < ships.Size(); ++i)
 	{
 		ShipPtr ship = ships[i];
-		ship->Spawn(ship->position + Vector3f(PlayingLevelRef().spawnPositionRight, 0, 0), 0, playerShip);
-		spawnedAtPosition = ship->entity->worldPosition;
+		spawnedAtPosition = CalcGroupSpawnPosition();
+		ship->Spawn(ship->position + spawnedAtPosition, 0, playerShip);
 		activeLevel->ships.AddItem(ship);
 		++shipsSpawned;
 	}
 	finishedSpawning = true;
 	OnFinishedSpawning();
+}
+
+Vector3f SpawnGroup::CalcGroupSpawnPosition() {
+	return Vector3f(PlayingLevelRef().spawnPositionRight, 0, 0);
 }
 
 Random spawnGroupRand;
@@ -146,8 +150,8 @@ bool SpawnGroup::Spawn(const Time& levelTime, std::shared_ptr<PlayerShip> player
 		}
 		if (lastSpawn.Seconds() == 0 || (levelTime - lastSpawn).Milliseconds() > spawnIntervalMsBetweenEachShipInFormation)
 		{
-			ship->Spawn(ship->position + Vector3f(PlayingLevelRef().spawnPositionRight, 0, 0), 0, playerShip);
-			spawnedAtPosition = ship->entity->worldPosition;
+			spawnedAtPosition = CalcGroupSpawnPosition();
+			ship->Spawn(ship->position + spawnedAtPosition, 0, playerShip);
 
 			activeLevel->ships.AddItem(ship);
 			lastSpawn = levelTime;
@@ -167,16 +171,26 @@ void SpawnGroup::SetFinishedSpawning()
 	finishedSpawning = true;
 }
 
+List<std::shared_ptr<Entity>> SpawnGroup::GetEntities() {
+	List<std::shared_ptr<Entity>> entities;
+	for (int i = 0; i < ships.Size(); ++i) {
+		std::shared_ptr<Ship> ship = ships[i];
+		if (ship->entity)
+			entities.Add(ship->entity);
+	}
+	return entities;
+}
+
 /// Gathers all ships internally for spawning.
 void SpawnGroup::PrepareForSpawning(SpawnGroup * parent)
 {
 	List<Vector3f> positions;
 	Vector3f offsetPerSpawn;
 	ships.Clear();
-	if (!parent)
-		LogMain("Spawning spawn group at time: "+String(spawnTime.ToString("m:S.n")), INFO);
+	//if (!parent)
+		//LogMain("Spawning spawn group at time: "+String(spawnTime.ToString("m:S.n")), INFO);
 
-	std::cout<<"\nSpawning formation: "<<GetName(formation);
+	//std::cout<<"\nSpawning formation: "<<GetName(formation);
 
 	/// Initial adjustments, or sub-group spawning.
 	switch(formation)
@@ -218,7 +232,7 @@ void SpawnGroup::PrepareForSpawning(SpawnGroup * parent)
 	/// Fetch amount.
 	int offsetNum = max(1, number - 1);
 	// Always nullify Z.
-	size.z = 0;
+	//size.z = 0;
 	switch(formation)
 	{
 		case Formation::LINE_XY:
@@ -358,7 +372,7 @@ void SpawnGroup::PrepareForSpawning(SpawnGroup * parent)
 
 		assert(position.x == position.x);
 		assert(position.y == position.y);
-		LogMain(String("Spawning ship @ x")+ String(position.x)+" y"+position.y, INFO);
+	//	LogMain(String("Spawning ship @ x")+ String(position.x)+" y"+position.y, INFO);
 
 		/// Add current position offset to it.
 //		position += Vector3f(spawnPositionRight, activeLevel->height * 0.5f, 0); 
@@ -386,6 +400,12 @@ end:
 }
 
 void SpawnGroup::Despawn() {
+	for (int i = 0; i < ships.Size(); ++i) {
+		auto ship = ships[i];
+		ship->Despawn(PlayingLevelRef(), false);
+		//MapMan.DeleteEntity(ship->entity);
+		ship->entity = nullptr;
+	}
 }
 
 // Number of ships active and alive (not despawned or destroyed).
@@ -535,6 +555,37 @@ String SpawnGroup::GetLevelCreationString(Time t)
 		str += "\nTimeBetweenShipSpawnsMs "+String(this->spawnIntervalMsBetweenEachShipInFormation);
 
 	return str;
+}
+
+void SpawnGroup::SetSpawnTimeString(String spawnTimeStr, Time lastMessageOrSpawnGroupTime) {
+	spawnTimeString = spawnTimeStr;
+	spawnTime = SpawnTimeFromString(spawnTimeStr, lastMessageOrSpawnGroupTime);
+}
+
+Time SpawnGroup::SpawnTimeFromString(String spawnTimeStr, Time lastMessageOrSpawnGroupTime) {
+	Time t(TimeType::MILLISECONDS_NO_CALENDER);
+	if (spawnTimeStr.StartsWith("+"))
+	{
+		Time lastTime = lastMessageOrSpawnGroupTime;
+		t = lastTime;
+		Time timeToAdd = Time(TimeType::MILLISECONDS_NO_CALENDER);
+		String timeStrWithoutPlus = spawnTimeStr;
+		timeStrWithoutPlus.Replace('+', '0');
+		timeToAdd.ParseFrom(timeStrWithoutPlus);
+		t += timeToAdd; //.AddSeconds(timeStr.Tokenize(":")[1].ParseInt());
+		return t;
+	}
+	else {
+		try {
+			bool ok = t.ParseFrom(spawnTimeStr);
+			if (ok)
+				return t;
+		}
+		catch (...) {
+		}
+	}
+	LogMain("Unable to parse spawn time", ERROR);
+	return Time();
 }
 
 void SpawnGroup::SetSpawnTime(Time newSpawnTime) { 

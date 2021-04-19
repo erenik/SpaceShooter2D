@@ -10,12 +10,20 @@
 #include "PlayingLevel.h"
 #include "Test/TutorialTests.h"
 
+Time GetSpawnTime(Time lastMessageOrSpawnGroupTime, int secondsToAdd) {
+	Time newTime = lastMessageOrSpawnGroupTime;
+	newTime.AddSeconds(secondsToAdd);
+	return newTime;
+}
+
+
 LevelMessage::LevelMessage()
 	: dontSkip(false)
+	, startTimeOffsetSeconds(0)
 {
 	displayed = hidden = false;
 	goToTime = startTime = stopTime = Time(TimeType::MILLISECONDS_NO_CALENDER, 0);
-	type = TEXT_MESSAGE;
+	type = LMType::TEXT_MESSAGE;
 	eventType = STRING_EVENT;
 	textID = "";
 	goToRewindPoint = false;
@@ -23,9 +31,9 @@ LevelMessage::LevelMessage()
 
 void LevelMessage::PrintAll()
 {
-	std::cout<<"\nType: "<<(type == TEXT_MESSAGE? "Text message" : "Event");
+	std::cout<<"\nType: "<<(type == LMType::TEXT_MESSAGE? "Text message" : "Event");
 	std::cout<<"\nTime: "<<startTime.Milliseconds();
-	if (type == TEXT_MESSAGE)
+	if (type == LMType::TEXT_MESSAGE)
 	{
 		std::cout<<"\nTextID: "<<textID;
 	}
@@ -79,7 +87,7 @@ bool LevelMessage::Trigger(PlayingLevel& playingLevel, Level * level)
 
 	TutorialTests::OnLevelMessageTriggered(this);
 
-	if (type == LevelMessage::TEXT_MESSAGE)
+	if (type == LMType::TEXT_MESSAGE)
 	{
 		// o.o uiiii
 		if (textID == "-1")
@@ -93,7 +101,7 @@ bool LevelMessage::Trigger(PlayingLevel& playingLevel, Level * level)
 		displayed = true;
 		++activeLevelDisplayMessages;
 	}
-	else if (type == LevelMessage::EVENT)
+	else if (type == LMType::EVENT)
 	{
 		displayed = true;
 		if (strings.Size())
@@ -115,7 +123,7 @@ bool LevelMessage::Trigger(PlayingLevel& playingLevel, Level * level)
 
 void LevelMessage::Hide(PlayingLevel& playingLevel)
 {
-	if (type == LevelMessage::TEXT_MESSAGE)
+	if (type == LMType::TEXT_MESSAGE)
 	{
 		--activeLevelDisplayMessages;
 		if (activeLevelDisplayMessages <= 0)
@@ -125,4 +133,46 @@ void LevelMessage::Hide(PlayingLevel& playingLevel)
 		displayed = false;
 	}
 	hidden = true;
+}
+
+String LevelMessage::GetEditorText(int maxChars) {
+	String toSet = textID;
+	if (toSet.Length() == 0 && strings.Size()) {
+		toSet = strings[0];
+	}
+	else if (goToRewindPoint) {
+		toSet = "Go to rewind point";
+	}
+
+	// Shorten as needed.
+	if (toSet.Length() > maxChars)
+		toSet = toSet.Part(0, maxChars - 3) + "...";
+
+	if (condition.Length() > 0)
+		toSet = "(IF ...) ";
+
+	toSet.ToUpperCase();
+	return toSet;
+}
+
+LevelMessageProperty::LevelMessageProperty(std::shared_ptr<Entity> owner, LevelMessage* levelMessage)
+	: EntityProperty("LevelMessageProp", -1, owner)
+	, levelMessage(levelMessage)
+{
+	// Set up entity scale, text to be rendered, etc. based on the LevelMessage.
+	QueuePhysics(new PMSetEntity(owner, PT_SET_SCALE, Vector3f(2.0f, 20.f, 2.f)));
+
+	// Events = Yellow
+	// Text = Gray
+	if (levelMessage->type == LMType::EVENT)
+		QueueGraphics(new GMSetEntityVec4f(owner, GT_COLOR, Vector4f(1, 1, 0, 1)));
+	else 
+		QueueGraphics(new GMSetEntityVec4f(owner, GT_COLOR, Vector4f(0.5f, 0.5f, 0.5f, 1)));
+
+	String toSet = levelMessage->GetEditorText(12);
+
+	QueueGraphics(new GMSetEntitys(owner, GT_TEXT, toSet));
+	QueueGraphics(new GMSetEntityf(owner, GT_TEXT_SIZE_RATIO, 0.3f));
+	QueueGraphics(new GMSetEntityVec4f(owner, GT_TEXT_POSITION, Vector3f(0, rand() % 20 - 10, 0)));
+
 }

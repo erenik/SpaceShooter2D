@@ -58,6 +58,7 @@ void SetApplicationDefaults()
 	Application::name = "ErenikSpaceShooter";
 	SpaceShooter2D::SetupUIStyling();
 	PhysicsProperty::defaultUseQuaternions = false;
+	*TextFont::defaultFontShader = "FontStylizedTripleColors";
 }
 
 // Global variables.

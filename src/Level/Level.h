@@ -31,6 +31,20 @@ class Message;
 extern Camera * levelCamera;
 extern Level * activeLevel;
 
+namespace LevelLoader {
+	void SetGroupDefaults(SpawnGroup* sg);
+};
+
+// Individual parts of a level, usually either a SpawnGroup or a Message/Event
+struct LevelElement {
+	LevelElement();
+	LevelElement(SpawnGroup* sg);
+	LevelElement(LevelMessage* sg);
+	~LevelElement();
+	SpawnGroup * sg = nullptr;
+	LevelMessage * lm = nullptr;
+};
+
 class Level 
 {
 public:
@@ -39,10 +53,15 @@ public:
 
 	int SpawnGroupsActive();
 
+	void AddSpawnGroup(SpawnGroup* sg);
+	void AddMessage(LevelMessage* lm);
+	int GetElementIndexOf(SpawnGroup* sg);
+
 	/// Deletes all ships, spawngroups, resets variables to defaults.
 	void Clear(PlayingLevel& playingLevel);
 	bool FinishedSpawning();
 	bool Load(String fromSource);
+	bool Save(String toFile);
 	/// Starts BGM, starts clocks/timers if any, etc.
 	void OnEnter();
 	// Used for player and camera. 
@@ -106,10 +125,14 @@ public:
 	Vector2f playingFieldSize;
 	Vector2f playingFieldHalfSize; // Half of the above, only used for convenience.
 
+
+
+	List<LevelElement> levelElements;
+
 	/// New spawn style.
-	List<SpawnGroup*> spawnGroups;
+	List<SpawnGroup*> SpawnGroups();
 	/// o.o
-	List<LevelMessage*> messages;
+	List<LevelMessage*> Messages();
 
 	List<Explosion*> explosions;
 
