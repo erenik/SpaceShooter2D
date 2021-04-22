@@ -12,7 +12,6 @@
 
 class PlayingLevel;
 class Ship;
-#define ShipPtr std::shared_ptr<Ship>
 class Weapon;
 class Entity;
 
@@ -33,8 +32,8 @@ public:
 	LightningArc();
 	int damage;
 	Vector3f position;
-	EntitySharedPtr graphicalEntity;
-	EntitySharedPtr targetEntity;
+	Entity* graphicalEntity;
+	Entity* targetEntity;
 	bool struckEntity;
 	bool arcFinished; // When time expires or range has been reached.
 	float maxRange;
@@ -79,28 +78,28 @@ public:
 	static const Weapon * const Get(Type type, int level);
 	static bool LoadTypes(String fromFile);
 	/// Moves the aim of this weapon turrent.
-	void Aim(PlayingLevel& playingLevel, ShipPtr ship);
+	void Aim(PlayingLevel& playingLevel, Ship* ship);
 	/// Shoots using previously calculated aim.
-	void Shoot(PlayingLevel& playingLevel, ShipPtr ship);
+	void Shoot(PlayingLevel& playingLevel, Ship* ship);
 	/// Called to update the various states of the weapon, such as reload time, making lightning arcs jump, etc.
-	void Process(PlayingLevel& playingLevel, ShipPtr ship, int timeInMs);
-	void ProcessLightning(PlayingLevel& playingLevel, ShipPtr ship, bool initial = false);
+	void Process(PlayingLevel& playingLevel, Ship* ship, int timeInMs);
+	void ProcessLightning(PlayingLevel& playingLevel, Ship* ship, bool initial = false);
 	void QueueReload();
 
 	// Path to icon
 	String Icon();
 
 	/// Based on ship.
-	Vector3f WorldPosition(EntitySharedPtr basedOnShipEntity);
+	Vector3f WorldPosition(Entity* basedOnShipEntity);
 	Vector3f location;
 
 	List<LightningArc*> arcs;
-	List<ShipPtr> shipsStruckThisArc; /// For skipping
+	List<Ship*> shipsStruckThisArc; /// For skipping
 
 	/// Delay in milliseconds between bounces for lightning
 	int arcDelay;
 	int maxBounces; /// Used to make lightning end prematurely.
-	ShipPtr nextTarget; // For lightning
+	Ship* nextTarget; // For lightning
 	int currCooldownMs = 0; /// Used instead of flyTime.
 	int previousUIUpdateCooldownMs = 0;
 	float stability;

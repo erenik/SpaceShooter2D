@@ -9,4 +9,4 @@
 
 class CollisionCallback;
 
-void HandleCollision(ShipPtr playerShip, List<EntitySharedPtr> shipEntities, CollisionCallback* message);
+void HandleCollision(Ship* playerShip, List<Entity*> shipEntities, CollisionCallback* message);

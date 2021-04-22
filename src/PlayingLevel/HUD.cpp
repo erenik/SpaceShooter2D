@@ -109,7 +109,7 @@ void HUD::UpdateHUDGearedWeapons()
 	// Remove old ones first.
 	QueueGraphics(new GMClearUI("clWeapons"));
 
-	ShipPtr ship = GetPlayerShip();
+	Ship* ship = GetPlayerShip();
 	List<UIElement*> weaponStatuses;
 	for (int i = 0; i < ship->weaponSet.Size(); ++i) {
 		Weapon * weapon = ship->weaponSet[i];

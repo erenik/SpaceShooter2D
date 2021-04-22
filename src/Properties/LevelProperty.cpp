@@ -19,10 +19,10 @@
 #include "Viewport.h"
 
 LevelProperty* LevelProperty::singleton = nullptr;
-EntitySharedPtr LevelProperty::levelEntity = nullptr;
+Entity* LevelProperty::levelEntity = nullptr;
 
 /// Default annulizing constructor.
-LevelProperty::LevelProperty(EntitySharedPtr owner, Vector2f playingFieldSize, float playingFieldPadding)
+LevelProperty::LevelProperty(Entity* owner, Vector2f playingFieldSize, float playingFieldPadding)
 	: EntityProperty("LevelProperty", 5, owner), playingFieldSize(playingFieldSize), playingFieldPadding(playingFieldPadding)
 {
 	singleton = this;
@@ -30,7 +30,7 @@ LevelProperty::LevelProperty(EntitySharedPtr owner, Vector2f playingFieldSize, f
 }
 
 
-EntitySharedPtr LevelProperty::Create(Vector2f playingFieldSize, float playingFieldPadding, bool createBlackness)
+Entity* LevelProperty::Create(Vector2f playingFieldSize, float playingFieldPadding, bool createBlackness)
 {
 	levelEntity = EntityMan.CreateEntity("LevelEntity", NULL, NULL);
 	LevelProperty* lp = new LevelProperty(levelEntity, playingFieldSize, playingFieldPadding);
@@ -72,7 +72,7 @@ void LevelProperty::CreateBlackness() {
 	/// Add blackness to track the level entity.
 	for (int i = 0; i < 4; ++i)
 	{
-		EntitySharedPtr blackness = EntityMan.CreateEntity("Blackness" + String(i), ModelMan.GetModel("sprite.obj"), TexMan.GetTexture("0x0A"));
+		Entity* blackness = EntityMan.CreateEntity("Blackness" + String(i), ModelMan.GetModel("sprite.obj"), TexMan.GetTexture("0x0A"));
 		float scale = 150.f;
 		float halfScale = scale * 0.5f;
 		blackness->scale = scale * Vector3f(1, 1, 1);
@@ -95,7 +95,7 @@ void LevelProperty::CreateBlackness() {
 
 void LevelProperty::CreateBackground() {
 	Texture * texture = TexMan.GetTexture("bgs/purple_space");
-	EntitySharedPtr backgroundEntity = EntityMan.CreateEntity("Background", ModelMan.GetModel("sprite.obj"), texture);
+	Entity* backgroundEntity = EntityMan.CreateEntity("Background", ModelMan.GetModel("sprite.obj"), texture);
 	// Ensure it covers the playing field.
 	Vector2f scale = Vector2f(texture->Width() / float(texture->Height()), 1);
 	Vector2f requiredScaleFactor = playingFieldSize.ElementDivision(scale);

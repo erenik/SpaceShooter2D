@@ -96,11 +96,11 @@ int DiffCost(String toUpgrade);
 /// In WeaponScriptEditing.cpp
 void ProcessMessageWSS(Message * message);
 /// Before killing 'em.
-void PrintEntityData(EntitySharedPtr entity);
+void PrintEntityData(Entity* entity);
 
 String DifficultyString(int diff);
 
-extern std::shared_ptr<Color> ssActiveTextColor;
+extern Color ssActiveTextColor;
 
 enum SSGameMode {
 	START_UP,
@@ -166,7 +166,7 @@ public:
 	void OnScoreUpdated();
 	void LoadDefaultName();
 	/// o.o
-	EntitySharedPtr OnShipDestroyed(ShipPtr ship);
+	Entity* OnShipDestroyed(Ship* ship);
 
 	// Hello!
 	void SetHighscore(String forMissionName, int score);

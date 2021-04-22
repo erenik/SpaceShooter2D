@@ -60,7 +60,7 @@ SpawnGroup::~SpawnGroup()
 //	ships.ClearAndDelete();
 	for (int i = 0; i < ships.Size(); ++i)
 	{
-		ShipPtr s = ships[i];
+		Ship* s = ships[i];
 		s->spawnGroup = 0;
 	}
 }
@@ -84,23 +84,23 @@ void SpawnGroup::ResetForSpawning() {
 
 void SpawnGroup::RemoveThis(Ship* sp) {
 	for (int i = 0; i < ships.Size(); ++i) {
-		if (ships[i].get() == sp)
+		if (ships[i] == sp)
 			ships.RemoveIndex(i);
 	}
 }
 
 
-ShipPtr SpawnGroup::GetNextShipToSpawn() {
+Ship* SpawnGroup::GetNextShipToSpawn() {
 	for (int i = 0; i < ships.Size(); ++i)
 		if (!ships[i]->spawned)
 			return ships[i];
 	return nullptr;
 }
 
-void SpawnGroup::SpawnAllShips(std::shared_ptr<PlayerShip> playerShip) {
+void SpawnGroup::SpawnAllShips(PlayerShip* playerShip) {
 	for (int i = 0; i < ships.Size(); ++i)
 	{
-		ShipPtr ship = ships[i];
+		Ship* ship = ships[i];
 		spawnedAtPosition = CalcGroupSpawnPosition();
 		ship->Spawn(ship->position + spawnedAtPosition, 0, playerShip);
 		activeLevel->ships.AddItem(ship);
@@ -120,7 +120,7 @@ Random spawnGroupRand;
 	Returns true if it has finished spawning. 
 	Call again until it returns true each iteration (required for some formations).
 */
-bool SpawnGroup::Spawn(const Time& levelTime, std::shared_ptr<PlayerShip> playerShip)
+bool SpawnGroup::Spawn(const Time& levelTime, PlayerShip* playerShip)
 {
 	/// Prepare spawning.
 	if (!preparedForSpawning)
@@ -141,7 +141,7 @@ bool SpawnGroup::Spawn(const Time& levelTime, std::shared_ptr<PlayerShip> player
 	/// Spawn one at a time?
 	else
 	{
-		ShipPtr ship = GetNextShipToSpawn();
+		Ship* ship = GetNextShipToSpawn();
 		// Finished spawning
 		if (!ship) {
 			finishedSpawning = true;
@@ -171,10 +171,10 @@ void SpawnGroup::SetFinishedSpawning()
 	finishedSpawning = true;
 }
 
-List<std::shared_ptr<Entity>> SpawnGroup::GetEntities() {
-	List<std::shared_ptr<Entity>> entities;
+List<Entity*> SpawnGroup::GetEntities() {
+	List<Entity*> entities;
 	for (int i = 0; i < ships.Size(); ++i) {
-		std::shared_ptr<Ship> ship = ships[i];
+		Ship* ship = ships[i];
 		if (ship->entity)
 			entities.Add(ship->entity);
 	}
@@ -412,7 +412,7 @@ void SpawnGroup::Despawn() {
 int SpawnGroup::ShipsActive() {
 	int numActive = 0;
 	for (int i = 0; i < ships.Size(); ++i){
-		ShipPtr ship = ships[i];
+		Ship* ship = ships[i];
 		if (!ship->spawned)
 			continue;
 		if (ship->destroyed)
@@ -425,13 +425,13 @@ int SpawnGroup::ShipsActive() {
 
 void SpawnGroup::AddShipAtPosition(ConstVec3fr position)
 {
-	ShipPtr newShip = Ship::New(shipType);
+	Ship* newShip = Ship::New(shipType);
 	if (!newShip)
 	{
 		LogMain("SpawnGroup::SpawnShip: Unable to create ship of type: "+shipType, CAUSE_ASSERTION_ERROR);
 		return;
 	}
-	ShipPtr ship = newShip;
+	Ship* ship = newShip;
 	ship->RandomizeWeaponCooldowns();
 	/// Apply spawn group properties.
 	ship->shoot &= shoot;
@@ -451,7 +451,7 @@ void SpawnGroup::AddShipAtPosition(ConstVec3fr position)
 
 
 // ?!
-/*EntitySharedPtr SpawnGroup::SpawnShip(ConstVec3fr atPosition)
+/*Entity* SpawnGroup::SpawnShip(ConstVec3fr atPosition)
 {
 }*/
 
@@ -474,7 +474,7 @@ bool SpawnGroup::DefeatedOrDespawned()
 		return false;
 	int stillAlive = 0;
 	for (int i = 0; i < ships.Size(); ++i) {
-		ShipPtr ship = ships[i];
+		Ship* ship = ships[i];
 		if (!ship->destroyed)
 			++stillAlive;
 	}
@@ -487,13 +487,13 @@ void SpawnGroup::SetDefeated()
 	shipsSpawned = ships.Size();
 	for (int i = 0; i < ships.Size(); ++i)
 	{
-		ShipPtr s = ships[i];
+		Ship* s = ships[i];
 		s->spawned = true;
 		s->destroyed = true;
 	}
 }
 
-void SpawnGroup::OnShipDestroyed(PlayingLevel& playingLevel, ShipPtr ship)
+void SpawnGroup::OnShipDestroyed(PlayingLevel& playingLevel, Ship* ship)
 {
 	if (ShipsDefeated() == shipsSpawned)
 	{
@@ -501,7 +501,7 @@ void SpawnGroup::OnShipDestroyed(PlayingLevel& playingLevel, ShipPtr ship)
 	}
 }
 
-void SpawnGroup::OnShipDespawned(PlayingLevel& playingLevel, ShipPtr ship)
+void SpawnGroup::OnShipDespawned(PlayingLevel& playingLevel, Ship* ship)
 {
 	if (ShipsDefeatedOrDespawned())
 	{
@@ -511,7 +511,7 @@ void SpawnGroup::OnShipDespawned(PlayingLevel& playingLevel, ShipPtr ship)
 
 bool SpawnGroup::ShipsDefeatedOrDespawned() {
 	for (int i = 0; i < ships.Size(); ++i) {
-		ShipPtr ship = ships[i];
+		Ship* ship = ships[i];
 		if (ship->destroyed || ship->despawned)
 			continue;
 		// One still alive?
@@ -523,7 +523,7 @@ bool SpawnGroup::ShipsDefeatedOrDespawned() {
 int SpawnGroup::ShipsDespawned() {
 	int num = 0;
 	for (int i = 0; i < ships.Size(); ++i) {
-		ShipPtr ship = ships[i];
+		Ship* ship = ships[i];
 		if (ship->despawned)
 			++num;
 	}
@@ -532,7 +532,7 @@ int SpawnGroup::ShipsDespawned() {
 int SpawnGroup::ShipsDefeated() {
 	int num = 0;
 	for (int i = 0; i < ships.Size(); ++i) {
-		ShipPtr ship = ships[i];
+		Ship* ship = ships[i];
 		if (ship->destroyed)
 			++num;
 	}

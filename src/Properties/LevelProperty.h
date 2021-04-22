@@ -13,15 +13,15 @@
 
 class LevelProperty : public EntityProperty {
 	static LevelProperty* singleton;
-	static EntitySharedPtr levelEntity;
+	static Entity* levelEntity;
 	/// Default annulizing constructor.
-	LevelProperty(EntitySharedPtr owner, Vector2f playingFieldSize, float playingFieldPadding);
+	LevelProperty(Entity* owner, Vector2f playingFieldSize, float playingFieldPadding);
 public:
 	static LevelProperty* GetSingleton() { return singleton; };
 
 	// Creates the entity and property, as well as darkness entities to show where the player cannot proceed beyond.
 	// createBlackness = false in editor, true in game, creates the border of gameplay.
-	static EntitySharedPtr Create(Vector2f playingFieldSize, float playingFieldPadding, bool createBlackness);
+	static Entity* Create(Vector2f playingFieldSize, float playingFieldPadding, bool createBlackness);
 	void MoveTo(Vector3f position);
 	void SetVelocity(Vector3f velocity);
 	void CreateBlackness();
@@ -39,7 +39,7 @@ private:
 	float playingFieldPadding;
 	Vector2f playingFieldSize, playingFieldHalfSize;
 	/// 4 entities constitude the blackness.
-	List< std::shared_ptr<Entity> > blacknessEntities;
+	List< Entity* > blacknessEntities;
 
 
 };

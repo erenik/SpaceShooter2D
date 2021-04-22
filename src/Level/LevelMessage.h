@@ -36,6 +36,8 @@ public:
 	// Depends on type, and stuff.
 	String GetEditorText(int maxChars);
 
+	void SpawnEditorEntity();
+	void DespawnEditorEntity();
 
 	String condition;
 	List<String> strings;
@@ -59,13 +61,16 @@ public:
 	bool goToRewindPoint;
 	// If true, will trigger even when jumping forward in time while testing.
 	bool dontSkip;
+
+private:
+	Entity* editorEntity;
 };
 
 #include "Entity/EntityProperty.h"
 
 class LevelMessageProperty : public EntityProperty {
 public:
-	LevelMessageProperty(std::shared_ptr<Entity> owner, LevelMessage * levelMessage);
+	LevelMessageProperty(Entity* owner, LevelMessage * levelMessage);
 	LevelMessage * levelMessage;
 };
 

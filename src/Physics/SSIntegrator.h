@@ -14,18 +14,18 @@ public:
 	/** All entities sent here should be fully dynamic! 
 		Kinematic ones may or may not work (consider adding own integration function).
 	*/
-	virtual void IntegrateDynamicEntities(List< std::shared_ptr<Entity> > & dynamicEntities, float timeInSeconds);
+	virtual void IntegrateDynamicEntities(List< Entity* > & dynamicEntities, float timeInSeconds);
 	/** All entities sent here should be fully kinematic! 
 		If not subclassed, the standard IntegrateEntities is called.
 	*/
-	virtual void IntegrateKinematicEntities(List< std::shared_ptr<Entity> > & kinematicEntities, float timeInSeconds);
+	virtual void IntegrateKinematicEntities(List< Entity* > & kinematicEntities, float timeInSeconds);
 	// If non-0, will enforce a constant Z on all entities.
 	float constantZ;
 
 	Vector2f frameMin, frameMax;
 
 private:
-	virtual void IntegrateVelocity(EntitySharedPtr forEntity, float timeInSeconds);
+	virtual void IntegrateVelocity(Entity* forEntity, float timeInSeconds);
 };
 
 #endif

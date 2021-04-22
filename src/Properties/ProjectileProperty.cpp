@@ -8,13 +8,15 @@
 #include "Graphics/Particles/ThrustEmitter.h"
 #include "Graphics/Particles/SmoothedPositionParticleEmitter.h"
 
-ProjectileProperty::ProjectileProperty(const Weapon & weaponThatSpawnedIt, EntitySharedPtr owner, bool enemy)
+ProjectileProperty::ProjectileProperty(const Weapon & weaponThatSpawnedIt, Entity* owner, bool enemy)
 : EntityProperty("ProjProp", ID(), owner), weapon(weaponThatSpawnedIt), enemy(enemy)
 {
 	sleeping = false;
 	timeAliveMs = 0;
 	nextWobbleMs = 0;
 	thrustEmitter = nullptr;
+	traceEmitter = nullptr;
+	targetLock = nullptr;
 }
 
 ProjectileProperty::~ProjectileProperty() {
@@ -88,7 +90,7 @@ void ProjectileProperty::Destroy()
 		tmpEmitter->SetScale(0.15f);
 		tmpEmitter->SetColor(color);
 		tmpEmitter->SetRatioRandomVelocity(1.f);
-		Graphics.QueueMessage(new GMAttachParticleEmitter(tmpEmitter->GetSharedPtr(), pl.sparks->GetSharedPtr()));
+		Graphics.QueueMessage(new GMAttachParticleEmitter(tmpEmitter, pl.sparks));
 	}
 	else /// Sparks for all physically based projectiles with friction against targets.
 	{	
@@ -101,7 +103,7 @@ void ProjectileProperty::Destroy()
 		tmpEmitter->SetScale(0.1f);
 		tmpEmitter->SetColor(color);
 		tmpEmitter->SetRatioRandomVelocity(1.f);
-		Graphics.QueueMessage(new GMAttachParticleEmitter(std::shared_ptr<ParticleEmitter>(tmpEmitter), std::weak_ptr<ParticleSystem>(pl.sparks)));
+		Graphics.QueueMessage(new GMAttachParticleEmitter(tmpEmitter, pl.sparks));
 	}
 
 //	float volume = distanceModifierToVolume * explosionSFXVolume;
@@ -195,7 +197,7 @@ void ProjectileProperty::Process(int timeInMs)
 		// Adjust velocity towards it by the given factor, per second.
 		// 1.0 will change velocity entirely to look at the enemy.
 		// Values above 1.0 will try and compensate for target velocity and not just current position?
-		EntitySharedPtr target = targetLock;
+		Entity* target = targetLock;
 		if (target == nullptr)
 			target = pl.GetLevel().ClosestTarget(PlayingLevelRef(), !enemy, owner->worldPosition);
 		Vector3f vecToTarget;
@@ -289,8 +291,8 @@ void ProjectileProperty::CreateProjectileTraceEmitter(Vector3f initialPosition) 
 	tmpEmitter->SetParticleLifeTime(0.2f);
 	tmpEmitter->SetScale(0.15f);
 	tmpEmitter->SetColor(defaultAlliedProjectileColor * 0.1f);
-	traceEmitter = tmpEmitter->GetSharedPtr();
-	Graphics.QueueMessage(new GMAttachParticleEmitter(traceEmitter, PlayingLevelRef().sparks->GetSharedPtr()));
+	traceEmitter = tmpEmitter;
+	Graphics.QueueMessage(new GMAttachParticleEmitter(traceEmitter, PlayingLevelRef().sparks));
 }
 
 
@@ -308,8 +310,8 @@ void ProjectileProperty::CreateThrustEmitter(Vector3f initialPosition) {
 	tmpEmitter->SetColor(weapon.type == Weapon::Type::BigRockets ? Vector4f(0.2f, 0.7f, 0.5f, 1.0f) : Vector4f(0.1f, 0.5f, 1.0f, 1.0f));
 	tmpEmitter->SetRatioRandomVelocity(0.5f);
 
-	thrustEmitter = tmpEmitter->GetSharedPtr();
-	Graphics.QueueMessage(new GMAttachParticleEmitter(thrustEmitter, PlayingLevelRef().sparks->GetSharedPtr()));
+	thrustEmitter = tmpEmitter;
+	Graphics.QueueMessage(new GMAttachParticleEmitter(thrustEmitter, PlayingLevelRef().sparks));
 
 }
 
@@ -326,7 +328,7 @@ void ProjectileProperty::ProcessMessage(Message * message)
 	}
 }
 
-bool ProjectileProperty::ShouldDamage(ShipPtr ship)
+bool ProjectileProperty::ShouldDamage(Ship* ship)
 {
 	if (penetratedTargets.Exists(ship))
 		return false;

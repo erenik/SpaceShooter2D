@@ -201,6 +201,8 @@ bool Weapon::LoadTypes(String fromFile)
 	columns = TokenizeCSV(firstLine, delimiter);
 	LogMain("Loading weapons from file: "+fromFile, INFO);
 
+	List<String> values;
+
 	// For each line after the first one, parse data.
 	for (int j = 1; j < lines.Size(); ++j)
 	{
@@ -360,13 +362,13 @@ bool Weapon::LoadTypes(String fromFile)
 Random shootRand;
 
 /// Moves the aim of this weapon turrent.
-void Weapon::Aim(PlayingLevel& playingLevel, ShipPtr ship)
+void Weapon::Aim(PlayingLevel& playingLevel, Ship* ship)
 {
 	// If no aim, just align it with the ship?
 	if (!aim)
 		return;
 
-	EntitySharedPtr target = NULL;
+	Entity* target = NULL;
 	// Aim.
 	if (ship->allied)
 	{
@@ -379,7 +381,7 @@ void Weapon::Aim(PlayingLevel& playingLevel, ShipPtr ship)
 	}
 	if (target == NULL)
 		return;
-	EntitySharedPtr shipEntity = ship->entity;
+	Entity* shipEntity = ship->entity;
 	// Estimate position upon impact?
 	Vector3f targetPos = target->worldPosition;
 	Vector3f toTarget = targetPos - weaponWorldPosition;
@@ -398,7 +400,7 @@ void Weapon::Aim(PlayingLevel& playingLevel, ShipPtr ship)
 }
 
 /// Based on ship.
-Vector3f Weapon::WorldPosition(EntitySharedPtr basedOnShipEntity)
+Vector3f Weapon::WorldPosition(Entity* basedOnShipEntity)
 {
 	Vector3f worldPos = basedOnShipEntity->transformationMatrix * location;
 	worldPos.z = 0;
@@ -407,7 +409,7 @@ Vector3f Weapon::WorldPosition(EntitySharedPtr basedOnShipEntity)
 }
 
 /// Shoots using previously calculated aim.
-void Weapon::Shoot(PlayingLevel& playingLevel, ShipPtr ship)
+void Weapon::Shoot(PlayingLevel& playingLevel, Ship* ship)
 {
 	if (!enabled)
 		return;
@@ -444,7 +446,7 @@ void Weapon::Shoot(PlayingLevel& playingLevel, ShipPtr ship)
 
 	for (int i = 0; i < numberOfProjectiles; ++i)
 	{
-		EntitySharedPtr shipEntity = ship->entity;
+		Entity* shipEntity = ship->entity;
 		Color color;
 		if (ship->allied)
 			color = defaultAlliedProjectileColor;
@@ -462,7 +464,7 @@ void Weapon::Shoot(PlayingLevel& playingLevel, ShipPtr ship)
 			flakMultiplier = shootRand.Randf(1.f) + 1.f;
 			flakDividendMultiplier = 1 / flakMultiplier;
 		}
-		EntitySharedPtr projectileEntity = EntityMan.CreateEntity(name + " Projectile", model, tex);
+		Entity* projectileEntity = EntityMan.CreateEntity(name + " Projectile", model, tex);
 		ProjectileProperty * projProp = new ProjectileProperty(*this, projectileEntity, ship->enemy);
 		projProp->weapon.damage *= flakMultiplier;
 		projectileEntity->properties.Add(projProp);
@@ -587,7 +589,7 @@ String Weapon::Icon() {
 }
 
 /// Called to update the various states of the weapon, such as reload time, making lightning arcs jump, etc.
-void Weapon::Process(PlayingLevel& playingLevel, ShipPtr ship, int timeInMs)
+void Weapon::Process(PlayingLevel& playingLevel, Ship* ship, int timeInMs)
 {
 	if (!enabled)
 		return;
@@ -635,7 +637,7 @@ LightningArc::LightningArc()
 	maxBounces = -1;
 }
 
-void Weapon::ProcessLightning(PlayingLevel& playingLevel, ShipPtr owner, bool initial /* = true*/)
+void Weapon::ProcessLightning(PlayingLevel& playingLevel, Ship* owner, bool initial /* = true*/)
 {
 	if (initial)
 	{
@@ -665,7 +667,7 @@ void Weapon::ProcessLightning(PlayingLevel& playingLevel, ShipPtr owner, bool in
 		if (nextTarget == 0)
 		{
 			List<float> distances;
-			List<ShipPtr> possibleTargets = PlayingLevelRef().GetLevel().GetShipsAtPoint(arc->position, maxRange, distances);
+			List<Ship*> possibleTargets = PlayingLevelRef().GetLevel().GetShipsAtPoint(arc->position, maxRange, distances);
 			if (!initial)
 				std::cout<<"\nPossible targets: "<<possibleTargets.Size();
 			possibleTargets.RemoveUnsorted(shipsStruckThisArc);
@@ -679,13 +681,13 @@ void Weapon::ProcessLightning(PlayingLevel& playingLevel, ShipPtr owner, bool in
 				continue;
 			}
 			// Grab first one which hasn't already been struck?
-			ShipPtr target = possibleTargets[0];
+			Ship* target = possibleTargets[0];
 			// Recalculate distance since list was unsorted earlier...
 			float distance = (target->entity->worldPosition - arc->position).Length();
 			/// Grab closest one.
 			for (int j = 1; j < possibleTargets.Size(); ++j)
 			{
-				ShipPtr t2 = possibleTargets[j];
+				Ship* t2 = possibleTargets[j];
 				float d2 = (t2->entity->worldPosition - arc->position).Length();
 				if (d2 < distance)
 				{
@@ -705,7 +707,7 @@ void Weapon::ProcessLightning(PlayingLevel& playingLevel, ShipPtr owner, bool in
 		if ((playingLevel.flyTime - arc->arcTime).Milliseconds() < arcDelay)
 			continue;
 
-		ShipPtr target = nextTarget;
+		Ship* target = nextTarget;
 		float distance = (target->entity->worldPosition - arc->position).Length();
 		LightningArc * newArc = new LightningArc();
 		newArc->position = target->entity->worldPosition;
@@ -724,7 +726,7 @@ void Weapon::ProcessLightning(PlayingLevel& playingLevel, ShipPtr owner, bool in
 		std::cout<<"\nThunderstruck! "<<target->entity->worldPosition;
 		target->Damage(playingLevel, (float)arc->damage, false, DamageSource::Projectile);
 		/// Span up a nice graphical entity to represent the bolt
-		EntitySharedPtr entity = EntityMan.CreateEntity("BoldPart", ModelMan.GetModel("cube.obj"), TexMan.GetTexture("0x00FFFF"));
+		Entity* entity = EntityMan.CreateEntity("BoldPart", ModelMan.GetModel("cube.obj"), TexMan.GetTexture("0x00FFFF"));
 		entity->localPosition = (arc->position + newArc->position) * 0.5f;
 		/// Rotate it accordingly.
 		Vector3f direction = newArc->position - arc->position;

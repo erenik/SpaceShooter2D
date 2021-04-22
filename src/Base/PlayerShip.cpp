@@ -11,7 +11,7 @@ PlayerShip::PlayerShip()
 	: Ship()
 {
 
-	ShipPtr ref = Ship::GetByType("Default");
+	Ship* ref = Ship::GetByType("Default");
 	assert(ref != nullptr);
 	CopyStatsFrom(*ref);
 	CopyWeaponsFrom(*ref);
@@ -39,7 +39,7 @@ void PlayerShip::SetAIVelocityVector(PlayingLevel& playingLevel, Vector3f vector
 	playingLevel.SetPlayerMovement(vector.NormalizedCopy() * magnitude);
 }
 
-void PlayerShip::ProcessAI(std::shared_ptr<PlayerShip> playerShip, int timeInMs) {
+void PlayerShip::ProcessAI(PlayerShip* playerShip, int timeInMs) {
 	if (!autoAim)
 		return;
 

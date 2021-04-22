@@ -1,4 +1,3 @@
-defaultTextColor	1 1 1 1
 
 // Make root active
 root
@@ -27,6 +26,7 @@ label "Audio options"
 topBorder 0x0000
 rightBorder 0x0000
 textAlignment Center
+textColor	1 1 1 1
 
 element padding 
 sizeRatioY 0.1

@@ -47,14 +47,14 @@ public:
 		Returns true if it has finished spawning. 
 		Call again until it returns true each iteration (required for some formations).
 	*/	
-	bool Spawn(const Time& levelTime, std::shared_ptr<PlayerShip> playerShip);
+	bool Spawn(const Time& levelTime, PlayerShip* playerShip);
 	/// To avoid spawning later.
 	void SetFinishedSpawning();
 	void OnFinishedSpawning();
 	void SetDefeated();
 	bool FinishedSpawning() { return finishedSpawning;};
 
-	List<std::shared_ptr<Entity>> GetEntities();
+	List<Entity*> GetEntities();
 
 	/// Gathers all ships internally for spawning. Returns lsit of all ships (used internally)
 	void PrepareForSpawning(SpawnGroup * parent = 0);
@@ -64,8 +64,8 @@ public:
 
 	/// Query, compares active ships vs. spawned amount
 	bool DefeatedOrDespawned();
-	void OnShipDestroyed(PlayingLevel& playingLevel, ShipPtr ship);
-	void OnShipDespawned(PlayingLevel& playingLevel, ShipPtr ship);
+	void OnShipDestroyed(PlayingLevel& playingLevel, Ship* ship);
+	void OnShipDespawned(PlayingLevel& playingLevel, Ship* ship);
 	/// Creates string (sequence of lines) required to create this specific SpawnGroup in e.g. a level file.
 	String GetLevelCreationString(Time t);
 
@@ -114,15 +114,15 @@ public:
 private:
 
 
-	ShipPtr GetNextShipToSpawn();
-	void SpawnAllShips(std::shared_ptr<PlayerShip> playerShip);
+	Ship* GetNextShipToSpawn();
+	void SpawnAllShips(PlayerShip* playerShip);
 
 	bool finishedSpawning;
 	AETime lastSpawn;
 	bool preparedForSpawning;
-	List<ShipPtr> ships;
+	List<Ship*> ships;
 	// ?!
-//	EntitySharedPtr SpawnShip(ConstVec3fr atPosition);
+//	Entity* SpawnShip(ConstVec3fr atPosition);
 	void AddShipAtPosition(ConstVec3fr position);
 };
 

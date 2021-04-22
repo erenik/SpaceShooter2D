@@ -11,4 +11,4 @@
 
 void ClearStars();
 void NewStars(Vector3f starDir, float emissionSpeed, float starScale = 0.2f, Color color = Color::ColorByHex32(0xffffffff));
-void LetStarsTrack(EntitySharedPtr entity, Vector3f positionOffset);
+void LetStarsTrack(Entity* entity, Vector3f positionOffset);

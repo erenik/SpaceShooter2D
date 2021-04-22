@@ -1,4 +1,6 @@
-defaultTextColor	1 1 1 1
+
+
+defaultFontShader FontStylizedTripleColors
 
 // Make root active
 root
@@ -20,6 +22,7 @@ parent lOptions
 defaultSizeRatioY 0.15
 
 label Options 
+textColor 0xFFFF
 topBorder 0x0000
 rightBorder 0x0000
 textAlignment Center  

@@ -22,13 +22,19 @@ public:
 	void OpenSpawnWindow();
 	void CloseSpawnWindow();
 
+	String LevelToTest() { return levelToTest; };
+
 private:
+	String levelToTest;
+
+
+	void PopulateSpawnWindowLists();
 
 	// Spawns spawn group at appropriate place in the editor for manipulation.
 	void Spawn(SpawnGroup * sg);
 	void Respawn(SpawnGroup * sg);
 
-	Time LastMessageOrSpawnGroupTime();
+	Time PreviousMessageOrSpawnGroupTime(void * comparedTo);
 
 	void UpdatePositionsOfSpawnGroupsAfterIndex(int index);
 	void UpdateWorldEntityForLevelTime(Time levelTime);
@@ -36,9 +42,10 @@ private:
 	Mission * editedMission;
 	Level editedLevel;
 
-	std::shared_ptr<Entity> levelEntity;
+	Entity* levelEntity;
 
 	SpawnGroup* editedSpawnGroup;
+	LevelMessage* editedLevelMessage;
 
 	bool movingCamera = false;
 	Vector2i previousMousePosition;

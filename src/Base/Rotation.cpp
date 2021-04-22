@@ -126,7 +126,7 @@ String Rotation::Name(int type)
 	return String();
 }
 
-void Rotation::OnEnter(ShipPtr forShip)
+void Rotation::OnEnter(Ship* forShip)
 {
 	this->ship = forShip;
 	this->entity = ship->entity;
@@ -153,9 +153,9 @@ void Rotation::OnEnter(ShipPtr forShip)
 	}
 }
 
-void Rotation::OnFrame(std::shared_ptr<PlayerShip> playerShip, int timeInMs)
+void Rotation::OnFrame(PlayerShip* playerShip, int timeInMs)
 {
-	EntitySharedPtr targetEntity = NULL;
+	Entity* targetEntity = NULL;
 	switch(type)
 	{
 		case Rotation::NONE:

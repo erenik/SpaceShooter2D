@@ -20,6 +20,7 @@ Time GetSpawnTime(Time lastMessageOrSpawnGroupTime, int secondsToAdd) {
 LevelMessage::LevelMessage()
 	: dontSkip(false)
 	, startTimeOffsetSeconds(0)
+	, editorEntity(nullptr)
 {
 	displayed = hidden = false;
 	goToTime = startTime = stopTime = Time(TimeType::MILLISECONDS_NO_CALENDER, 0);
@@ -155,7 +156,7 @@ String LevelMessage::GetEditorText(int maxChars) {
 	return toSet;
 }
 
-LevelMessageProperty::LevelMessageProperty(std::shared_ptr<Entity> owner, LevelMessage* levelMessage)
+LevelMessageProperty::LevelMessageProperty(Entity* owner, LevelMessage* levelMessage)
 	: EntityProperty("LevelMessageProp", -1, owner)
 	, levelMessage(levelMessage)
 {
@@ -176,3 +177,16 @@ LevelMessageProperty::LevelMessageProperty(std::shared_ptr<Entity> owner, LevelM
 	QueueGraphics(new GMSetEntityVec4f(owner, GT_TEXT_POSITION, Vector3f(0, rand() % 20 - 10, 0)));
 
 }
+
+void LevelMessage::SpawnEditorEntity() {
+	Vector3f position = Vector3f(PlayingLevelRef().spawnPositionRight, 0, 0);
+	this->editorPosition = position;
+	editorEntity = MapMan.CreateEntity("LevelMessageEntity", ModelMan.GetModel("cube"), TexMan.GetTexture("0xFFFF"), position);
+	editorEntity->properties.Add(new LevelMessageProperty(editorEntity, this));
+}
+void LevelMessage::DespawnEditorEntity() {
+	if (editorEntity)
+		MapMan.DeleteEntity(editorEntity);
+	editorEntity = nullptr;
+}
+

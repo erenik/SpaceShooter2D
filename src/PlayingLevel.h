@@ -14,8 +14,8 @@ class PlayerShip;
 class PlayingLevel;
 struct Mission;
 
-ShipPtr GetPlayerShip();
-EntitySharedPtr PlayerShipEntity();
+Ship* GetPlayerShip();
+Entity* PlayerShipEntity();
 PlayingLevel& PlayingLevelRef();
 
 class PlayingLevel : public SpaceShooter2D
@@ -26,9 +26,9 @@ public:
 	Level& GetLevel() { return level; };
 
 	/// Searches among actively spawned ships.
-	ShipPtr GetShip(EntitySharedPtr forEntity);
+	Ship* GetShip(Entity* forEntity);
 
-	ShipPtr GetShipByID(int id);
+	Ship* GetShipByID(int id);
 	void UpdateUI();
 	// Inherited via AppState
 	virtual void OnEnter(AppState* previousState) override;
@@ -97,21 +97,26 @@ public:
 	int timeElapsedMs = 0;
 	int hudUpdateMs = 0;
 	/// Particle system for sparks/explosion-ish effects.
-	std::shared_ptr<ParticleSystem> sparks;
+	ParticleSystem* sparks;
 
 	/// These will hopefully always be in AABB axes.
 	Vector3f frustumMin, frustumMax;
 
-	static std::shared_ptr<PlayerShip> playerShip;
+	static PlayerShip* playerShip;
 	/// The level entity, around which the playing field and camera are based upon.
-	static EntitySharedPtr levelEntity;
+	static Entity* levelEntity;
 	//static Vector2f playingFieldSize;
 	//static Vector2f playingFieldHalfSize;
+
+	List<Ship*> PlayerShips();
+
 	/// All ships, including player.
-	List< std::shared_ptr<Entity> > shipEntities;
-	List< std::shared_ptr<Entity> > projectileEntities;
+	List< Entity* > shipEntities;
+	List< Entity* > projectileEntities;
 	String onDeath; // What happens when the player dies?
 
+
+	bool playtestingEditorLevel = false;
 
 	bool GameTimePausedDueToActiveSpawnGroup();
 	bool GameTimePausedDueToActiveLevelMessage();
@@ -173,7 +178,7 @@ private:
 	int timeDeadMs = 0;
 	bool autoProceedMessages = false;
 
-	std::shared_ptr<ParticleEmitter> starEmitter = nullptr;
+	ParticleEmitter* starEmitter = nullptr;
 
 };
 

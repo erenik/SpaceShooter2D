@@ -10,7 +10,7 @@
 class ExplosionProperty : public EntityProperty 
 {
 public:
-	ExplosionProperty(const Weapon & weaponThatSpawnedIt, EntitySharedPtr owner);
+	ExplosionProperty(const Weapon & weaponThatSpawnedIt, Entity* owner);
 	// Static version.
 	static int ID();
 	/// Based on radius
@@ -27,7 +27,7 @@ public:
 	virtual void Process(int timeInMs);
 	virtual void ProcessMessage(Message * message);
 
-	bool ShouldDamage(ShipPtr ship);
+	bool ShouldDamage(Ship* ship);
 
 	/// Resets sleep-flag, among other things
 	void OnSpawn();
@@ -39,7 +39,7 @@ public:
 	Weapon weapon;
 	Vector3f position;
 	float currentRadius;
-	List<ShipPtr> affectedShips; // Only affect a ship once.
+	List<Ship*> affectedShips; // Only affect a ship once.
 	Time startTime;
 
 
@@ -47,7 +47,7 @@ public:
 	bool player;
 	bool enemy;
 
-	List<ShipPtr> damagedTargets;
+	List<Ship*> damagedTargets;
 	/// If not currently active (available for re-use).
 	bool sleeping;
 

@@ -208,7 +208,7 @@ String Movement::Name(int type)
 }
 
 // Upon entering this movement pattern.
-void Movement::OnEnter(std::shared_ptr<PlayerShip> playerShip, ShipPtr ship)
+void Movement::OnEnter(PlayerShip* playerShip, Ship* ship)
 {
 	timeInCurrentMovement = 0;
 	// Reset stuff.
@@ -271,7 +271,7 @@ void Movement::OnSpeedUpdated(PlayingLevel& playingLevel)
 }
 
 // Called every frame.
-void Movement::OnFrame(std::shared_ptr<PlayerShip> playerShip, int timeInMs)
+void Movement::OnFrame(PlayerShip* playerShip, int timeInMs)
 {
 	timeInCurrentMovement += timeInMs;
 	switch(type)
@@ -358,7 +358,7 @@ void Movement::SetWindowSpeed(Vector2f desiredAppearedSpeed)
 	QueuePhysics(new PMSetEntity(shipEntity, PT_VELOCITY, totalSpeed));
 }
 
-void Movement::MoveToLocation(std::shared_ptr<PlayerShip> playerShip)
+void Movement::MoveToLocation(PlayerShip* playerShip)
 {
 	Vector3f pos;
 	bool isPosition = false;
@@ -458,7 +458,7 @@ void Movement::MoveToLocation(std::shared_ptr<PlayerShip> playerShip)
 void Movement::Circle()
 {
 	// Go towards target.
-	EntitySharedPtr target = PlayingLevelRef().playerShip->entity;
+	Entity* target = PlayingLevelRef().playerShip->entity;
 	if (!target)
 	{
 		SetDirection(Vector3f());

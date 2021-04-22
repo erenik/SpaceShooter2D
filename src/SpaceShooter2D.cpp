@@ -42,10 +42,10 @@
 #include "Input/InputManager.h"
 #include "Base/PlayerShip.h"
 
-std::shared_ptr<Color> ssActiveTextColor = Color::ColorByHexName("#fb6b1dff");
+Color ssActiveTextColor = Color::ColorByHexName("#fb6b1dff");
 
 List<Weapon> Weapon::types;
-List<ShipPtr> Ship::types;
+List<Ship*> Ship::types;
 
 Time SpaceShooter2D::startDate;
 
@@ -58,7 +58,7 @@ void SetApplicationDefaults()
 	Application::name = "ErenikSpaceShooter";
 	SpaceShooter2D::SetupUIStyling();
 	PhysicsProperty::defaultUseQuaternions = false;
-	*TextFont::defaultFontShader = "FontStylizedTripleColors";
+	TextFont::defaultFontShader = "FontStylizedTripleColors";
 }
 
 // Global variables.
@@ -71,8 +71,8 @@ LevelEditor* levelEditor = nullptr;
 InHangar * inHangar = nullptr;
 
 /// All ships, including player.
-List< std::shared_ptr<Entity> > shipEntities;
-List< std::shared_ptr<Entity> > projectileEntities;
+List< Entity* > shipEntities;
+List< Entity* > projectileEntities;
 String playerName;
 /// o.o
 String onDeath; // What happens when the player dies?
@@ -258,7 +258,7 @@ void SpaceShooter2D::CreateUserInterface()
 }
 
 
-void PrintEntityData(EntitySharedPtr entity)
+void PrintEntityData(Entity* entity)
 {
 	std::cout<<"\n\nEntity name: "<<entity->name
 		<<"\nPosition: "<<entity->worldPosition
@@ -269,7 +269,7 @@ void PrintEntityData(EntitySharedPtr entity)
 	ShipProperty * sp = (ShipProperty*) entity->GetProperty(ShipProperty::ID());
 	if (sp)
 	{
-		const ShipPtr ship = sp->GetShip();
+		const Ship* ship = sp->GetShip();
 		std::cout<<"\nSleeping: "<<(sp->sleeping? "Yes" : "No")
 			<<", HP: "<<ship->hp<<", Allied: "<<(ship->allied? "Yes" : "No")
 			<<"\nLastCollission: "<<ship->lastShipCollision.Seconds()<<", CollisionDmgCooldown: "<<ship->collisionDamageCooldown.Seconds()
@@ -589,10 +589,10 @@ void SpaceShooter2D::KeyPressed(int keyCode, bool downBefore)
 
 
 /// o.o
-EntitySharedPtr SpaceShooter2D::OnShipDestroyed(ShipPtr ship)
+Entity* SpaceShooter2D::OnShipDestroyed(Ship* ship)
 {
 		// Explode
-//	EntitySharedPtr explosionEntity = spaceShooter->NewExplosion(owner->position, ship);
+//	Entity* explosionEntity = spaceShooter->NewExplosion(owner->position, ship);
 //	game->explosions.Add(explosionEntity);
 	return NULL;
 }

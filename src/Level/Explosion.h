@@ -21,7 +21,7 @@ public:
 	Weapon weapon;
 	Vector3f position;
 	float currentRadius;
-	List<ShipPtr> affectedShips; // Only affect a ship once.
+	List<Ship*> affectedShips; // Only affect a ship once.
 	Time startTime;
 };
 

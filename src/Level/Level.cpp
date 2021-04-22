@@ -77,9 +77,9 @@ Vector3f Level::BaseVelocity()
 }
 
 /// Creates player entity within this level. (used for spawning)
-EntitySharedPtr Level::SpawnPlayer(PlayingLevel& playingLevel, ShipPtr playerShip, ConstVec3fr atPosition)
+Entity* Level::SpawnPlayer(PlayingLevel& playingLevel, Ship* playerShip, ConstVec3fr atPosition)
 {	
-	EntitySharedPtr entity = playerShip->Spawn(atPosition, 0, playingLevel.playerShip);
+	Entity* entity = playerShip->Spawn(atPosition, 0, playingLevel.playerShip);
 	playingLevel.OnPlayerSpawned();
 	return entity;
 }
@@ -107,7 +107,7 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 	if (second >500)
 	{
 		second = 0;
-		List<ShipPtr> spookyShips;
+		List<Ship*> spookyShips;
 		int playerColliding = 0,
 			enemyCategory = 0;
 		
@@ -115,7 +115,7 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 		memset(formations, 0, sizeof(int) * (int)Formation::FORMATIONS);
 		for (int i = 0; i < ships.Size(); ++i)
 		{
-			ShipPtr ship = ships[i];
+			Ship* ship = ships[i];
 			if (ship->entity)
 			{
 				if (!ship->entity->registeredForPhysics)
@@ -149,12 +149,6 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 
 	ProcessLevelMessages(playingLevel.levelTime);
 
-	/// Clearing the level
-	if (LevelCleared(playingLevel))
-	{
-		MesMan.QueueMessages("GoToHangar");
-		return;
-	}
 	if (playingLevel.GameTimePaused()) {
 		LogMain("Game time is paused", EXTENSIVE_DEBUG);
 		SleepThread(10);
@@ -180,10 +174,10 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 		}
 		/// Apply damage to nearby ships (if any)
 		List<float> distances;
-		List<ShipPtr> relShips = GetShipsAtPoint(exp->position, exp->currentRadius, distances);
+		List<Ship*> relShips = GetShipsAtPoint(exp->position, exp->currentRadius, distances);
 		for (int j = 0; j < relShips.Size(); ++j)
 		{
-			ShipPtr ship = relShips[j];
+			Ship* ship = relShips[j];
 			if (exp->affectedShips.Exists(ship))
 				continue;
 			float amount = exp->weapon.damage;
@@ -251,7 +245,7 @@ List<LevelMessage*> Level::Messages(){
 	return lms;
 }
 
-void Level::UpdateSpawnDespawnLimits(std::shared_ptr<Entity> levelEntity) {
+void Level::UpdateSpawnDespawnLimits(Entity* levelEntity) {
 	PlayingLevel& playingLevel = PlayingLevelRef();
 	playingLevel.removeInvuln = levelEntity->worldPosition[0] + playingFieldHalfSize[0] + playingFieldPadding + 1.f;
 	assert(playingLevel.removeInvuln > -1000);
@@ -377,7 +371,7 @@ void Level::OnLevelTimeAdjusted(Time levelTime)
 
 
 // Check spawn groups.
-bool Level::LevelCleared(PlayingLevel& playingLevel)
+bool Level::LevelCleared(Time levelTime, List<Entity*> shipEntities, List<Ship*> playerShips)
 {
 //	ferewr
 	switch(endCriteria)
@@ -385,9 +379,9 @@ bool Level::LevelCleared(PlayingLevel& playingLevel)
 		case NEVER:
 			return false;
 		case NO_MORE_ENEMIES:
-			if (playingLevel.levelTime.Seconds() < 3)
+			if (levelTime.Seconds() < 3)
 				return false;
-			if (playingLevel.shipEntities.Size() > this->PlayerShips(playingLevel).Size())
+			if (shipEntities.Size() > playerShips.Size())
 				return false;
 			if (!FinishedSpawning())
 				return false;
@@ -402,17 +396,17 @@ bool Level::LevelCleared(PlayingLevel& playingLevel)
 	return false;
 }
 
-EntitySharedPtr Level::ClosestShipOrObstacle(PlayingLevel& playingLevel, bool enemy, ConstVec3fr position, float& outDistance) 
+Entity* Level::ClosestShipOrObstacle(PlayingLevel& playingLevel, bool enemy, ConstVec3fr position, float& outDistance) 
 {
 	if (!enemy)
 	{
 		return playingLevel.playerShip->entity;
 	}
-	EntitySharedPtr closest = NULL;
+	Entity* closest = NULL;
 	float closestDist = 100000.f;
 	for (int i = 0; i < playingLevel.shipEntities.Size(); ++i)
 	{
-		EntitySharedPtr e = playingLevel.shipEntities[i];
+		Entity* e = playingLevel.shipEntities[i];
 		ShipProperty * sp = e->GetProperty<ShipProperty>();
 		if (sp->IsEnemy() != enemy)
 			continue;
@@ -428,17 +422,17 @@ EntitySharedPtr Level::ClosestShipOrObstacle(PlayingLevel& playingLevel, bool en
 	return closest;
 }
 
-EntitySharedPtr Level::ClosestTarget(PlayingLevel & playingLevel, bool enemy, ConstVec3fr position)
+Entity* Level::ClosestTarget(PlayingLevel & playingLevel, bool enemy, ConstVec3fr position)
 {
 	if (!enemy)
 	{
 		return playingLevel.playerShip->entity;
 	}
-	EntitySharedPtr closest = NULL;
+	Entity* closest = NULL;
 	float closestDist = 100000.f;
 	for (int i = 0; i < playingLevel.shipEntities.Size(); ++i)
 	{
-		EntitySharedPtr e = playingLevel.shipEntities[i];
+		Entity* e = playingLevel.shipEntities[i];
 		ShipProperty * sp = e->GetProperty<ShipProperty>();
 		// Ignore asteroids here, only want killable enemies in this function.
 		if (sp->GetShip()->type == "Asteroid")
@@ -459,9 +453,9 @@ EntitySharedPtr Level::ClosestTarget(PlayingLevel & playingLevel, bool enemy, Co
 #include "PhysicsLib/EstimatorFloat.h"
 
 /// o.o'
-void Level::Explode(Weapon & weapon, EntitySharedPtr causingEntity, bool enemy)
+void Level::Explode(Weapon & weapon, Entity* causingEntity, bool enemy)
 {
-	EntitySharedPtr explosionEntity = EntityMan.CreateEntity("ExplosionEntity", ModelMan.GetModel("Sphere"), 0 /*TexMan.GetTexture("0xFFFF")*/);
+	Entity* explosionEntity = EntityMan.CreateEntity("ExplosionEntity", ModelMan.GetModel("Sphere"), 0 /*TexMan.GetTexture("0xFFFF")*/);
 	ExplosionProperty * explosionProperty = new ExplosionProperty(weapon, explosionEntity);
 	explosionEntity->properties.AddItem(explosionProperty);
 	explosionProperty->weapon = weapon;
@@ -492,14 +486,14 @@ void Level::Explode(Weapon & weapon, EntitySharedPtr causingEntity, bool enemy)
 	MapMan.AddEntity(explosionEntity, false, true);
 }
 
-List<ShipPtr> Level::GetShipsAtPoint(ConstVec3fr position, float maxRadius, List<float> & distances)
+List<Ship*> Level::GetShipsAtPoint(ConstVec3fr position, float maxRadius, List<float> & distances)
 {
-	List<ShipPtr> relevantShips;
+	List<Ship*> relevantShips;
 	distances.Clear();
 	float maxDist = maxRadius;
 	for (int i = 0; i < ships.Size(); ++i)
 	{
-		ShipPtr ship = ships[i];
+		Ship* ship = ships[i];
 		if (ship->destroyed || !ship->spawned)
 			continue;
 		if (ship->entity == 0)
@@ -579,7 +573,7 @@ void Level::RemoveExistingEnemies(PlayingLevel& playingLevel)
 	String lg;
 	for (int i = 0; i < ships.Size(); ++i)
 	{
-		ShipPtr ship = ships[i];
+		Ship* ship = ships[i];
 		lg += ship->name+" ";
 		ship->Despawn(playingLevel, false);
 	}
@@ -588,7 +582,7 @@ void Level::RemoveExistingEnemies(PlayingLevel& playingLevel)
 	Sleep(50);
 	for (int i = 0; i < ships.Size(); ++i)
 	{
-		ShipPtr s = ships[i];
+		Ship* s = ships[i];
 		s->spawnGroup = 0;
 	}
 	ships.Clear();
@@ -618,11 +612,19 @@ LevelMessage * Level::GetMessageWithTextId(String id) {
 }
 
 
-List<ShipPtr> Level::PlayerShips(PlayingLevel& playingLevel)
+List<Ship*> Level::PlayerShips(PlayingLevel& playingLevel)
 {
-	List<ShipPtr> playerShips;
+	List<Ship*> playerShips;
 	playerShips.AddItem(playingLevel.playerShip);
 	return playerShips;
+}
+
+int Level::GetElementIndexOf(LevelMessage* lm) {
+	for (int i = 0; i < levelElements.Size(); ++i) {
+		if (levelElements[i].lm == lm)
+			return i;
+	}
+	return -1;
 }
 
 int Level::GetElementIndexOf(SpawnGroup* sg) {
@@ -631,4 +633,11 @@ int Level::GetElementIndexOf(SpawnGroup* sg) {
 			return i;
 	}
 	return -1;
+}
+
+void LevelElement::InvalidateSpawnTime() {
+	if (sg)
+		sg->InvalidateSpawnTime();
+	if (lm)
+		lm->startTime = Time(TimeType::MILLISECONDS_NO_CALENDER);
 }

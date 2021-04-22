@@ -7,7 +7,7 @@
 #include "PhysicsLib/EstimatorFloat.h"
 #include "PlayingLevel.h"
 
-ExplosionProperty::ExplosionProperty(const Weapon & weaponThatSpawnedIt, EntitySharedPtr owner)
+ExplosionProperty::ExplosionProperty(const Weapon & weaponThatSpawnedIt, Entity* owner)
 : EntityProperty("ProjProp", ID(), owner), weapon(weaponThatSpawnedIt)
 {
 	sleeping = false;
@@ -71,7 +71,7 @@ float ExplosionProperty::CurrentDamage()
 	std::cout<<"\nCurrent Damage: "<<currDmg<<" total: "<<totalDamageInflicted;
 	return currDmg;
 }
-bool ExplosionProperty::ShouldDamage(ShipPtr ship)
+bool ExplosionProperty::ShouldDamage(Ship* ship)
 {
 	if (damagedTargets.Exists(ship))
 		return false;

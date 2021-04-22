@@ -10,7 +10,7 @@ class PlayerShip : public Ship {
 public:
 	PlayerShip();
 
-	virtual void ProcessAI(std::shared_ptr<PlayerShip> playerShip, int timeInMs) override;
+	virtual void ProcessAI(PlayerShip* playerShip, int timeInMs) override;
 
 	bool AutoAim() const { return autoAim; }
 	void SetAutoAim(bool value);

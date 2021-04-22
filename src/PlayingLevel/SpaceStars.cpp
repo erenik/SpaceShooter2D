@@ -12,8 +12,8 @@
 #include "Graphics/Messages/GraphicsMessages.h"
 #include "Graphics/Particles/Stars.h"
 
-std::shared_ptr<ParticleSystem> stars = nullptr;
-std::shared_ptr<ParticleEmitter> starEmitter = nullptr;
+ParticleSystem* stars = nullptr;
+ParticleEmitter* starEmitter = nullptr;
 
 void ClearStars() {
 	/// Clear old stars?
@@ -27,13 +27,13 @@ void ClearStars() {
 void NewStars(Vector3f starDir, float emissionSpeed, float starScale, Color color) {
 
 	Stars * newStars = new Stars(true);
-	stars = newStars->GetSharedPtr();
+	stars = newStars;
 	stars->deleteEmittersOnDeletion = true;
 	Graphics.QueueMessage(new GMRegisterParticleSystem(stars, true));
 
 	/// Add emitter
 	StarEmitter * emitter = new StarEmitter(Vector3f());
-	starEmitter = emitter->GetSharedPtr();
+	starEmitter = emitter;
 
 	Graphics.QueueMessage(new GMAttachParticleEmitter(starEmitter, stars));
 
@@ -50,7 +50,7 @@ void NewStars(Vector3f starDir, float emissionSpeed, float starScale, Color colo
 	startEmitter->SetParticleLifeTime(60.f);
 	startEmitter->SetScale(starScale);
 	startEmitter->SetColor(color);
-	QueueGraphics(new GMAttachParticleEmitter(startEmitter->GetSharedPtr(), stars->GetSharedPtr()));
+	QueueGraphics(new GMAttachParticleEmitter(startEmitter, stars));
 
 	/// Update base emitter emitting all the time.
 	starEmitter->newType = true;
@@ -68,7 +68,7 @@ void NewStars(Vector3f starDir, float emissionSpeed, float starScale, Color colo
 }
 
 
-void LetStarsTrack(EntitySharedPtr entity, Vector3f positionOffset) {
+void LetStarsTrack(Entity* entity, Vector3f positionOffset) {
 	GraphicsMan.QueueMessage(new GMSetParticleEmitter(starEmitter, GT_EMITTER_ENTITY_TO_TRACK, entity));
 	GraphicsMan.QueueMessage(new GMSetParticleEmitter(starEmitter, GT_EMITTER_POSITION_OFFSET, Vector3f(70.f, 0, 0)));
 

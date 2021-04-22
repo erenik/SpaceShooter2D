@@ -15,11 +15,11 @@ class ShipProperty : public EntityProperty
 	friend class Ship;
 public:
 	/// Reference to the game and this property's owner.
-	ShipProperty(ShipPtr ship, EntitySharedPtr owner);
+	ShipProperty(Ship* ship, Entity* owner);
 	// Static version.
 	static int ID();
 
-	const ShipPtr GetShip() const {return ship;};
+	const Ship* GetShip() const {return ship;};
 	void Remove();
 	// Reset sleep.
 	void OnSpawn();
@@ -29,7 +29,7 @@ public:
 	virtual void OnCollision(Collision & data);
 
 	/// If reacting to collisions...
-	virtual void OnCollision(EntitySharedPtr withEntity);
+	virtual void OnCollision(Entity* withEntity);
 
 	// Since enemies go from right to left..
 	bool IsAllied();
@@ -42,18 +42,18 @@ public:
 	bool shouldDelete;
 
 	/// o.o
-//	void LoadDataFrom(ShipPtr ship);
+//	void LoadDataFrom(Ship* ship);
 
 
 	// False by default. If true will use default behaviour of following the mouse.
 	bool useMouseInput;
 
 	/// o.o
-//	ShipPtr ship;
+//	Ship* ship;
 
 private:
 	
-	ShipPtr ship;
+	Ship* ship;
 
 	bool spawnInvulnerability; // Default true at start.
 	long millisecondsPassedSinceLastFire;	

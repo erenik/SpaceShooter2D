@@ -19,8 +19,6 @@ class SpawnGroup;
 class WeaponScript;
 class ShipProperty;
 
-#define ShipPtr std::shared_ptr<Ship>
-
 enum SkillType {
 	NO_SKILL,
 	ATTACK_FRENZY,
@@ -52,34 +50,33 @@ class alignas(16) Ship
 {
 protected:
 	Ship();
-	static ShipPtr NewShip();
+	static Ship* NewShip();
 public:
-	static ShipPtr NewShip(const Ship& ref);
+	static Ship* NewShip(const Ship& ref);
 
 	~Ship();
 	std::weak_ptr<Ship> selfPtr;
-	ShipPtr GetSharedPtr();
 
 	/// Returns nullptr if it was not found
-	static ShipPtr GetByType(String typeName);
+	static Ship* GetByType(String typeName);
 	void CopyStatsFrom(const Ship& ref);
 	void CopyWeaponsFrom(const Ship& ref);
 
 	/// Call on spawning.
 	void RandomizeWeaponCooldowns();
 	/// Spawns at local position according to window/player area, creating entities, registering for movement, etc. Returns it and all children spawned with it.
-	List< std::shared_ptr<Entity> > Spawn(
+	List< Entity* > Spawn(
 		ConstVec3fr atWorldPosition,
-		ShipPtr parent,
-		std::shared_ptr<PlayerShip> playerShip);
+		Ship* parent,
+		PlayerShip* playerShip);
 	/// Handles spawning of children as needed.
-	List< std::shared_ptr<Entity> > SpawnChildren(std::shared_ptr<PlayerShip> playerShip);
+	List< Entity* > SpawnChildren(PlayerShip* playerShip);
 	void Despawn(PlayingLevel& playingLevel, bool doExplodeEffectsForChildren);
 	void ExplodeEffects(PlayingLevel& playingLevel);
 	/// Checks current movement. Will only return true if movement is target based and destination is within threshold.
 	bool ArrivedAtDestination();
-	void Process(PlayingLevel& playingLevel, std::shared_ptr<PlayerShip> playerShip, int timeInMs);
-	virtual void ProcessAI(std::shared_ptr<PlayerShip> playerShip, int timeInMs);
+	void Process(PlayingLevel& playingLevel, PlayerShip* playerShip, int timeInMs);
+	virtual void ProcessAI(PlayerShip* playerShip, int timeInMs);
 	void ProcessWeapons(PlayingLevel& playingLevel, int timeInMs);
 
 	/// Disables weapon in this and children ships.
@@ -107,10 +104,10 @@ public:
 	/// E.g. "DoveDir(3), RotateToFace(player, 5)"
 	void ParseRotation(String fromString);
 	/// Sets movement. Clears any other existing movements.
-	void SetMovement(std::shared_ptr<PlayerShip> playerShip, Movement & movement);
+	void SetMovement(PlayerShip* playerShip, Movement & movement);
 	void SetSpeed(PlayingLevel& playingLevel, float speed);
 	/// Creates new ship of specified type.
-	static ShipPtr New(String shipByName);
+	static Ship* New(String shipByName);
 
 	/// Main script to play.
 	String scriptSource;
@@ -132,7 +129,7 @@ public:
 	bool SwitchToWeapon(int index);
 
 	/// Calls OnEnter for the initial movement pattern.
-	void StartMovement(std::shared_ptr<PlayerShip> playerShip);
+	void StartMovement(PlayerShip* playerShip);
 
 	/// For player ship.
 	Weapon * SetWeaponLevel(Weapon::Type ofType, int level);
@@ -155,9 +152,9 @@ public:
 	String physicsModel;
 
 	SpawnGroup * spawnGroup;
-	ShipPtr parent;
+	Ship* parent;
 	ShipProperty * shipProperty;
-	List<ShipPtr> children;
+	List<Ship*> children;
 	// Bools
 	bool canMove;
 	bool movementDisabled; // temporarily.
@@ -236,12 +233,12 @@ public:
 	int score; 
 
 	// Default false
-	EntitySharedPtr entity;
+	Entity* entity;
 	// Data details.
 	// Spawn position.
 	Vector3f position;
 	/// As loaded.
-	static List<ShipPtr>  types;
+	static List<Ship*>  types;
 
 	WeaponScript * weaponScript;
 

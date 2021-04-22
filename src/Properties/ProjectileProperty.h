@@ -12,7 +12,7 @@
 class ProjectileProperty : public EntityProperty 
 {
 public:
-	ProjectileProperty(const Weapon & weaponThatSpawnedIt, EntitySharedPtr owner, bool enemy);
+	ProjectileProperty(const Weapon & weaponThatSpawnedIt, Entity* owner, bool enemy);
 	virtual ~ProjectileProperty();
 
 	// Static version.
@@ -37,7 +37,7 @@ public:
 	virtual void Process(int timeInMs);
 	virtual void ProcessMessage(Message * message);
 
-	bool ShouldDamage(ShipPtr ship);
+	bool ShouldDamage(Ship* ship);
 
 	/// Resets sleep-flag, among other things
 	void OnSpawn();
@@ -48,21 +48,22 @@ public:
 	Weapon weapon;
 	float distanceTraveled;
 
-	List<ShipPtr> penetratedTargets;
+	List<Ship*> penetratedTargets;
 	/// If not currently active (available for re-use).
 	bool sleeping;
 
 	/// Used for various effects, such as laser burst wobbling, fading damage/removal for heat-wave/ion flak, etc.
 	int timeAliveMs;
-	Vector4f color;
+	Color color;
 	String onCollisionMessage;
 	Vector3f direction;
 	Vector3f up; // Set upon launch, used to change direction of laser burst projectiles
 	int nextWobbleMs; // Next time in timeAliveMs that it should change direction.
 
-	std::shared_ptr<ParticleEmitter> thrustEmitter, traceEmitter;
+	ParticleEmitter* thrustEmitter;
+	ParticleEmitter* traceEmitter;
 
-	EntitySharedPtr targetLock;
+	Entity* targetLock;
 };
 
 #endif

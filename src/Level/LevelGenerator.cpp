@@ -40,7 +40,7 @@ void GenerateLevel (PlayingLevel & playingLevel, String arguments)
 	List<String> relevantShips;
 	for(int q = 0; q<Ship::types.Size(); q++)
 	{
-		ShipPtr shipType = Ship::types[q];
+		Ship* shipType = Ship::types[q];
 		
 		//Catch unwanted bosses and skip them
 		if(shipType->boss) 

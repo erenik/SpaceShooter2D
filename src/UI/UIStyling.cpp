@@ -12,8 +12,8 @@
 #include "Graphics/Fonts/TextFont.h"
 
 void SpaceShooter2D::SetupUIStyling() {
-	*TextFont::defaultFontSource = "img/fonts/Font_test_BW.png";
-	UIElement::forceUpperCase = true;
+	TextFont::defaultFontSource = "img/fonts/Font_test_BW.png";
+	UIElement::defaultForceUpperCase = true;
 
 	UIElement::defaultTextColor = Color::ColorByHexName("#8f1767ff");
 	UIElement::defaultTextureSource = "0x22AA";

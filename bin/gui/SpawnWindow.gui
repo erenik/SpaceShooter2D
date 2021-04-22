@@ -1,12 +1,14 @@
 // Main UI when starting up.
 
 defaultTexture	0x2244
-//defaultTextColor	1 1 1 1
+defaultTextColor	1 1 1 1
 defaultDividerX	0.4
 // defaultSetDividerInMiddle true
 
 defaultFont img/fonts/font3.png
 defaultFontShader Font
+defaultForceUpperCase false
+defaultFont font3
 
 // Make root active
 root
@@ -23,6 +25,7 @@ padding 0.01
 texture 0x00ff
 visible false
 
+
 parent lSpawnWindow
 
 defaultSizeRatioXY 1 0.1
@@ -32,7 +35,7 @@ text "Name"
 
 StringInput SGSpawnTime "Spawn time: "
 
-DropDownMenu ShipTypeToSpawn
+DropDownMenu SGShipType
 text "Ship type: "
 
 DropDownMenu SpawnFormation
@@ -52,11 +55,7 @@ IntegerInput Speed
 ColumnList SpawnButtons
 padding 0.1
 
-Button PlayTestLevel
-text "Test level"
-
 Button GenerateLevel
-
 
 parent SpawnButtons
 defaultSizeRatioXY 0.4 1
@@ -66,6 +65,8 @@ text "Create new"
 
 Button DeleteSG
 text "Delete"
+
+
 
 
 ///////////////////////
@@ -81,3 +82,11 @@ StringInput LMTextID "Text ID"
 StringInput LMScript "Script"
 StringInput LMCondition "Condition"
 Checkbox LMGoToRewindPoint "Go to rewind point"
+
+Button DeleteLM
+text "Delete message/event"
+
+/*
+
+
+*/

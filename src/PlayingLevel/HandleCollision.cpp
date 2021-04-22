@@ -10,17 +10,17 @@
 #include "Physics/Messages/CollisionCallback.h"
 
 
-void HandleCollision(ShipPtr playerShip, List<EntitySharedPtr> shipEntities, CollisionCallback* message) {
+void HandleCollision(Ship* playerShip, List<Entity*> shipEntities, CollisionCallback* message) {
 
 	CollisionCallback* cc = (CollisionCallback*)message;
-	EntitySharedPtr one = cc->one;
-	EntitySharedPtr two = cc->two;
+	Entity* one = cc->one;
+	Entity* two = cc->two;
 #define SHIP 0
 #define PROJ 1
 	//			std::cout<<"\nColCal: "<<cc->one->name<<" & "<<cc->two->name;
 
-	EntitySharedPtr shipEntity1 = NULL;
-	EntitySharedPtr other = NULL;
+	Entity* shipEntity1 = NULL;
+	Entity* other = NULL;
 	int oneType = (one == playerShip->entity || shipEntities.Exists(one)) ? SHIP : PROJ;
 	int twoType = (two == playerShip->entity || shipEntities.Exists(two)) ? SHIP : PROJ;
 	int types[5] = { 0,0,0,0,0 };

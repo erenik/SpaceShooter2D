@@ -32,6 +32,8 @@
 #include "Input/InputMapping.h"
 #include "Input/Action.h"
 
+#include "LevelEditor/LevelEditor.h"
+
 #include "Test/TutorialTests.h"
 
 SpawnGroup testGroup;
@@ -45,10 +47,10 @@ void OnPlayerInvulnerabilityUpdated()
 
 }
 
-ShipPtr GetPlayerShip() {
+Ship* GetPlayerShip() {
 	return PlayingLevel::playerShip;
 }
-EntitySharedPtr PlayerShipEntity() {
+Entity* PlayerShipEntity() {
 	auto playerShip = GetPlayerShip();
 	if (playerShip == nullptr)
 		return nullptr;
@@ -59,8 +61,8 @@ PlayingLevel& PlayingLevelRef() {
 }
 
 
-std::shared_ptr<PlayerShip> PlayingLevel::playerShip = nullptr;
-EntitySharedPtr PlayingLevel::levelEntity = nullptr;
+PlayerShip* PlayingLevel::playerShip = nullptr;
+Entity* PlayingLevel::levelEntity = nullptr;
 
 GameVariable* SpaceShooter2D::currentLevel = nullptr,
 * SpaceShooter2D::currentStage = nullptr,
@@ -86,11 +88,11 @@ PlayingLevel::PlayingLevel()
 	singleton = this;
 }
 
-ShipPtr PlayingLevel::GetShipByID(int id)
+Ship* PlayingLevel::GetShipByID(int id)
 {
 	for (int i = 0; i < level.ships.Size(); ++i)
 	{
-		ShipPtr ship = level.ships[i];
+		Ship* ship = level.ships[i];
 		if (ship->ID() == id)
 			return ship;
 	}
@@ -107,6 +109,13 @@ void PlayingLevel::UpdateUI() {
 // Inherited via AppState
 void PlayingLevel::OnEnter(AppState* previousState) {
 
+	String testLevel = "";
+	if (previousState->GetID() == SSGameMode::LEVEL_EDITOR) {
+		auto levelEditor = (LevelEditor*)previousState;
+		testLevel = levelEditor->LevelToTest();
+		playtestingEditorLevel = true;
+	}
+
 	assert(PlayerName().Length() > 0);
 
 	testGroup.number = 1;
@@ -122,18 +131,24 @@ void PlayingLevel::OnEnter(AppState* previousState) {
 	NewPlayer();
 	LoadWeapons();
 
-	// Create.. the sparks! o.o
-// New global sparks system.
-	sparks = (new Sparks(true))->GetSharedPtr();
-	// Register it for rendering.
+	// New global sparks system.
+	sparks = (new Sparks(true));
 	Graphics.QueueMessage(new GMRegisterParticleSystem(sparks, true));
 
 	// Check if we are playing a campaign mission
-	GameVar * currentMissionVar = GameVars.GetString("CurrentMission");
-	assert(currentMissionVar);
-	Mission * currentMission = MissionsMan.GetMissionByName(currentMissionVar->strValue);
-	assert(currentMission);
-	LoadLevel(currentMission->levelFilePath, currentMission);
+	String levelToLoad;
+	if (playtestingEditorLevel) {
+		levelToLoad = testLevel;
+		currentMission = nullptr;
+	}
+	else {
+		GameVar * currentMissionVar = GameVars.GetString("CurrentMission");
+		assert(currentMissionVar);
+		Mission * currentMission = MissionsMan.GetMissionByName(currentMissionVar->strValue);
+		assert(currentMission);
+		levelToLoad = currentMission->levelFilePath;
+	}	
+	LoadLevel(levelToLoad, currentMission);
 
 	// Play script for animation or whatever.
 	ScriptMan.PlayScript("scripts/NewGame.txt");
@@ -143,7 +158,8 @@ void PlayingLevel::OnEnter(AppState* previousState) {
 	TextMan.LoadFromDir();
 	TextMan.SetLanguage("English");
 
-	if (!GameVars.GetInt("PlayTutorial")->iValue == 1) {
+	auto playTutorialVar = GameVars.GetInt("PlayTutorial");
+	if (playTutorialVar && !playTutorialVar->iValue == 1) {
 		LevelMessage * message = level.GetMessageWithTextId("TutorialConcluded");
 		if (message != nullptr)
 			JumpToAfterMessage(message);
@@ -211,6 +227,17 @@ void PlayingLevel::Process(int timeInMs) {
 		return;
 
 	level.Process(*this, timeInMs);
+
+	if (level.LevelCleared(levelTime, shipEntities, PlayerShips())) {
+		if (playtestingEditorLevel)
+			SetMode(SSGameMode::LEVEL_EDITOR);
+		else {
+			/// Clearing the level
+			MesMan.QueueMessages("GoToHangar");
+			return;
+		}
+	}
+
 	// Update > 30 fps if possible
 	if (hudUpdateMs > 10) {
 		HUD* hud = HUD::Get();
@@ -228,6 +255,14 @@ void PlayingLevel::Process(int timeInMs) {
 
 }
 
+List<Ship*> PlayingLevel::PlayerShips()
+{
+	List<Ship*> playerShips;
+	playerShips.AddItem(playerShip);
+	return playerShips;
+}
+
+
 // If true, game over is pending/checking respawn conditions, don't process other messages.
 bool PlayingLevel::CheckForGameOver(int timeInMs) {
 	if (!playerShip->destroyed)
@@ -239,8 +274,12 @@ bool PlayingLevel::CheckForGameOver(int timeInMs) {
 
 	LogMain("Game over! Player HP 0", INFO);
 	// Game OVER!
-	if (onDeath.Length() == 0)
-		spaceShooter->GameOver();
+	if (onDeath.Length() == 0) {
+		if (playtestingEditorLevel)
+			SetMode(SSGameMode::LEVEL_EDITOR);
+		else
+			spaceShooter->GameOver();
+	}
 	else if (onDeath.StartsWith("RespawnAt"))
 	{
 		playerShip->hp = (float)playerShip->maxHP;
@@ -261,7 +300,7 @@ bool PlayingLevel::CheckForGameOver(int timeInMs) {
 
 void PlayingLevel::OnPlayerDied() {
 	QueueGraphics(new GMSetCamera(levelCamera, CT_POSITION, Vector3f(0,0,10) + playerShip->entity->worldPosition));
-	QueueGraphics(new GMSetCamera(levelCamera, CT_ENTITY_TO_TRACK, (EntitySharedPtr) nullptr));
+	QueueGraphics(new GMSetCamera(levelCamera, CT_ENTITY_TO_TRACK, (Entity*) nullptr));
 	QueueGraphics(new GMSetCamera(levelCamera, CT_SMOOTHING, 0.95f));
 	failedToSurvive = true;
 }
@@ -287,25 +326,25 @@ void PlayingLevel::Render(GraphicsState* graphicsState)
 void PlayingLevel::OnExit(AppState* nextState) {
 
 	// Mark the level as completed. Mark times completed as increased if done multiple times.
-	int& timesCompleted = TimesCompleted(currentMission->name);
-	if (timesCompleted == 0) {
-		FirstTimeCompletion() = currentMission->name;
-		RepeatCompletion() = "";
+	if (currentMission != nullptr) {
+		int& timesCompleted = TimesCompleted(currentMission->name);
+		if (timesCompleted == 0) {
+			FirstTimeCompletion() = currentMission->name;
+			RepeatCompletion() = "";
+		}
+		else {
+			FirstTimeCompletion() = "";
+			RepeatCompletion() = currentMission->name;
+		}
+		++timesCompleted;
+		FlyTime() += this->flyTime;
+		SetHighscore(currentMission->name, score);
+		// Save weapons based on currently equipped ones (including damage taken, stats or other stuff)
+		playerShip->SaveGearToVars();
+		// Autosave!
+		SaveFile::AutoSave(Application::name, PlayerName() + " " + DifficultyString(difficulty->GetInt()) + " " + FlyTime().ToString("H:m"));
 	}
-	else {
-		FirstTimeCompletion() = "";
-		RepeatCompletion() = currentMission->name;
-	}
-	++timesCompleted;
-	FlyTime() += this->flyTime;
 
-	SetHighscore(currentMission->name, score);
-
-	// Save weapons based on currently equipped ones (including damage taken, stats or other stuff)
-	playerShip->SaveGearToVars();
-
-	// Autosave!
-	SaveFile::AutoSave(Application::name, PlayerName()+" "+ DifficultyString(difficulty->GetInt())+ " "+FlyTime().ToString("H:m"));
 
 	level.Clear(*this);
 
@@ -724,7 +763,7 @@ void PlayingLevel::ProcessMessage(Message* message)
 			// Shoot.
 			Color color = Vector4f(0.8f, 0.7f, 0.1f, 1.f);
 			Texture* tex = TexMan.GetTextureByColor(color);
-			EntitySharedPtr projectileEntity = EntityMan.CreateEntity(name + " Projectile", ModelMan.GetModel("sphere.obj"), tex);
+			Entity* projectileEntity = EntityMan.CreateEntity(name + " Projectile", ModelMan.GetModel("sphere.obj"), tex);
 			Weapon weapon;
 			weapon.damage = 500;
 			weapon.lifeTimeMs = 100000;
@@ -897,7 +936,7 @@ void PlayingLevel::Cleanup()
 	/// Remove projectiles which have been passed by.
 	for (int i = 0; i < projectileEntities.Size(); ++i)
 	{
-		EntitySharedPtr proj = projectileEntities[i];
+		Entity* proj = projectileEntities[i];
 		ProjectileProperty* pp = (ProjectileProperty*)proj->GetProperty(ProjectileProperty::ID());
 		if (pp->sleeping ||
 			(proj->worldPosition[0] < despawnPositionLeft ||
@@ -920,7 +959,7 @@ void PlayingLevel::Cleanup()
 	/// Clean ships.
 	for (int i = 0; i < level.ships.Size(); ++i)
 	{
-		ShipPtr ship = level.ships[i];
+		Ship* ship = level.ships[i];
 		if (ship->destroyed || !ship->spawned)
 		{
 			level.ships.RemoveItem(ship); // Remove it. Remove links to spawn-group too.
@@ -978,10 +1017,10 @@ void PlayingLevel::UpdatePlayerVelocity()
 
 
 /// Searches among actively spawned ships.
-ShipPtr PlayingLevel::GetShip(EntitySharedPtr forEntity) {
+Ship* PlayingLevel::GetShip(Entity* forEntity) {
 	for (int i = 0; i < level.ships.Size(); ++i)
 	{
-		ShipPtr ship = level.ships[i];
+		Ship* ship = level.ships[i];
 		if (ship->entity == forEntity)
 			return ship;
 	}
@@ -991,8 +1030,7 @@ ShipPtr PlayingLevel::GetShip(EntitySharedPtr forEntity) {
 /// o.o
 void PlayingLevel::NewPlayer()
 {
-	playerShip = std::shared_ptr<PlayerShip>(new PlayerShip());
-	playerShip->selfPtr = playerShip;
+	playerShip = new PlayerShip();
 }
 
 /// Loads target level. The source and separate .txt description have the same name, just different file-endings, e.g. "Level 1.png" and "Level 1.txt"
@@ -1110,7 +1148,7 @@ void PlayingLevel::UpdateRenderArrows()
 	for (int i = 0; i < shipEntities.Size(); ++i)
 	{	
 		// Grab the position
-		EntitySharedPtr e = shipEntities[i];
+		Entity* e = shipEntities[i];
 		Vector2f pos = e->worldPosition;
 		// Check if outside boundary.
 		if (pos > minField && pos < maxField)

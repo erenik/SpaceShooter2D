@@ -30,7 +30,7 @@ void SpaceShooterScript::EvaluateLine(String & line)
 		List<String> args = line.Tokenize(",()");
 		// Do charge until done.
 		String target = args[1];
-		EntitySharedPtr targetEntity = 0;
+		Entity* targetEntity = 0;
 		if (target == "self")
 			targetEntity = this->entity;
 		lineFinished = false;
@@ -41,7 +41,7 @@ void SpaceShooterScript::EvaluateLine(String & line)
 		float distance = (targetEntity->worldPosition.x - (levelEntity->worldPosition.x - pl.PlayingFieldHalfSize().x)) / pl.PlayingFieldSize().x;
 	//	std::cout<<"\nDistance "<<distance;
 		ClampFloat(distance, -1.f, 1.f);
-		ShipPtr ship = pl.GetShip(targetEntity);
+		Ship* ship = pl.GetShip(targetEntity);
 		int minSpeed = int( args[2].ParseFloat()), 
 			maxSpeed = int (args[3].ParseFloat());
 		ship->speed = minSpeed + (1 - distance) * (maxSpeed - minSpeed);
@@ -73,7 +73,7 @@ void SpaceShooterScript::EvaluateLine(String & line)
 		List<String> args = line.Tokenize(",()");
 		// Do charge until done.
 		String target = args[1];
-		EntitySharedPtr targetEntity = 0;
+		Entity* targetEntity = 0;
 		if (target == "self")
 			targetEntity = this->entity;
 		lineFinished = false;
@@ -85,7 +85,7 @@ void SpaceShooterScript::EvaluateLine(String & line)
 		float distance = ((levelEntity->worldPosition.x + targetX) - targetEntity->worldPosition.x) / pl.PlayingFieldSize().x;
 	//	std::cout<<"\nDistance "<<distance;
 //		ClampFloat(distance, -1.f, 1.f);
-		ShipPtr ship = pl.GetShip(targetEntity);
+		Ship* ship = pl.GetShip(targetEntity);
 		/// Set initial speed.
 		if (sssState != 1)
 		{
@@ -112,7 +112,7 @@ void SpaceShooterScript::EvaluateLine(String & line)
 		List<String> args = line.Tokenize(",()");
 		String target = args[1]; target.RemoveSurroundingWhitespaces();
 		int id = target.ParseInt();
-		ShipPtr ship = pl.GetShipByID(id);
+		Ship* ship = pl.GetShipByID(id);
 		if (target == "self")
 			ship = pl.GetShip(this->entity);
 		float speed = args[2].ParseFloat();
@@ -124,13 +124,13 @@ void SpaceShooterScript::EvaluateLine(String & line)
 		List<String> args = line.Tokenize(",()");
 		// Do charge until done.
 		String target = args[1];
-		EntitySharedPtr targetEntity = 0;
+		Entity* targetEntity = 0;
 		if (target == "self")
 			targetEntity = this->entity;
 		if (targetEntity == 0)
 			return;		
 		String weaponName = args[2];
-		ShipPtr ship = spaceShooter->GetShip(targetEntity);
+		Ship* ship = spaceShooter->GetShip(targetEntity);
 		ship->DisableWeapon(weaponName);
 		lineProcessed = lineFinished = true;
 	}
@@ -154,7 +154,7 @@ bool SpaceShooterEvaluator::EvaluateFunction(String byName, List<String> argumen
 
 	String name = byName;
 	#define GRAB_SHIP int id = arguments[0].ParseInt();\
-		ShipPtr ship = pl.GetShipByID(id);\
+		Ship* ship = pl.GetShipByID(id);\
 		if (!ship){\
 			result = ExpressionResult::Integral(0);\
 			result.text = "Unable to find ship with id "+String(id);\

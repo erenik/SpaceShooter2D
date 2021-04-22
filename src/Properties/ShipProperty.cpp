@@ -24,7 +24,7 @@
 #include "SpaceShooter2D.h"
 #include "PlayingLevel.h"
 
-ShipProperty::ShipProperty(ShipPtr ship, EntitySharedPtr owner)
+ShipProperty::ShipProperty(Ship* ship, Entity* owner)
 : EntityProperty("ShipProperty", ID(), owner), ship(ship)
 {
 	assert(ship != nullptr);
@@ -82,7 +82,7 @@ void ShipProperty::Process(int timeInMs)
 void ShipProperty::OnCollision(Collision & data)
 {
 	// Check what we are colliding with.
-	EntitySharedPtr other = 0;
+	Entity* other = 0;
 	if (data.one == owner)
 		other = data.two;
 	else if (data.two == owner)
@@ -91,7 +91,7 @@ void ShipProperty::OnCollision(Collision & data)
 
 Random penetrationRand;
 /// If reacting to collisions...
-void ShipProperty::OnCollision(EntitySharedPtr withEntity)
+void ShipProperty::OnCollision(Entity* withEntity)
 {
 //	std::cout<<"\nShipProperty::OnCollision for entity "<<owner->name;
 	if (sleeping)
@@ -99,7 +99,7 @@ void ShipProperty::OnCollision(EntitySharedPtr withEntity)
 //		std::cout<<"\nSleeping, skipping stuffs";
 		return;
 	}
-	EntitySharedPtr other = withEntity;
+	Entity* other = withEntity;
 
 	ShipProperty * sspp = (ShipProperty *) other->GetProperty(ShipProperty::ID());
 	bool despawning = false;
@@ -169,7 +169,7 @@ void ShipProperty::OnCollision(EntitySharedPtr withEntity)
 		tmpEmitter->SetScale(0.05f);
 		tmpEmitter->SetParticleLifeTime(1.5f);
 		tmpEmitter->SetColor(Vector4f(1.f, 0.5f, 0.1f, 1.f));
-		Graphics.QueueMessage(new GMAttachParticleEmitter(std::shared_ptr<ParticleEmitter>(tmpEmitter), std::weak_ptr<ParticleSystem>(pl.sparks)));
+		Graphics.QueueMessage(new GMAttachParticleEmitter(tmpEmitter, pl.sparks));
 		return;
 	}
 
