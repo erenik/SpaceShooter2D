@@ -19,6 +19,7 @@ Time GetSpawnTime(Time lastMessageOrSpawnGroupTime, int secondsToAdd) {
 
 LevelMessage::LevelMessage()
 	: dontSkip(false)
+	, name("")
 	, startTimeOffsetSeconds(0)
 	, editorEntity(nullptr)
 {
@@ -105,8 +106,8 @@ bool LevelMessage::Trigger(PlayingLevel& playingLevel, Level * level)
 	else if (type == LMType::EVENT)
 	{
 		displayed = true;
-		if (strings.Size())
-			MesMan.QueueMessages(strings);
+		if (string.Length())
+			MesMan.QueueMessages(string);
 		if (goToTime.intervals != 0)
 		{
 			level->SetTime(goToTime);
@@ -138,8 +139,8 @@ void LevelMessage::Hide(PlayingLevel& playingLevel)
 
 String LevelMessage::GetEditorText(int maxChars) {
 	String toSet = textID;
-	if (toSet.Length() == 0 && strings.Size()) {
-		toSet = strings[0];
+	if (toSet.Length() == 0 && string.Length()) {
+		toSet = string;
 	}
 	else if (goToRewindPoint) {
 		toSet = "Go to rewind point";
@@ -165,28 +166,42 @@ LevelMessageProperty::LevelMessageProperty(Entity* owner, LevelMessage* levelMes
 
 	// Events = Yellow
 	// Text = Gray
-	if (levelMessage->type == LMType::EVENT)
-		QueueGraphics(new GMSetEntityVec4f(owner, GT_COLOR, Vector4f(1, 1, 0, 1)));
-	else 
-		QueueGraphics(new GMSetEntityVec4f(owner, GT_COLOR, Vector4f(0.5f, 0.5f, 0.5f, 1)));
+	ResetColor();
 
 	String toSet = levelMessage->GetEditorText(12);
 
 	QueueGraphics(new GMSetEntitys(owner, GT_TEXT, toSet));
 	QueueGraphics(new GMSetEntityf(owner, GT_TEXT_SIZE_RATIO, 0.3f));
-	QueueGraphics(new GMSetEntityVec4f(owner, GT_TEXT_POSITION, Vector3f(0, rand() % 20 - 10, 0)));
+	QueueGraphics(new GMSetEntityVec4f(owner, GT_TEXT_POSITION, Vector3f(0, int(owner->localPosition.x) % 20 - 10, 0)));
+}
 
+void LevelMessageProperty::ProcessMessage(Message * message) {
+	if (message->msg == "ResetColor") {
+		ResetColor();
+	}
+}
+void LevelMessageProperty::ResetColor() {
+	if (levelMessage->type == LMType::EVENT)
+		QueueGraphics(new GMSetEntityVec4f(owner, GT_COLOR, Vector4f(1, 1, 0, 1)));
+	else
+		QueueGraphics(new GMSetEntityVec4f(owner, GT_COLOR, Vector4f(0.5f, 0.5f, 0.5f, 1)));
 }
 
 void LevelMessage::SpawnEditorEntity() {
 	Vector3f position = Vector3f(PlayingLevelRef().spawnPositionRight, 0, 0);
 	this->editorPosition = position;
 	editorEntity = MapMan.CreateEntity("LevelMessageEntity", ModelMan.GetModel("cube"), TexMan.GetTexture("0xFFFF"), position);
+	editorEntity->localPosition = position; // Set position so it can be used to calc text rendering in next step.
 	editorEntity->properties.Add(new LevelMessageProperty(editorEntity, this));
 }
 void LevelMessage::DespawnEditorEntity() {
 	if (editorEntity)
 		MapMan.DeleteEntity(editorEntity);
 	editorEntity = nullptr;
+}
+
+void LevelMessage::ResetEditorEntityColor() {
+	Message message("ResetColor");
+	editorEntity->ProcessMessage(&message);
 }
 

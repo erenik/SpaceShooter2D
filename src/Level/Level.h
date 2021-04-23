@@ -43,9 +43,11 @@ struct LevelElement {
 	~LevelElement();
 
 	void InvalidateSpawnTime();
+	Time SpawnOrStartTime();
 
-	SpawnGroup * sg = nullptr;
-	LevelMessage * lm = nullptr;
+	SpawnGroup * spawnGroup = nullptr;
+	LevelMessage * levelMessage = nullptr;
+	Time spawnOrStartTime;
 };
 
 class Level 
@@ -131,7 +133,7 @@ public:
 
 
 
-	List<LevelElement> levelElements;
+	List<LevelElement*> levelElements;
 
 	/// New spawn style.
 	List<SpawnGroup*> SpawnGroups();

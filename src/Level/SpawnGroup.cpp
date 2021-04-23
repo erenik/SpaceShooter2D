@@ -47,6 +47,9 @@ Formation GetFormationByName(String name)
 
 
 SpawnGroup::SpawnGroup()
+	: spawnTimeString("0")
+	, formation(Formation::LINE_Y)
+	, size(Vector2f(5,5))
 {
 	spawnTime = Time(TimeType::MILLISECONDS_NO_CALENDER);
 	pausesGameTime = false;
@@ -128,8 +131,8 @@ bool SpawnGroup::Spawn(const Time& levelTime, PlayerShip* playerShip)
 
 	// Shouldn't spawn yet, this check might be better placed before this call though?
 	if (levelTime < spawnTime) {
-		assert(false && "Shouldn't be here.");
-		return false;
+		//assert(false && "Shouldn't be here.");
+		//return false;
 	}
 
 	// Spawn all?

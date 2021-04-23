@@ -5,7 +5,6 @@ defaultTextColor	1 1 1 1
 defaultDividerX	0.4
 // defaultSetDividerInMiddle true
 
-defaultFont img/fonts/font3.png
 defaultFontShader Font
 defaultForceUpperCase false
 defaultFont font3
@@ -55,8 +54,6 @@ IntegerInput Speed
 ColumnList SpawnButtons
 padding 0.1
 
-Button GenerateLevel
-
 parent SpawnButtons
 defaultSizeRatioXY 0.4 1
 
@@ -85,8 +82,3 @@ Checkbox LMGoToRewindPoint "Go to rewind point"
 
 Button DeleteLM
 text "Delete message/event"
-
-/*
-
-
-*/

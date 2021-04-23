@@ -418,7 +418,6 @@ void SpaceShooter2D::ProcessGeneralMessage(Message* message) {
 		if (msg == "OpenLevelEditor")
 		{
 			SetMode(LEVEL_EDITOR);
-			StateMan.QueueState(levelEditor);
 		}
 		if (msg == "NewGame")
 			NewGame();
@@ -901,6 +900,9 @@ void SpaceShooter2D::SetMode(SSGameMode newMode, bool updateUI)
 		break;
 	case SSGameMode::PLAYING_LEVEL:
 		StateMan.QueueState(playingLevel);
+		break;
+	case SSGameMode::LEVEL_EDITOR:
+		StateMan.QueueState(levelEditor);
 		break;
 	default:
 		break;

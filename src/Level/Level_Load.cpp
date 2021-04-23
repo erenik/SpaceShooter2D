@@ -51,7 +51,7 @@ namespace LevelLoader
 			if (message->type == LMType::EVENT)
 				prefix = "Event";
 			LogMain(prefix + " " + message->textID + " added at time: " + message->startTime.ToString("m:S"), INFO);
-			level->levelElements.Add(LevelElement(message));
+			level->levelElements.Add(new LevelElement(message));
 			lastMessage = message;
 			message = nullptr;
 		}
@@ -191,10 +191,10 @@ int Level::SpawnGroupsActive() {
 }
 
 void Level::AddSpawnGroup(SpawnGroup* sg) {
-	levelElements.Add(LevelElement(sg));
+	levelElements.Add(new LevelElement(sg));
 }
 void Level::AddMessage(LevelMessage* lm) {
-	levelElements.Add(LevelElement(lm));
+	levelElements.Add(new LevelElement(lm));
 }
 
 /// Deletes all ships, spawngroups, resets variables to defaults.
@@ -233,10 +233,10 @@ bool Level::Load(String fromSource)
 	/// Clear old stuff.
 	ships.Clear();
 	for (int i = 0; i < levelElements.Size(); ++i) {
-		SAFE_DELETE(levelElements[i].sg);
-		SAFE_DELETE(levelElements[i].lm);
+		SAFE_DELETE(levelElements[i]->spawnGroup);
+		SAFE_DELETE(levelElements[i]->levelMessage);
 	}
-	levelElements.Clear();
+	levelElements.ClearAndDelete();
 
 	/// Set end criteria..
 	endCriteria = Level::NO_MORE_ENEMIES;
@@ -323,7 +323,7 @@ bool Level::Load(String fromSource)
 			lineWithoutEvent.RemoveSurroundingWhitespaces();
 			if (lineWithoutEvent.Length() > 0) {
 				if (!line.Contains("+")) {
-					message->strings.Add(lineWithoutEvent); // By default, add argument to be invoked on passing it.
+					message->string = lineWithoutEvent; // By default, add argument to be invoked on passing it.
 				}
 			}			
 
@@ -347,7 +347,7 @@ bool Level::Load(String fromSource)
 			{
 				String strArg = line - "String";
 				strArg.RemoveSurroundingWhitespaces();
-				message->strings.AddItem(strArg);
+				message->string = strArg;
 			}
 			if (var == "DontSkip")
 			{
@@ -515,7 +515,7 @@ bool Level::Save(String toFile) {
 	// Start writing Events, Messages and SpawnGroups in the order they came, stepping 10ms per loop.
 	Time levelTime = Time(TimeType::MILLISECONDS_NO_CALENDER);
 
-	List<LevelElement> levelElementsToWrite = this->levelElements;
+	List<LevelElement*> levelElementsToWrite = this->levelElements;
 
 	String toWrite;
 
@@ -527,9 +527,9 @@ bool Level::Save(String toFile) {
 	}
 	outFile.WriteLine("// Auto-generated file from saving level in the editor.");
 	for (int i = 0; i < levelElementsToWrite.Size(); ++i) {
-		LevelElement& le = levelElementsToWrite[i];
+		LevelElement& le = *levelElementsToWrite[i];
 
-		SpawnGroup * sg = le.sg;
+		SpawnGroup * sg = le.spawnGroup;
 		if (sg) {
 			// Write it.
 			outFile.WriteLine("SpawnGroup "+sg->spawnTimeString);
@@ -541,14 +541,14 @@ bool Level::Save(String toFile) {
 			outFile.WriteLine("Position xy " + VectorString(sg->position));
 		}
 
-		if (le.lm) {
-			LevelMessage * levelMessage = le.lm;
+		if (le.levelMessage) {
+			LevelMessage * levelMessage = le.levelMessage;
 			outFile.WriteLine((levelMessage->type == LMType::EVENT? "Event " : "Message ") + String(levelMessage->startTimeOffsetSeconds));
 			
 			if (levelMessage->name.Length() > 0)
 				outFile.WriteLine("Name " + levelMessage->name);
-			if (levelMessage->strings.Size() > 0)
-				outFile.WriteLine("String " + levelMessage->strings[0]);
+			if (levelMessage->string.Length() > 0)
+				outFile.WriteLine("String " + levelMessage->string);
 			if (levelMessage->textID.Length() > 0)
 				outFile.WriteLine("TextID " + levelMessage->textID);
 			if (levelMessage->dontSkip)

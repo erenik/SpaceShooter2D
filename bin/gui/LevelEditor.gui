@@ -23,7 +23,7 @@ sizeRatioXY 0.5 0.05
 alignmentXY 0.25 0.95
 
 list lMainMenu
-sizeRatioXY 0.2 0.4
+sizeRatioXY 0.2 0.5
 alignmentXY	0.1 0.6
 padding 0.025
 
@@ -40,9 +40,14 @@ alignmentXY 0.5 0.02
 
 
 parent lMainMenu
-defaultSizeRatioY 0.1
+defaultSizeRatioY 0.08
 defaultTextAlignment Left
 
+Button NewSG 
+text "New Spawn group"
+
+button NewLM
+text "New message/event"
 
 Button PlayTestLevel
 text "Test level"
@@ -56,16 +61,35 @@ button NewLevelButton
 text	"New level"
 onActivate NewLevel
 
-button LoadGameButton
+button SaveLevelButton
 text	"Save level"
 onActivate SaveLevel
 
-DropDownMenu OpenLevelDropDown
-text "Open level"
-onActivate OpenLevel
+button SaveAsButton
+text "Save as ..."
+onActivate PushUI(SaveLevelAsDialog)
+
+button SaveAsButton
+text "Load level"
+onActivate PushUI(LoadLevelFromDialog)
 
 button QuitButton
 text "Quit"
 onActivate	ExitToMainMenu
 
+
+//// Save as... Dialog
+parent LevelEditorScreen
+defaultFontShader Font
+defaultFont Font3
+
+FileBrowser SaveLevelAsDialog
+FileFilter .srl
+sizeRatioXY 1 1
+visible false
+
+FileBrowser LoadLevelFromDialog
+FileFilter .srl
+sizeRatioXY 1 1
+visible false
 

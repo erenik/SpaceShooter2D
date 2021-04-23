@@ -86,7 +86,7 @@ void GenerateLevel (PlayingLevel & playingLevel, String arguments)
 		sg->SetSpawnTime(spawnTime);
 		// Pick a ship
 		sg->shipType = relevantShips[selector.Randi(relevantShips.Size())];
-		level.levelElements.Add(LevelElement(sg));
+		level.levelElements.Add(new LevelElement(sg));
 		// Pick a formation
 		sg->formation = Formation(selector.Randi((int)Formation::FORMATIONS - 2) + 1);
 		

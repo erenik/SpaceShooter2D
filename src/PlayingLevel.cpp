@@ -273,12 +273,14 @@ bool PlayingLevel::CheckForGameOver(int timeInMs) {
 		return true;
 
 	LogMain("Game over! Player HP 0", INFO);
+
+	if (playtestingEditorLevel)
+		SetMode(SSGameMode::LEVEL_EDITOR);
+
+
 	// Game OVER!
 	if (onDeath.Length() == 0) {
-		if (playtestingEditorLevel)
-			SetMode(SSGameMode::LEVEL_EDITOR);
-		else
-			spaceShooter->GameOver();
+		spaceShooter->GameOver();
 	}
 	else if (onDeath.StartsWith("RespawnAt"))
 	{

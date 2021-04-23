@@ -10,6 +10,8 @@ public:
 	LevelEditor();
 	virtual ~LevelEditor();
 
+	void Initialize();
+
 	// Inherited via AppState
 	virtual void OnEnter(AppState* previousState) override;
 	virtual void Process(int timeInMs) override;
@@ -17,7 +19,8 @@ public:
 	virtual void OnExit(AppState* nextState) override;
 	void ProcessMessage(Message* message);
 
-	void LoadMission(Mission * mission);
+	void LoadMission(Mission * mission, bool force);
+	bool LoadLevel(String fromPath);
 
 	void OpenSpawnWindow();
 	void CloseSpawnWindow();
@@ -28,15 +31,21 @@ private:
 	String levelToTest;
 
 
+	void CreateNewSpawnGroup();
+	void CreateNewLevelMessage();
 	void PopulateSpawnWindowLists();
 
-	// Spawns spawn group at appropriate place in the editor for manipulation.
-	void Spawn(SpawnGroup * sg);
-	void Respawn(SpawnGroup * sg);
+	// Spawns at appropriate place in the editor for manipulation.
+	void Spawn(LevelElement* levelElement, const Time atTime);
+	void Respawn(LevelElement* levelElement);
+
+	// Returns a time in editorTime for a spawngroup to spawn at. Expensive ?
+	Time CalculateEditorSpawnTimeFor(LevelElement* levelElement);
 
 	Time PreviousMessageOrSpawnGroupTime(void * comparedTo);
 
-	void UpdatePositionsOfSpawnGroupsAfterIndex(int index);
+	void UpdatePositionsLevelElementsAfter(int index);
+	void UpdatePositionsLevelElementsAfter(LevelElement* levelElement);
 	void UpdateWorldEntityForLevelTime(Time levelTime);
 
 	Mission * editedMission;
@@ -44,6 +53,7 @@ private:
 
 	Entity* levelEntity;
 
+	LevelElement* editedLevelElement;
 	SpawnGroup* editedSpawnGroup;
 	LevelMessage* editedLevelMessage;
 

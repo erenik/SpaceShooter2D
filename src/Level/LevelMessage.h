@@ -19,7 +19,6 @@ enum class LMType {
 
 Time GetSpawnTime(Time lastMessageOrSpawnGroupTime, int secondsToAdd);
 
-
 class LevelMessage 
 {
 public:
@@ -38,9 +37,10 @@ public:
 
 	void SpawnEditorEntity();
 	void DespawnEditorEntity();
+	void ResetEditorEntityColor();
 
 	String condition;
-	List<String> strings;
+	String string;
 	LMType type;
 	int eventType;
 	enum {
@@ -62,8 +62,8 @@ public:
 	// If true, will trigger even when jumping forward in time while testing.
 	bool dontSkip;
 
-private:
 	Entity* editorEntity;
+private:
 };
 
 #include "Entity/EntityProperty.h"
@@ -71,6 +71,8 @@ private:
 class LevelMessageProperty : public EntityProperty {
 public:
 	LevelMessageProperty(Entity* owner, LevelMessage * levelMessage);
+	void ProcessMessage(Message * message) override;
+	void ResetColor();
 	LevelMessage * levelMessage;
 };
 
