@@ -27,27 +27,13 @@ class Camera;
 class Level;
 class LevelMessage;
 class Message;
+struct LevelElement;
 
 extern Camera * levelCamera;
 extern Level * activeLevel;
 
 namespace LevelLoader {
 	void SetGroupDefaults(SpawnGroup* sg);
-};
-
-// Individual parts of a level, usually either a SpawnGroup or a Message/Event
-struct LevelElement {
-	LevelElement();
-	LevelElement(SpawnGroup* sg);
-	LevelElement(LevelMessage* sg);
-	~LevelElement();
-
-	void InvalidateSpawnTime();
-	Time SpawnOrStartTime();
-
-	SpawnGroup * spawnGroup = nullptr;
-	LevelMessage * levelMessage = nullptr;
-	Time spawnOrStartTime;
 };
 
 class Level 

@@ -157,12 +157,14 @@ String LevelMessage::GetEditorText(int maxChars) {
 	return toSet;
 }
 
-LevelMessageProperty::LevelMessageProperty(Entity* owner, LevelMessage* levelMessage)
-	: EntityProperty("LevelMessageProp", -1, owner)
+LevelMessageProperty::LevelMessageProperty(Entity* owner, LevelMessage* levelMessage, LevelElement* levelElement)
+	: EntityProperty("LevelMessageProp", ID, owner)
 	, levelMessage(levelMessage)
+	, levelElement(levelElement)
 {
 	// Set up entity scale, text to be rendered, etc. based on the LevelMessage.
 	QueuePhysics(new PMSetEntity(owner, PT_SET_SCALE, Vector3f(2.0f, 20.f, 2.f)));
+	QueuePhysics(new PMSetEntity(owner, PT_PHYSICS_SHAPE, ShapeType::AABB));
 
 	// Events = Yellow
 	// Text = Gray
@@ -187,12 +189,12 @@ void LevelMessageProperty::ResetColor() {
 		QueueGraphics(new GMSetEntityVec4f(owner, GT_COLOR, Vector4f(0.5f, 0.5f, 0.5f, 1)));
 }
 
-void LevelMessage::SpawnEditorEntity() {
+void LevelMessage::SpawnEditorEntity(LevelElement* levelElement) {
 	Vector3f position = Vector3f(PlayingLevelRef().spawnPositionRight, 0, 0);
 	this->editorPosition = position;
 	editorEntity = MapMan.CreateEntity("LevelMessageEntity", ModelMan.GetModel("cube"), TexMan.GetTexture("0xFFFF"), position);
 	editorEntity->localPosition = position; // Set position so it can be used to calc text rendering in next step.
-	editorEntity->properties.Add(new LevelMessageProperty(editorEntity, this));
+	editorEntity->properties.Add(new LevelMessageProperty(editorEntity, this, levelElement));
 }
 void LevelMessage::DespawnEditorEntity() {
 	if (editorEntity)

@@ -151,7 +151,7 @@ void SpaceShooter2D::OpenLoadScreen()
 	/// Move cursor to first save in the list.
 	if (saves.Size())
 	{
-		saves[0]->Hover();
+		saves[0]->Hover(nullptr);
 	}
 	else 
 	{
@@ -171,12 +171,12 @@ void SpaceShooter2D::OpenJumpDialog()
 		jumpDialog->sizeRatioX = 0.5f;
 		jumpDialog->sizeRatioY = 0.1f;
 		jumpDialog->CreateChildren(nullptr);
-		jumpDialog->input->BeginInput(); // Make its input active straight away.
+		jumpDialog->input->BeginInput(nullptr); // Make its input active straight away.
 		// Add it to the main UI.
 		QueueGraphics(new GMAddUI(jumpDialog, "root"));
 	}
 	else {
-		jumpDialog->input->BeginInput(); // Make its input active straight away.
+		jumpDialog->input->BeginInput(nullptr); // Make its input active straight away.
 		QueueGraphics(GMPushUI::ToUI(jumpDialog, MainWindow()->ui));
 	}
 		// Close it afterwards.

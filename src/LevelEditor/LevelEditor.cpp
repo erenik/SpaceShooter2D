@@ -18,6 +18,7 @@
 #include "PlayingLevel.h"
 #include "Level/SpawnGroup.h"
 #include "Level/LevelMessage.h"
+#include "Level/LevelElement.h"
 
 AppWindow* spawnWindow = 0;
 UserInterface* spawnUI = 0;
@@ -33,6 +34,7 @@ UserInterface* spawnUI = 0;
 LevelEditor::LevelEditor() {
 	id = SSGameMode::LEVEL_EDITOR;
 	Initialize();
+	keyPressedCallback = true;
 }
 
 LevelEditor::~LevelEditor() {
@@ -48,6 +50,8 @@ void LevelEditor::Initialize() {
 // Inherited via AppState
 void LevelEditor::OnEnter(AppState* previousState) {
 	Initialize();
+
+	automaticallySelectClosestElement = true;
 
 	LogMain("Entering Level editor ", INFO);
 
@@ -67,94 +71,129 @@ void LevelEditor::OnEnter(AppState* previousState) {
 	inputMapping.bindings.Add(new Binding(Action::FromString("CenterCamera"), KEY::HOME));
 	inputMapping.bindings.Add(new Binding(Action::CreateStartStopAction("ZoomOut"), KEY::PG_UP));
 	inputMapping.bindings.Add(new Binding(Action::CreateStartStopAction("ZoomIn"), KEY::PG_DOWN));
+	inputMapping.bindings.Add(new Binding(Action::CreateStartStopAction("PanRight"), KEY::RIGHT));
+	inputMapping.bindings.Add(new Binding(Action::CreateStartStopAction("PanLeft"), KEY::LEFT));
+	inputMapping.bindings.Add(new Binding(Action::FromString("ClearSelection"), KEY::ESCAPE));
+
+	// Initially disable some buttons.
+	QueueGraphics(new GMSetUIb("NewSG", GMUI::ENABLED, false));
+	QueueGraphics(new GMSetUIb("NewLM", GMUI::ENABLED, false));
+	QueueGraphics(new GMSetUIb("DeleteElement", GMUI::ENABLED, false));
 }
 
 int nextUpdateInfoMs = 100;
 
-void LevelEditor::Process(int timeInMs) {
-	if (zoomSpeed != 0)
-		levelCamera->SetTargetZoom(levelCamera->CurrentZoom() + zoomSpeed);
+LevelElement* LevelEditor::GetElementClosestToCamera() const {
+	if (levelCamera == nullptr)
+		return nullptr;
 
+	float closestDistance = 100000;
+	LevelElement* closest = nullptr;
+	for (int i = 0; i < editedLevel.levelElements.Size(); ++i) {
+		LevelElement* levelElement = editedLevel.levelElements[i];
+		if (levelElement->spawnGroup) {
+			SpawnGroup* sg = levelElement->spawnGroup;
+			float distance = (sg->spawnedAtPosition - levelCamera->Position()).LengthSquared();
+			if (closest == nullptr || distance < closestDistance) {
+				closestDistance = distance;
+				closest = levelElement;
+			}
+		}
+		else if (levelElement->levelMessage) {
+			LevelMessage * lm = levelElement->levelMessage;
+			float distance = (lm->editorPosition - levelCamera->Position()).LengthSquared();
+			if (closest == nullptr || distance < closestDistance)
+			{
+				closestDistance = distance;
+				closest = levelElement;
+			}
+		}
+	}
+	return closest;
+}
+
+void LevelEditor::Select(LevelElement* levelElement) {
+	editedLevelElement = levelElement;
+	OnEditedLevelElementChanged();
+	automaticallySelectClosestElement = false;
+	if (levelElement) {
+		QueueGraphics(new GMSetUIt("bottomInfoText", GMUI::TEXT, "Selected element"));
+	}
+}
+
+void LevelEditor::OnEditedLevelElementChanged() {
+	if (editedLevelElement == nullptr)
+		return;
+
+	// Print details?
+	if (editedLevelElement->spawnGroup) {
+		SpawnGroup* sg = editedLevelElement->spawnGroup;
+		QueueGraphics(new GMSetUIb("lLevelMessageEditor", GMUI::VISIBILITY, false, spawnUI));
+		QueueGraphics(new GMSetUIt("centerInfoText", GMUI::TEXT, sg ? sg->name : ""));
+		if (sg) {
+			QueueGraphics(new GMSetUIt("SGName", GMUI::STRING_INPUT_TEXT, sg->name, spawnUI));
+			QueueGraphics(new GMSetUIs("SGShipType", GMUI::DROP_DOWN_INPUT_SELECT, sg->shipType, spawnUI));
+			QueueGraphics(new GMSetUIs("SpawnFormation", GMUI::DROP_DOWN_INPUT_SELECT, GetName(sg->formation), spawnUI));
+			QueueGraphics(new GMSetUIv2i("SGPosition", GMUI::VECTOR_INPUT, sg->position, spawnUI));
+			QueueGraphics(new GMSetUIv2i("SGSize", GMUI::VECTOR_INPUT, sg->size, spawnUI));
+			QueueGraphics(new GMSetUIi("SGAmount", GMUI::INTEGER_INPUT, sg->number, spawnUI));
+			QueueGraphics(new GMSetUIs("SGSpawnTime", GMUI::STRING_INPUT_TEXT, sg->spawnTimeString, spawnUI));
+
+
+			if (editedSpawnGroup != nullptr)
+				QueueGraphics(new GMSetEntityVec4f(editedSpawnGroup->GetEntities(), GT_COLOR, Vector4f(1, 1, 1, 1)));
+			editedSpawnGroup = sg;
+			QueueGraphics(new GMSetEntityVec4f(editedSpawnGroup->GetEntities(), GT_COLOR, Vector4f(3, 3, 3, 1)));
+		}
+
+		if (editedLevelMessage != nullptr)
+			editedLevelMessage->ResetEditorEntityColor();
+		editedLevelMessage = nullptr;
+	}
+	else if (editedLevelElement->levelMessage) {
+		auto lm = editedLevelElement->levelMessage;
+		if (editedSpawnGroup != nullptr)
+			QueueGraphics(new GMSetEntityVec4f(editedSpawnGroup->GetEntities(), GT_COLOR, Vector4f(1, 1, 1, 1)));
+		editedSpawnGroup = nullptr;
+
+		QueueGraphics(new GMSetUIt("centerInfoText", GMUI::TEXT, lm->GetEditorText(20)));
+		QueueGraphics(new GMSetUIb("lLevelMessageEditor", GMUI::VISIBILITY, true, spawnUI));
+		QueueGraphics(new GMSetUIs("LMName", GMUI::STRING_INPUT_TEXT, lm->name, spawnUI));
+		QueueGraphics(new GMSetUIi("LMStartTime", GMUI::INTEGER_INPUT, lm->startTimeOffsetSeconds, spawnUI));
+		QueueGraphics(new GMSetUIs("LMTextID", GMUI::STRING_INPUT_TEXT, lm->textID, spawnUI));
+		QueueGraphics(new GMSetUIs("LMScript", GMUI::STRING_INPUT_TEXT, (lm->string), spawnUI));
+		QueueGraphics(new GMSetUIs("LMCondition", GMUI::STRING_INPUT_TEXT, lm->condition, spawnUI));
+		QueueGraphics(new GMSetUIb("LMGoToRewindPoint", GMUI::TOGGLED, lm->goToRewindPoint, spawnUI));
+
+		if (editedLevelMessage != nullptr)
+			editedLevelMessage->ResetEditorEntityColor();
+
+		editedLevelMessage = lm;
+		QueueGraphics(new GMSetEntityVec4f(editedLevelMessage->editorEntity, GT_COLOR, Vector4f(3, 3, 3, 1)));
+	}
+}
+
+void LevelEditor::Process(int timeInMs) {
+	if (levelCamera) {
+		if (zoomSpeed != 0)
+			levelCamera->SetTargetZoom(levelCamera->CurrentZoom() + zoomSpeed);
+
+		levelCamera->velocity = cameraPan;
+		levelCamera->scaleSpeedWithZoom = true;
+	}
 
 	nextUpdateInfoMs -= timeInMs;
 	if (nextUpdateInfoMs < 0) {
 		nextUpdateInfoMs = 200;
-		auto spawnGroups = editedLevel.SpawnGroups();
-		editedLevelElement = nullptr;
-		float closestDistance = 100000;
-		for (int i = 0; i < editedLevel.levelElements.Size(); ++i) {
-			LevelElement& levelElement = *editedLevel.levelElements[i];
-			if (levelElement.spawnGroup) {
-				SpawnGroup* sg = levelElement.spawnGroup;
-				float distance = (sg->spawnedAtPosition - levelCamera->Position()).LengthSquared();
-				if (editedLevelElement == nullptr || distance < closestDistance) {
-					closestDistance = distance;
-					editedLevelElement = &levelElement;
-				}
-			}
-			else if (levelElement.levelMessage) {
-				LevelMessage * lm = levelElement.levelMessage;
-				float distance = (lm->editorPosition - levelCamera->Position()).LengthSquared();
-				if (editedLevelElement == nullptr || distance < closestDistance)
-				{
-					closestDistance = distance;
-					editedLevelElement = &levelElement;
-				}
-			}
-		}
+		
+		QueueGraphics(new GMSetUIb("DeleteElement", GMUI::ENABLED, editedLevelElement != nullptr));
 
-		if (editedLevelElement == nullptr)
-			return;
-
-		// Print details?
-		if (editedLevelElement->spawnGroup) {
-			SpawnGroup* sg = editedLevelElement->spawnGroup;
-			QueueGraphics(new GMSetUIb("lLevelMessageEditor", GMUI::VISIBILITY, false, spawnUI));
-			QueueGraphics(new GMSetUIt("centerInfoText", GMUI::TEXT, sg ? sg->name : ""));
-			if (sg) {
-				QueueGraphics(new GMSetUIt("SGName", GMUI::STRING_INPUT_TEXT, sg->name, spawnUI));
-				QueueGraphics(new GMSetUIs("SGShipType", GMUI::DROP_DOWN_INPUT_SELECT, sg->shipType, spawnUI));
-				QueueGraphics(new GMSetUIs("SpawnFormation", GMUI::DROP_DOWN_INPUT_SELECT, GetName(sg->formation), spawnUI));
-				QueueGraphics(new GMSetUIv2i("SGPosition", GMUI::VECTOR_INPUT, sg->position, spawnUI));
-				QueueGraphics(new GMSetUIv2i("SGSize", GMUI::VECTOR_INPUT, sg->size, spawnUI));
-				QueueGraphics(new GMSetUIi("SGAmount", GMUI::INTEGER_INPUT, sg->number, spawnUI));
-				QueueGraphics(new GMSetUIs("SGSpawnTime", GMUI::STRING_INPUT_TEXT, sg->spawnTimeString, spawnUI));
-				
-
-				if (editedSpawnGroup != nullptr)
-					QueueGraphics(new GMSetEntityVec4f(editedSpawnGroup->GetEntities(), GT_COLOR, Vector4f(1, 1, 1, 1)));
-				editedSpawnGroup = sg;
-				QueueGraphics(new GMSetEntityVec4f(editedSpawnGroup->GetEntities(), GT_COLOR, Vector4f(3, 3, 3, 1)));
-			}
-
-			if (editedLevelMessage != nullptr)
-				editedLevelMessage->ResetEditorEntityColor();
-			editedLevelMessage = nullptr;
-		}
-		else if (editedLevelElement->levelMessage) {
-			auto lm = editedLevelElement->levelMessage;
-			if (editedSpawnGroup != nullptr)
-				QueueGraphics(new GMSetEntityVec4f(editedSpawnGroup->GetEntities(), GT_COLOR, Vector4f(1, 1, 1, 1)));
-			editedSpawnGroup = nullptr;
-
-			QueueGraphics(new GMSetUIt("centerInfoText", GMUI::TEXT, lm->GetEditorText(20)));
-			QueueGraphics(new GMSetUIb("lLevelMessageEditor", GMUI::VISIBILITY, true, spawnUI));
-			QueueGraphics(new GMSetUIs("LMName", GMUI::STRING_INPUT_TEXT, lm->name, spawnUI));
-			QueueGraphics(new GMSetUIi("LMStartTime", GMUI::INTEGER_INPUT, lm->startTimeOffsetSeconds, spawnUI));
-			QueueGraphics(new GMSetUIs("LMTextID", GMUI::STRING_INPUT_TEXT, lm->textID, spawnUI));
-			QueueGraphics(new GMSetUIs("LMScript", GMUI::STRING_INPUT_TEXT, (lm->string), spawnUI));
-			QueueGraphics(new GMSetUIs("LMCondition", GMUI::STRING_INPUT_TEXT, lm->condition, spawnUI));
-			QueueGraphics(new GMSetUIb("LMGoToRewindPoint", GMUI::TOGGLED, lm->goToRewindPoint, spawnUI));
-
-			if (editedLevelMessage != nullptr)
-				editedLevelMessage->ResetEditorEntityColor();
-
-			editedLevelMessage = lm;
-			QueueGraphics(new GMSetEntityVec4f(editedLevelMessage->editorEntity, GT_COLOR, Vector4f(3, 3, 3, 1)));
+		if (automaticallySelectClosestElement) {
+			editedLevelElement = nullptr;
+			editedLevelElement = GetElementClosestToCamera();
+			OnEditedLevelElementChanged();
 		}
 	}
-	
-
 }
 
 void LevelEditor::Render(GraphicsState* graphicsState) {
@@ -168,6 +207,15 @@ void LevelEditor::OnExit(AppState* nextState) {
 	if (spawnWindow)
 		spawnWindow->Hide();
 }
+
+/// Callback from the Input-manager, query it for additional information as needed.
+void LevelEditor::KeyPressed(int keyCode, bool downBefore) {
+	//if (keyCode == KEY::ESCAPE) {
+	//	if (automaticallySelectClosestElement == false)
+	//		automaticallySelectClosestElement = true;
+	//}
+}
+
 
 void LevelEditor::ProcessMessage(Message* message) {
 	String msg = message->msg;
@@ -288,6 +336,9 @@ void LevelEditor::ProcessMessage(Message* message) {
 			CreateNewSpawnGroup();
 		else if (msg == "NewLM")
 			CreateNewLevelMessage();
+		else if (msg == "DeleteElement") {
+			DeleteEditedElement();
+		}
 		else if (msg == "NewLevel") {
 			editedLevel.source = "newlevel.srl"; // Clear it
 			editedLevel.levelElements.ClearAndDelete();
@@ -306,28 +357,13 @@ void LevelEditor::ProcessMessage(Message* message) {
 			SetMode(SSGameMode::PLAYING_LEVEL);
 		}
 		else if (msg == "DeleteLM") {
-			// Despawn entiti representin it.
-			editedLevelMessage->DespawnEditorEntity();
-			int index = editedLevel.GetElementIndexOf(editedLevelMessage);
-			editedLevel.levelElements.RemoveIndex(index, ListOption::RETAIN_ORDER);
-			delete editedLevelMessage;
-			// Update the remaining spawngroups after here.
-			UpdatePositionsLevelElementsAfter(index - 1);
-			editedLevelMessage = nullptr;
+			DeleteEditedElement();
 		}
 		else if (msg == "CreateNewGroup") {
 			CreateNewSpawnGroup();
 		}
 		else if (msg == "DeleteSG") {
-			if (editedSpawnGroup) {
-				editedSpawnGroup->Despawn();
-				int index = editedLevel.GetElementIndexOf(editedSpawnGroup);
-				editedLevel.levelElements.RemoveIndex(index, ListOption::RETAIN_ORDER);
-				delete editedSpawnGroup;
-				// Update the remaining spawngroups after here.
-				UpdatePositionsLevelElementsAfter(index - 1);
-				editedSpawnGroup = nullptr;
-			}
+			DeleteEditedElement();
 		}
 		else if (msg == "SaveLevel") {
 			editedLevel.Save(editedLevel.source);
@@ -340,8 +376,8 @@ void LevelEditor::ProcessMessage(Message* message) {
 				LoadLevel(editedLevel.source);
 		}
 		else if (msg == "CenterCamera") { 
-			// Do stuff
-			QueueGraphics(new GMSetCamera(levelCamera, CT_POSITION, Vector3f(0, 0, 10)));
+			if (levelCamera)
+				QueueGraphics(new GMSetCamera(levelCamera, CT_POSITION, Vector3f(0, 0, 10)));
 		}
 		else if (msg == "OpenLevel") {
 			auto missions = MissionsMan.GetMissions();
@@ -360,19 +396,63 @@ void LevelEditor::ProcessMessage(Message* message) {
 		else if (msg == "StartZoomOut") {
 			zoomSpeed = -2;
 		}
+		else if (msg == "StartPanRight")
+			cameraPan.x = 1;
+		else if (msg == "StopPanRight" || msg == "StopPanLeft")
+			cameraPan.x = 0;
+		else if (msg == "StartPanLeft")
+			cameraPan.x = -1;
+		else if (msg == "ClearSelection") {
+			Select(nullptr);
+			automaticallySelectClosestElement = true;
+			QueueGraphics(new GMSetUIt("bottomInfoText", GMUI::TEXT, "Cleared selection."));
+		}
+	}
+	else if (message->type == MessageType::RAYCAST) {
+		Raycast * raycast = (Raycast*)message;
+		if (raycast->isecs.Size()) {
+			auto intersection = raycast->isecs[0];
+			for (int i = 0; i < raycast->isecs.Size(); ++i) {
+				auto entity = raycast->isecs[i].entity;
+				for (int p = 0; p < entity->properties.Size(); ++p) {
+					auto entityProperty = entity->properties[p];
+					auto lmProperty = (LevelMessageProperty*)entity->GetProperty(LevelMessageProperty::ID);
+					auto sgProperty = (SpawnGroupProperty*)entity->GetProperty(SpawnGroupProperty::ID);
+					if (lmProperty)
+						Select(lmProperty->levelElement);
+					else if (sgProperty)
+						Select(sgProperty->levelElement);
+				}
+			}
+		}
 	}
 	else if (message->type == MessageType::MOUSE_MESSAGE) {
 		// do nothing
 		MouseMessage * mm = (MouseMessage*)message;
 		switch (mm->interaction) {
 		case MouseMessage::LDOWN:
-			movingCamera = true;
+			movingCamera = true; 
+			screenDistancePanned = 0;
 			break;
-		case MouseMessage::LUP:
+		case MouseMessage::LUP: {
 			movingCamera = false;
+			if (mm->element == nullptr && screenDistancePanned < 5) {
+				// Do some raytracing or just check if an enity is near here?
+				AppWindow * activeWindow = ActiveWindow();
+				if (activeWindow != MainWindow())
+					return;
+				// Try to get ray.
+				Ray ray;
+				if (!activeWindow->GetRayFromScreenCoordinates(mm->coords, ray))
+					return;
+				QueuePhysics(new PMRaycast(ray));
+			}
+			break;
+		}
 		case MouseMessage::MOVE:
 			// Pan o-o
 			if (levelCamera && movingCamera && mm->element == nullptr) {
+				screenDistancePanned += (mm->coords - previousMousePosition).Length();
 				levelCamera->position -= Vector2f(mm->coords - previousMousePosition) * 0.005f * levelCamera->CurrentZoom();
 			}
 			break;
@@ -389,9 +469,26 @@ void LevelEditor::ProcessMessage(Message* message) {
 	ProcessGeneralMessage(message);
 }
 
-void LevelEditor::CreateNewSpawnGroup() {
+void LevelEditor::DeleteEditedElement() {
+	int index = editedLevel.levelElements.GetIndexOf(editedLevelElement);
+	editedLevelElement->Despawn();
+	editedLevel.levelElements.RemoveIndex(index, ListOption::RETAIN_ORDER);
+
 	if (editedLevelElement) {
-		SpawnGroup * sg;
+		SAFE_DELETE(editedLevelElement->spawnGroup);
+		SAFE_DELETE(editedLevelElement->levelMessage);
+	}
+	SAFE_DELETE(editedLevelElement);
+
+	// Update the remaining spawngroups after here.
+	UpdatePositionsLevelElementsAfter(index - 1);
+
+	automaticallySelectClosestElement = true; // Auto-target new elements if deleting currently selected one(s)
+}
+
+void LevelEditor::CreateNewSpawnGroup() {
+	SpawnGroup * sg;
+	if (editedLevelElement) {
 		if (editedLevelElement->spawnGroup)
 			sg = new SpawnGroup(*editedSpawnGroup); // Copy over relevant data if available.
 		else
@@ -399,32 +496,37 @@ void LevelEditor::CreateNewSpawnGroup() {
 		int index = editedLevel.levelElements.GetIndexOf(editedLevelElement);
 		editedLevel.levelElements.Insert(new LevelElement(sg), index + 1); // Insert one slot after the current selection.
 		editedLevelElement = editedLevel.levelElements[index + 1];
+		UpdatePositionsLevelElementsAfter(index - 1);
 	}
 	else {
-		SpawnGroup * sg = new SpawnGroup();
+		sg = new SpawnGroup();
 		editedLevel.levelElements.Add(new LevelElement(sg));
 		editedLevelElement = editedLevel.levelElements[0];
 	}
+	if (sg)
+		QueueGraphics(new GMSetUIt("bottomInfoText", GMUI::TEXT, "New Spawn group created: " + sg->name));
 }
 
 void LevelEditor::CreateNewLevelMessage() {
+	LevelMessage * lm;
 	if (editedLevelElement) {
-		LevelMessage * lm;
 		if (editedLevelElement->levelMessage)
 			lm = new LevelMessage(*editedLevelMessage); // Copy over relevant data if available.
 		else
 			lm = new LevelMessage();
-		int index = editedLevel.GetElementIndexOf(editedLevelMessage);
+		int index = editedLevel.levelElements.GetIndexOf(editedLevelElement);
 		editedLevel.levelElements.Insert(new LevelElement(lm), index + 1); // Insert one slot after the current selection.
 		editedLevelElement = editedLevel.levelElements[index + 1];
 	}
 	else {
-		LevelMessage * lm = new LevelMessage();
+		lm = new LevelMessage();
 		editedLevel.levelElements.Add(new LevelElement(lm));
 		editedLevelElement = editedLevel.levelElements[0];
 	}
 	Spawn(editedLevelElement, CalculateEditorSpawnTimeFor(editedLevelElement));
 	UpdatePositionsLevelElementsAfter(editedLevelElement);
+	if (lm)
+		QueueGraphics(new GMSetUIt("bottomInfoText", GMUI::TEXT, "New LevelMessage created: " + lm->name));
 }
 
 void LevelEditor::LoadMission(Mission * mission, bool force) {
@@ -486,6 +588,13 @@ bool LevelEditor::LoadLevel(String fromPath) {
 		LevelElement* le = editedLevel.levelElements[i];
 		Spawn(le, CalculateEditorSpawnTimeFor(le));
 	}
+
+
+	// Enable buttons for creating new elements.
+	QueueGraphics(new GMSetUIb("NewSG", GMUI::ENABLED, true));
+	QueueGraphics(new GMSetUIb("NewLM", GMUI::ENABLED, true));
+
+
 	return true;
 }
 
@@ -541,10 +650,10 @@ void LevelEditor::Spawn(LevelElement* levelElement, const Time atTime) {
 	UpdateWorldEntityForLevelTime(atTime);
 	if (levelElement->spawnGroup) {
 		// Spawn until it returns false
-		while (!levelElement->spawnGroup->Spawn(atTime, nullptr));
+		while (!levelElement->spawnGroup->Spawn(atTime, nullptr, levelElement));
 	}
 	else if (levelElement->levelMessage) {
-		levelElement->levelMessage->SpawnEditorEntity();
+		levelElement->levelMessage->SpawnEditorEntity(levelElement);
 	}
 
 }
@@ -618,6 +727,8 @@ void LevelEditor::UpdatePositionsLevelElementsAfter(int index) {
 	if (index < 0)
 		index = 0;
 	if (index > editedLevel.levelElements.Size())
+		return;
+	if (editedLevel.levelElements.Size() == 0)
 		return;
 	index = index % editedLevel.levelElements.Size();
 	UpdatePositionsLevelElementsAfter(editedLevel.levelElements[index]);

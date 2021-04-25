@@ -50,7 +50,10 @@ SpawnGroup::SpawnGroup()
 	: spawnTimeString("0")
 	, formation(Formation::LINE_Y)
 	, size(Vector2f(5,5))
+	, number(3)
 {
+	if (Ship::types.Size() > 0)
+		shipType = Ship::types[0]->name; // Default to first ship type of those loaded?
 	spawnTime = Time(TimeType::MILLISECONDS_NO_CALENDER);
 	pausesGameTime = false;
 	spawnIntervalMsBetweenEachShipInFormation = 0;
@@ -100,12 +103,17 @@ Ship* SpawnGroup::GetNextShipToSpawn() {
 	return nullptr;
 }
 
-void SpawnGroup::SpawnAllShips(PlayerShip* playerShip) {
+void SpawnGroup::SpawnAllShips(PlayerShip* playerShip, LevelElement* levelElement) {
 	for (int i = 0; i < ships.Size(); ++i)
 	{
 		Ship* ship = ships[i];
 		spawnedAtPosition = CalcGroupSpawnPosition();
-		ship->Spawn(ship->position + spawnedAtPosition, 0, playerShip);
+		auto entitiesSpawned = ship->Spawn(ship->position + spawnedAtPosition, 0, playerShip);
+		for (int e = 0; e < entitiesSpawned.Size(); ++e) {
+			auto entity = entitiesSpawned[e];
+			entity->properties.Add(new SpawnGroupProperty(entity, this, levelElement));
+		}
+
 		activeLevel->ships.AddItem(ship);
 		++shipsSpawned;
 	}
@@ -123,7 +131,7 @@ Random spawnGroupRand;
 	Returns true if it has finished spawning. 
 	Call again until it returns true each iteration (required for some formations).
 */
-bool SpawnGroup::Spawn(const Time& levelTime, PlayerShip* playerShip)
+bool SpawnGroup::Spawn(const Time& levelTime, PlayerShip* playerShip, LevelElement* levelElement)
 {
 	/// Prepare spawning.
 	if (!preparedForSpawning)
@@ -138,7 +146,7 @@ bool SpawnGroup::Spawn(const Time& levelTime, PlayerShip* playerShip)
 	// Spawn all?
 	if (spawnIntervalMsBetweenEachShipInFormation == 0)
 	{
-		SpawnAllShips(playerShip);
+		SpawnAllShips(playerShip, levelElement);
 		return true;
 	}
 	/// Spawn one at a time?
@@ -154,7 +162,10 @@ bool SpawnGroup::Spawn(const Time& levelTime, PlayerShip* playerShip)
 		if (lastSpawn.Seconds() == 0 || (levelTime - lastSpawn).Milliseconds() > spawnIntervalMsBetweenEachShipInFormation)
 		{
 			spawnedAtPosition = CalcGroupSpawnPosition();
-			ship->Spawn(ship->position + spawnedAtPosition, 0, playerShip);
+			auto entitiesSpawned = ship->Spawn(ship->position + spawnedAtPosition, 0, playerShip);
+			for (int i = 0; i < entitiesSpawned.Size(); ++i) {
+				entitiesSpawned[i]->properties.Add(new SpawnGroupProperty(entitiesSpawned[i], this, levelElement));
+			}
 
 			activeLevel->ships.AddItem(ship);
 			lastSpawn = levelTime;

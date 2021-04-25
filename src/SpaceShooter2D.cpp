@@ -79,12 +79,15 @@ String onDeath; // What happens when the player dies?
 
 String SSGameModeString(SSGameMode mode) {
 	switch (mode) {
+	case SSGameMode::START_UP: return "Start up";
 	case SSGameMode::MAIN_MENU: return "Main Menu";
 	case SSGameMode::NEW_GAME: return "New Game";
 	case SSGameMode::EDITING_OPTIONS: return "Options";
 	case SSGameMode::IN_HANGAR: return "In Hangar";
 	case SSGameMode::PLAYING_LEVEL: return "Playing level";
+	case SSGameMode::LEVEL_EDITOR: return "Level editor";
 	default:
+		assert(false && "Add it");
 		break;
 	}
 	return "" + mode;
@@ -812,9 +815,11 @@ void SpaceShooter2D::MouseClick(AppWindow * appWindow, bool down, int x, int y, 
 {
 	if (down)
 	{
+		/*
 		Ray ray; 
 		appWindow->GetRayFromScreenCoordinates(x,y, ray);
 		PhysicsMan.QueueMessage(new PMRaycast(ray));
+		*/
 	}
 }
 

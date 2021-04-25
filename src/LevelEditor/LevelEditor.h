@@ -10,7 +10,14 @@ public:
 	LevelEditor();
 	virtual ~LevelEditor();
 
+
+	LevelElement* GetElementClosestToCamera() const;
+	void Select(LevelElement* levelElement);
+	void OnEditedLevelElementChanged();
 	void Initialize();
+
+	/// Callback from the Input-manager, query it for additional information as needed.
+	virtual void KeyPressed(int keyCode, bool downBefore) override;
 
 	// Inherited via AppState
 	virtual void OnEnter(AppState* previousState) override;
@@ -26,6 +33,8 @@ public:
 	void CloseSpawnWindow();
 
 	String LevelToTest() { return levelToTest; };
+
+	void DeleteEditedElement();
 
 private:
 	String levelToTest;
@@ -57,8 +66,12 @@ private:
 	SpawnGroup* editedSpawnGroup;
 	LevelMessage* editedLevelMessage;
 
+	// Default mode. Clicking another element will set this to false. Escape should set it to true again.
+	bool automaticallySelectClosestElement = true;
 	bool movingCamera = false;
 	Vector2i previousMousePosition;
 	float zoomSpeed = 0;
+	Vector2f cameraPan;
+	float screenDistancePanned;
 };
 

@@ -15,7 +15,7 @@ void SpaceShooter2D::SetupUIStyling() {
 	TextFont::defaultFontSource = "img/fonts/Font_test_BW.png";
 	UIElement::defaultForceUpperCase = true;
 
-	UIElement::defaultTextColor = Color::ColorByHexName("#8f1767ff");
+	//UIElement::defaultTextColor = Color::ColorByHexName("#8f1767ff");
 	UIElement::defaultTextureSource = "0x22AA";
 
 	UIToggleButton::defaultOnToggledTexture = "";
@@ -36,7 +36,7 @@ void SpaceShooter2D::SetupUIStyling() {
 	UIScrollBarHandle::defaultLockHeight = 0;
 	UIScrollBarHandle::defaultBorderOffset = 2;
 
-	TextFont::idleColor = Color::ColorByHexName("#8f1767ff");
-	TextFont::onHoverColor = Color::ColorByHexName("#fb6b1dff");
-	TextFont::onActiveColor = Color::ColorByHexName("#ffffffff");
+	TextFont::colors = TextColors(Color::ColorByHexName("#8f1767ff")
+		, Color::ColorByHexName("#fb6b1dff")
+		, Color::ColorByHexName("#ffffffff"));
 }

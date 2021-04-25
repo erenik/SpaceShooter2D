@@ -2,44 +2,28 @@
 /// 2015-01-21
 /// Level.
 
-#include "../SpaceShooter2D.h"
-#include "SpawnGroup.h"
 #include "Text/TextManager.h"
-#include "LevelMessage.h"
-#include "Explosion.h"
-#include "File/LogFile.h"
+// Engine
 #include "Message/MathMessage.h"
 #include "StateManager.h"
+#include "OS/Sleep.h"
+#include "File/LogFile.h"
+
+// Game-specific
+#include "SpawnGroup.h"
+#include "../SpaceShooter2D.h"
+#include "LevelMessage.h"
+#include "Explosion.h"
 #include "../Properties/ExplosionProperty.h"
 #include "PlayingLevel.h"
-#include "OS/Sleep.h"
 #include "Base/PlayerShip.h"
 #include "Test/TutorialTests.h"
+#include "LevelElement.h"
 
 Camera * levelCamera = NULL;
 
 
 Level * activeLevel = NULL;
-
-LevelElement::LevelElement(): spawnGroup(nullptr), levelMessage(nullptr) {}
-
-LevelElement::LevelElement(SpawnGroup* spawnGroup)
-: spawnGroup(spawnGroup), levelMessage(nullptr), spawnOrStartTime(spawnGroup->spawnTime){
-}
-LevelElement::LevelElement(LevelMessage* levelMessage)
-: levelMessage(levelMessage), spawnGroup(nullptr), spawnOrStartTime(levelMessage->startTime){
-}
-LevelElement::~LevelElement() {
-	SAFE_DELETE(levelMessage);
-	SAFE_DELETE(spawnGroup);
-}
-
-Time LevelElement::SpawnOrStartTime() {
-	if (spawnGroup)
-		return spawnGroup->spawnTime;
-	else if (levelMessage)
-		return levelMessage->startTime;
-}
 
 
 Level::Level()
@@ -232,7 +216,7 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 		{
 			LogMain("Spawning group " + sg->name + " at time " + spawnTime, INFO);
 			playingLevel.SetLastSpawnGroup(sg);
-			sg->Spawn(playingLevel.levelTime, playingLevel.playerShip);
+			sg->Spawn(playingLevel.levelTime, playingLevel.playerShip, sg->levelElement);
 			continue;
 		}
 	}
@@ -604,7 +588,7 @@ void Level::HideLevelMessage(LevelMessage * levelMessage) {
 	if (levelMessage == nullptr)
 		levelMessage = activeLevelMessage;
 	if (levelMessage == nullptr) {
-		LogMain("No message to hide", ERROR);
+		LogMain("No message to hide", LogLevel::ERROR);
 		return;
 	}
 	levelMessage->Hide(PlayingLevelRef());
@@ -644,11 +628,4 @@ int Level::GetElementIndexOf(SpawnGroup* spawnGroup) {
 			return i;
 	}
 	return -1;
-}
-
-void LevelElement::InvalidateSpawnTime() {
-	if (spawnGroup)
-		spawnGroup->InvalidateSpawnTime();
-	if (levelMessage)
-		levelMessage->startTime = Time(TimeType::MILLISECONDS_NO_CALENDER);
 }

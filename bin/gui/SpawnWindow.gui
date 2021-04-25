@@ -1,7 +1,7 @@
 // Main UI when starting up.
 
 defaultTexture	0x2244
-defaultTextColor	1 1 1 1
+defaultTextColor	0xAAAAAAFF
 defaultDividerX	0.4
 // defaultSetDividerInMiddle true
 

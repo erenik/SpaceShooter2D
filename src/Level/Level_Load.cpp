@@ -2,13 +2,17 @@
 /// 2015-01-21
 /// Level.
 
-#include "../SpaceShooter2D.h"
-#include "SpawnGroup.h"
 #include "Text/TextManager.h"
 #include "LevelMessage.h"
-#include "File/LogFile.h"
+//#include "File/LogFile.h"
+
+// Gamespecific
+#include "../SpaceShooter2D.h"
+#include "SpawnGroup.h"
 #include "PlayingLevel.h"
-#include <optional>
+#include "LevelElement.h"
+
+#include "File/LogFile.h"
 
 namespace LevelLoader 
 {

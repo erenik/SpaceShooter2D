@@ -561,7 +561,7 @@ void PlayingLevel::ProcessMessage(Message* message)
 				String str = sg.GetLevelCreationString(flyTime);
 				File::AppendToFile(SPAWNED_ENEMIES_LOG, str);
 				LogMain(str, INFO);
-				sg.Spawn(levelTime, playerShip);
+				sg.Spawn(levelTime, playerShip, nullptr);
 			}
 			storedTestGroups.Clear();
 		}

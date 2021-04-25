@@ -400,7 +400,7 @@ void InHangar::UpdateUpgradesLists()
 		// Skip irrelevant gear depending on current filter.
 		if (gearCategory != gear.type && gearCategory != Gear::Type::All)
 			continue;
-		Color textColor = UIElement::defaultTextColor;
+		TextColors* textColors = UIElement::defaultTextColors;
 		UIElement * buyProductButton = buyProductButtonTemplate->Copy();
 		buyProductButton->name += gear.name;
 

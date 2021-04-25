@@ -45,7 +45,7 @@ void main(void)
 	gl_FragColor += highlightColorVec4;	
 	// fb6b1dff
 
-	//gl_FragColor.x = 0.5;
+	//gl_FragColor.xyz = vec3(1,1,1);
 	
 	if (debugColor.x > 0)
 		gl_FragColor = vec4(debugColor.xyz, 1);

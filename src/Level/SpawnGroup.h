@@ -30,6 +30,7 @@ enum class Formation {
 String GetName(Formation forFormationType);
 Formation GetFormationByName(String name);
 
+struct LevelElement;
 
 class SpawnGroup 
 {
@@ -47,7 +48,7 @@ public:
 		Returns true if it has finished spawning. 
 		Call again until it returns true each iteration (required for some formations).
 	*/	
-	bool Spawn(const Time& levelTime, PlayerShip* playerShip);
+	bool Spawn(const Time& levelTime, PlayerShip* playerShip, LevelElement* levelElement);
 	/// To avoid spawning later.
 	void SetFinishedSpawning();
 	void OnFinishedSpawning();
@@ -77,6 +78,7 @@ public:
 	static Time SpawnTimeFromString(String spawnTimeStr, Time lastMessageOrSpawnGroupTime);
 
 	/// o.o
+	LevelElement* levelElement;
 	String name;
 	String shipType;
 	bool playerSurvived; // player survived the way?
@@ -115,7 +117,7 @@ private:
 
 
 	Ship* GetNextShipToSpawn();
-	void SpawnAllShips(PlayerShip* playerShip);
+	void SpawnAllShips(PlayerShip* playerShip, LevelElement* levelElement);
 
 	bool finishedSpawning;
 	AETime lastSpawn;
@@ -126,6 +128,21 @@ private:
 	void AddShipAtPosition(ConstVec3fr position);
 };
 
+#include "Entity/EntityProperty.h"
+
+struct LevelElement;
+
+class SpawnGroupProperty : public EntityProperty {
+public:
+	static const int ID = EntityPropertyID::CUSTOM_GAME_2;
+	SpawnGroupProperty(Entity* owner, SpawnGroup * spawnGroup, LevelElement* levelElement) : EntityProperty("SpawnGroupProperty", ID, owner)
+		, spawnGroup(spawnGroup), levelElement(levelElement) {
+	}
+	~SpawnGroupProperty() {};
+
+	SpawnGroup* spawnGroup;
+	LevelElement* levelElement;
+};
 
 
 #endif

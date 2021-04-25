@@ -1,9 +1,11 @@
 //Skapad 22-02-2016 kl 10:33 på morgonen. Det var en måndag.
+
 #include "Level.h"
 #include "../SpaceShooter2D.h"
 #include "SpawnGroup.h"
 #include "../MovementPattern.h"
 #include "PlayingLevel.h"
+#include "LevelElement.h"
 
 int difficulty = 1;
 int defaultDelay = 0;

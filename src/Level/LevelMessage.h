@@ -16,6 +16,7 @@ enum class LMType {
 	EVENT,
 };
 
+struct LevelElement;
 
 Time GetSpawnTime(Time lastMessageOrSpawnGroupTime, int secondsToAdd);
 
@@ -35,7 +36,7 @@ public:
 	// Depends on type, and stuff.
 	String GetEditorText(int maxChars);
 
-	void SpawnEditorEntity();
+	void SpawnEditorEntity(LevelElement* levelElement);
 	void DespawnEditorEntity();
 	void ResetEditorEntityColor();
 
@@ -63,17 +64,22 @@ public:
 	bool dontSkip;
 
 	Entity* editorEntity;
+
 private:
 };
 
 #include "Entity/EntityProperty.h"
 
+struct LevelElement;
+
 class LevelMessageProperty : public EntityProperty {
 public:
-	LevelMessageProperty(Entity* owner, LevelMessage * levelMessage);
+	static const int ID = EntityPropertyID::CUSTOM_GAME_1;
+	LevelMessageProperty(Entity* owner, LevelMessage * levelMessage, LevelElement* levelElement);
 	void ProcessMessage(Message * message) override;
 	void ResetColor();
 	LevelMessage * levelMessage;
+	LevelElement* levelElement;
 };
 
 #endif // LEVEL_MSG_H
