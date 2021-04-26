@@ -86,6 +86,7 @@ String SSGameModeString(SSGameMode mode) {
 	case SSGameMode::IN_HANGAR: return "In Hangar";
 	case SSGameMode::PLAYING_LEVEL: return "Playing level";
 	case SSGameMode::LEVEL_EDITOR: return "Level editor";
+	case SSGameMode::GAME_OVER: return "Game over";
 	default:
 		assert(false && "Add it");
 		break;

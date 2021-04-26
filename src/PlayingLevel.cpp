@@ -274,9 +274,10 @@ bool PlayingLevel::CheckForGameOver(int timeInMs) {
 
 	LogMain("Game over! Player HP 0", INFO);
 
-	if (playtestingEditorLevel)
+	if (playtestingEditorLevel) {
 		SetMode(SSGameMode::LEVEL_EDITOR);
-
+		return true;
+	}
 
 	// Game OVER!
 	if (onDeath.Length() == 0) {

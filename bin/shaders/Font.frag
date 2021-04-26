@@ -34,8 +34,18 @@ void main(void)
 {
 	// Texture image data. This will be the base for the colors.
 	vec4 baseFrag = texture2D(baseImage, UV_Coord);
-	
 	gl_FragColor = baseFrag;
+	
+	// Is it outside the text? Add shader if it's nearby?
+	if (baseFrag.w == 0){
+		float shadowOffset = 1.0 / 512;
+		float shadowValue = 0.2;
+		vec4 shadowReferenceFrag = texture2D(baseImage, UV_Coord + vec2(-shadowOffset, shadowOffset));
+		if (shadowReferenceFrag.w != 0)
+			gl_FragColor = vec4(shadowValue,shadowValue,shadowValue,1);
+		return;
+	}
+
 
 	if (baseFrag.w == 0)
 		return;

@@ -1,171 +1,225 @@
-// Red Star, 2nd level, 
-// showcases new background, music, 
-// +asteroids within the level,
-// +more movement to enemies
-// All ships retain stats from Tutorial, but 
-// +move at higher speeds,
-// +in new patterns
+// Auto-generated file from saving level in the editor.
+Event 0
+String SetMessagesPauseGameTime(true)
 
+Event 0
+String SetSpawnGroupsPauseGameTime(true)
 
-
-
-// StarSpeed XY 0 0
-StarColor RGBA 1 0.9 0.9 0.3
-
-// MessagesPauseGameTime true
-// SpawnGroupsPauseGameTime true
-
-Event SetMessagesPauseGameTime(true)
-Event SetSpawnGroupsPauseGameTime(true)
-
-Event PlayBGM music/2013-07-15_Summer_dance.ogg
+Event 0
+String PlayBGM music/2013-07-15_Summer_dance.ogg
 DontSkip
 
-Event SetBGMVolume 0.1
+Event 0
+String SetBGMVolume 0.1
 DontSkip
 
-Event LoadWeapons
+Event 0
+String LoadWeapons
 
-Event SetRewindPoint
+Event 0
+String SetRewindPoint
 
-Message +:01
+Message 1
 TextID RedStarMissionIntro
-Message
+
+Message 0
 TextID Eliminate
-Message 
+
+Message 0
 TextID RogerThat
 
-Event SetMessagesPauseGameTime(false)
-DontSkip
-Event SetSpawnGroupsPauseGameTime(false)
+Event 0
+String SetMessagesPauseGameTime(false)
 DontSkip
 
-Event SetRewindPoint
+Event 0
+String SetSpawnGroupsPauseGameTime(false)
+DontSkip
+
+Event 0
+String SetRewindPoint
 DontSkip
 
 SpawnGroup +:01
 Name SmallAsteroidsField
-ShipType	SmallAsteroid
-Formation SWARM_BOX_XY
-Size xy 50 30
-Position xy 0 0
+ShipType SmallAsteroid
 Number 20
+Formation SWARM_BOX_XY
+Movement 
+Size xy 50.000000 30.000000
+Position xy 0 0 0
+RelativeSpeed 5.000000
 
-/* 0+:00 - 0+:30
-*Start*
-Fighter enemies (2 hits) grouped in different formations, firing (low damage) in succession. Moving straight forward, forward while traveling up/down.
-*/
 SpawnGroup +:03
 Name Fighters_VX_5
 ShipType Fighter
+Number 5
 Formation V_X
-Number	5
-Size xy 10 10
-Position xy 0 0
-Movement Straight
-
-CopyGroup +:01
-ShipType Fighter
-Number	3
-Size xy 5 5
-
-CopyGroup +:01
-ShipType Bomber
-Formation V_X
-Number	1
-
-
-// Lower attack!
-CopyNamedGroup Fighters_VX_5 +:5
-Position xy 0 -10
-Movement UpLeft
-
-CopyGroup +:01
-ShipType Fighter
-Number	3
-Size xy 5 5
-
-CopyGroup +:01
-ShipType Bomber
-Formation V_X
-Number	1
-
-
-CopyNamedGroup SmallAsteroidsField +:1
-
-// Upper attack!
-CopyNamedGroup Fighters_VX_5 +:5
-Position xy 0 10
 Movement DownLeft
+Size xy 10.000000 10.000000
+Position xy 0 0 0
+RelativeSpeed 15.000000
 
-CopyGroup +:01
+SpawnGroup +:01
+Name Fighters_VX_5
 ShipType Fighter
-Number	3
-Size xy 5 5
-
-CopyGroup +:01
-ShipType Bomber
+Number 3
 Formation V_X
-Number	1
+Movement Straight
+Size xy 5.000000 5.000000
+Position xy 0 0 0
+RelativeSpeed 5.000000
 
+SpawnGroup +:01
+Name Fighters_VX_5
+ShipType Bomber
+Number 1
+Formation V_X
+Movement Straight
+Size xy 5.000000 5.000000
+Position xy 0 0 0
+RelativeSpeed 5.000000
 
-// Some break time
-// Some messages?
+SpawnGroup +:5
+Name Fighters_VX_5
+ShipType Fighter
+Number 5
+Formation V_X
+Movement UpLeft
+Size xy 10.000000 10.000000
+Position xy 0 -10 0
+RelativeSpeed 5.000000
 
+SpawnGroup +:01
+Name Fighters_VX_5
+ShipType Fighter
+Number 3
+Formation V_X
+Movement UpLeft
+Size xy 5.000000 5.000000
+Position xy 0 -10 0
+RelativeSpeed 5.000000
 
-CopyNamedGroup SmallAsteroidsField +:5
+SpawnGroup +:01
+Name Fighters_VX_5
+ShipType Bomber
+Number 1
+Formation V_X
+Movement UpLeft
+Size xy 5.000000 5.000000
+Position xy 0 -10 0
+RelativeSpeed 5.000000
 
-
-// Stray fighters
-CopyGroup +:5
+SpawnGroup +:1
+Name SmallAsteroidsField
+ShipType SmallAsteroid
+Number 20
 Formation SWARM_BOX_XY
-Position xy 0 0
-Movement Straight-n-Up
-Size xy 30 20
+Movement 
+Size xy 50.000000 30.000000
+Position xy 0 0 0
+RelativeSpeed 5.000000
+
+SpawnGroup +:5
+Name Fighters_VX_5
+ShipType Fighter
+Number 5
+Formation V_X
+Movement DownLeft
+Size xy 10.000000 10.000000
+Position xy 0 10 0
+RelativeSpeed 5.000000
+
+SpawnGroup +:01
+Name Fighters_VX_5
+ShipType Fighter
+Number 3
+Formation V_X
+Movement DownLeft
+Size xy 5.000000 5.000000
+Position xy 0 10 0
+RelativeSpeed 5.000000
+
+SpawnGroup +:01
+Name Fighters_VX_5
+ShipType Bomber
+Number 1
+Formation V_X
+Movement DownLeft
+Size xy 5.000000 5.000000
+Position xy 0 10 0
+RelativeSpeed 5.000000
+
+SpawnGroup +:5
+Name SmallAsteroidsField
+ShipType SmallAsteroid
+Number 20
+Formation SWARM_BOX_XY
+Movement 
+Size xy 50.000000 30.000000
+Position xy 0 0 0
+RelativeSpeed 5.000000
+
+SpawnGroup +:5
+Name SmallAsteroidsField
 ShipType Fighter
 Number 10
-
-CopyGroup +:1
 Formation SWARM_BOX_XY
-Size xy 25 15
+Movement Straight-n-Up
+Size xy 30.000000 20.000000
+Position xy 0 0 0
+RelativeSpeed 5.000000
+
+SpawnGroup +:1
+Name SmallAsteroidsField
 ShipType Fighter
 Number 5
-
-CopyGroup +:1
 Formation SWARM_BOX_XY
-Size xy 20 10
+Movement Straight-n-Up
+Size xy 25.000000 15.000000
+Position xy 0 0 0
+RelativeSpeed 5.000000
+
+SpawnGroup +:1
+Name SmallAsteroidsField
 ShipType Bomber
 Number 3
-
-// Another break 
-CopyNamedGroup SmallAsteroidsField +:5
-
-
-CopyGroup +:5
 Formation SWARM_BOX_XY
-Size xy 20 15
+Movement Straight-n-Up
+Size xy 20.000000 10.000000
+Position xy 0 0 0
+RelativeSpeed 5.000000
+
+SpawnGroup +:5
+Name SmallAsteroidsField
+ShipType SmallAsteroid
+Number 20
+Formation SWARM_BOX_XY
+Movement 
+Size xy 50.000000 30.000000
+Position xy 0 0 0
+RelativeSpeed 5.000000
+
+SpawnGroup +:5
+Name SmallAsteroidsField
 ShipType Fighter
 Number 4
-
-CopyGroup +:1
 Formation SWARM_BOX_XY
-Size xy 20 20
+Movement 
+Size xy 20.000000 15.000000
+Position xy 0 0 0
+RelativeSpeed 5.000000
+
+SpawnGroup +:1
+Name SmallAsteroidsField
 ShipType Fighter
 Number 5
+Formation SWARM_BOX_XY
+Movement 
+Size xy 20.000000 20.000000
+Position xy 0 0 0
+RelativeSpeed 5.000000
 
-
-
-
-
-
-Event +:44
+Event 44
 String GoToHangar
-// String GoToWorkshop
-
-// Event	1:10
-// String 	EndLevel 
-
-// Old shit below.
-StopLoading // Makes it stop loading past this point.
-
 

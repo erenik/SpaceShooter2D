@@ -41,7 +41,7 @@ alignmentXY 0.5 0.02
 
 
 parent lMainMenu
-defaultSizeRatioY 0.08
+defaultSizeRatioY 0.07
 defaultTextAlignment Left
 
 Button NewSG 

@@ -66,7 +66,7 @@ void LevelEditor::OnEnter(AppState* previousState) {
 	}
 
 
-	QueueGraphics(GMPushUI::ToWindow("gui/LevelEditor.gui"));
+	QueueGraphics(GMPushUI::ToWindow("gui/LevelEditor.gui", WindowMan.MainWindow()));
 
 	inputMapping.bindings.Add(new Binding(Action::FromString("CenterCamera"), KEY::HOME));
 	inputMapping.bindings.Add(new Binding(Action::CreateStartStopAction("ZoomOut"), KEY::PG_UP));
@@ -126,18 +126,22 @@ void LevelEditor::OnEditedLevelElementChanged() {
 		return;
 
 	// Print details?
+	String indexString = "Element "+String(editedLevel.levelElements.GetIndexOf(editedLevelElement)) + "/" + String(editedLevel.levelElements.Size());
+
 	if (editedLevelElement->spawnGroup) {
 		SpawnGroup* sg = editedLevelElement->spawnGroup;
 		QueueGraphics(new GMSetUIb("lLevelMessageEditor", GMUI::VISIBILITY, false, spawnUI));
-		QueueGraphics(new GMSetUIt("centerInfoText", GMUI::TEXT, sg ? sg->name : ""));
+		QueueGraphics(new GMSetUIt("centerInfoText", GMUI::TEXT, indexString + " : "+ (sg ? sg->name : "")));
 		if (sg) {
 			QueueGraphics(new GMSetUIt("SGName", GMUI::STRING_INPUT_TEXT, sg->name, spawnUI));
 			QueueGraphics(new GMSetUIs("SGShipType", GMUI::DROP_DOWN_INPUT_SELECT, sg->shipType, spawnUI));
 			QueueGraphics(new GMSetUIs("SpawnFormation", GMUI::DROP_DOWN_INPUT_SELECT, GetName(sg->formation), spawnUI));
+			QueueGraphics(new GMSetUIs("SGMovementPattern", GMUI::DROP_DOWN_INPUT_SELECT, sg->movementPattern.name, spawnUI));
 			QueueGraphics(new GMSetUIv2i("SGPosition", GMUI::VECTOR_INPUT, sg->position, spawnUI));
 			QueueGraphics(new GMSetUIv2i("SGSize", GMUI::VECTOR_INPUT, sg->size, spawnUI));
 			QueueGraphics(new GMSetUIi("SGAmount", GMUI::INTEGER_INPUT, sg->number, spawnUI));
 			QueueGraphics(new GMSetUIs("SGSpawnTime", GMUI::STRING_INPUT_TEXT, sg->spawnTimeString, spawnUI));
+			QueueGraphics(new GMSetUIi("SGSpeed", GMUI::INTEGER_INPUT, sg->relativeSpeed, spawnUI));
 
 
 			if (editedSpawnGroup != nullptr)
@@ -156,7 +160,7 @@ void LevelEditor::OnEditedLevelElementChanged() {
 			QueueGraphics(new GMSetEntityVec4f(editedSpawnGroup->GetEntities(), GT_COLOR, Vector4f(1, 1, 1, 1)));
 		editedSpawnGroup = nullptr;
 
-		QueueGraphics(new GMSetUIt("centerInfoText", GMUI::TEXT, lm->GetEditorText(20)));
+		QueueGraphics(new GMSetUIt("centerInfoText", GMUI::TEXT, indexString + " : " + lm->GetEditorText(20)));
 		QueueGraphics(new GMSetUIb("lLevelMessageEditor", GMUI::VISIBILITY, true, spawnUI));
 		QueueGraphics(new GMSetUIs("LMName", GMUI::STRING_INPUT_TEXT, lm->name, spawnUI));
 		QueueGraphics(new GMSetUIi("LMStartTime", GMUI::INTEGER_INPUT, lm->startTimeOffsetSeconds, spawnUI));
@@ -271,6 +275,8 @@ void LevelEditor::ProcessMessage(Message* message) {
 			else if (msg == "SetSGName") {
 				editedSpawnGroup->name = strmsg->value;
 			}
+			else if (msg.Contains("SGMovementPattern"))
+				editedSpawnGroup->movementPattern = MovementPattern::ByName(strmsg->value);
 		}
 		else if (editedLevelMessage) {
 			if (msg == "SetLMName")
@@ -298,7 +304,7 @@ void LevelEditor::ProcessMessage(Message* message) {
 					editedSpawnGroup->number = 1;
 				Respawn(editedLevelElement);
 			}
-			if (msg == "SetSpeed") {
+			if (msg == "SetSGSpeed") {
 				editedSpawnGroup->relativeSpeed = ((IntegerMessage*)message)->value;
 			}
 		}
@@ -323,7 +329,7 @@ void LevelEditor::ProcessMessage(Message* message) {
 	}
 	if (message->type == MessageType::STRING) {
 		if (msg == "OnReloadUI") {
-			QueueGraphics(GMPushUI::ToWindow("gui/LevelEditor.gui"));
+			QueueGraphics(GMPushUI::ToWindow("gui/LevelEditor.gui", WindowMan.MainWindow()));
 			QueueGraphics(new GMSetUIt("bottomInfoText", GMUI::TEXT, "Reloaded UI"));
 			if (spawnWindow == nullptr)
 				OpenSpawnWindow();
@@ -476,7 +482,9 @@ void LevelEditor::DeleteEditedElement() {
 
 	if (editedLevelElement) {
 		SAFE_DELETE(editedLevelElement->spawnGroup);
-		SAFE_DELETE(editedLevelElement->levelMessage);
+		SAFE_DELETE(editedLevelElement->levelMessage); 
+		editedLevelMessage = nullptr;
+		editedSpawnGroup = nullptr;
 	}
 	SAFE_DELETE(editedLevelElement);
 
@@ -605,13 +613,13 @@ void LevelEditor::OpenSpawnWindow()
 		spawnWindow = WindowMan.NewWindow("SpawnWindow", "Spawn Window");
 		spawnWindow->SetRequestedSize(Vector2i(600, 400));
 		spawnWindow->Create();
-		spawnWindow->SetAlwaysOnTop();
 		UserInterface* ui = spawnUI = spawnWindow->CreateUI();
 		QueueGraphics(GMPushUI::ToWindow("gui/SpawnWindow.gui", spawnWindow));
 		//ui->Load("gui/SpawnWindow.gui");
 		//ui->PushToStack("SpawnWindow");
 	}
 	spawnWindow->Show();
+	spawnWindow->SetAlwaysOnTop();
 	// No need to re-render the 3d scene here.
 	spawnWindow->renderScene = false;
 
@@ -636,6 +644,10 @@ void LevelEditor::PopulateSpawnWindowLists() {
 	}
 	QueueGraphics(new GMSetUIContents(spawnUI, "SpawnFormation", spawnFormations));
 
+	List<String> spawnGroupMovementPatterns;
+	for (int i = 0; i < MovementPattern::movementPatterns.Size(); ++i)
+		spawnGroupMovementPatterns.Add(MovementPattern::movementPatterns[i].name);
+	QueueGraphics(new GMSetUIContents(spawnUI, "SGMovementPattern", spawnGroupMovementPatterns));
 }
 
 

@@ -541,8 +541,10 @@ bool Level::Save(String toFile) {
 			outFile.WriteLine("ShipType " + sg->shipType);
 			outFile.WriteLine("Number " + String(sg->number));
 			outFile.WriteLine("Formation " + GetName(sg->formation));
+			outFile.WriteLine("Movement " + sg->movementPattern.name);
 			outFile.WriteLine("Size xy " + VectorString(sg->size));
 			outFile.WriteLine("Position xy " + VectorString(sg->position));
+			outFile.WriteLine("RelativeSpeed " + String(sg->relativeSpeed));
 		}
 
 		if (le.levelMessage) {

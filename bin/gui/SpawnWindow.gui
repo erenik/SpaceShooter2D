@@ -40,6 +40,9 @@ text "Ship type: "
 DropDownMenu SpawnFormation
 text "Spawn formation: "
 
+DropDownMenu SGMovementPattern
+text "Movement pattern: "
+
 IntegerInput SGAmount
 text "Amount"
 
@@ -49,7 +52,8 @@ text "Formation size"
 VectorInput 2 SGPosition
 text "Position"
 
-IntegerInput Speed
+IntegerInput SGSpeed
+text "Relative Speed"
 
 ColumnList SpawnButtons
 padding 0.1
