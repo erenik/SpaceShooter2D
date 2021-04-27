@@ -1,9 +1,9 @@
 Type;Name;Weapons;Movement pattern;Speed;Rotation Pattern;Rotation Speed;Has Shield;Shield Value;Shield Regen Rate;Hit Points;Abilties;Ability Cooldown;Graphic Model;Texture;Other;Collide damage;Max rotation per second;Score;Difficulty
-Pirate;Fighter;EMachine gun I;Straight(inf);.5;None;1;No;n/a;n/a;20;n/a;n/a;Ships/V-Fighter;Ships/Fighter;n/a;10;30;15;
-Pirate;Bomber;EBomber I;Straight(inf);.4;None;1;No;n/a;n/a;100;n/a;n/a;Ships/Bomber;Ships/Bomber;n/a;14;30;50;
-Pirate;BigFighter;EBF Aim gun I,EBF Burst gun I;MoveTo(xy 5 0,15), Straight(inf);.3;None;1;No;n/a;n/a;250;n/a;n/a;Ships/BigFighter;Ships/BigFighter;n/a;18;30;100;
-Pirate;Fighter2;EMachine gun II;Straight(inf);1.0;None;1;No;n/a;n/a;50;n/a;n/a;Ships/V-Fighter;Ships/Fighter2;n/a;12;30;30;
-Pirate;Fighter3;EMachine gun III;Straight(inf);1.5;None;1;No;n/a;n/a;100;n/a;n/a;Ships/V-Fighter;Ships/Fighter3;n/a;14;30;45;
-Asteroid;SmallAsteroid;;;0;Random;1;;;;250;;;Asteroids/Asteroid_1;Asteroids/Asteroid_texture_1;;30;;0;
-Asteroid;Asteroid;;;;;;;;;;;;Asteroids/Asteroid_1;Asteroids/Asteroid_texture_1;;;;0;
+Pirate;Fighter;EMachine gun I;Straight(inf);.5;None;1;No;n/a;n/a;20;n/a;n/a;Ships/V-Fighter;Ships/Fighter;n/a;20;30;15;
+Pirate;Bomber;EBomber I;Straight(inf);.4;None;1;No;n/a;n/a;100;n/a;n/a;Ships/Bomber;Ships/Bomber;n/a;28;30;50;
+Pirate;BigFighter;EBF Aim gun I,EBF Burst gun I;MoveTo(xy 5 0,15), Straight(inf);.3;None;1;No;n/a;n/a;250;n/a;n/a;Ships/BigFighter;Ships/BigFighter;n/a;36;30;100;
+Pirate;Fighter2;EMachine gun II;Straight(inf);1.0;None;1;No;n/a;n/a;50;n/a;n/a;Ships/V-Fighter;Ships/Fighter2;n/a;24;30;30;
+Pirate;Fighter3;EMachine gun III;Straight(inf);1.5;None;1;No;n/a;n/a;100;n/a;n/a;Ships/V-Fighter;Ships/Fighter3;n/a;28;30;45;
+Asteroid;SmallAsteroid;;;0;Random;1;;;;250;;;Asteroids/Asteroid_1;Asteroids/Asteroid_texture_1;;60;;0;
+Asteroid;Asteroid;;;;Random;1;;;;1000;;;Asteroids/Asteroid_1;Asteroids/Asteroid_texture_1;;;;0;
 ;;;;;;;;;;;;;;;;;;;

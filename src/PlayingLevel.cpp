@@ -140,6 +140,10 @@ void PlayingLevel::OnEnter(AppState* previousState) {
 	if (playtestingEditorLevel) {
 		levelToLoad = testLevel;
 		currentMission = nullptr;
+
+		// Boost up more weapons apt for play-testing the level.
+		playerShip->EquipTutorialLevel1Weapons();
+		LoadWeapons();
 	}
 	else {
 		GameVar * currentMissionVar = GameVars.GetString("CurrentMission");
@@ -918,6 +922,11 @@ void PlayingLevel::ToggleInGameMenu() {
 	// Pause the game.
 	if (!paused)
 	{
+		if (playtestingEditorLevel) {
+			// Return back to editor straight away.
+			SetMode(SSGameMode::LEVEL_EDITOR);
+			return;
+		}
 		Pause();
 		// Bring up the in-game menu.
 		HUD::Get()->OpenInGameMenu();

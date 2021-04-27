@@ -43,7 +43,7 @@ DontSkip
 SpawnGroup +:01
 Name SmallAsteroidsField
 ShipType SmallAsteroid
-Number 20
+Number 7
 Formation SWARM_BOX_XY
 Movement 
 Size xy 50.000000 30.000000
@@ -55,10 +55,40 @@ Name Fighters_VX_5
 ShipType Fighter
 Number 5
 Formation V_X
-Movement DownLeft
+Movement DownLeftMore
 Size xy 10.000000 10.000000
-Position xy 0 0 0
-RelativeSpeed 15.000000
+Position xy 0 10 0
+RelativeSpeed 20.000000
+
+SpawnGroup +:03
+Name Fighters_VX_5
+ShipType Fighter
+Number 5
+Formation V_X
+Movement DownLeftMore
+Size xy 10.000000 10.000000
+Position xy 0 10 0
+RelativeSpeed 20.000000
+
+SpawnGroup +:03
+Name Fighters_VX_5
+ShipType Fighter
+Number 5
+Formation V_X
+Movement UpLeftMore
+Size xy 10.000000 10.000000
+Position xy 0 -10 0
+RelativeSpeed 20.000000
+
+SpawnGroup +:03
+Name Fighters_VX_5
+ShipType Fighter
+Number 5
+Formation V_X
+Movement UpLeftMore
+Size xy 10.000000 10.000000
+Position xy 0 -10 0
+RelativeSpeed 20.000000
 
 SpawnGroup +:01
 Name Fighters_VX_5
@@ -113,7 +143,7 @@ RelativeSpeed 5.000000
 SpawnGroup +:1
 Name SmallAsteroidsField
 ShipType SmallAsteroid
-Number 20
+Number 9
 Formation SWARM_BOX_XY
 Movement 
 Size xy 50.000000 30.000000
@@ -153,7 +183,7 @@ RelativeSpeed 5.000000
 SpawnGroup +:5
 Name SmallAsteroidsField
 ShipType SmallAsteroid
-Number 20
+Number 12
 Formation SWARM_BOX_XY
 Movement 
 Size xy 50.000000 30.000000

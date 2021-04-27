@@ -140,8 +140,12 @@ void Ship::RandomizeWeaponCooldowns()
 
 List<Entity*> Ship::Spawn(ConstVec3fr atWorldPosition, Ship* in_parent, PlayerShip* playerShip)
 {	
-
-	LogMain("Possible kills : "+ String(++spaceShooter->LevelPossibleKills()->iValue), DEBUG);
+	if (this->type == "Asteroid") {
+		// No bonus possible kills for asteroids or their subdivided children.
+	}
+	else {
+		LogMain("Possible kills : "+ String(++spaceShooter->LevelPossibleKills()->iValue), DEBUG);
+	}
 
 	/// Reset stuffs if not already done so.
 	movementDisabled = false;
@@ -307,6 +311,26 @@ void Ship::Despawn(PlayingLevel& playingLevel, bool doExplodeEffectsForChildren)
 		child->parent = 0;
 		child->Despawn(playingLevel, doExplodeEffectsForChildren);
 	}
+
+	// Create sub-asteroids based off of this asteroid, with lower HP and collision damages, but random initial velocities?
+	if (this->type == "Asteroid") {
+		if (this->collideDamage > 5) // Don't sub-divide if collision damage is already quite low.
+		{
+			static Random asteroidRandom;
+			for (int i = 0; i < 5; ++i) {
+				Ship * newAsteroid = Ship::New(this->name);
+				float scale = asteroidRandom.Randf(0.4f) + 0.1f; // Generates smaller asteroids at 10-50% of parent's radius.
+				newAsteroid->collideDamage = this->collideDamage * scale; // Quarter collision damage.
+				newAsteroid->maxHP = this->maxHP * scale; // Quarter HP
+				Entity* asteroidEntity = newAsteroid->Spawn(this->entity->worldPosition, nullptr, nullptr);
+				float velocity = asteroidRandom.Randf(1.0f / scale) * 5.0f; // Max velocity increases with smaller scales.
+				float halfVel = velocity * 0.5f;
+				QueuePhysics(new PMSetEntity(asteroidEntity, PT_VELOCITY, Vector2f(asteroidRandom.Randf(velocity) - halfVel, asteroidRandom.Randf(velocity) - halfVel)));
+				QueuePhysics(new PMSetEntity(asteroidEntity, PT_SET_SCALE, this->entity->scale * scale)); // Halve radius.
+			}
+		}
+	}
+
 //	LogMain("Despawning ship "+name+" with children "+childrrr, INFO);
 	spawned = false;
 

@@ -241,6 +241,7 @@ void LevelEditor::ProcessMessage(Message* message) {
 		FileEvent * fileEvent = (FileEvent*)message;
 		if (msg == "SaveLevelAsDialog") {
 			if (fileEvent->files.Size()) {
+				levelSavePath = fileEvent->files[0];
 				bool ok = editedLevel.Save(fileEvent->files[0]);
 				QueueGraphics(new GMSetUIt("bottomInfoText", GMUI::TEXT, "Saved level: " + fileEvent->files[0]));
 			}
@@ -248,6 +249,7 @@ void LevelEditor::ProcessMessage(Message* message) {
 		else if (msg == "LoadLevelFromDialog") {
 			editedMission = nullptr; // No longer editing any mission, only free levels.
 			if (fileEvent->files.Size()) {
+				levelSavePath = fileEvent->files[0];
 				bool ok = LoadLevel(fileEvent->files[0]);
 				QueueGraphics(new GMSetUIt("bottomInfoText", GMUI::TEXT, "Loaded level: " + fileEvent->files[0]));
 			}
@@ -372,8 +374,8 @@ void LevelEditor::ProcessMessage(Message* message) {
 			DeleteEditedElement();
 		}
 		else if (msg == "SaveLevel") {
-			editedLevel.Save(editedLevel.source);
-			QueueGraphics(new GMSetUIt("bottomInfoText", GMUI::TEXT, "Saved level: "+ editedLevel.source));
+			editedLevel.Save(levelSavePath);
+			QueueGraphics(new GMSetUIt("bottomInfoText", GMUI::TEXT, "Saved level: "+ levelSavePath));
 		}
 		else if (msg == "ReloadLevel") {
 			if (editedMission)
@@ -547,6 +549,7 @@ void LevelEditor::LoadMission(Mission * mission, bool force) {
 		return;
 	}
 	editedMission = mission;
+	levelSavePath = editedMission->levelFilePath;
 	LoadLevel(editedMission->levelFilePath);
 }
 

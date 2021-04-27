@@ -38,7 +38,7 @@ public:
 
 private:
 	String levelToTest;
-
+	String levelSavePath;
 
 	void CreateNewSpawnGroup();
 	void CreateNewLevelMessage();
