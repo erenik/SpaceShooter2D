@@ -1,0 +1,105 @@
+defaultTexture	null
+defaultTextColor	0xAAAAAAFF
+defaultFont font3
+defaultFontShader Font
+defaultForceUpperCase false
+
+// Make root active
+root	List
+name 		ShipTypeEditor
+removeOnPop true
+texture 	0x33DD
+exitable 	true
+padding 0.1
+
+parent ShipTypeEditor
+ColumnList clMainArea
+sizeRatioY 1
+
+
+parent clMainArea
+List lLeftSide
+sizeRatioX 0.3
+List lAttributes
+sizeRatioX 0.4
+padding 0.01
+List lRightSidePreview
+padding 0.1
+sizeRatioX 0.3
+
+parent lLeftSide
+defaultSizeRatioX 1
+List lFileActions
+sizeRatioY 0.3
+
+List lSelectType
+padding 0.01
+
+
+parent lFileActions
+defaultSizeRatioXY 1 0.25
+Button NewShipType
+text "New type"
+
+Button DeleteShipType
+text "Delete type"
+
+Button SaveShipTypes
+text "Save ship types"
+
+DropDownList OpenShipType
+text "Select type"
+
+///////////////////////////////////////
+parent lSelectType
+
+//////////////////////////////////////
+// Attributes 
+parent lAttributes
+defaultSizeRatioXY 1 0.08
+
+DropDownList ShipType
+text "Type"
+
+StringInput ShipName
+text "Name"
+
+DropDownList Weapons
+text "Weapons"
+
+//DropDownList MovementPattern
+//text "Movement pattern"
+
+FloatInput Speed
+text "Speed"
+maxDecimals 3
+
+IntegerInput HitPoints
+text "Hit Points"
+
+FileInput GraphicsModel
+text "Graphic Model"
+fileFilter .obj
+
+FileInput Texture
+text "Diffuse texture"
+fileFilter .png
+
+IntegerInput CollisionDamage
+text "Collide damage"
+
+IntegerInput Score
+text "Score"
+
+//////////////////////////////////////
+// LEFT SIDE 
+parent lRightSidePreview
+
+Image Model
+texture 0xFFFF
+Image TexturePreview
+texture 0xFFFF
+Image TexturedModel
+texture 0xFFFF
+
+

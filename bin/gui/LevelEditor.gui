@@ -29,6 +29,12 @@ alignmentXY	0.06 0.6
 padding 0.025
 texture 0x22DD
 
+list lStarData
+sizeRatioXY 0.2 0.1
+alignmentXY 0.3 0.95
+padding 0.025
+texture 0x22DD
+
 label bottomInfoText
 text "Info"
 sizeRatioXY 0.3 0.03
@@ -79,6 +85,10 @@ button SaveAsButton
 text "Load level"
 onActivate PushUI(LoadLevelFromDialog)
 
+button OpenShipTypeEditor
+text "Ship Type Editor"
+onActivate PushUI(gui/Editor/ShipTypeEditor.gui)
+
 button QuitButton
 text "Quit"
 onActivate	ExitToMainMenu
@@ -99,4 +109,16 @@ FileBrowser LoadLevelFromDialog
 FileFilter .srl
 sizeRatioXY 1 1
 visible false
+
+/// Star data 
+parent lStarData
+defaultSizeRatioXY 1 0.2
+
+VectorInput 4 StarColor
+text "Star color"
+maxDecimals 3
+
+VectorInput 3 StarSpeed
+text "Star(dust) speed"
+maxDecimals 3
 

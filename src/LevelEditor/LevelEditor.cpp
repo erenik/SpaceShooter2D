@@ -19,6 +19,7 @@
 #include "Level/SpawnGroup.h"
 #include "Level/LevelMessage.h"
 #include "Level/LevelElement.h"
+#include "ShipTypeEditor.h"
 
 AppWindow* spawnWindow = 0;
 UserInterface* spawnUI = 0;
@@ -220,9 +221,11 @@ void LevelEditor::KeyPressed(int keyCode, bool downBefore) {
 	//}
 }
 
+ShipTypeEditor shipTypeEditor;
 
 void LevelEditor::ProcessMessage(Message* message) {
 	String msg = message->msg;
+	shipTypeEditor.ProcessMessage(message);
 	if (message->type == MessageType::ON_UI_PUSHED) {
 		OnUIPushed* uiPushed = (OnUIPushed*)message;
 		// Set default path to ./Level/
@@ -327,6 +330,13 @@ void LevelEditor::ProcessMessage(Message* message) {
 		else if (msg == "SetSGSize") {
 			editedSpawnGroup->size = vm->GetVector2f();
 			Respawn(editedLevelElement);
+		}
+		else if (msg == "SetStarColor") {
+			editedLevel.starColor = vm->GetVector4f();
+			// Start animating stars..? or skip it?
+		}
+		else if (msg == "SetStarSpeed") {
+			editedLevel.starSpeed = vm->GetVector3f();
 		}
 	}
 	if (message->type == MessageType::STRING) {
@@ -605,9 +615,16 @@ bool LevelEditor::LoadLevel(String fromPath) {
 	QueueGraphics(new GMSetUIb("NewSG", GMUI::ENABLED, true));
 	QueueGraphics(new GMSetUIb("NewLM", GMUI::ENABLED, true));
 
-
+	OnLevelLoaded();
 	return true;
 }
+
+// Update some UI after reading from files.
+void LevelEditor::OnLevelLoaded() {
+	QueueGraphics(new GMSetUIv4f("StarColor", GMUI::VECTOR_INPUT, editedLevel.starColor));
+	QueueGraphics(new GMSetUIv3f("StarSpeed", GMUI::VECTOR_INPUT, editedLevel.starSpeed));
+}
+
 
 void LevelEditor::OpenSpawnWindow()
 {

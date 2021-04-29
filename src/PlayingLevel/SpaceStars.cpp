@@ -38,14 +38,17 @@ void NewStars(Vector3f starDir, float emissionSpeed, float starScale, Color colo
 	Graphics.QueueMessage(new GMAttachParticleEmitter(starEmitter, stars));
 
 
+	Emitter velocityEmitter;
+	velocityEmitter.type = EmitterType::LINE; // Makes them get a random velocity from 0 to 1 of vec?
+	velocityEmitter.vec = starDir;
+
 	ParticleEmitter* startEmitter = new ParticleEmitter();
 	startEmitter->newType = true;
 	startEmitter->instantaneous = true;
 	startEmitter->constantEmission = 1400;
 	startEmitter->positionEmitter.type = EmitterType::PLANE_XY;
 	startEmitter->positionEmitter.SetScale(100.f);
-	startEmitter->velocityEmitter.type = EmitterType::VECTOR;
-	startEmitter->velocityEmitter.vec = starDir;
+	startEmitter->velocityEmitter = velocityEmitter;
 	startEmitter->SetEmissionVelocity(emissionSpeed);
 	startEmitter->SetParticleLifeTime(60.f);
 	startEmitter->SetScale(starScale);
@@ -59,8 +62,7 @@ void NewStars(Vector3f starDir, float emissionSpeed, float starScale, Color colo
 	starEmitter->SetParticlesPerSecond(40);
 	starEmitter->positionEmitter.type = EmitterType::PLANE_XY;
 	starEmitter->positionEmitter.SetScale(30.f);
-	starEmitter->velocityEmitter.type = EmitterType::VECTOR;
-	starEmitter->velocityEmitter.vec = starDir;
+	starEmitter->velocityEmitter = velocityEmitter;
 	starEmitter->SetParticleLifeTime(60.f);
 	starEmitter->SetColor(color);
 	starEmitter->SetScale(starScale);

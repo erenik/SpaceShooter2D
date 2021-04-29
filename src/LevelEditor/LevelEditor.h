@@ -40,6 +40,9 @@ private:
 	String levelToTest;
 	String levelSavePath;
 
+	// Update some UI after reading from files.
+	void OnLevelLoaded();
+
 	void CreateNewSpawnGroup();
 	void CreateNewLevelMessage();
 	void PopulateSpawnWindowLists();

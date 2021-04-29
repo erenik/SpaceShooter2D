@@ -530,6 +530,13 @@ bool Level::Save(String toFile) {
 		return false;
 	}
 	outFile.WriteLine("// Auto-generated file from saving level in the editor.");
+
+	// First write general data, such as star-speed, background image, initial BGM?
+	outFile.WriteLine("StarColor "+ ColorString(starColor));
+	if (starSpeed.MaxPart() == 0)
+		starSpeed = Vector3f(-1, 0, 0);
+	outFile.WriteLine("StarSpeed " + VectorString(starSpeed, true));
+
 	for (int i = 0; i < levelElementsToWrite.Size(); ++i) {
 		LevelElement& le = *levelElementsToWrite[i];
 
