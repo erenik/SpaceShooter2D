@@ -9,6 +9,8 @@ defaultFontShader Font
 defaultForceUpperCase false
 defaultFont font3
 
+defaultTextPadding	4
+
 // Make root active
 root
 name SpawnWindow
@@ -27,7 +29,7 @@ visible false
 
 parent lSpawnWindow
 
-defaultSizeRatioXY 1 0.1
+defaultSizeRatioXY 1 0.08
 
 StringInput SGName "Name"
 text "Name"

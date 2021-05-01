@@ -125,6 +125,18 @@ Ship* Ship::GetByType(String typeName) {
 	return nullptr;
 }
 
+Ship* Ship::NewShipType(String newTypeName) {
+	Ship* ship = new Ship();
+	ship->name = newTypeName;
+	types.Add(ship);
+	return ship;
+}
+
+bool Ship::DeleteShipType(Ship* shipType) {
+	types.Remove(shipType);
+	return true;
+}
+
 Random cooldownRand;
 void Ship::RandomizeWeaponCooldowns()
 {
@@ -246,6 +258,10 @@ List<Entity*> Ship::Spawn(ConstVec3fr atWorldPosition, Ship* in_parent, PlayerSh
 		script->OnBegin();
 	}
 
+	if (this->type == "Asteroid") {
+		RandomizeAsteroidRotation();
+	}
+
 	return entity;
 }
 
@@ -320,13 +336,15 @@ void Ship::Despawn(PlayingLevel& playingLevel, bool doExplodeEffectsForChildren)
 			for (int i = 0; i < 5; ++i) {
 				Ship * newAsteroid = Ship::New(this->name);
 				float scale = asteroidRandom.Randf(0.4f) + 0.1f; // Generates smaller asteroids at 10-50% of parent's radius.
-				newAsteroid->collideDamage = this->collideDamage * scale; // Quarter collision damage.
-				newAsteroid->maxHP = this->maxHP * scale; // Quarter HP
+				newAsteroid->collideDamage = this->collideDamage * scale * scale; // Quarter collision damage.
+				newAsteroid->maxHP = this->maxHP * scale * scale; // Quarter HP
 				Entity* asteroidEntity = newAsteroid->Spawn(this->entity->worldPosition, nullptr, nullptr);
 				float velocity = asteroidRandom.Randf(1.0f / scale) * 5.0f; // Max velocity increases with smaller scales.
 				float halfVel = velocity * 0.5f;
 				QueuePhysics(new PMSetEntity(asteroidEntity, PT_VELOCITY, Vector2f(asteroidRandom.Randf(velocity) - halfVel, asteroidRandom.Randf(velocity) - halfVel)));
 				QueuePhysics(new PMSetEntity(asteroidEntity, PT_SET_SCALE, this->entity->scale * scale)); // Halve radius.
+
+				newAsteroid->RandomizeAsteroidRotation();
 			}
 		}
 	}
@@ -362,6 +380,12 @@ void Ship::Despawn(PlayingLevel& playingLevel, bool doExplodeEffectsForChildren)
 		else
 			spawnGroup->OnShipDespawned(PlayingLevelRef(), this);
 	}
+}
+
+void Ship::RandomizeAsteroidRotation() {
+	static Random asteroidRotationRandom;
+	float maxRotationSpeed = 2.5f;
+	QueuePhysics(new PMSetEntity(entity, PT_ROTATIONAL_VELOCITY, Vector3f(0, asteroidRotationRandom.Randf(maxRotationSpeed) - maxRotationSpeed * 0.5f, 0)));
 }
 
 /// Checks current movement. Will only return true if movement is target based and destination is within threshold.
@@ -925,11 +949,11 @@ float Ship::Speed()
 }
 
 /// Accounting for boosting skills.
-float Ship::MaxShield()
+int Ship::MaxShield()
 {
 	if (activeSkill == POWER_SHIELD)
 		return maxShieldValue * 10;
-	return maxShieldValue * this->shieldGeneratorEfficiency;
+	return int(maxShieldValue * this->shieldGeneratorEfficiency);
 }
 
 /// Checks weapon's latest aim dir.

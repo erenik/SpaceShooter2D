@@ -4,6 +4,9 @@ defaultFont font3
 defaultFontShader Font
 defaultForceUpperCase false
 
+defaultTextPadding	8
+
+
 // Make root active
 root	List
 name 		ShipTypeEditor
@@ -31,9 +34,6 @@ parent lLeftSide
 defaultSizeRatioX 1
 List lFileActions
 sizeRatioY 0.3
-
-List lSelectType
-padding 0.01
 
 
 parent lFileActions

@@ -59,6 +59,8 @@ public:
 
 	/// Returns nullptr if it was not found
 	static Ship* GetByType(String typeName);
+	static Ship* NewShipType(String newTypeName);
+	static bool DeleteShipType(Ship* shipType);
 	void CopyStatsFrom(const Ship& ref);
 	void CopyWeaponsFrom(const Ship& ref);
 
@@ -99,6 +101,7 @@ public:
 	void Destroy(PlayingLevel& playingLevel);
 	// Load ship-types.
 	static bool LoadTypes(String file);
+	static bool SaveTypes(String toFile);
 	/// E.g. "Straight(10), MoveTo(X Y 5 20, 5)"
 	void ParseMovement(String fromString);
 	/// E.g. "DoveDir(3), RotateToFace(player, 5)"
@@ -119,7 +122,7 @@ public:
 	/// Returns speed, accounting for active skills, weights, etc.
 	float Speed();
 	/// Accounting for boosting skills.
-	float MaxShield();
+	int MaxShield();
 
 	/// Checks weapon's latest aim dir.
 	Vector3f WeaponTargetDir();
@@ -192,9 +195,11 @@ public:
 	float weaponCooldownBonus;
 	/// Mooovemeeeeeeent
 	List<Movement> movements;
+	String movementsString; // Before parsing details.
 	int currentMovement; // Index of which pattern is active at the moment.
 	int timeInCurrentMovement; // Also milliseconds.
 	List<Rotation> rotations;
+	String rotationsString; // Before parsing details.
 	int currentRotation;
 	int timeInCurrentRotation;
 	/// Maximum amount of radians the ship may rotate per second.
@@ -202,7 +207,8 @@ public:
 
 	// Parsed value divided by 5.
 	float speed;
-	float shieldValue, maxShieldValue;
+	float shieldValue;
+	int maxShieldValue;
 	/// Regen per millisecond
 	float shieldRegenRate;
 	float hp;
@@ -246,6 +252,8 @@ public:
 	ArmorStats armorStats;
 
 private:
+	void RandomizeAsteroidRotation();
+
 	int shipID;
 	static int shipIDEnumerator;
 };

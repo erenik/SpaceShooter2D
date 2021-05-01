@@ -5,6 +5,8 @@
 
 defaultFontShader FontStylizedTripleColors
 
+defaultTextPadding 2
+
 // Make root active
 root
 name 		MainMenuScreen

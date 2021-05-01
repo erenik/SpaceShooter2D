@@ -8,8 +8,8 @@ data/Boss 1 Weapons.csv
 Movements:
 data/AlienMovementPatterns.csv
 
-
 Ships:
-data/HumanShips.csv
-data/AlienShips.csv
-data/Boss 1 Data.csv
+data/AllShips.csv 
+// data/HumanShips.csv
+// data/AlienShips.csv
+// data/Boss 1 Data.csv

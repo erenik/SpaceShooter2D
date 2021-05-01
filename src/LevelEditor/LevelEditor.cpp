@@ -24,6 +24,7 @@
 AppWindow* spawnWindow = 0;
 UserInterface* spawnUI = 0;
 
+ShipTypeEditor shipTypeEditor;
 
 /** 
 	TODO:
@@ -187,13 +188,18 @@ void LevelEditor::Process(int timeInMs) {
 		levelCamera->scaleSpeedWithZoom = true;
 	}
 
+	if (shipTypeEditor.Visible()) {
+		shipTypeEditor.Process(timeInMs);
+		return;
+	}
+
 	nextUpdateInfoMs -= timeInMs;
 	if (nextUpdateInfoMs < 0) {
 		nextUpdateInfoMs = 200;
 		
 		QueueGraphics(new GMSetUIb("DeleteElement", GMUI::ENABLED, editedLevelElement != nullptr));
 
-		if (automaticallySelectClosestElement) {
+		if (automaticallySelectClosestElement && !shipTypeEditor.Visible()) {
 			editedLevelElement = nullptr;
 			editedLevelElement = GetElementClosestToCamera();
 			OnEditedLevelElementChanged();
@@ -220,8 +226,6 @@ void LevelEditor::KeyPressed(int keyCode, bool downBefore) {
 	//		automaticallySelectClosestElement = true;
 	//}
 }
-
-ShipTypeEditor shipTypeEditor;
 
 void LevelEditor::ProcessMessage(Message* message) {
 	String msg = message->msg;

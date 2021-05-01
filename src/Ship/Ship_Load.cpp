@@ -107,12 +107,14 @@ bool Ship::LoadTypes(String file)
 			}
 			else if (column == "Movement pattern")
 			{
+				ship->movementsString = value;
 				ship->ParseMovement(value);
 				ship->movements.Size();
 				ship->canMove = true;
 			}
 			else if (column == "Rotation pattern")
 			{
+				ship->rotationsString = value;
 				ship->ParseRotation(value);
 				ship->rotations.Size();
 			}
@@ -163,6 +165,67 @@ bool Ship::LoadTypes(String file)
 	}
 	return true;
 }
+
+bool Ship::SaveTypes(String toFile) {
+
+	File outFile(toFile);
+	bool ok = outFile.OpenForWritingText();
+	if (!ok)
+		return false;
+
+	List<String> columns;
+	columns.Add("Type", "Name", "Weapons", "Movement pattern", "Speed");
+	columns.Add("Rotation Pattern", "Rotation Speed", "Shield Value", "Shield Regen Rate");
+	columns.Add("Hit Points", "Graphic Model", "Texture", "Collide damage", "Script");
+	columns.AddItem("OnCollision");
+	for (int i = -1; i < types.Size(); ++i) {
+		Ship * type = nullptr;
+		if (i >= 0)
+			type = types[i];
+		for (int c = 0; c < columns.Size(); ++c) {
+			String columnName = columns[c];
+			if (i == -1) {
+				outFile.Write(columnName + ";");
+				continue;
+			}
+			if (columnName == "Type")
+				outFile.Write(type->type);
+			else if (columnName == "Name")
+				outFile.Write(type->name);
+			else if (columnName == "Weapons" && type->weaponSet.Size() > 0)
+				outFile.Write(type->weaponSet[0]->name);
+			else if (columnName == "Movement pattern")
+				outFile.Write(type->movementsString);
+			else if (columnName == "Speed")
+				outFile.Write(String(type->speed, 3));
+			else if (columnName == "Rotation Pattern")
+				outFile.Write(type->rotationsString);
+			else if (columnName == "Rotation Speed")
+				; // outFile.Write(String(type->rot);
+			else if (columnName == "Shield Value")
+				outFile.Write(String(type->maxShieldValue));
+			else if (columnName == "Shield Regen Rate")
+				outFile.Write(String(type->shieldRegenRate, 3));
+			else if (columnName == "Hit Points")
+				outFile.Write(String(type->maxHP));
+			else if (columnName == "Graphic Model")
+				outFile.Write(type->visuals.graphicModel);
+			else if (columnName == "Texture")
+				outFile.Write(type->visuals.textureSource);
+			else if (columnName == "Collide damage")
+				outFile.Write(String(type->collideDamage));
+			else if (columnName == "Script")
+				outFile.Write(type->scriptSource);
+			else if (columnName == "Name")
+				outFile.Write(type->name);
+			outFile.Write(";");
+		}
+		outFile.Write("\n");
+	}
+	outFile.Close();
+	return true;
+}
+
 
 /// E.g. "Straight(10), MoveTo(X Y 5 20, 5)"
 void Ship::ParseMovement(String fromString)
