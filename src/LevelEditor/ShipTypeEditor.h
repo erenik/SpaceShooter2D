@@ -9,6 +9,9 @@ class Message;
 
 class ShipTypeEditor{
 public:
+
+	void OnEnter();
+
 	// Updating the ship based on inputs.
 	void ProcessMessage(Message* message);
 

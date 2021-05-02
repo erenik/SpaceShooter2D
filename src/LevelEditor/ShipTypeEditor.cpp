@@ -14,6 +14,11 @@ Ship * editedShip;
 
 Time deleteClickTime;
 
+void ShipTypeEditor::OnEnter() {
+	editedShip = nullptr;
+	OnEditedShipUpdated();
+}
+
 // Updating the ship based on inputs.
 void ShipTypeEditor::ProcessMessage(Message* message) {
 
@@ -25,6 +30,8 @@ void ShipTypeEditor::ProcessMessage(Message* message) {
 		}
 		if (msg == "NewShipType") {
 			Ship * newType = Ship::NewShipType("New type");
+			editedShip = newType;
+			OnEditedShipUpdated();
 			// Inherit defaults from currently selected one?.. or not.
 			UpdateAvailableShipTypes();
 		}
@@ -40,7 +47,7 @@ void ShipTypeEditor::ProcessMessage(Message* message) {
 				delete editedShip;
 				editedShip = nullptr;
 				QueueGraphics(new GMSetUIt("DeleteShipType", GMUI::TEXT, "Delete ship type"));
-				QueueGraphics(new GMSetUIb("DeleteShipType", GMUI::ENABLED, editedShip != nullptr));
+				OnEditedShipUpdated();
 				UpdateAvailableShipTypes();
 			}
 			else {
@@ -65,6 +72,8 @@ void ShipTypeEditor::ProcessMessage(Message* message) {
 				weaponTypes.Add(Weapon::types[i].name);
 			QueueGraphics(new GMSetUIContents("Weapons", weaponTypes));
 
+
+			OnEnter();
 			QueueGraphics(new GMSetUIb("DeleteShipType", GMUI::ENABLED, false));
 
 			visible = true;
@@ -147,6 +156,10 @@ void ShipTypeEditor::OnEditedShipUpdated() {
 
 		QueueGraphics(new GMSetUIs("TexturePreview", GMUI::TEXTURE_SOURCE, editedShip->visuals.textureSource));
 	}
+
+	QueueGraphics(new GMSetUIb("DeleteShipType", GMUI::ENABLED, editedShip != nullptr));
+	QueueGraphics(new GMSetUIb("lAttributes", GMUI::ENABLED, editedShip != nullptr, UIFilter::IncludeChildren));
+
 }
 
 void Push() {
