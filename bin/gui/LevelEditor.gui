@@ -31,7 +31,7 @@ alignmentXY	0.06 0.6
 padding 0.025
 texture 0x22DD
 
-list lStarData
+list lLevelGeneralData
 sizeRatioXY 0.2 0.1
 alignmentXY 0.3 0.95
 padding 0.025
@@ -113,7 +113,7 @@ sizeRatioXY 1 1
 visible false
 
 /// Star data 
-parent lStarData
+parent lLevelGeneralData
 defaultSizeRatioXY 1 0.3
 
 VectorInput 4 StarColor
@@ -124,3 +124,5 @@ VectorInput 3 StarSpeed
 text "Star(dust) speed"
 maxDecimals 3
 
+FileInput StaticBackground
+fileFilter .png

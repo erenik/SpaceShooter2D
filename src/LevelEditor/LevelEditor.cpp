@@ -47,6 +47,7 @@ void LevelEditor::Initialize() {
 	editedSpawnGroup = nullptr;
 	editedMission = nullptr;
 	editedLevelMessage = nullptr;
+	editedLevel.levelElements.ClearAndDelete();
 }
 
 // Inherited via AppState
@@ -78,9 +79,12 @@ void LevelEditor::OnEnter(AppState* previousState) {
 	inputMapping.bindings.Add(new Binding(Action::FromString("ClearSelection"), KEY::ESCAPE));
 
 	// Initially disable some buttons.
-	QueueGraphics(new GMSetUIb("NewSG", GMUI::ENABLED, false));
-	QueueGraphics(new GMSetUIb("NewLM", GMUI::ENABLED, false));
-	QueueGraphics(new GMSetUIb("DeleteElement", GMUI::ENABLED, false));
+	bool levelLoaded = editedLevel.levelElements.Size() > 0;
+	QueueGraphics(new GMSetUIb("NewSG", GMUI::ENABLED, levelLoaded));
+	QueueGraphics(new GMSetUIb("NewLM", GMUI::ENABLED, levelLoaded));
+	QueueGraphics(new GMSetUIb("DeleteElement", GMUI::ENABLED, levelLoaded));
+	QueueGraphics(new GMSetUIb("lLevelGeneralData", GMUI::ENABLED, levelLoaded, UIFilter::IncludeChildren));
+
 }
 
 int nextUpdateInfoMs = 100;
@@ -267,6 +271,10 @@ void LevelEditor::ProcessMessage(Message* message) {
 	}
 	else if (message->type == MessageType::SET_STRING) {
 		auto strmsg = ((SetStringMessage*)message);
+		if (msg == "SetStaticBackground") {
+			editedLevel.backgroundSource = strmsg->value;
+			LevelEntity->SetBackgroundSource(strmsg->value);
+		}
 		if (editedSpawnGroup != nullptr) {
 			if (msg == "SetSGSpawnTime") {
 				editedSpawnGroup->SetSpawnTimeString(strmsg->value, PreviousMessageOrSpawnGroupTime(editedSpawnGroup));
@@ -350,6 +358,7 @@ void LevelEditor::ProcessMessage(Message* message) {
 			if (spawnWindow == nullptr)
 				OpenSpawnWindow();
 			else {
+				spawnWindow->Show();
 				QueueGraphics(GMPushUI::ToWindow("gui/SpawnWindow.gui", spawnWindow));
 				PopulateSpawnWindowLists();
 			}
@@ -589,7 +598,7 @@ bool LevelEditor::LoadLevel(String fromPath) {
 	QueueGraphics(new GMSetCamera(levelCamera, CT_ZOOM, 33.0f));
 
 	/// Add entity to track for both the camera, blackness and player playing field.
-	levelEntity = LevelEntity->Create(editedLevel.playingFieldSize, playingFieldPadding, false);
+	levelEntity = LevelEntity->Create(editedLevel.playingFieldSize, playingFieldPadding, false, &editedLevel);
 	LevelEntity->SetVelocity(editedLevel.BaseVelocity());
 
 	/// Add emitter for stars at player start.
@@ -616,8 +625,6 @@ bool LevelEditor::LoadLevel(String fromPath) {
 
 
 	// Enable buttons for creating new elements.
-	QueueGraphics(new GMSetUIb("NewSG", GMUI::ENABLED, true));
-	QueueGraphics(new GMSetUIb("NewLM", GMUI::ENABLED, true));
 
 	OnLevelLoaded();
 	return true;
@@ -625,6 +632,10 @@ bool LevelEditor::LoadLevel(String fromPath) {
 
 // Update some UI after reading from files.
 void LevelEditor::OnLevelLoaded() {
+	QueueGraphics(new GMSetUIb("NewSG", GMUI::ENABLED, true));
+	QueueGraphics(new GMSetUIb("NewLM", GMUI::ENABLED, true));
+	QueueGraphics(new GMSetUIb("lLevelGeneralData", GMUI::ENABLED, true, UIFilter::IncludeChildren));
+
 	QueueGraphics(new GMSetUIv4f("StarColor", GMUI::VECTOR_INPUT, editedLevel.starColor));
 	QueueGraphics(new GMSetUIv3f("StarSpeed", GMUI::VECTOR_INPUT, editedLevel.starSpeed));
 }
@@ -635,7 +646,7 @@ void LevelEditor::OpenSpawnWindow()
 	if (!spawnWindow)
 	{
 		spawnWindow = WindowMan.NewWindow("SpawnWindow", "Spawn Window");
-		spawnWindow->SetRequestedSize(Vector2i(600, 400));
+		spawnWindow->SetRequestedSize(Vector2i(800, 600));
 		spawnWindow->Create();
 		UserInterface* ui = spawnUI = spawnWindow->CreateUI();
 		QueueGraphics(GMPushUI::ToWindow("gui/SpawnWindow.gui", spawnWindow));

@@ -1096,7 +1096,7 @@ void PlayingLevel::LoadLevel(String fromSource, Mission * forMission)
 	/// Add entity to track for both the camera, blackness and player playing field.
 	if (levelEntity == nullptr)
 	{
-		levelEntity = LevelEntity->Create(level.playingFieldSize, playingFieldPadding, true);
+		levelEntity = LevelEntity->Create(level.playingFieldSize, playingFieldPadding, true, &level);
 		LevelEntity->SetVelocity(level.BaseVelocity());
 	}
 

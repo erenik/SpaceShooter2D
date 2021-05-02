@@ -463,7 +463,7 @@ bool Level::Load(String fromSource)
 			assert(tokens[2] == "RGB");
 			if (tokens.Size() < 6)
 			{
-				std::cout<<"ERrror";
+				std::cout << "ERrror";
 				continue;
 			}
 			newCode.color[0] = tokens[3].ParseInt();
@@ -474,7 +474,7 @@ bool Level::Load(String fromSource)
 		else if (line.StartsWith("Goal"))
 		{
 			List<String> tokens = line.Tokenize(" ");
-			if (tokens.Size() < 5){std::cout<<"\nError"; continue;}
+			if (tokens.Size() < 5) { std::cout << "\nError"; continue; }
 			goalColor[0] = tokens[2].ParseInt();
 			goalColor[1] = tokens[3].ParseInt();
 			goalColor[2] = tokens[4].ParseInt();
@@ -489,6 +489,8 @@ bool Level::Load(String fromSource)
 			String vector = line - "StarColor";
 			starColor.ParseFrom(vector);
 		}
+		else if (line.StartsWith("Background"))
+			backgroundSource = (line - "Background").WithSurroundingWhitespacesRemoved();
 	}
 	// Add last group, if needed.
 	AddGroupsIfNeeded();
@@ -536,6 +538,7 @@ bool Level::Save(String toFile) {
 	if (starSpeed.MaxPart() == 0)
 		starSpeed = Vector3f(-1, 0, 0);
 	outFile.WriteLine("StarSpeed " + VectorString(starSpeed, true));
+	outFile.WriteLine("Background " + backgroundSource);
 
 	for (int i = 0; i < levelElementsToWrite.Size(); ++i) {
 		LevelElement& le = *levelElementsToWrite[i];

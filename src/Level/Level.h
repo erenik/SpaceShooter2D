@@ -98,6 +98,11 @@ public:
 
 	String source;
 
+	// Sets source and updates entity texture as well.
+	void SetBackgroundSource(String source);
+
+	String backgroundSource;
+
 	/// Enemy ships within.
 	List<Ship*> enemyShips, alliedShips, ships;
 

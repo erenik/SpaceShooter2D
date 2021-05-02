@@ -1,6 +1,7 @@
 // Auto-generated file from saving level in the editor.
 StarColor rgba 0.6000000238 0.400000006 0.25 0.5
 StarSpeed xyz -3 0 0
+Background ./img/bgs//red_space.png
 Event 0
 String SetMessagesPauseGameTime(true)
 
@@ -25,6 +26,7 @@ Message 1
 TextID RedStarMissionIntro
 
 Message 0
+Name hello
 TextID Eliminate
 
 Message 0

@@ -11,6 +11,8 @@
 
 #define LevelEntity LevelProperty::GetSingleton()
 
+class Level;
+
 class LevelProperty : public EntityProperty {
 	static LevelProperty* singleton;
 	static Entity* levelEntity;
@@ -19,13 +21,15 @@ class LevelProperty : public EntityProperty {
 public:
 	static LevelProperty* GetSingleton() { return singleton; };
 
+	void SetBackgroundSource(String source);
+
 	// Creates the entity and property, as well as darkness entities to show where the player cannot proceed beyond.
 	// createBlackness = false in editor, true in game, creates the border of gameplay.
-	static Entity* Create(Vector2f playingFieldSize, float playingFieldPadding, bool createBlackness);
+	static Entity* Create(Vector2f playingFieldSize, float playingFieldPadding, bool createBlackness, Level* forLevel);
 	void MoveTo(Vector3f position);
 	void SetVelocity(Vector3f velocity);
 	void CreateBlackness();
-	void CreateBackground();
+	void CreateBackground(Level * forLevel);
 	void ToggleBlackness();
 	Vector3f Velocity();
 
@@ -41,5 +45,6 @@ private:
 	/// 4 entities constitude the blackness.
 	List< Entity* > blacknessEntities;
 
+	Entity* backgroundEntity;
 
 };

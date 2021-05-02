@@ -18,19 +18,22 @@
 #include "Window/AppWindowManager.h"
 #include "Viewport.h"
 
+#include "Level/Level.h"
+
 LevelProperty* LevelProperty::singleton = nullptr;
 Entity* LevelProperty::levelEntity = nullptr;
 
 /// Default annulizing constructor.
 LevelProperty::LevelProperty(Entity* owner, Vector2f playingFieldSize, float playingFieldPadding)
 	: EntityProperty("LevelProperty", 5, owner), playingFieldSize(playingFieldSize), playingFieldPadding(playingFieldPadding)
+	, backgroundEntity(nullptr)
 {
 	singleton = this;
 	levelEntity = owner;
 }
 
 
-Entity* LevelProperty::Create(Vector2f playingFieldSize, float playingFieldPadding, bool createBlackness)
+Entity* LevelProperty::Create(Vector2f playingFieldSize, float playingFieldPadding, bool createBlackness, Level * forLevel)
 {
 	levelEntity = EntityMan.CreateEntity("LevelEntity", NULL, NULL);
 	LevelProperty* lp = new LevelProperty(levelEntity, playingFieldSize, playingFieldPadding);
@@ -43,7 +46,7 @@ Entity* LevelProperty::Create(Vector2f playingFieldSize, float playingFieldPaddi
 
 	if (createBlackness)
 		lp->CreateBlackness();
-	lp->CreateBackground();
+	lp->CreateBackground(forLevel);
 
 	// Finalize details before registering.
 	levelEntity->localPosition = Vector3f();
@@ -93,9 +96,12 @@ void LevelProperty::CreateBlackness() {
 	QueueGraphics(new GMRegisterEntities(blacknessEntities));
 }
 
-void LevelProperty::CreateBackground() {
-	Texture * texture = TexMan.GetTexture("bgs/purple_space");
-	Entity* backgroundEntity = EntityMan.CreateEntity("Background", ModelMan.GetModel("sprite.obj"), texture);
+void LevelProperty::CreateBackground(Level * forLevel) {
+	String backgroundSource = forLevel->backgroundSource;
+	if (backgroundSource.Length() == 0)
+		backgroundSource = "bgs/purple_space";
+	Texture * texture = TexMan.GetTexture(backgroundSource);
+	backgroundEntity = EntityMan.CreateEntity("Background", ModelMan.GetModel("sprite.obj"), texture);
 	// Ensure it covers the playing field.
 	Vector2f scale = Vector2f(texture->Width() / float(texture->Height()), 1);
 	Vector2f requiredScaleFactor = playingFieldSize.ElementDivision(scale);
@@ -105,6 +111,10 @@ void LevelProperty::CreateBackground() {
 	backgroundEntity->localPosition = position;
 	levelEntity->AddChild(backgroundEntity);
 	QueueGraphics(new GMRegisterEntity(backgroundEntity));
+}
+
+void LevelProperty::SetBackgroundSource(String source) {
+	QueueGraphics(new GMSetEntityTexture(backgroundEntity, TexMan.GetTexture(source)));
 }
 
 void LevelProperty::ToggleBlackness() {
