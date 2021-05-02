@@ -55,7 +55,7 @@ defaultTextAlignment Center
 
 button NewGameButton
 text	"New game"
-onActivate OpenNewGameMenu&PushUI(gui/NewGame.gui)&LoadDefaultName
+onActivate OpenNewGameMenu
 
 button LoadGameButton
 text	"Load game"

@@ -14,6 +14,7 @@
 #include "UI/UIUtil.h"
 #include "UI/UIInputs.h"
 #include "UI/UIButtons.h"
+#include "UI/Buttons/UIRadioButtons.h"
 #include "Text/TextManager.h"
 #include "PlayingLevel.h"
 
@@ -34,7 +35,22 @@ void SpaceShooter2D::UpdateUI()
 		case START_UP: break; // No UI, or splash screen?
 		case MAIN_MENU: toPush = "gui/MainMenu.gui"; break;
 		case EDITING_OPTIONS: toPush = "gui/Options.gui"; break;
-		case NEW_GAME: toPush = "gui/NewGame.gui"; break;
+		case NEW_GAME: 
+		{
+			UIElement * element = UserInterface::LoadUIAsElement("gui/NewGame.gui");
+			UIStringInput * stringInput = (UIStringInput*) element->GetElement("PlayerName", UIType::STRING_INPUT);
+			stringInput->SetValue(PlayerName());
+
+			UIRadioButtons * difficultyButtons = (UIRadioButtons*)element->GetElement("NewGameDifficulty", UIType::RADIO_BUTTONS);
+			difficultyButtons->SetValue(nullptr, difficulty->iValue);
+
+			QueueGraphics(GMPushUI::ToUI(element));
+
+			//GraphicsMan.QueueMessage(new GMSetUIs("PlayerName", GMUI::STRING_INPUT_TEXT, ));
+			//GraphicsMan.QueueMessage(new GMSetUIi("Difficulty", GMUI::INTEGER_INPUT, difficulty->iValue));
+
+			break;
+		}
 		case LOAD_SAVES: toPush = "gui/LoadScreen.gui"; break;
 		case GAME_OVER: 
 		case PLAYING_LEVEL:	toPush = "gui/HUD.gui"; break;
@@ -55,7 +71,6 @@ void SpaceShooter2D::UpdateUI()
 	
 	switch(mode)
 	{
-		case NEW_GAME:  LoadDefaultName(); break;
 		case EDITING_OPTIONS: LoadOptions(); break;
 		case LOAD_SAVES: 
 			OpenLoadScreen(); 

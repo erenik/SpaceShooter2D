@@ -87,6 +87,7 @@ String SSGameModeString(SSGameMode mode) {
 	case SSGameMode::PLAYING_LEVEL: return "Playing level";
 	case SSGameMode::LEVEL_EDITOR: return "Level editor";
 	case SSGameMode::GAME_OVER: return "Game over";
+	case SSGameMode::LOAD_SAVES: return "Load saves";
 	default:
 		assert(false && "Add it");
 		break;
@@ -914,11 +915,15 @@ void SpaceShooter2D::SetMode(SSGameMode newMode, bool updateUI)
 		break;
 	}
 
+	bool enteringANewMode = false;
 	if (mode == newMode) {
-		LogMain("Already within mode " + SSGameModeString(newMode)+", updating UI just in case...", INFO);
-		UpdateUI();
+		LogMain("Already within mode " + SSGameModeString(newMode) + ", updating UI just in case...", WARNING);
+		//UpdateUI();
 		return;
 	}
+	else
+		enteringANewMode = true;
+
 	if (previousMode != mode)
 	{
 		previousMode = mode;
@@ -926,5 +931,7 @@ void SpaceShooter2D::SetMode(SSGameMode newMode, bool updateUI)
 	}
 	LogMain("Entering game mode: " + SSGameModeString(newMode) + ", previously: " + SSGameModeString(mode), INFO);
 	mode = newMode;
+	if (enteringANewMode)
+		UpdateUI();
 }
 

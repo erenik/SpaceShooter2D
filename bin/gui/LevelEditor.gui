@@ -83,7 +83,7 @@ button SaveAsButton
 text "Save as ..."
 onActivate PushUI(SaveLevelAsDialog)
 
-button SaveAsButton
+button LoadButton
 text "Load level"
 onActivate PushUI(LoadLevelFromDialog)
 

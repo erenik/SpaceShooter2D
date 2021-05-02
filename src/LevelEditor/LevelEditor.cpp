@@ -79,11 +79,8 @@ void LevelEditor::OnEnter(AppState* previousState) {
 	inputMapping.bindings.Add(new Binding(Action::FromString("ClearSelection"), KEY::ESCAPE));
 
 	// Initially disable some buttons.
-	bool levelLoaded = editedLevel.levelElements.Size() > 0;
-	QueueGraphics(new GMSetUIb("NewSG", GMUI::ENABLED, levelLoaded));
-	QueueGraphics(new GMSetUIb("NewLM", GMUI::ENABLED, levelLoaded));
-	QueueGraphics(new GMSetUIb("DeleteElement", GMUI::ENABLED, levelLoaded));
-	QueueGraphics(new GMSetUIb("lLevelGeneralData", GMUI::ENABLED, levelLoaded, UIFilter::IncludeChildren));
+	OnLevelLoaded();
+	
 
 }
 
@@ -632,9 +629,16 @@ bool LevelEditor::LoadLevel(String fromPath) {
 
 // Update some UI after reading from files.
 void LevelEditor::OnLevelLoaded() {
-	QueueGraphics(new GMSetUIb("NewSG", GMUI::ENABLED, true));
-	QueueGraphics(new GMSetUIb("NewLM", GMUI::ENABLED, true));
-	QueueGraphics(new GMSetUIb("lLevelGeneralData", GMUI::ENABLED, true, UIFilter::IncludeChildren));
+
+	bool levelLoaded = editedLevel.levelElements.Size() > 0;
+	QueueGraphics(new GMSetUIb("NewSG", GMUI::ENABLED, levelLoaded));
+	QueueGraphics(new GMSetUIb("NewLM", GMUI::ENABLED, levelLoaded));
+	QueueGraphics(new GMSetUIb("DeleteElement", GMUI::ENABLED, levelLoaded));
+	QueueGraphics(new GMSetUIb("lLevelGeneralData", GMUI::ENABLED, levelLoaded, UIFilter::IncludeChildren));
+	QueueGraphics(new GMSetUIb("PlayTestLevel", GMUI::ENABLED, levelLoaded));
+	QueueGraphics(new GMSetUIb("ReloadLevelButton", GMUI::ENABLED, levelLoaded));
+	QueueGraphics(new GMSetUIb("SaveLevelButton", GMUI::ENABLED, levelLoaded));
+	QueueGraphics(new GMSetUIb("SaveAsButton", GMUI::ENABLED, levelLoaded));
 
 	QueueGraphics(new GMSetUIv4f("StarColor", GMUI::VECTOR_INPUT, editedLevel.starColor));
 	QueueGraphics(new GMSetUIv3f("StarSpeed", GMUI::VECTOR_INPUT, editedLevel.starSpeed));

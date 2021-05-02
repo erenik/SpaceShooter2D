@@ -119,7 +119,7 @@ defaultRightBorder ui/Orange2
 defaultFont Font3
 defaultFontShader Font
 defaultTextColor 0xFFFF
-
+defaultForceUpperCase false
 
 element Debug
 sizeRatioXY 1 1  

@@ -47,7 +47,7 @@ DontSkip
 SpawnGroup +:01
 Name SmallAsteroidsField
 ShipType SmallAsteroid
-Number 7
+Number 4
 Formation SWARM_BOX_XY
 Movement 
 Size xy 50.000000 30.000000
@@ -62,7 +62,7 @@ Formation V_X
 Movement DownLeftMore
 Size xy 10.000000 10.000000
 Position xy 0 10 0
-RelativeSpeed 20.000000
+RelativeSpeed 1.000000
 
 SpawnGroup +:03
 Name Fighters_VX_5
@@ -72,7 +72,7 @@ Formation V_X
 Movement DownLeftMore
 Size xy 10.000000 10.000000
 Position xy 0 10 0
-RelativeSpeed 20.000000
+RelativeSpeed 1.000000
 
 SpawnGroup +:03
 Name Fighters_VX_5
@@ -82,7 +82,7 @@ Formation V_X
 Movement UpLeftMore
 Size xy 10.000000 10.000000
 Position xy 0 -10 0
-RelativeSpeed 20.000000
+RelativeSpeed 1.000000
 
 SpawnGroup +:03
 Name Fighters_VX_5
@@ -92,9 +92,9 @@ Formation V_X
 Movement UpLeftMore
 Size xy 10.000000 10.000000
 Position xy 0 -10 0
-RelativeSpeed 20.000000
+RelativeSpeed 1.000000
 
-SpawnGroup +:01
+SpawnGroup +:03
 Name Fighters_VX_5
 ShipType Fighter
 Number 3
@@ -102,7 +102,7 @@ Formation V_X
 Movement Straight
 Size xy 5.000000 5.000000
 Position xy 0 0 0
-RelativeSpeed 5.000000
+RelativeSpeed 1.000000
 
 SpawnGroup +:01
 Name Fighters_VX_5
@@ -122,7 +122,7 @@ Formation V_X
 Movement UpLeft
 Size xy 10.000000 10.000000
 Position xy 0 -10 0
-RelativeSpeed 5.000000
+RelativeSpeed 1.000000
 
 SpawnGroup +:01
 Name Fighters_VX_5
@@ -132,7 +132,7 @@ Formation V_X
 Movement UpLeft
 Size xy 5.000000 5.000000
 Position xy 0 -10 0
-RelativeSpeed 5.000000
+RelativeSpeed 1.000000
 
 SpawnGroup +:01
 Name Fighters_VX_5
@@ -147,7 +147,7 @@ RelativeSpeed 5.000000
 SpawnGroup +:1
 Name SmallAsteroidsField
 ShipType SmallAsteroid
-Number 9
+Number 8
 Formation SWARM_BOX_XY
 Movement 
 Size xy 50.000000 30.000000
@@ -162,7 +162,7 @@ Formation V_X
 Movement DownLeft
 Size xy 10.000000 10.000000
 Position xy 0 10 0
-RelativeSpeed 5.000000
+RelativeSpeed 1.000000
 
 SpawnGroup +:01
 Name Fighters_VX_5
@@ -172,7 +172,7 @@ Formation V_X
 Movement DownLeft
 Size xy 5.000000 5.000000
 Position xy 0 10 0
-RelativeSpeed 5.000000
+RelativeSpeed 1.000000
 
 SpawnGroup +:01
 Name Fighters_VX_5
@@ -202,9 +202,9 @@ Formation SWARM_BOX_XY
 Movement Straight-n-Up
 Size xy 30.000000 20.000000
 Position xy 0 0 0
-RelativeSpeed 5.000000
+RelativeSpeed 1.000000
 
-SpawnGroup +:1
+SpawnGroup +:5
 Name SmallAsteroidsField
 ShipType Fighter
 Number 5
@@ -212,7 +212,7 @@ Formation SWARM_BOX_XY
 Movement Straight-n-Up
 Size xy 25.000000 15.000000
 Position xy 0 0 0
-RelativeSpeed 5.000000
+RelativeSpeed 1.000000
 
 SpawnGroup +:1
 Name SmallAsteroidsField
@@ -227,7 +227,7 @@ RelativeSpeed 5.000000
 SpawnGroup +:5
 Name SmallAsteroidsField
 ShipType SmallAsteroid
-Number 20
+Number 16
 Formation SWARM_BOX_XY
 Movement 
 Size xy 50.000000 30.000000
@@ -242,7 +242,7 @@ Formation SWARM_BOX_XY
 Movement 
 Size xy 20.000000 15.000000
 Position xy 0 0 0
-RelativeSpeed 5.000000
+RelativeSpeed 1.000000
 
 SpawnGroup +:1
 Name SmallAsteroidsField
@@ -252,7 +252,7 @@ Formation SWARM_BOX_XY
 Movement 
 Size xy 20.000000 20.000000
 Position xy 0 0 0
-RelativeSpeed 5.000000
+RelativeSpeed 1.000000
 
 Event 44
 String GoToHangar
