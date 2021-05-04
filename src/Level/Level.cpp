@@ -37,6 +37,7 @@ Level::Level()
 
 	playingFieldSize = Vector2f(50, 30);
 	playingFieldHalfSize = playingFieldSize * 0.5f;
+	playerAimCrossHair = nullptr;
 }
 
 Level::~Level()
@@ -76,6 +77,12 @@ Entity* Level::SpawnPlayer(PlayingLevel& playingLevel, Ship* playerShip, ConstVe
 {	
 	Entity* entity = playerShip->Spawn(atPosition, 0, playingLevel.playerShip);
 	playingLevel.OnPlayerSpawned();
+	
+	Model * model = ModelMan.GetModel("Cube");
+	model = ModelMan.GetModel("plane");
+	playerAimCrossHair = MapMan.CreateEntity("AimCrosshair", model, TexMan.GetTexture("img/ui/Crosshairs"));
+	playerAimCrossHair->localPosition = Vector3f(0, 1, -5); // Offset by 5 units to the right?
+	QueuePhysics(new PMSetEntity(playerAimCrossHair, PT_PARENT, entity));
 	return entity;
 }
 
@@ -143,6 +150,17 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 	playingLevel.flyTime.AddMs(timeInMs);
 
 	ProcessLevelMessages(playingLevel.levelTime);
+
+	// Update cursor
+	if (playerAimCrossHair) {
+		// Rotate it to match.
+		Vector3f aimDir = GetPlayerShip()->WeaponTargetDir().NormalizedCopy();
+		if (aimDir.MaxPart() == 0)
+			aimDir = Vector3f(1, 0, 0);
+		aimDir *= 5.0f; // Move it away!
+		playerAimCrossHair->localPosition = Vector3f(-aimDir.y, 0, -aimDir.x);
+	}
+
 
 	if (playingLevel.GameTimePaused()) {
 		LogMain("Game time is paused", EXTENSIVE_DEBUG);

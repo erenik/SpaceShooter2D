@@ -29,7 +29,7 @@ public:
 	virtual void OnCollision(Collision & data);
 
 	/// If reacting to collisions...
-	virtual void OnCollision(Entity* withEntity);
+	virtual void OnCollision(Entity* withEntity, float impactVelocity);
 
 	// Since enemies go from right to left..
 	bool IsAllied();

@@ -91,7 +91,7 @@ void ShipProperty::OnCollision(Collision & data)
 
 Random penetrationRand;
 /// If reacting to collisions...
-void ShipProperty::OnCollision(Entity* withEntity)
+void ShipProperty::OnCollision(Entity* withEntity, float impactVelocity)
 {
 //	std::cout<<"\nShipProperty::OnCollision for entity "<<owner->name;
 	if (sleeping)
@@ -134,16 +134,19 @@ void ShipProperty::OnCollision(Entity* withEntity)
 //		std::cout<<"\nCollision with ship! o.o";
 		if (sspp->sleeping)
 			return;
+
+		float damageRatioBasedOnVelocity = impactVelocity * 0.1f; // 10 units per second = full damage, less => less, more => more
+
 		// Check collision damage cooldown for if we should apply damage.
 		if (ship->lastShipCollision < pl.flyTime - ship->collisionDamageCooldown)
 		{
-			if (!ship->Damage(pl, float(sspp->ship->collideDamage), false, DamageSource::Collision))
+			if (!ship->Damage(pl, float(sspp->ship->collideDamage) * damageRatioBasedOnVelocity, false, DamageSource::Collision))
 				ship->lastShipCollision = pl.flyTime;
 		}
 		// Same for the other ship.
 		if (ship && sspp->ship->lastShipCollision < pl.flyTime - sspp->ship->collisionDamageCooldown)
 		{
-			if (!sspp->ship->Damage(pl, float(ship->collideDamage), false, DamageSource::Collision))
+			if (!sspp->ship->Damage(pl, float(ship->collideDamage) * damageRatioBasedOnVelocity, false, DamageSource::Collision))
 				sspp->ship->lastShipCollision = pl.flyTime;
 		}
 
@@ -164,7 +167,7 @@ void ShipProperty::OnCollision(Entity* withEntity)
 		velocity += 1.f;
 		velocity *= 0.5f;
 		tmpEmitter->SetEmissionVelocity(velocity);
-		tmpEmitter->constantEmission = 50;
+		tmpEmitter->constantEmission = 50 * damageRatioBasedOnVelocity;
 		tmpEmitter->instantaneous = true;
 		tmpEmitter->SetScale(0.05f);
 		tmpEmitter->SetParticleLifeTime(1.5f);

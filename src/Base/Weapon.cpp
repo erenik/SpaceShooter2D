@@ -58,6 +58,7 @@ Weapon::Weapon()
 	burst = false;
 	reloading = false;
 	aim = false;
+	currentAim = Vector3f(1, 0, 0);
 	shotsLeft = 0;
 	estimatePosition = false;
 	projectilePath = STRAIGHT;
@@ -477,7 +478,7 @@ void Weapon::Shoot(PlayingLevel& playingLevel, Ship* ship)
 		Vector3f dir(-1.f,0,0);
 		// For defaults of forward, invert for player
 		if (ship->allied)
-			dir *= -1.f;
+			dir = currentAim;
 		if (aim)
 		{
 			dir = currentAim;

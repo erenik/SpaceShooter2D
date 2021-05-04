@@ -27,16 +27,17 @@ void HandleCollision(Ship* playerShip, List<Entity*> shipEntities, CollisionCall
 	++types[oneType];
 	++types[twoType];
 	//	std::cout<<"\nCollision between "<<one->name<<" and "<<two->name;
+
 	if (oneType == SHIP)
 	{
 		ShipProperty* shipProp = (ShipProperty*)one->GetProperty(ShipProperty::ID());
 		if (shipProp)
-			shipProp->OnCollision(two);
+			shipProp->OnCollision(two, cc->impactVelocity);
 	}
 	if (twoType == SHIP)
 	{
 		ShipProperty* shipProp = (ShipProperty*)two->GetProperty(ShipProperty::ID());
 		if (shipProp)
-			shipProp->OnCollision(one);
+			shipProp->OnCollision(one, cc->impactVelocity);
 	}
 }

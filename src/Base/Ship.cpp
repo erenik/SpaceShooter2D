@@ -34,6 +34,7 @@ Ship::Ship()
 	collisionDamageCooldown = Time(TimeType::MILLISECONDS_NO_CALENDER, 100);
 	lastShipCollision = Time(TimeType::MILLISECONDS_NO_CALENDER, 0);
 
+	targetAim = Vector2f(1, 0);
 	heatDamageTaken = 0;
 	spawnGroup = 0;
 	shoot = false;
@@ -184,9 +185,11 @@ List<Entity*> Ship::Spawn(ConstVec3fr atWorldPosition, Ship* in_parent, PlayerSh
 	
 	PhysicsProperty * pp = new PhysicsProperty();
 	entity->physics = pp;
+	pp->SetMass(3); // By default 3 tons? Normal asteroids default to 10 tons.
 	// Setup physics.
 	pp->type = PhysicsType::DYNAMIC;
-	pp->linearDamping = 0.99f;
+	pp->linearDamping = 0.95f;
+	pp->elasticity = 0.6f; // Retain 20% of energy when bouncing back off of collisions. (from 0.5 -> 1.0 is 100% of retained energy).
 	float radians = PI / 2;
 	if (enemy)
 	{
@@ -260,6 +263,8 @@ List<Entity*> Ship::Spawn(ConstVec3fr atWorldPosition, Ship* in_parent, PlayerSh
 
 	if (this->type == "Asteroid") {
 		RandomizeAsteroidRotation();
+		pp->SetMass(maxHP * 0.04f); // 25 HP = 1 mass?, also calculated the inverseMass straight away.
+		pp->elasticity = 0.9f; // Retain 80% of energy in collisions (0.5 -> 1.0 is 100%, so 0.1 = 20%)
 	}
 
 	return entity;
@@ -402,6 +407,15 @@ void Ship::Process(PlayingLevel& playingLevel, PlayerShip* playerShip, int timeI
 	/// If destroyed from elsewhere..?
 	if (entity == 0)
 		return;
+
+	if (activeWeapon) {
+		// Rotations per second?
+		float aimSpeed = 3.0f; // 3.. units per second?
+		float toAimRatio = timeInMs * 0.001f * aimSpeed; // aim 10% per second?
+		activeWeapon->currentAim = activeWeapon->currentAim * (1 - toAimRatio) + targetAim * toAimRatio;
+		activeWeapon->currentAim.Normalize();
+	}
+
 	// Skill cooldown.
 	if (timeSinceLastSkillUseMs >= 0)
 	{
@@ -959,6 +973,9 @@ int Ship::MaxShield()
 /// Checks weapon's latest aim dir.
 Vector3f Ship::WeaponTargetDir()
 {
+	if (activeWeapon)
+		return activeWeapon->currentAim;
+
 	for (int i = 0; i < weaponSet.Size(); ++i)
 	{
 		Weapon * weapon = weaponSet[i];
@@ -966,6 +983,11 @@ Vector3f Ship::WeaponTargetDir()
 			return weapon->currentAim;
 	}
 	return Vector3f();
+}
+
+// Sets aiming directory for the current weapon.
+void Ship::SetAimDir(Vector2f newAimDir) {
+	targetAim = newAimDir;
 }
 
 int Ship::CurrentWeaponIndex() {

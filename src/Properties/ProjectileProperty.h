@@ -8,6 +8,9 @@
 #include "Base/Weapon.h"
 #include "Entity/EntityProperty.h"
 #include "Time/Time.h"
+#include "Color.h"
+
+class ParticleEmitter;
 
 class ProjectileProperty : public EntityProperty 
 {

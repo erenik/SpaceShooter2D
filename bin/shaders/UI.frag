@@ -24,13 +24,9 @@ void main(void)
 	vec4 baseFrag = texture2D(baseImage, UV_Coord);
 	vec4 color = clamp(baseFrag, vec4(0,0,0,0), vec4(1,1,1,1));
 	
-//	if (highlightColorVec4.x > 0)
-	//	color.x += 0.5;
-	
-	
 	gl_FragColor = color;
 	gl_FragColor *= primaryColorVec4;
-	float highlightFactor = 1.0 + highlightColorVec4.x * 0.0001;
+	float highlightFactor = 1.0 + highlightColorVec4.x;
 	gl_FragColor.xyz *= highlightFactor;
 }
 

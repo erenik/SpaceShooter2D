@@ -5,6 +5,9 @@
 #include "SpaceShooterCR.h"
 #include "Physics/Collision/Collision.h"
 
+#include "Properties/ShipProperty.h"
+#include "Properties/ProjectileProperty.h"
+
 /// Returns false if the colliding entities are no longer in contact after resolution.
 bool SpaceShooterCR::ResolveCollision(Collision & c)
 {
@@ -54,6 +57,39 @@ bool SpaceShooterCR::ResolveCollision(Collision & c)
 	// Two dynamic entities.
 	else 
 	{
+		// Apply some velocities from each other (assuming ship-ship collission)?
+		auto shipOne = c.one->GetProperty<ShipProperty>();
+		auto shipTwo = c.two->GetProperty<ShipProperty>();
+		if (shipOne && shipTwo) {
+			auto physicsOne = c.one->physics;
+			auto physicsTwo = c.two->physics;
+			// Not actually colliding into each other anymore? Then ignore.
+			if (c.collisionVelocity < 0) {
+				return true;
+			}
+			float massDifferenceMultiplier = physicsOne->mass / physicsTwo->mass;
+			float invertedMassDifferenceMultiplier = 1 / massDifferenceMultiplier;
+			float totalMultipliersDivider = (physicsOne->elasticity + physicsTwo->elasticity) / (massDifferenceMultiplier + invertedMassDifferenceMultiplier);
+			massDifferenceMultiplier *= totalMultipliersDivider;
+			invertedMassDifferenceMultiplier *= totalMultipliersDivider;
+			// Gain +1 velocity away from the collision.
+			physicsOne->velocity += (-c.collisionNormal).NormalizedCopy() * c.collisionVelocity * invertedMassDifferenceMultiplier;
+			physicsOne->smoothedVelocity = physicsOne->velocity;
+
+			physicsTwo->velocity += (c.collisionNormal).NormalizedCopy() * c.collisionVelocity * massDifferenceMultiplier;
+			physicsTwo->smoothedVelocity = physicsTwo->velocity;
+		}
+		auto projProp = c.one->GetProperty<ProjectileProperty>();
+		if (!projProp)
+			projProp = c.two->GetProperty<ProjectileProperty>();
+		if (projProp) {
+			auto ship = shipOne ? shipOne : shipTwo;
+			// Apply a velocity-impulse based on the damage it would have inflicted.
+			auto shipEntity = ship->owner;
+			shipEntity->physics->velocity += (projProp->owner->physics->velocity).NormalizedCopy() * projProp->weapon.damage * 0.05f * shipEntity->physics->inverseMass;
+			shipEntity->physics->smoothedVelocity = shipEntity->physics->velocity;
+		}
+
 		// Notify both entities of the collision that just occured.
 		c.one->OnCollision(c);
 		c.two->OnCollision(c);

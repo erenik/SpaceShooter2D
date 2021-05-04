@@ -127,6 +127,9 @@ public:
 	/// Checks weapon's latest aim dir.
 	Vector3f WeaponTargetDir();
 
+	// Sets aiming directory for the current weapon.
+	void SetAimDir(Vector2f);
+
 	
 	int CurrentWeaponIndex();
 	bool SwitchToWeapon(int index);
@@ -256,6 +259,8 @@ private:
 
 	int shipID;
 	static int shipIDEnumerator;
+
+	Vector2f targetAim;
 };
 
 #endif

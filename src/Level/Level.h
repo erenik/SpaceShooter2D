@@ -153,6 +153,8 @@ public:
 	bool LevelCleared(Time levelTime, List<Entity*> shipEntities, List<Ship*> playerShips);
 
 private:
+
+	Entity* playerAimCrossHair;
 };
 
 #endif

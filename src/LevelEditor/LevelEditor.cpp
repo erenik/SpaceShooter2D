@@ -54,6 +54,8 @@ void LevelEditor::Initialize() {
 void LevelEditor::OnEnter(AppState* previousState) {
 	Initialize();
 
+	QueueGraphics(new GMRecompileShaders()); // Shouldn't be needed...
+
 	automaticallySelectClosestElement = true;
 
 	LogMain("Entering Level editor ", INFO);
@@ -117,8 +119,12 @@ LevelElement* LevelEditor::GetElementClosestToCamera() const {
 
 void LevelEditor::Select(LevelElement* levelElement) {
 	editedLevelElement = levelElement;
+	if (editedLevelElement)
+		OpenSpawnWindow();
 	OnEditedLevelElementChanged();
 	automaticallySelectClosestElement = false;
+
+
 	if (levelElement) {
 		QueueGraphics(new GMSetUIt("bottomInfoText", GMUI::TEXT, "Selected element"));
 	}
@@ -583,7 +589,7 @@ bool LevelEditor::LoadLevel(String fromPath) {
 
 	MapMan.DeleteAllEntities();
 
-	OpenSpawnWindow();
+	//OpenSpawnWindow();
 
 
 	QueueGraphics(new GMSetUIt("bottomInfoText", GMUI::TEXT, "Editing " + fromPath));
@@ -606,7 +612,7 @@ bool LevelEditor::LoadLevel(String fromPath) {
 	GraphicsMan.ResumeRendering();
 	PhysicsMan.Pause();
 	editedLevel.OnEnter();
-	QueueGraphics(new GMRecompileShaders()); // Shouldn't be needed...
+	
 
 	// Pause all logic.
 	PlayingLevel::paused = true;
@@ -631,17 +637,21 @@ bool LevelEditor::LoadLevel(String fromPath) {
 void LevelEditor::OnLevelLoaded() {
 
 	bool levelLoaded = editedLevel.levelElements.Size() > 0;
-	QueueGraphics(new GMSetUIb("NewSG", GMUI::ENABLED, levelLoaded));
-	QueueGraphics(new GMSetUIb("NewLM", GMUI::ENABLED, levelLoaded));
-	QueueGraphics(new GMSetUIb("DeleteElement", GMUI::ENABLED, levelLoaded));
-	QueueGraphics(new GMSetUIb("lLevelGeneralData", GMUI::ENABLED, levelLoaded, UIFilter::IncludeChildren));
-	QueueGraphics(new GMSetUIb("PlayTestLevel", GMUI::ENABLED, levelLoaded));
-	QueueGraphics(new GMSetUIb("ReloadLevelButton", GMUI::ENABLED, levelLoaded));
-	QueueGraphics(new GMSetUIb("SaveLevelButton", GMUI::ENABLED, levelLoaded));
-	QueueGraphics(new GMSetUIb("SaveAsButton", GMUI::ENABLED, levelLoaded));
 
-	QueueGraphics(new GMSetUIv4f("StarColor", GMUI::VECTOR_INPUT, editedLevel.starColor));
-	QueueGraphics(new GMSetUIv3f("StarSpeed", GMUI::VECTOR_INPUT, editedLevel.starSpeed));
+	LogMain("OnLevelLoaded: " + String(levelLoaded) + ", elements: " + String(editedLevel.levelElements.Size()), INFO);
+
+	auto mainUI = MainUI();
+	QueueGraphics(new GMSetUIb("NewSG", GMUI::ENABLED, levelLoaded, mainUI));
+	QueueGraphics(new GMSetUIb("NewLM", GMUI::ENABLED, levelLoaded, mainUI));
+	QueueGraphics(new GMSetUIb("DeleteElement", GMUI::ENABLED, levelLoaded, mainUI));
+	QueueGraphics(new GMSetUIb("lLevelGeneralData", GMUI::ENABLED, levelLoaded, UIFilter::IncludeChildren, mainUI));
+	QueueGraphics(new GMSetUIb("PlayTestLevel", GMUI::ENABLED, levelLoaded, mainUI));
+	QueueGraphics(new GMSetUIb("ReloadLevelButton", GMUI::ENABLED, levelLoaded, mainUI));
+	QueueGraphics(new GMSetUIb("SaveLevelButton", GMUI::ENABLED, levelLoaded, mainUI));
+	QueueGraphics(new GMSetUIb("SaveAsButton", GMUI::ENABLED, levelLoaded, mainUI));
+
+	QueueGraphics(new GMSetUIv4f("StarColor", GMUI::VECTOR_INPUT, editedLevel.starColor, mainUI));
+	QueueGraphics(new GMSetUIv3f("StarSpeed", GMUI::VECTOR_INPUT, editedLevel.starSpeed, mainUI));
 }
 
 

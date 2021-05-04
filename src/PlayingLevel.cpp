@@ -407,6 +407,10 @@ void PlayingLevel::ProcessMessage(Message* message)
 		if (gamepadMessage->rightButtonPressed)
 			playerShip->SwitchToWeapon(playerShip->CurrentWeaponIndex() + 1);
 
+		if (state.rightStick.MaxPart() > 0.2f) {
+			playerShip->SetAimDir(state.rightStick.NormalizedCopy());
+		}
+
 		// Only with menu open.
 //		if (HUD::Get()->InGameMenuOpen()) {
 	//	}

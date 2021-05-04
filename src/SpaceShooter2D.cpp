@@ -134,9 +134,9 @@ void SpaceShooter2D::OnEnter(AppState * previousState)
 
 	// Set some default 
 	// When clicking on it.
-	UIElement::onActiveHightlightFactor = 0.2f;
+	UIElement::onActiveHightlightFactor = 0.5f;
 	// When hovering on it.
-	UIElement::onHoverHighlightFactor = 0.2f;
+	UIElement::onHoverHighlightFactor = 0.3f;
 	UIElement::onIdleHighlightFactor = 0.0f;
 	// When toggled, additional factor
 	UIElement::onToggledHighlightFactor = 0.3f;

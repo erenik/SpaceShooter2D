@@ -74,10 +74,21 @@ int SpaceShooterCD::DetectCollisions(List<EntityPair> & pairs, List<Collision> &
 		if (distanceLengthNotRooted > radiusPowerOf2 * 1.05f)
 			continue;
 		
+
 		Collision c;
 		c.one = entity;
 		c.two = entity2;
+		c.collissionPoint = (entity->worldPosition + entity2->worldPosition) / 2;
 		c.collisionNormal = (entity2->worldPosition - entity->worldPosition).NormalizedCopy();
+
+
+		auto physicsOne = c.one->physics;
+		auto physicsTwo = c.two->physics;
+		float velocityIntoCollisionOne = physicsOne->velocity.DotProduct(c.collisionNormal);
+		float velocityIntoCollisionTwo = -physicsTwo->velocity.DotProduct(c.collisionNormal);
+		float totalVelocityIntoCollision = velocityIntoCollisionOne + velocityIntoCollisionTwo;
+		c.collisionVelocity = totalVelocityIntoCollision;
+
 		collisions.Add(c);
 		numCol += 1;
 	}	
