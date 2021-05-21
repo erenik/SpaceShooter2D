@@ -134,19 +134,19 @@ void SpaceShooter2D::OnEnter(AppState * previousState)
 
 	// Set some default 
 	// When clicking on it.
-	UIElement::onActiveHightlightFactor = 0.5f;
+	UIVisuals::onActiveHightlightFactor = 0.5f;
 	// When hovering on it.
-	UIElement::onHoverHighlightFactor = 0.3f;
-	UIElement::onIdleHighlightFactor = 0.0f;
+	UIVisuals::onHoverHighlightFactor = 0.3f;
+	UIVisuals::onIdleHighlightFactor = 0.0f;
 	// When toggled, additional factor
-	UIElement::onToggledHighlightFactor = 0.3f;
+	UIVisuals::onToggledHighlightFactor = 0.3f;
 
 	if (!shipDataLoaded)
 		LoadShipData();
 
 	QueuePhysics(new PMSeti(PT_AABB_SWEEPER_DIVISIONS, 1));// subdivisionsZ
 
-	WeaponScript::CreateDefault();
+	//WeaponScript::CreateDefault();
 	/// Enable Input-UI navigation via arrow-keys and Enter/Esc.
 	InputMan.SetNavigateUI(true);
 

@@ -37,7 +37,7 @@ void SpaceShooter2D::UpdateUI()
 		case EDITING_OPTIONS: toPush = "gui/Options.gui"; break;
 		case NEW_GAME: 
 		{
-			UIElement * element = UserInterface::LoadUIAsElement("gui/NewGame.gui");
+			UIElement * element = UserInterface::LoadUIAsElement(nullptr, "gui/NewGame.gui");
 			UIStringInput * stringInput = (UIStringInput*) element->GetElement("PlayerName", UIType::STRING_INPUT);
 			stringInput->SetValue(PlayerName());
 
@@ -138,7 +138,7 @@ void SpaceShooter2D::OpenLoadScreen()
 	{
 		SaveFileHeader & h = headers[i];
 
-		UIElement * fromTemplate = UserInterface::LoadUIAsElement("gui/SaveEntry.gui");
+		UIElement * fromTemplate = UserInterface::LoadUIAsElement(nullptr, "gui/SaveEntry.gui");
 
 		// h.saveName = filename, not so interesting.
 		List<String> additionalData = h.customHeaderData.Tokenize("\n");
@@ -181,10 +181,10 @@ void SpaceShooter2D::OpenJumpDialog()
 	if (!jumpDialog)
 	{
 		jumpDialog = new UIStringInput("JumpTo", "JumpToTime");
-		jumpDialog->textureSource = "0x44AA";
+		//jumpDialog->visuals.textureSource = "0x44AA";
 		jumpDialog->onTrigger += "PopUI(JumpTo)&ResumeGame";
-		jumpDialog->sizeRatioX = 0.5f;
-		jumpDialog->sizeRatioY = 0.1f;
+		jumpDialog->layout.sizeRatioX = 0.5f;
+		jumpDialog->layout.sizeRatioY = 0.1f;
 		jumpDialog->CreateChildren(nullptr);
 		jumpDialog->input->BeginInput(nullptr); // Make its input active straight away.
 		// Add it to the main UI.

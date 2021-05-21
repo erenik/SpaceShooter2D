@@ -35,7 +35,7 @@ class WeaponScript
 {
 public:
 	WeaponScript();
-	static void CreateDefault();
+	void AddDefaultWeapons();
 	void Process(Ship* forShip, int timeInMs);
 	static WeaponScript * LastEdited();
 	int timeInCurrentActionMs;
@@ -44,6 +44,9 @@ public:
 	Time lastEdit;
 private:
 	int currentAction;
+
+	//static WeaponScript * CreateDefault();
+
 };
 
 #endif

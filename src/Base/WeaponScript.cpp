@@ -72,14 +72,21 @@ WeaponScript::WeaponScript()
 	lastEdited = this;
 }
 
-void WeaponScript::CreateDefault()
+/*
+WeaponScript* WeaponScript::CreateDefault()
 {
 	WeaponScript * weaponScript = new WeaponScript();
-	weaponScript->actions.AddItem(ScriptAction::SwitchWeapon(0, 1000));
-	weaponScript->actions.AddItem(ScriptAction::SwitchWeapon(1, 1000));
-	weaponScript->actions.AddItem(ScriptAction::SwitchWeapon(2, 100));
+	weaponScript->AddDefaultWeapons();
 	weaponScripts.AddItem(weaponScript);
+	return weaponScript;
+}*/
+
+void WeaponScript::AddDefaultWeapons() {
+	actions.AddItem(ScriptAction::SwitchWeapon(0, 1000));
+	actions.AddItem(ScriptAction::SwitchWeapon(1, 500));
+	actions.AddItem(ScriptAction::SwitchWeapon(2, 100));
 }
+
 
 void WeaponScript::Process(Ship* forShip, int timeInMs)
 {

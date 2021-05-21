@@ -80,7 +80,7 @@ public:
 	/// Moves the aim of this weapon turrent.
 	void Aim(PlayingLevel& playingLevel, Ship* ship);
 	/// Shoots using previously calculated aim.
-	void Shoot(PlayingLevel& playingLevel, Ship* ship);
+	void Shoot(PlayingLevel& playingLevel, Ship* ship, const Vector2f& currentAim);
 	/// Called to update the various states of the weapon, such as reload time, making lightning arcs jump, etc.
 	void Process(PlayingLevel& playingLevel, Ship* ship, int timeInMs);
 	void ProcessLightning(PlayingLevel& playingLevel, Ship* ship, bool initial = false);

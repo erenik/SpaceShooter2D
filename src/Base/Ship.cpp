@@ -34,7 +34,7 @@ Ship::Ship()
 	collisionDamageCooldown = Time(TimeType::MILLISECONDS_NO_CALENDER, 100);
 	lastShipCollision = Time(TimeType::MILLISECONDS_NO_CALENDER, 0);
 
-	targetAim = Vector2f(1, 0);
+	currentAim = targetAim = Vector2f(1, 0);
 	heatDamageTaken = 0;
 	spawnGroup = 0;
 	shoot = false;
@@ -341,8 +341,8 @@ void Ship::Despawn(PlayingLevel& playingLevel, bool doExplodeEffectsForChildren)
 			for (int i = 0; i < 5; ++i) {
 				Ship * newAsteroid = Ship::New(this->name);
 				float scale = asteroidRandom.Randf(0.4f) + 0.1f; // Generates smaller asteroids at 10-50% of parent's radius.
-				newAsteroid->collideDamage = this->collideDamage * scale * scale; // Quarter collision damage.
-				newAsteroid->maxHP = this->maxHP * scale * scale; // Quarter HP
+				newAsteroid->collideDamage = int(this->collideDamage * scale * scale); // Quarter collision damage.
+				newAsteroid->maxHP = int(this->maxHP * scale * scale); // Quarter HP
 				Entity* asteroidEntity = newAsteroid->Spawn(this->entity->worldPosition, nullptr, nullptr);
 				float velocity = asteroidRandom.Randf(1.0f / scale) * 5.0f; // Max velocity increases with smaller scales.
 				float halfVel = velocity * 0.5f;
@@ -408,12 +408,13 @@ void Ship::Process(PlayingLevel& playingLevel, PlayerShip* playerShip, int timeI
 	if (entity == 0)
 		return;
 
-	if (activeWeapon) {
-		// Rotations per second?
+	// Rotations per second?
+	// Aim as long as recent input was gotten for aiming..?
+	if (true) {
 		float aimSpeed = 3.0f; // 3.. units per second?
 		float toAimRatio = timeInMs * 0.001f * aimSpeed; // aim 10% per second?
-		activeWeapon->currentAim = activeWeapon->currentAim * (1 - toAimRatio) + targetAim * toAimRatio;
-		activeWeapon->currentAim.Normalize();
+		currentAim = currentAim * (1 - toAimRatio) + targetAim * toAimRatio;
+		currentAim.Normalize();
 	}
 
 	// Skill cooldown.
@@ -435,7 +436,7 @@ void Ship::Process(PlayingLevel& playingLevel, PlayerShip* playerShip, int timeI
 	// AI
 	ProcessAI(playerShip, timeInMs);
 	// Weapon systems.
-	ProcessWeapons(playingLevel, timeInMs);
+	ProcessWeapons(playingLevel, timeInMs, currentAim);
 	// Shield
 	if (hasShield)
 	{
@@ -500,13 +501,17 @@ void Ship::ProcessAI(PlayerShip* playerShip, int timeInMs)
 }
 
 
-void Ship::ProcessWeapons(PlayingLevel& playingLevel, int timeInMs)
+void Ship::ProcessWeapons(PlayingLevel& playingLevel, int timeInMs, const Vector2f& currentAim)
 {
 	if (!weaponSet.Size())
 		return;
 
-	if (weaponScriptActive && weaponScript)
-	{
+	if (weaponScriptActive) {
+		if (weaponScript == nullptr) {
+			// LAcking weapon script? auto-create one that loops all current weapons?
+			weaponScript = new WeaponScript();
+			weaponScript->AddDefaultWeapons();
+		}
 		weaponScript->Process(this, timeInMs);
 	}
 
@@ -531,7 +536,7 @@ void Ship::ProcessWeapons(PlayingLevel& playingLevel, int timeInMs)
 			// Dude..
 			shoot = true;
 			// Shoot all weapons by default.
-			weapon->Shoot(playingLevel, this);
+			weapon->Shoot(playingLevel, this, currentAim);
 		}
 		return;
 	}
@@ -541,8 +546,9 @@ void Ship::ProcessWeapons(PlayingLevel& playingLevel, int timeInMs)
 		activeWeapon = weaponSet.Size()? weaponSet[0] : 0;
 	// Shoot with current weapon for player.
 	if (activeWeapon)
-		activeWeapon->Shoot(playingLevel, this);
+		activeWeapon->Shoot(playingLevel, this, currentAim);
 }
+
 // Sets new bonus, updates weapons if needed.
 void Ship::SetProjectileSpeedBonus(float newBonus)
 {

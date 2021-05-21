@@ -154,7 +154,7 @@ void Level::Process(PlayingLevel& playingLevel, int timeInMs)
 	// Update cursor
 	if (playerAimCrossHair) {
 		// Rotate it to match.
-		Vector3f aimDir = GetPlayerShip()->WeaponTargetDir().NormalizedCopy();
+		Vector3f aimDir = GetPlayerShip()->currentAim;
 		if (aimDir.MaxPart() == 0)
 			aimDir = Vector3f(1, 0, 0);
 		aimDir *= 5.0f; // Move it away!

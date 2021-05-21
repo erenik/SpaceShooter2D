@@ -140,17 +140,19 @@ void LevelEditor::OnEditedLevelElementChanged() {
 	if (editedLevelElement->spawnGroup) {
 		SpawnGroup* sg = editedLevelElement->spawnGroup;
 		QueueGraphics(new GMSetUIb("lLevelMessageEditor", GMUI::VISIBILITY, false, spawnUI));
-		QueueGraphics(new GMSetUIt("centerInfoText", GMUI::TEXT, indexString + " : "+ (sg ? sg->name : "")));
 		if (sg) {
-			QueueGraphics(new GMSetUIt("SGName", GMUI::STRING_INPUT_TEXT, sg->name, spawnUI));
-			QueueGraphics(new GMSetUIs("SGShipType", GMUI::DROP_DOWN_INPUT_SELECT, sg->shipType, spawnUI));
-			QueueGraphics(new GMSetUIs("SpawnFormation", GMUI::DROP_DOWN_INPUT_SELECT, GetName(sg->formation), spawnUI));
-			QueueGraphics(new GMSetUIs("SGMovementPattern", GMUI::DROP_DOWN_INPUT_SELECT, sg->movementPattern.name, spawnUI));
-			QueueGraphics(new GMSetUIv2i("SGPosition", GMUI::VECTOR_INPUT, sg->position, spawnUI));
-			QueueGraphics(new GMSetUIv2i("SGSize", GMUI::VECTOR_INPUT, sg->size, spawnUI));
-			QueueGraphics(new GMSetUIi("SGAmount", GMUI::INTEGER_INPUT, sg->number, spawnUI));
-			QueueGraphics(new GMSetUIs("SGSpawnTime", GMUI::STRING_INPUT_TEXT, sg->spawnTimeString, spawnUI));
-			QueueGraphics(new GMSetUIi("SGSpeed", GMUI::INTEGER_INPUT, sg->relativeSpeed, spawnUI));
+			QueueGraphics(new GMSetUIt("centerInfoText", GMUI::TEXT, indexString + " : " + (sg ? sg->name : "")));
+			if (spawnWindow && spawnWindow->IsVisible()) {
+				QueueGraphics(new GMSetUIt("SGName", GMUI::STRING_INPUT_TEXT, sg->name, spawnUI));
+				QueueGraphics(new GMSetUIs("SGShipType", GMUI::DROP_DOWN_INPUT_SELECT, sg->shipType, spawnUI));
+				QueueGraphics(new GMSetUIs("SpawnFormation", GMUI::DROP_DOWN_INPUT_SELECT, GetName(sg->formation), spawnUI));
+				QueueGraphics(new GMSetUIs("SGMovementPattern", GMUI::DROP_DOWN_INPUT_SELECT, sg->movementPattern.name, spawnUI));
+				QueueGraphics(new GMSetUIv2i("SGPosition", GMUI::VECTOR_INPUT, sg->position, spawnUI));
+				QueueGraphics(new GMSetUIv2i("SGSize", GMUI::VECTOR_INPUT, sg->size, spawnUI));
+				QueueGraphics(new GMSetUIi("SGAmount", GMUI::INTEGER_INPUT, sg->number, spawnUI));
+				QueueGraphics(new GMSetUIs("SGSpawnTime", GMUI::STRING_INPUT_TEXT, sg->spawnTimeString, spawnUI));
+				QueueGraphics(new GMSetUIi("SGSpeed", GMUI::INTEGER_INPUT, int(sg->relativeSpeed), spawnUI));
+			}
 
 
 			if (editedSpawnGroup != nullptr)
@@ -170,13 +172,16 @@ void LevelEditor::OnEditedLevelElementChanged() {
 		editedSpawnGroup = nullptr;
 
 		QueueGraphics(new GMSetUIt("centerInfoText", GMUI::TEXT, indexString + " : " + lm->GetEditorText(20)));
-		QueueGraphics(new GMSetUIb("lLevelMessageEditor", GMUI::VISIBILITY, true, spawnUI));
-		QueueGraphics(new GMSetUIs("LMName", GMUI::STRING_INPUT_TEXT, lm->name, spawnUI));
-		QueueGraphics(new GMSetUIi("LMStartTime", GMUI::INTEGER_INPUT, lm->startTimeOffsetSeconds, spawnUI));
-		QueueGraphics(new GMSetUIs("LMTextID", GMUI::STRING_INPUT_TEXT, lm->textID, spawnUI));
-		QueueGraphics(new GMSetUIs("LMScript", GMUI::STRING_INPUT_TEXT, (lm->string), spawnUI));
-		QueueGraphics(new GMSetUIs("LMCondition", GMUI::STRING_INPUT_TEXT, lm->condition, spawnUI));
-		QueueGraphics(new GMSetUIb("LMGoToRewindPoint", GMUI::TOGGLED, lm->goToRewindPoint, spawnUI));
+
+		if (spawnWindow && spawnWindow->IsVisible()) {
+			QueueGraphics(new GMSetUIb("lLevelMessageEditor", GMUI::VISIBILITY, true, spawnUI));
+			QueueGraphics(new GMSetUIs("LMName", GMUI::STRING_INPUT_TEXT, lm->name, spawnUI));
+			QueueGraphics(new GMSetUIi("LMStartTime", GMUI::INTEGER_INPUT, lm->startTimeOffsetSeconds, spawnUI));
+			QueueGraphics(new GMSetUIs("LMTextID", GMUI::STRING_INPUT_TEXT, lm->textID, spawnUI));
+			QueueGraphics(new GMSetUIs("LMScript", GMUI::STRING_INPUT_TEXT, (lm->string), spawnUI));
+			QueueGraphics(new GMSetUIs("LMCondition", GMUI::STRING_INPUT_TEXT, lm->condition, spawnUI));
+			QueueGraphics(new GMSetUIb("LMGoToRewindPoint", GMUI::TOGGLED, lm->goToRewindPoint, spawnUI));
+		}
 
 		if (editedLevelMessage != nullptr)
 			editedLevelMessage->ResetEditorEntityColor();

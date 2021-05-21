@@ -30,7 +30,7 @@ void UpdateScriptsUI()
 		// ...
 		UIButton * button = new UIButton("LoadScript: "+String(i));
 		button->SetText(weaponScripts[i]->name);
-		button->sizeRatioY = 0.15f;
+		button->layout.sizeRatioY = 0.15f;
 		tmp.AddItem(button);
 	}
 	QueueGraphics(new GMAddUI(tmp, "lScripts"));
@@ -56,27 +56,27 @@ void UpdateEditScriptUI()
 			ScriptAction & action = editScript->actions[i];
 			// ...
 			UIButton * cl = new UIButton("EditScriptAction:"+String(i));
-			cl->sizeRatioY = 0.1f;
+			cl->layout.sizeRatioY = 0.1f;
 			cl->SetText(String(i+1)+". "+(action.name.Length()? action.name : ScriptAction::GetStringForType(action.type)));
 			tmp.AddItem(cl);
 		}
 		/// Add some extra options.
 		UIButton * c2 = new UIButton("DuplicateScript");
-		c2->sizeRatioY = 0.1f;
+		c2->layout.sizeRatioY = 0.1f;
 		c2->SetText("Duplicate script");
 		tmp.AddItem(c2);
 		c2 = new UIButton("DeleteScript");
-		c2->sizeRatioY = 0.1f;
+		c2->layout.sizeRatioY = 0.1f;
 		c2->SetText("Delete script");
 		tmp.AddItem(c2);
 	}
 	else 
 	{
 		UILabel * ul = new UILabel("No script active. Select in left or add");
-		ul->sizeRatioY = 0.1f;
+		ul->layout.sizeRatioY = 0.1f;
 		tmp.AddItem(ul);
 		ul = new UILabel("a new part from the right to start a new one.");
-		ul->sizeRatioY = 0.1f;
+		ul->layout.sizeRatioY = 0.1f;
 		tmp.AddItem(ul);
 	}
 	QueueGraphics(new GMAddUI(tmp, editField));
@@ -104,12 +104,12 @@ void UpdateEditActionUI()
 	{
 		case ScriptAction::SWITCH_TO_WEAPON:
 			UIIntegerInput * ii = new UIIntegerInput("Weapon type", "SetWeaponIndex");
-			ii->sizeRatioY = 0.1f;
+			ii->layout.sizeRatioY = 0.1f;
 			ii->CreateChildren(nullptr);
 			ii->SetValue(action->weaponIndex);
 			tmp.AddItem(ii);
 			ii = new UIIntegerInput("Milliseconds", "SetMilliseconds");
-			ii->sizeRatioY = 0.1f;
+			ii->layout.sizeRatioY = 0.1f;
 			ii->CreateChildren(nullptr);
 			ii->SetValue(action->durationMs);
 			tmp.AddItem(ii);
@@ -129,8 +129,8 @@ void UpdateToAddList()
 	{
 		UIButton * button = new UIButton("AddScriptAction: "+String(i));
 		button->SetText(ScriptAction::GetStringForType(i));
-		button->sizeRatioY = 0.15f;
-		button->textureSource = UIElement::defaultTextureSource;
+		button->layout.sizeRatioY = 0.15f;
+		button->visuals.textureSource = UIVisuals::defaultTextureSource;
 		tmp.AddItem(button);
 	}
 	QueueGraphics(new GMAddUI(tmp, "lToAdd"));

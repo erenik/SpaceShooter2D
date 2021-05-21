@@ -113,9 +113,9 @@ void HUD::UpdateHUDGearedWeapons()
 	List<UIElement*> weaponStatuses;
 	for (int i = 0; i < ship->weaponSet.Size(); ++i) {
 		Weapon * weapon = ship->weaponSet[i];
-		UIElement * weaponStatus = UserInterface::LoadUIAsElement("gui/HUDWeaponStatus.gui");
+		UIElement * weaponStatus = UserInterface::LoadUIAsElement(nullptr, "gui/HUDWeaponStatus.gui");
 		weaponStatus->name += String(i);
-		weaponStatus->GetElementByName("Icon")->textureSource = weapon->Icon();
+		weaponStatus->GetElementByName("Icon")->visuals.textureSource = weapon->Icon();
 		
 		UIElement * weaponName = weaponStatus->GetElementByName("WeaponName");
 		weaponName->SetText(weapon->name);

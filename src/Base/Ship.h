@@ -79,7 +79,7 @@ public:
 	bool ArrivedAtDestination();
 	void Process(PlayingLevel& playingLevel, PlayerShip* playerShip, int timeInMs);
 	virtual void ProcessAI(PlayerShip* playerShip, int timeInMs);
-	void ProcessWeapons(PlayingLevel& playingLevel, int timeInMs);
+	void ProcessWeapons(PlayingLevel& playingLevel, int timeInMs, const Vector2f& currentAim);
 
 	/// Disables weapon in this and children ships.
 	void DisableWeapon(String weaponName);
@@ -253,6 +253,8 @@ public:
 
 	// Totals from equipped stuff.
 	ArmorStats armorStats;
+
+	Vector2f currentAim;
 
 private:
 	void RandomizeAsteroidRotation();

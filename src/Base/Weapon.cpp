@@ -410,7 +410,7 @@ Vector3f Weapon::WorldPosition(Entity* basedOnShipEntity)
 }
 
 /// Shoots using previously calculated aim.
-void Weapon::Shoot(PlayingLevel& playingLevel, Ship* ship)
+void Weapon::Shoot(PlayingLevel& playingLevel, Ship* ship, const Vector2f& currentAim)
 {
 	if (!enabled)
 		return;
@@ -449,8 +449,11 @@ void Weapon::Shoot(PlayingLevel& playingLevel, Ship* ship)
 	{
 		Entity* shipEntity = ship->entity;
 		Color color;
-		if (ship->allied)
+		// For player ships, use the ship's aim rather than what the weapon is auto-targetting.
+		if (ship->allied) {
+			this->currentAim = currentAim;
 			color = defaultAlliedProjectileColor;
+		}
 		else
 			color = Vector4f(0.8f,0.7f,0.1f,1.f);
 		Texture * tex = TexMan.GetTextureByColor(color);

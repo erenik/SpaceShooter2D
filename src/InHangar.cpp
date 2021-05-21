@@ -72,7 +72,7 @@ void InHangar::OnEnter(AppState * previousState) {
 }
 
 void InHangar::DisplayMessage(HangarMessage msg) {
-	UIElement * element = UserInterface::LoadUIAsElement("gui/HangarMessage.gui");
+	UIElement * element = UserInterface::LoadUIAsElement(nullptr, "gui/HangarMessage.gui");
 	element->GetElementByName("HangarMessage")->SetText(msg.text);
 	QueueGraphics(GMPushUI::ToUI(element));
 	currentMessage = msg;
@@ -296,7 +296,7 @@ void InHangar::SetGearCategory(Gear::Type category) {
 void InHangar::OnGearCategoryChanged() {
 	for (int i = 0; i < int(Gear::Type::AllCategories); ++i) {
 		if (i == int(gearCategory))
-			QueueGraphics(new GMSetUIv4f(GetButtonNameForCategory(Gear::Type(i)), GMUI::COLOR, (UIElement::onToggledHighlightFactor + 1.0f) * Vector4f(1, 1, 1, 1)));
+			QueueGraphics(new GMSetUIv4f(GetButtonNameForCategory(Gear::Type(i)), GMUI::COLOR, (UIVisuals::onToggledHighlightFactor + 1.0f) * Vector4f(1, 1, 1, 1)));
 		else
 			QueueGraphics(new GMSetUIv4f(GetButtonNameForCategory(Gear::Type(i)), GMUI::COLOR, 1.0f * Vector4f(1, 1, 1, 1)));
 	}
@@ -307,7 +307,7 @@ void InHangar::PushUI() {
 	// Remove old ones first.
 	QueueGraphics(new GMPopUI("gui/Hangar.gui", true));
 
-	UIElement * hangar = UserInterface::LoadUIAsElement("gui/Hangar.gui");
+	UIElement * hangar = UserInterface::LoadUIAsElement(nullptr, "gui/Hangar.gui");
 	((UIStringInput*)hangar->GetElementByName("Name"))->SetValue(PlayerName());
 	((UIIntegerInput*)hangar->GetElementByName("TotalScore"))->SetValue(score->iValue);
 	((UIIntegerInput*)hangar->GetElementByName("Money"))->SetValue(Money());
@@ -324,8 +324,8 @@ void InHangar::PopulateMissionsList() {
 	List<UIElement*> entries;
 	for (int i = 0; i < missions.Size(); ++i) {
 		Mission* mission = missions[i];
-		UIElement * missionButton = UserInterface::LoadUIAsElement("gui/SelectMissionButton.gui");
-		missionButton->GetElementByName("Icon")->textureSource = "0x334455";
+		UIElement * missionButton = UserInterface::LoadUIAsElement(nullptr, "gui/SelectMissionButton.gui");
+		missionButton->GetElementByName("Icon")->visuals.textureSource = "0x334455";
 		missionButton->GetElementByName("Completed")->SetText(mission->Completed()? "Completed" : "");
 		UIElement * missionName = missionButton->GetElementByName("MissionName");
 		missionName->SetText(TextMan.GetText(mission->name));
@@ -392,7 +392,7 @@ void InHangar::UpdateUpgradesLists()
 	QueueGraphics(new GMClearUI(productsList));
 	/// Fill with column lists for each weapon.
 	List<UIElement*> shopProductEntries;
-	UIElement * buyProductButtonTemplate = UserInterface::LoadUIAsElement("gui/BuyProductButton.gui");
+	UIElement * buyProductButtonTemplate = UserInterface::LoadUIAsElement(nullptr, "gui/BuyProductButton.gui");
 	List<Gear> gearToDisplay = relevantGear;
 	for (int i = 0; i < gearToDisplay.Size(); ++i)
 	{
@@ -400,7 +400,7 @@ void InHangar::UpdateUpgradesLists()
 		// Skip irrelevant gear depending on current filter.
 		if (gearCategory != gear.type && gearCategory != Gear::Type::All)
 			continue;
-		TextColors* textColors = UIElement::defaultTextColors;
+		TextColors* textColors = UIText::defaultTextColors;
 		UIElement * buyProductButton = buyProductButtonTemplate->Copy();
 		buyProductButton->name += gear.name;
 
@@ -424,7 +424,7 @@ void InHangar::UpdateUpgradesLists()
 		auto isOwnedLabel = buyProductButton->GetElementByName("Owned");
 		isOwnedLabel->name += gear.name;
 		
-		buyProductButton->GetElementByName("Icon")->textureSource = gear.Icon();
+		buyProductButton->GetElementByName("Icon")->visuals.textureSource = gear.Icon();
 
 		buyProductButton->onHover = "SetHoverUpgrade:" + gear.name;
 		shopProductEntries.Add(buyProductButton);
@@ -454,7 +454,7 @@ void InHangar::FillSelectGearList(String list, Gear::Type type, Gear currentlyEq
 	QueueGraphics(new GMClearUI(list));
 	/// Fill with column lists for each weapon.
 	List<UIElement*> selectGearEntries;
-	UIElement * adjustEquippedItemButtonTemplate = UserInterface::LoadUIAsElement("gui/AdjustEquippedItemButton.gui");
+	UIElement * adjustEquippedItemButtonTemplate = UserInterface::LoadUIAsElement(nullptr, "gui/AdjustEquippedItemButton.gui");
 	List<Gear> gearToDisplayInList = Gear::GetAllOwnedOfType(type);
 
 	// Filter out gear currently equipped
@@ -478,8 +478,8 @@ void InHangar::FillSelectGearList(String list, Gear::Type type, Gear currentlyEq
 			gearNameLabel->SetText(Text(TextMan.GetText("Unequip") + " " + TextMan.GetText(currentlyEquippedGearInSlot.name)));
 			selectGearButton->onHover = "SetHoverUpgrade:" + currentlyEquippedGearInSlot.name;
 			selectGearButton->activationMessage = "UnequipGearInActiveSlot";
-			selectGearButton->textureSource = "0x661122";
-			selectGearButton->GetElementByName("GearIcon")->textureSource = currentlyEquippedGearInSlot.Icon();
+			selectGearButton->visuals.textureSource = "0x661122";
+			selectGearButton->GetElementByName("GearIcon")->visuals.textureSource = currentlyEquippedGearInSlot.Icon();
 		}
 		else {
 			Gear gear = gearToDisplayInList[i];
@@ -487,7 +487,7 @@ void InHangar::FillSelectGearList(String list, Gear::Type type, Gear currentlyEq
 			gearNameLabel->SetText(Text(TextMan.GetText(gear.name)));
 			selectGearButton->onHover = "SetHoverUpgrade:" + gear.name;
 			selectGearButton->activationMessage = "EquipGear:" + gear.name;
-			selectGearButton->GetElementByName("GearIcon")->textureSource = gear.Icon();
+			selectGearButton->GetElementByName("GearIcon")->visuals.textureSource = gear.Icon();
 		}
 
 		gearNameLabel->SetOnHoverTextColor(ssActiveTextColor);
@@ -521,7 +521,7 @@ void InHangar::OnGearChanged() {
 void InHangar::UpdateShipStats() {
 	QueueGraphics(new GMClearUI("lEditScreenShipStats"));
 	UIElement* gearDesc = nullptr;
-	gearDesc = UserInterface::LoadUIAsElement("gui/ShipStatsDescription.gui");
+	gearDesc = UserInterface::LoadUIAsElement(nullptr, "gui/ShipStatsDescription.gui");
 	
 	//((UIStringInput*)gearDesc->GetElementByName("ShipName"))->SetValue("Vertigo");
 	//	((UIIntegerInput*)gearDesc->GetElementByName("ShipPrice"))->SetValue(0);
@@ -544,7 +544,7 @@ void InHangar::FillEditScreenEntries(String inList, Gear::Type type) {
 	QueueGraphics(new GMClearUI(inList));
 	/// Fill with column lists for each weapon.
 	List<UIElement*> equippedGearEntries;
-	UIElement * adjustEquippedItemButtonTemplate = UserInterface::LoadUIAsElement("gui/AdjustEquippedItemButton.gui");
+	UIElement * adjustEquippedItemButtonTemplate = UserInterface::LoadUIAsElement(nullptr, "gui/AdjustEquippedItemButton.gui");
 
 	playerShip->UpdateGearFromVars();
 
@@ -563,8 +563,8 @@ void InHangar::FillEditScreenEntries(String inList, Gear::Type type) {
 			// TODO: Set text color of all.
 			adjustEquippedItemButton->GetElementByName("GearSlot")->SetText(TextMan.GetText("GearSlot") + " " + String(i + 1));
 			adjustOrEquipNameLabel->SetText(TextMan.GetText("AddEquipment"+ toString(type)));
-			adjustEquippedItemButton->GetElementByName("GearIcon")->textureSource = Gear::TypeIcon(type);
-			adjustEquippedItemButton->GetElementByName("GearIcon")->color = Vector4f(1,1,1,1) * 0.8f;
+			adjustEquippedItemButton->GetElementByName("GearIcon")->visuals.textureSource = Gear::TypeIcon(type);
+			adjustEquippedItemButton->GetElementByName("GearIcon")->visuals.color = Vector4f(1,1,1,1) * 0.8f;
 		}
 		// Show entries 
 		else {
@@ -574,7 +574,7 @@ void InHangar::FillEditScreenEntries(String inList, Gear::Type type) {
 			adjustEquippedItemButton->GetElementByName("GearSlot")->SetText(TextMan.GetText("GearSlot") + " " + String(i + 1));
 			adjustOrEquipNameLabel->SetText(TextMan.GetText(gear.name));
 			adjustEquippedItemButton->onHover = "SetHoverUpgrade:" + gear.name;
-			adjustEquippedItemButton->GetElementByName("GearIcon")->textureSource = gear.Icon();
+			adjustEquippedItemButton->GetElementByName("GearIcon")->visuals.textureSource = gear.Icon();
 		}
 
 		adjustOrEquipNameLabel->SetOnHoverTextColor(ssActiveTextColor);
@@ -679,7 +679,7 @@ void InHangar::UpdateGearDetails(String upgrade)
 
 	UIElement* gearDesc = nullptr;
 	if (isWeapon) {
-		gearDesc = UserInterface::LoadUIAsElement("gui/GearWeaponDescription.gui");
+		gearDesc = UserInterface::LoadUIAsElement(nullptr, "gui/GearWeaponDescription.gui");
 		((UIStringInput*)gearDesc->GetElementByName("GearName"))->SetValue(TextMan.GetText(upgrade));
 		((UIIntegerInput*)gearDesc->GetElementByName("GearPrice"))->SetValue(weapon.cost);
 		((UIIntegerInput*)gearDesc->GetElementByName("GearDamage"))->SetValue((int)weapon.damage);
@@ -721,7 +721,7 @@ void InHangar::UpdateGearDetails(String upgrade)
 		};
 	}
 	else if (isArmor) {
-		gearDesc = UserInterface::LoadUIAsElement("gui/GearArmorDescription.gui");
+		gearDesc = UserInterface::LoadUIAsElement(nullptr, "gui/GearArmorDescription.gui");
 		((UIStringInput*)gearDesc->GetElementByName("GearName"))->SetValue(TextMan.GetText(upgrade));
 		((UIIntegerInput*)gearDesc->GetElementByName("GearPrice"))->SetValue(gear.price);
 		((UIIntegerInput*)gearDesc->GetElementByName("GearHp"))->SetValue((int)gear.maxHP);
@@ -731,7 +731,7 @@ void InHangar::UpdateGearDetails(String upgrade)
 		gearDesc->GetElementByName("GearTextDescription")->SetText(TextMan.GetText(gear.name + "Desc"));
 	}
 	else if (isShield) {
-		gearDesc = UserInterface::LoadUIAsElement("gui/GearShieldDescription.gui");
+		gearDesc = UserInterface::LoadUIAsElement(nullptr, "gui/GearShieldDescription.gui");
 		((UIStringInput*)gearDesc->GetElementByName("GearName"))->SetValue(TextMan.GetText(upgrade));
 		((UIIntegerInput*)gearDesc->GetElementByName("GearPrice"))->SetValue(gear.price);
 		((UIIntegerInput*)gearDesc->GetElementByName("GearHp"))->SetValue((int)gear.maxShield);
