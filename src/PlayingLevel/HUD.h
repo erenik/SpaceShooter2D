@@ -39,6 +39,7 @@ public:
 
 	void OpenInGameMenu();
 	void CloseInGameMenu();
+	bool IsMenuOpen();
 
 	bool activeWeaponsShown = false;
 private:

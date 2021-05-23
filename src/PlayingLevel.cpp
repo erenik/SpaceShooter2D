@@ -585,8 +585,11 @@ void PlayingLevel::ProcessMessage(Message* message)
 		}
 
 		else if (msg == "OnReloadUI") {
+			bool hudWasOpen = HUD::Get()->IsMenuOpen();
 			CreateUserInterface();
 			HUD::Get()->Show();
+			if (hudWasOpen)
+				HUD::Get()->OpenInGameMenu();
 		}
 		else if (msg == "ProceedMessage")
 		{

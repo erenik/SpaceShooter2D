@@ -77,7 +77,7 @@ public:
 	void ExplodeEffects(PlayingLevel& playingLevel);
 	/// Checks current movement. Will only return true if movement is target based and destination is within threshold.
 	bool ArrivedAtDestination();
-	void Process(PlayingLevel& playingLevel, PlayerShip* playerShip, int timeInMs);
+	virtual void Process(PlayingLevel& playingLevel, PlayerShip* playerShip, int timeInMs);
 	virtual void ProcessAI(PlayerShip* playerShip, int timeInMs);
 	void ProcessWeapons(PlayingLevel& playingLevel, int timeInMs, const Vector2f& currentAim);
 
@@ -129,6 +129,7 @@ public:
 
 	// Sets aiming directory for the current weapon.
 	void SetAimDir(Vector2f);
+	Vector2f GetAimDir();
 
 	
 	int CurrentWeaponIndex();

@@ -5,6 +5,7 @@
 #include "Base/PlayerShip.h"
 #include "File/LogFile.h"
 #include "PlayingLevel.h"
+#include "Input/InputManager.h"
 
 // Fetches player ship along with gear and updated stats.
 PlayerShip::PlayerShip()
@@ -37,6 +38,38 @@ void PlayerShip::SetAIVelocityVector(PlayingLevel& playingLevel, Vector3f vector
 		magnitude *= distance / 5.0f;
 	}
 	playingLevel.SetPlayerMovement(vector.NormalizedCopy() * magnitude);
+}
+
+#include "PlayingLevel/HUD.h"
+
+void PlayerShip::Process(PlayingLevel& playingLevel, PlayerShip* playerShip, int timeInMs) {
+	float targetRotationSpeed = 2.0f;
+	if (!HUD::Get() || !HUD::Get()->IsMenuOpen()) {
+		if (InputMan.KeyPressed(KEY::UP) || InputMan.KeyPressed(KEY::LEFT)) {
+			Angle angle = Angle::FromVector(GetAimDir());
+			angle += Angle::FromDegrees(targetRotationSpeed);
+			SetAimDir(angle.ToVector2f());
+		}
+		else if (InputMan.KeyPressed(KEY::DOWN) || InputMan.KeyPressed(KEY::RIGHT)) {
+			Angle angle = Angle::FromVector(GetAimDir());
+			angle += Angle::FromDegrees(-targetRotationSpeed);
+			SetAimDir(angle.ToVector2f());
+		}
+	}
+
+	// Skill cooldown.
+	if (timeSinceLastSkillUseMs >= 0)
+	{
+		timeSinceLastSkillUseMs += timeInMs;
+		if (timeSinceLastSkillUseMs > skillDurationMs)
+		{
+			activeSkill = NO_SKILL;
+			spaceShooter->UpdateHUDSkill();
+		}
+	}
+
+
+	Ship::Process(playingLevel, playerShip, timeInMs);
 }
 
 void PlayerShip::ProcessAI(PlayerShip* playerShip, int timeInMs) {

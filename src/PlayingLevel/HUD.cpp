@@ -292,6 +292,10 @@ void HUD::OpenInGameMenu()
 	InputMan.SetNavigateUI(true);
 }
 
+bool HUD::IsMenuOpen() {
+	return inGameMenuOpened;
+}
+
 void HUD::CloseInGameMenu()
 {
 	PopUI(inGameMenuGui);
@@ -304,6 +308,12 @@ void HUD::ProcessMessage(Message* message) {
 	String msg = message->msg;
 	switch (message->type)
 	{
+		case MessageType::ON_UI_POPPED: {
+			if (msg.Contains("InGameMenu")) {
+				inGameMenuOpened = false;
+			}
+			break;
+		}
 		case MessageType::STRING:
 		{
 			msg.RemoveSurroundingWhitespaces();

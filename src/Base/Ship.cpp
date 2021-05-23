@@ -410,23 +410,13 @@ void Ship::Process(PlayingLevel& playingLevel, PlayerShip* playerShip, int timeI
 
 	// Rotations per second?
 	// Aim as long as recent input was gotten for aiming..?
-	if (true) {
+	if (!enemy) {
 		float aimSpeed = 3.0f; // 3.. units per second?
 		float toAimRatio = timeInMs * 0.001f * aimSpeed; // aim 10% per second?
 		currentAim = currentAim * (1 - toAimRatio) + targetAim * toAimRatio;
 		currentAim.Normalize();
 	}
 
-	// Skill cooldown.
-	if (timeSinceLastSkillUseMs >= 0)
-	{
-		timeSinceLastSkillUseMs += timeInMs;
-		if (timeSinceLastSkillUseMs > skillDurationMs)
-		{
-			activeSkill = NO_SKILL;
-			spaceShooter->UpdateHUDSkill();
-		}
-	}
 	/// Process scripts (pretty much AI and other stuff?)
 	if (script)
 		script->Process(timeInMs);
@@ -994,6 +984,10 @@ Vector3f Ship::WeaponTargetDir()
 // Sets aiming directory for the current weapon.
 void Ship::SetAimDir(Vector2f newAimDir) {
 	targetAim = newAimDir;
+}
+
+Vector2f Ship::GetAimDir() {
+	return targetAim;
 }
 
 int Ship::CurrentWeaponIndex() {

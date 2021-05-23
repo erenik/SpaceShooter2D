@@ -25,27 +25,27 @@ parent imList
 
 defaultSizeRatioXY 1 0.15
 //defaultTopBorder ui/border_top_4
-defaultRightBorder 0xAAFF
+// defaultRightBorder 0xAAFF
 //defaultTexture	0x22FF
 
 Button Continue
 onActivate PopUI(InGameMenu)&ToggleMenu
-topRightCorner ui/message_top_right_corner_64x32
+// topRightCorner ui/message_top_right_corner_64x32
 
 Button Restart "Restart level"
 onActivate PopUI(InGameMenu)&RestartLevel
-topRightCorner ui/top_right_corner_8x8
+// topRightCorner ui/top_right_corner_8x8
 
 Button Restart "Abort mission"
 onActivate PopUI(InGameMenu)&AbortMission
-topRightCorner ui/top_right_corner_8x8
+// topRightCorner ui/top_right_corner_8x8
 
 Button	OptionsButton
 text "Options"
 onActivate PushUI(gui/Options.gui)  // OpenOptionsScreen
-topRightCorner ui/top_right_corner_8x8
+// topRightCorner ui/top_right_corner_8x8
 
 Button ExitToMainMenuButton
 onActivate PopUI(HUD)&PopUI(InGameMenu)&GoToMainMenu
 text	"Exit to main menu"
-topRightCorner ui/top_right_corner_64x32_red
+// topRightCorner ui/top_right_corner_64x32_red

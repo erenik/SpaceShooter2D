@@ -60,7 +60,7 @@ Weapon::Weapon()
 	aim = false;
 	currentAim = Vector3f(1, 0, 0);
 	shotsLeft = 0;
-	estimatePosition = false;
+	estimatePosition = true;
 	projectilePath = STRAIGHT;
 	burstStart = Time(TimeType::MILLISECONDS_NO_CALENDER, 0);
 	cooldown = Time(TimeType::MILLISECONDS_NO_CALENDER, 1000);
@@ -386,7 +386,7 @@ void Weapon::Aim(PlayingLevel& playingLevel, Ship* ship)
 	// Estimate position upon impact?
 	Vector3f targetPos = target->worldPosition;
 	Vector3f toTarget = targetPos - weaponWorldPosition;
-	if (estimatePosition)
+	if (true) // estimatePosition) // Always estimate?
 	{
 		float dist = toTarget.Length();
 		// Check velocity of target.
@@ -398,6 +398,7 @@ void Weapon::Aim(PlayingLevel& playingLevel, Ship* ship)
 	}
 	// Aim at the player.
 	currentAim = toTarget.NormalizedCopy();
+	ship->SetAimDir(currentAim);
 }
 
 /// Based on ship.
@@ -481,10 +482,11 @@ void Weapon::Shoot(PlayingLevel& playingLevel, Ship* ship, const Vector2f& curre
 		Vector3f dir(-1.f,0,0);
 		// For defaults of forward, invert for player
 		if (ship->allied)
-			dir = currentAim;
+			dir = ship->currentAim;
+
 		if (aim)
 		{
-			dir = currentAim;
+			dir = this->currentAim;
 		}
 		// Angle, +180
 		else if (angle)

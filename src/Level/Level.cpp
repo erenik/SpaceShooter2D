@@ -82,6 +82,7 @@ Entity* Level::SpawnPlayer(PlayingLevel& playingLevel, Ship* playerShip, ConstVe
 	model = ModelMan.GetModel("plane");
 	playerAimCrossHair = MapMan.CreateEntity("AimCrosshair", model, TexMan.GetTexture("img/ui/Crosshairs"));
 	playerAimCrossHair->localPosition = Vector3f(0, 1, -5); // Offset by 5 units to the right?
+	QueueGraphics(new GMSetEntityb(playerAimCrossHair, GT_IS_ALPHA_ENTITY, true));
 	QueuePhysics(new PMSetEntity(playerAimCrossHair, PT_PARENT, entity));
 	return entity;
 }

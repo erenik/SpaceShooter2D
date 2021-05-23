@@ -12,6 +12,9 @@ public:
 
 	virtual void ProcessAI(PlayerShip* playerShip, int timeInMs) override;
 
+	// For processing player input to guide the ship further.
+	void Process(PlayingLevel& playingLevel, PlayerShip* playerShip, int timeInMs) override;
+
 	bool AutoAim() const { return autoAim; }
 	void SetAutoAim(bool value);
 	int MaxGearForType(Gear::Type type) const;
