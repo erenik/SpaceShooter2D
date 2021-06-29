@@ -182,6 +182,7 @@ List<Entity*> Ship::Spawn(ConstVec3fr atWorldPosition, Ship* in_parent, PlayerSh
 	Texture * texture = TexMan.GetTexture(visuals.textureSource);
 	Entity* entity = EntityMan.CreateEntity(name, GetModel(), texture);
 	entity->localPosition = atPosition;
+	entity->SetScale(2.0f); // Scale up all..!
 	
 	PhysicsProperty * pp = new PhysicsProperty();
 	entity->physics = pp;

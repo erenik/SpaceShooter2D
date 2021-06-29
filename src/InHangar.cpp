@@ -411,32 +411,32 @@ void InHangar::UpdateUpgradesLists()
 			if (gear.price > Money()) {
 				buyProductButton->activationMessage = "PlayErrorSFX TODO";
 			}
-			else {
-			}
 		}
 		UIElement * productName = buyProductButton->GetElementByName("ProductName");
-		productName->SetText(Text(gear.name));
-		productName->SetOnHoverTextColor(ssActiveTextColor);
+		if (productName) {
+			productName->SetText(Text(gear.name));
+			productName->SetOnHoverTextColor(ssActiveTextColor);
+			auto productLabelName = productName->name + gear.name;
+			buyProductButton->GetElementByName("Price")->SetText(Text(gear.price));
+			auto priceLabelName = buyProductButton->GetElementByName("Price")->name += gear.name;
+			auto isOwnedLabel = buyProductButton->GetElementByName("Owned");
+			isOwnedLabel->name += gear.name;
 
-		auto productLabelName = buyProductButton->GetElementByName("ProductName")->name += gear.name;
-		buyProductButton->GetElementByName("Price")->SetText(Text(gear.price));
-		auto priceLabelName = buyProductButton->GetElementByName("Price")->name += gear.name;
-		auto isOwnedLabel = buyProductButton->GetElementByName("Owned");
-		isOwnedLabel->name += gear.name;
-		
-		buyProductButton->GetElementByName("Icon")->visuals.textureSource = gear.Icon();
+			buyProductButton->GetElementByName("Icon")->visuals.textureSource = gear.Icon();
 
-		buyProductButton->onHover = "SetHoverUpgrade:" + gear.name;
-		shopProductEntries.Add(buyProductButton);
+			buyProductButton->onHover = "SetHoverUpgrade:" + gear.name;
+			shopProductEntries.Add(buyProductButton);
 
-		StoreButtonData data;
-		data.gear = gear;
-		data.buttonName = buyProductButton->name;
-		data.isOwnedLabelName = isOwnedLabel->name;
-		data.productNameLabel = productLabelName;
-		data.productPriceLabel = priceLabelName;
+			StoreButtonData data;
+			data.gear = gear;
+			data.buttonName = buyProductButton->name;
+			data.isOwnedLabelName = isOwnedLabel->name;
+			data.productNameLabel = productLabelName;
+			data.productPriceLabel = priceLabelName;
 
-		storeButtonData.Add(data);
+			storeButtonData.Add(data);
+		}
+
 
 	}
 	QueueGraphics(new GMAddUI(shopProductEntries, productsList));
@@ -444,8 +444,15 @@ void InHangar::UpdateUpgradesLists()
 	UpdateUpgradeStatesInList();
 
 	// Hover to the first element by default
-	assert(shopProductEntries.Size() > 0);
-	QueueGraphics(new GMSetHoverUI(shopProductEntries[0]->name));
+	if (shopProductEntries.Size() > 0) {
+		assert(shopProductEntries.Size() > 0);
+		QueueGraphics(new GMSetHoverUI(shopProductEntries[0]->name));
+	}
+	else {
+		UIElement* popup = new UIButton("popup");
+		popup->SetText("Nothing to buy!");
+		QueueGraphics(GMPushUI::ToUI(popup, nullptr));
+	}
 
 	GraphicsMan.QueueMessage(new GMSetUIi("WorkshopMoney", GMUI::INTEGER_INPUT, Money()));
 }
