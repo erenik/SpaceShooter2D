@@ -36,7 +36,10 @@ void SpaceShooter2D::SetupUIStyling() {
 	UIScrollBarHandle::defaultLockHeight = 0;
 	UIScrollBarHandle::defaultBorderOffset = 2;
 
-	TextFont::colors = TextColors(Color::ColorByHexName("#8f1767ff")
-		, Color::ColorByHexName("#fb6b1dff")
-		, Color::ColorByHexName("#ffffffff"));
+	TextFont::colors = TextColors(
+		Vector3f(0.05f,0,0), 
+		Vector3f(0.15f,0,0), 
+		Vector3f(0.25f, 0,0));
+	TextFont::colors.notToggledIdle = TextFont::colors.notToggledHover = Vector3f(0.35,0,0);
+	TextFont::colors.toggledIdle = TextFont::colors.toggledHover = Vector3f(0.45,0,0);
 }

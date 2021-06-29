@@ -40,7 +40,8 @@ void main(void)
 	if (baseFrag.w == 0)
 		return;
 
-	if (primaryColorVec4.x > 0.9 && primaryColorVec4.y > 0.9) {
+	// Toggled togglables 0.4-0.5
+	if (primaryColorVec4.x > 0.4) {
 		// Selected: c7dcd0, 9babb2, 7f708a
 		if (baseFrag.x > 0.8)
 			gl_FragColor = vec4(0.7804, 0.8627, 0.8157, 1);
@@ -49,7 +50,27 @@ void main(void)
 		else
 			gl_FragColor = vec4(0.4980, 0.4392, 0.5412, 1);
 	}
-	else if (primaryColorVec4.x > 0.90){
+	// Not toggled togglables 0.3-0.4 
+	else if (primaryColorVec4.x > 0.3) {
+		// Deselected 7f708a, 625565, 3e3546
+		if (baseFrag.x > 0.8)
+			gl_FragColor = vec4(0.4980, 0.4392, 0.5412, 1);
+		else if (baseFrag.x > 0.5)
+			gl_FragColor = vec4(0.3843, 0.3333, 0.3961, 1);
+		else
+			gl_FragColor = vec4(0.2431, 0.2078, 0.2745, 1);
+	}
+	// Active 0.2-0.3
+	else if (primaryColorVec4.x > 0.2){
+		if (baseFrag.x > 0.8)
+			gl_FragColor = vec4(0.9765, 0.7608, 0.1686,1);
+		else if (baseFrag.x > 0.5)
+			gl_FragColor = vec4(0.9843, 0.4196, 0.1137,1);
+		else
+			gl_FragColor = vec4(0.6824, 0.1373, 0.2039,1);
+	}
+	// Hovered 0.1-0.2
+	else if (primaryColorVec4.x > 0.1){
 		// Orange 
 		// Highlight: #f9c22b
 		// Color: #fb6b1d
@@ -61,7 +82,8 @@ void main(void)
 		else
 			gl_FragColor = vec4(0.6824, 0.1373, 0.2039,1);
 	}
-	else if (primaryColorVec4.x < 0.6 && primaryColorVec4.z < 0.8){
+	// Idle 0-0.1
+	else if (primaryColorVec4.x < 0.1) {
 		// Purple, f45d92, 8f1767, 5e1c5a
 		if (baseFrag.x > 0.8)
 			gl_FragColor = vec4(0.9569, 0.3647, 0.5725, 1);
@@ -70,15 +92,7 @@ void main(void)
 		else
 			gl_FragColor = vec4(0.3686, 0.1098, 0.3529, 1);
 	}
-	else if (primaryColorVec4.x > 0.3) {
-		// Deselected 7f708a, 625565, 3e3546
-		if (baseFrag.x > 0.8)
-			gl_FragColor = vec4(0.4980, 0.4392, 0.5412, 1);
-		else if (baseFrag.x > 0.5)
-			gl_FragColor = vec4(0.3843, 0.3333, 0.3961, 1);
-		else
-			gl_FragColor = vec4(0.2431, 0.2078, 0.2745, 1);
-	}
+	/// ...Disableds?
 	else {
 		gl_FragColor *= primaryColorVec4 * 0.5 + 0.5;
 		gl_FragColor += highlightColorVec4;	
