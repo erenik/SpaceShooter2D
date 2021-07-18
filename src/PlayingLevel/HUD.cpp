@@ -31,6 +31,7 @@ void HUD::Show() {
 	
 	overlaysCreated = false;
 	PushUI(hudPath);
+	UpdateDebugVisibility();
 	// By default remove hover from any UI element. Select weapons with 1-9 keys.
 	QueueGraphics(new GMSetHoverUI(nullptr));
 
@@ -40,6 +41,14 @@ void HUD::Show() {
 void HUD::Hide() {
 	PopUI(hudPath);
 }
+
+// Checks GameVars if it has changed and updates visibility if so.
+void HUD::UpdateDebugVisibility() {
+	// Depending on if DebugUI is set, show/hide the Debug-spam
+	auto debugUI = GameVars.GetInt("DebugUI");
+	QueueGraphics(new GMSetUIb("Debug", GMUI::VISIBILITY, debugUI && debugUI->iValue));
+}
+
 
 void HUD::UpdateUI() {
 	UpdateActiveWeapon();

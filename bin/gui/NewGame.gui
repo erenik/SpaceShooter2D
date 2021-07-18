@@ -20,7 +20,7 @@ parent lNewGame
 defaultSizeRatioXY 1 0.1
 
 label NewGame "New Game"
-textColor #fb6b1dff
+textColor 0.85 1 1 1
 sizeRatioY 0.15
 textAlignment Center
 

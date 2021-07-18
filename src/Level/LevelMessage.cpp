@@ -96,9 +96,35 @@ bool LevelMessage::Trigger(PlayingLevel& playingLevel, Level * level)
 		{
 			PrintAll();
 		}
-		Text text = TextMan.GetText(textID); 
-		text.Replace("$Name", playingLevel.PlayerName());
-		QueueGraphics(new GMSetUIs("LevelMessage", GMUI::TEXT, text));
+		Text text = TextMan.GetText(textID); 		
+		if (text.Contains("$")) {
+			text.Replace("$Name", playingLevel.PlayerName());
+			const InputMapping& inputMapping = playingLevel.InputMapping();
+			String movementKeys, proceedKeys;
+			for (int i = 0; i < inputMapping.bindings.Size(); ++i) {
+				auto binding = inputMapping.bindings[i];
+				if (binding->name == "MoveShipUp")
+					movementKeys.Add(binding->KeysToTriggerItToString());
+				if (binding->name == "MoveShipDown")
+					movementKeys.Add(binding->KeysToTriggerItToString());
+				if (binding->name == "MoveShipLeft")
+					movementKeys.Add(binding->KeysToTriggerItToString());
+				if (binding->name == "MoveShipRight")
+					movementKeys.Add(binding->KeysToTriggerItToString());
+				if (binding->name == "ProceedMessage")
+					proceedKeys = binding->KeysToTriggerItToString();
+			}
+
+			String inputColorStart = "$color(0.4)";
+			String colorReset = "$color(reset)";
+			text.Replace("$MovementKeys", inputColorStart + movementKeys + colorReset);
+			text.Replace("$ProceedKey", inputColorStart + proceedKeys + colorReset);
+
+			// Convert the text to actual color markers before submitting anything..!
+			text.ConvertColorMarkers();
+		}
+
+		QueueGraphics(new GMSetUIt("LevelMessage", GMUI::TEXT, text));
 		QueueGraphics(new GMSetUIb("LevelMessage", GMUI::VISIBILITY, true));
 		displayed = true;
 		++activeLevelDisplayMessages;

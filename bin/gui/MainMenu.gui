@@ -53,6 +53,8 @@ parent lMainMenu
 defaultSizeRatioY 0.10
 defaultTextAlignment Center
 
+defaultTexture	0x2244
+
 button NewGameButton
 text	"New game"
 onActivate OpenNewGameMenu

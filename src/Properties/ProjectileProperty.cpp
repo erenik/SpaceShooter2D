@@ -20,10 +20,15 @@ ProjectileProperty::ProjectileProperty(const Weapon & weaponThatSpawnedIt, Entit
 }
 
 ProjectileProperty::~ProjectileProperty() {
-	if (thrustEmitter != nullptr)
-		QueueGraphics(new GMDetachParticleEmitter(thrustEmitter));
-	if (traceEmitter)
-		QueueGraphics(new GMDetachParticleEmitter(traceEmitter));
+	if (Graphics.shouldLive) {
+		if (thrustEmitter != nullptr)
+			QueueGraphics(new GMDetachParticleEmitter(thrustEmitter));
+		if (traceEmitter)
+			QueueGraphics(new GMDetachParticleEmitter(traceEmitter));
+	}
+	else {
+		std::cout << "Graphics thread already terminating.";
+	}
 }
 
 // Static version.

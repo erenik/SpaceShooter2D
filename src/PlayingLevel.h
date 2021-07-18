@@ -25,6 +25,9 @@ public:
 
 	Level& GetLevel() { return level; };
 
+	// For printing to UI mainly
+	const InputMapping& InputMapping() const;
+
 	/// Searches among actively spawned ships.
 	Ship* GetShip(Entity* forEntity);
 

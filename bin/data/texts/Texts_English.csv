@@ -17,13 +17,13 @@ Text Ids below;Text strings associated with Ids below
 ;
 ;
 /// Tutorial stuff;
-TutorialStart;Tutorial Start. Press Enter or the A-button to proceed.
+TutorialStart;Tutorial Start. Press $ProceedKey or the A-button to proceed.
 GreetingsPilot;Greetings, pilot. These are your orders.
 FirstTask;Task: Destroy 3 immobile units with basic weaponry.
 FireWithSpacebar;Fire using Spacebar or Right trigger.
-MoveWithWASD;Move using the [WSAD] keys or left analog stick.
+MoveWithWASD;Move using the $MovementKeys keys or left analog stick.
 WellDone;Well done.
-TryAgainToFire;Try again. Use the [WSAD] keys to move.\nHold Spacebar to fire.
+TryAgainToFire;Try again. Use the $MovementKeys keys to move.\nHold Spacebar to fire.
 ;
 WeaponSwitchingIntro;Weapon switching.
 WeaponSwitchingIntro2;In combat you may want to switch weapons\nin order to defeat your opponents faster. 

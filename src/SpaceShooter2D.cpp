@@ -398,6 +398,14 @@ void SpaceShooter2D::ProcessMessage(Message * message)
 // Process messages which can be sent from any game state really.
 void SpaceShooter2D::ProcessGeneralMessage(Message* message) {
 
+	if (message->type == MessageType::BOOL_MESSAGE) {
+		BoolMessage* boolMessage = (BoolMessage*)message;
+		bool value = boolMessage->value;
+		if (message->msg.Contains("SetBool:ToggleDebugUI")) {
+			GameVars.SetInt("DebugUI", value);
+		}
+	}
+
 	if (message->type == MessageType::ON_UI_PUSHED) {
 		OnUIPushed * onUIPushed = (OnUIPushed*)message;
 		if (onUIPushed->msg.StartsWith("LoadScreen"))
@@ -407,6 +415,10 @@ void SpaceShooter2D::ProcessGeneralMessage(Message* message) {
 			QueueGraphics(new GMSetUIi("MasterVolume", GMUI::INTEGER_INPUT, 100 * AudioMan.MasterVolume()));
 			QueueGraphics(new GMSetUIi("BGMVolume", GMUI::INTEGER_INPUT, 100 * AudioMan.BGMVolume()));
 			QueueGraphics(new GMSetUIi("SFXVolume", GMUI::INTEGER_INPUT, 100 * AudioMan.SFXVolume()));
+		}
+		if (onUIPushed->msg.StartsWith("Options")) {
+			auto debugUI = GameVars.GetInt("DebugUI");
+			QueueGraphics(new GMSetUIb("ToggleDebugUI", GMUI::TOGGLED, debugUI && debugUI->iValue));
 		}
 	}
 	else if (message->type == MessageType::STRING) {

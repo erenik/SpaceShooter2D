@@ -31,7 +31,10 @@ text	"Level message"
 font	Font_test_BW
 sizeRatioXY 0.9 0.2
 alignmentXY	0.5	0.3
-textPadding 32
+// Default to 30% text size, so that text may be split up into 3 lines easily?
+textSizeRatio 0.3
+lineSpacing 1.5
+textPadding 20
 visible false
 topBorder ui/Orange2
 rightBorder ui/Orange2

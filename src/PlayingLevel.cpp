@@ -171,6 +171,10 @@ void PlayingLevel::OnEnter(AppState* previousState) {
 
 };
 
+const InputMapping& PlayingLevel::InputMapping() const { 
+	return inputMapping; 
+}
+
 void PlayingLevel::CreateDefaultBindings() {
 	List<Binding*>& bindings = this->inputMapping.bindings;
 #define BIND(a,b) bindings.Add(new Binding(a,b));
@@ -247,11 +251,14 @@ void PlayingLevel::Process(int timeInMs) {
 		HUD* hud = HUD::Get();
 		hud->UpdateActiveWeapon();
 		hud->UpdateCooldowns(); // Update HUD 10 times a sec.
-		// Update Debug once every 10 HUD updates?
-		++hudUpdates;
-		if (hudUpdates > 10) {
-			hud->UpdateDebug();
-			hudUpdates = 0;
+		auto debugUI = GameVars.GetInt("DebugUI");
+		if (debugUI && debugUI->iValue) {
+			// Update Debug once every 10 HUD updates?
+			++hudUpdates;
+			if (hudUpdates > 10) {
+				hud->UpdateDebug();
+				hudUpdates = 0;
+			}
 		}
 		hudUpdateMs = 0;
 	}
@@ -590,6 +597,9 @@ void PlayingLevel::ProcessMessage(Message* message)
 			HUD::Get()->Show();
 			if (hudWasOpen)
 				HUD::Get()->OpenInGameMenu();
+
+			// Re-display Level Message if one is current.
+			level.activeLevelMessage->Trigger(*this, &level);
 		}
 		else if (msg == "ProceedMessage")
 		{
@@ -889,6 +899,7 @@ void PlayingLevel::ProcessMessage(Message* message)
 		}
 		else if (msg == "InGameMenuPopped") {
 			Resume();
+			HUD::Get()->UpdateDebugVisibility();
 		}
 		else if (msg == "ToggleMenu")
 		{
@@ -920,6 +931,7 @@ void PlayingLevel::LoadWeapons() {
 		}
 		playerShip->weaponSet.Add(weapon);
 	}
+	playerShip->SwitchToWeapon(0);
 	LogMain("Weapons locked and loaded", INFO);
 	HUD::Get()->UpdateHUDGearedWeapons();
 

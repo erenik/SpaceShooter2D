@@ -16,6 +16,10 @@ public:
 	void Show();
 	void Hide();
 
+
+	// Checks GameVars if it has changed and updates visibility if so.
+	void UpdateDebugVisibility();
+
 	// Updates all
 	void UpdateUI();
 

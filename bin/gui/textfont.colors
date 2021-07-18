@@ -1,0 +1,7 @@
+idle 0.7
+hover 0.8
+active 0.5
+toggledIdle 0.9
+toggledHover 0.8
+notToggledIdle 0.6
+notToggledHover 0.8
