@@ -178,6 +178,11 @@ const InputMapping& PlayingLevel::InputMapping() const {
 void PlayingLevel::CreateDefaultBindings() {
 	List<Binding*>& bindings = this->inputMapping.bindings;
 #define BIND(a,b) bindings.Add(new Binding(a,b));
+
+	BIND(Action::FromString("AimUp"), List<int>(KEY::UP));
+	BIND(Action::FromString("AimDown"), List<int>(KEY::DOWN));
+	BIND(Action::FromString("AimUp"), List<int>(KEY::LEFT));
+	BIND(Action::FromString("AimDown"), List<int>(KEY::RIGHT));
 	BIND(Action::FromString("AutoAim"), List<int>(KEY::CTRL, KEY::A));
 	BIND(Action::FromString("SpeedUp"), List<int>(KEY::CTRL, KEY::S, KEY::PLUS));
 	BIND(Action::FromString("SpeedDown"), List<int>(KEY::CTRL, KEY::S, KEY::MINUS));
@@ -487,7 +492,23 @@ void PlayingLevel::ProcessMessage(Message* message)
 		if (found > 0)
 			msg = msg.Part(0, found);
 		
+		const float aimIncrementDegrees = 45.0f;
+
 		if (false) {}
+		else if (msg == "AimUp") {
+			if (!HUD::Get() || !HUD::Get()->IsMenuOpen()) {
+				Angle angle = Angle::FromVector(playerShip->GetAimDir());
+				angle += Angle::FromDegrees(aimIncrementDegrees);
+				playerShip->SetAimDir(angle.ToVector2f());
+			}
+		}
+		else if (msg == "AimDown") {
+			if (!HUD::Get() || !HUD::Get()->IsMenuOpen()) {
+				Angle angle = Angle::FromVector(playerShip->GetAimDir());
+				angle += Angle::FromDegrees(-aimIncrementDegrees);
+				playerShip->SetAimDir(angle.ToVector2f());
+			}
+		}
 		else if (msg == "AutoAim") {
 			bool wasOn = playerShip->AutoAim();
 			playerShip->SetAutoAim(!wasOn);

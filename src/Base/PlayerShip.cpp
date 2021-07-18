@@ -44,18 +44,6 @@ void PlayerShip::SetAIVelocityVector(PlayingLevel& playingLevel, Vector3f vector
 
 void PlayerShip::Process(PlayingLevel& playingLevel, PlayerShip* playerShip, int timeInMs) {
 	float targetRotationSpeed = 2.0f;
-	if (!HUD::Get() || !HUD::Get()->IsMenuOpen()) {
-		if (InputMan.KeyPressed(KEY::UP) || InputMan.KeyPressed(KEY::LEFT)) {
-			Angle angle = Angle::FromVector(GetAimDir());
-			angle += Angle::FromDegrees(targetRotationSpeed);
-			SetAimDir(angle.ToVector2f());
-		}
-		else if (InputMan.KeyPressed(KEY::DOWN) || InputMan.KeyPressed(KEY::RIGHT)) {
-			Angle angle = Angle::FromVector(GetAimDir());
-			angle += Angle::FromDegrees(-targetRotationSpeed);
-			SetAimDir(angle.ToVector2f());
-		}
-	}
 
 	// Skill cooldown.
 	if (timeSinceLastSkillUseMs >= 0)
