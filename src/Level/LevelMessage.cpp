@@ -100,7 +100,7 @@ bool LevelMessage::Trigger(PlayingLevel& playingLevel, Level * level)
 		if (text.Contains("$")) {
 			text.Replace("$Name", playingLevel.PlayerName());
 			const InputMapping& inputMapping = playingLevel.InputMapping();
-			String movementKeys, proceedKeys;
+			String movementKeys, proceedKeys, shootKeys, selectWeaponKeys, toggleWeaponScriptKeys;
 			for (int i = 0; i < inputMapping.bindings.Size(); ++i) {
 				auto binding = inputMapping.bindings[i];
 				if (binding->name == "MoveShipUp")
@@ -113,12 +113,21 @@ bool LevelMessage::Trigger(PlayingLevel& playingLevel, Level * level)
 					movementKeys.Add(binding->KeysToTriggerItToString());
 				if (binding->name == "ProceedMessage")
 					proceedKeys = binding->KeysToTriggerItToString();
+				if (binding->name.Contains("Shooting"))
+					shootKeys = binding->KeysToTriggerItToString();
+				if (binding->name.Contains("Weapon:"))
+					selectWeaponKeys += binding->KeysToTriggerItToString();
+				if (binding->name.Contains("ToggleWeaponScript"))
+					toggleWeaponScriptKeys = binding->KeysToTriggerItToString();
 			}
 
 			String inputColorStart = "$color(0.4)";
 			String colorReset = "$color(reset)";
 			text.Replace("$MovementKeys", inputColorStart + movementKeys + colorReset);
 			text.Replace("$ProceedKey", inputColorStart + proceedKeys + colorReset);
+			text.Replace("$ShootKey", inputColorStart + shootKeys + colorReset);
+			text.Replace("$SelectWeaponKeys", inputColorStart + selectWeaponKeys + colorReset);
+			text.Replace("$ToggleWeaponScriptKeys", inputColorStart + toggleWeaponScriptKeys + colorReset);
 
 			// Convert the text to actual color markers before submitting anything..!
 			text.ConvertColorMarkers();

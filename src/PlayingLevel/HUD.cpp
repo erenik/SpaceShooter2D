@@ -98,6 +98,12 @@ void HUD::UpdateActiveWeapon() {
 		
 		QueueGraphics(new GMSetUIs("Ammunition" + String(i), GMUI::TEXT, String(weapon->shotsLeft)));
 		QueueGraphics(new GMSetUIv4f("Ammunition" + String(i), GMUI::TEXT_COLOR, weapon->reloading ? Vector4f(0.6f, 0.6f, 0.6f,1) : Vector4f(0.9f, 0.9f, 0.9f,1)));
+		if (weapon->reloading) {
+			QueueGraphics(new GMSetUIf("ReloadGreying" + String(i), GMUI::SIZE_RATIO_Y, weapon->currCooldownMs / (float) weapon->cooldown.Milliseconds()));
+		}
+		else {
+			QueueGraphics(new GMSetUIf("ReloadGreying" + String(i), GMUI::SIZE_RATIO_Y, 0.0f));
+		}
 		QueueGraphics(new GMSetUIs("Cooldown" + String(i), GMUI::TEXT, String(weapon->currCooldownMs / 1000.0f, 1)));
 	}
 
@@ -127,12 +133,15 @@ void HUD::UpdateHUDGearedWeapons()
 		weaponStatus->GetElementByName("Icon")->visuals.textureSource = weapon->Icon();
 		
 		UIElement * weaponName = weaponStatus->GetElementByName("WeaponName");
-		weaponName->SetText(weapon->name);
-		weaponName->name += String(i);
+		if (weaponName) {
+			weaponName->SetText(weapon->name);
+			weaponName->name += String(i);
+		}
 
 		weaponStatus->GetElementByName("Ammunition")->SetText(String(weapon->shotsLeft));
 		weaponStatus->GetElementByName("Ammunition")->name += String(i);
 		weaponStatus->GetElementByName("Cooldown")->name += String(i);
+		weaponStatus->GetElementByName("ReloadGreying")->name += String(i);
 		weaponStatuses.Add(weaponStatus);
 	}
 	QueueGraphics(new GMAddUI(weaponStatuses, "clWeapons"));
@@ -170,6 +179,7 @@ void HUD::UpdateHUDGearedWeaponsIfNeeded() {
 	if (overlaysCreated)
 		return;
 	UpdateHUDGearedWeapons();
+	overlaysCreated = true;
 }
 
 void HUD::UpdateUIPlayerHP(bool force)

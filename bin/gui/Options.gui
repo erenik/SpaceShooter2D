@@ -22,7 +22,7 @@ parent lOptions
 defaultSizeRatioY 0.15
 
 label Options
-textColor 0xFFFF
+textColor 0.8 1 1
 topBorder 0x0000
 rightBorder 0x0000
 textAlignment Center
@@ -33,7 +33,6 @@ sizeRatioY 0.1
 defaultSizeRatioY 0.12
 
 button AudioOptionsButton
-OnHoverTextColor #fb6b1dff
 text "Audio options"
 onActivate	PushUI(gui/AudioOptions.gui)
 
@@ -41,6 +40,5 @@ Checkbox ToggleDebugUI
 text "Debug UI"
 
 button Back
-OnHoverTextColor #fb6b1dff
 onActivate PopUI(Options)
 

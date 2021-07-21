@@ -1,12 +1,12 @@
 Type;Name;Weapons;Movement pattern;Speed;Rotation Pattern;Rotation Speed;Shield Value;Shield Regen Rate;Hit Points;Graphic Model;Texture;Collide damage;Script;OnCollision;
-H-Fighter;Default;;;0.006;;;100;0.000;100;H-Fighter;Ships/Ship_texture_2;5;;;
+H-Fighter;Default;;;0.000;;;100;0.000;100;H-Fighter;Ships/Ship_texture_2;5;;;
 PracticeTarget;ImmobilePracticeTarget;;0;0.000;;;25;0.000;10;./obj/Ships//V-Fighter.obj;./img/Ships//Fighter.png;25;;;
 PracticeTarget;ImmobilePracticeTargetTougher;;0;0.000;;;33;0.000;50;Asteroids/Asteroid_1;Asteroids/Asteroid_texture_1;35;;;
-Debris;SpeedDebris;;Straight;0.001;;;0;0.000;100000;Ships/Debris;;0;;;
+Debris;SpeedDebris;;Straight;0.000;;;0;0.000;100000;Ships/Debris;;0;;;
 Asteroid;Asteroid;;;0.000;Random;;0;0.000;1000;Asteroids/Asteroid_1;Asteroids/Asteroid_texture_1;0;;;
-Pirate;Fighter;EMachine gun I;Straight(inf);0.040;None;;10;0.000;20;Ships/V-Fighter;Ships/Fighter;50;;;
+Pirate;Fighter;EMachine gun I;Straight(inf);0.002;None;;10;0.000;20;Ships/V-Fighter;Ships/Fighter;50;;;
 Pirate;Bomber;EBomber I;Straight(inf);0.000;None;;10;0.000;100;Ships/Bomber;./img/Ships//Bomber_texture.png;50;;;
-Pirate;BigFighter;EBF Aim gun I;MoveTo(xy 5 0,15), Straight(inf);0.000;None;;10;0.000;250;Ships/BigFighter;Ships/BigFighter;36;;;
+Pirate;BigFighter;EBF Aim gun I;MoveTo(xy 5 0,15), Straight(inf);0.000;None;;10;0.000;250;Ships/BigFighter;./img/Ships//Big_fighter_texture.png;36;;;
 Pirate;Fighter2;EMachine gun II;Straight(inf);0.000;None;;10;0.000;50;Ships/V-Fighter;Ships/Fighter2;24;;;
 Pirate;Fighter3;EMachine gun III;Straight(inf);0.000;None;;10;0.000;100;Ships/V-Fighter;Ships/Fighter3;28;;;
 Asteroid;SmallAsteroid;;;0.000;Random;;0;0.000;250;Asteroids/Asteroid_1;Asteroids/Asteroid_texture_1;60;;;
@@ -33,3 +33,4 @@ Asteroid;SmallAsteroid;;;0.000;Random;;0;0.000;250;Asteroids/Asteroid_1;Asteroid
 ;Boss1_StingerR;Stinger;;0.000;;;10;0.000;1500;Bosses/Boss1_StingerR;0xFFFFFFFF;150;;;
 ;Boss1_StingerL;Stinger;;0.000;;;10;0.000;1500;Bosses/Boss1_StingerL;0xFFFFFFFF;150;;;
 ;;;;0.000;;;10;-431602080.000;10;obj/Ships/Ship.obj;0xFFFFFFFF;1;;;
+;Space Station;;;0.000;;;10;-431602080.000;10000;./obj/Buildings//Space_station.obj;./img/Buildings//Space_station.png;100;;;

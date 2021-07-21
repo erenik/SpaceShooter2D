@@ -26,9 +26,9 @@ label "Audio options"
 topBorder 0x0000
 rightBorder 0x0000
 textAlignment Center
-textColor	1 1 1 1
+textColor 0.8 1 1
 
-element padding 
+element padding
 sizeRatioY 0.1
 
 
@@ -37,20 +37,15 @@ defaultSizeRatioY 0.10
 IntegerInput MasterVolume
 text "Master Volume"
 Range 0 100
-OnHoverTextColor #fb6b1dff
 
 IntegerInput BGMVolume
 text "BGM Volume"
 Range 0 100
-OnHoverTextColor #fb6b1dff
 
 IntegerInput SFXVolume
 text "SFX Volume"
 Range 0 100
-OnHoverTextColor #fb6b1dff
 
 Button Back
-OnHoverTextColor #fb6b1dff
 onActivate PopUI(AudioOptions)
-
 

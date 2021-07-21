@@ -20,24 +20,24 @@ Text Ids below;Text strings associated with Ids below
 TutorialStart;Tutorial Start. Press $ProceedKey or the A-button to proceed.
 GreetingsPilot;Greetings, pilot. These are your orders.
 FirstTask;Task: Destroy 3 immobile units with basic weaponry.
-FireWithSpacebar;Fire using Spacebar or Right trigger.
+FireWithSpacebar;Fire using $ShootKey or Right trigger.
 MoveWithWASD;Move using the $MovementKeys keys or left analog stick.
 WellDone;Well done.
-TryAgainToFire;Try again. Use the $MovementKeys keys to move.\nHold Spacebar to fire.
+TryAgainToFire;Try again. Use the $MovementKeys keys to move.\nHold $ShootKey to fire.
 ;
 WeaponSwitchingIntro;Weapon switching.
-WeaponSwitchingIntro2;In combat you may want to switch weapons\nin order to defeat your opponents faster. 
-WeaponSwitchingIntro3;Switching weapons is done via the number keys or bumper buttons.
+WeaponSwitchingIntro2;In combat you may want to switch weapons\nin order to defeat your opponents faster.
+WeaponSwitchingIntro3;Switching weapons is done via the $SelectWeaponKeys keys or bumper buttons.
 SecondTask;Task: Destroy 3 immobile units with weapon switch available.
-TryAgainWeaponSwitch;Try again. Use the [123] buttons to use all\n your weapons to your advantage.
+TryAgainWeaponSwitch;Try again. Use the $SelectWeaponKeys keys to use all\n your weapons to your advantage.
 ;
-WeaponScriptsIntro;In order to ease stress on the pilot,\nweapon scripts may be activated. 
+WeaponScriptsIntro;In order to ease stress on the pilot,\nweapon scripts may be activated.
 WeaponScriptsIntro2;Weapon Scripts automatically cycle\nbetween various available weapons.
 WeaponScriptsIntro3;These may be adjusted to your preference later on.
 EngagingWeaponScript;Engaging weapon-script.
 TryAgainWeaponScript;Try again. Aligning yourself with your enemies\nshould be enough.
 DeactivatingWeaponScript;De-activating weapon-script.
-WeaponScriptToggleWithE;You can toggle the selected weapon script at\nany time using the [E] key or X-button.
+WeaponScriptToggleWithE;You can toggle the selected weapon script at\nany time using the $ToggleWeaponScriptKeys key or X-button.
 ;
 // Weapon upgrades?;
 130;All weapons may be upgraded as you proceed.

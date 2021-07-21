@@ -77,8 +77,11 @@ void LevelEditor::OnEnter(AppState* previousState) {
 	inputMapping.bindings.Add(new Binding(Action::CreateStartStopAction("ZoomOut"), KEY::PG_UP));
 	inputMapping.bindings.Add(new Binding(Action::CreateStartStopAction("ZoomIn"), KEY::PG_DOWN));
 	inputMapping.bindings.Add(new Binding(Action::CreateStartStopAction("PanRight"), KEY::RIGHT));
+	inputMapping.bindings.Add(new Binding(Action::CreateStartStopAction("PanRight"), KEY::D));
 	inputMapping.bindings.Add(new Binding(Action::CreateStartStopAction("PanLeft"), KEY::LEFT));
+	inputMapping.bindings.Add(new Binding(Action::CreateStartStopAction("PanLeft"), KEY::A));
 	inputMapping.bindings.Add(new Binding(Action::FromString("ClearSelection"), KEY::ESCAPE));
+
 
 	// Initially disable some buttons.
 	OnLevelLoaded();
@@ -435,12 +438,13 @@ void LevelEditor::ProcessMessage(Message* message) {
 		else if (msg == "StartZoomOut") {
 			zoomSpeed = -2;
 		}
+#define PAN_SPEED 3
 		else if (msg == "StartPanRight")
-			cameraPan.x = 1;
+			cameraPan.x = PAN_SPEED;
 		else if (msg == "StopPanRight" || msg == "StopPanLeft")
 			cameraPan.x = 0;
 		else if (msg == "StartPanLeft")
-			cameraPan.x = -1;
+			cameraPan.x = -PAN_SPEED;
 		else if (msg == "ClearSelection") {
 			Select(nullptr);
 			automaticallySelectClosestElement = true;
@@ -496,8 +500,9 @@ void LevelEditor::ProcessMessage(Message* message) {
 			}
 			break;
 		case MouseMessage::SCROLL:
+			float scrollBaseMultiplier = 50.0f;
 			if (levelCamera && mm->element == nullptr)
-				levelCamera->SetTargetZoom(levelCamera->CurrentZoom() * (1 - mm->scrollDistance * 0.5f) - mm->scrollDistance);
+				levelCamera->SetTargetZoom(levelCamera->CurrentZoom() * (1 - mm->scrollDistance) - mm->scrollDistance * scrollBaseMultiplier);
 			return;
 		}
 		previousMousePosition = mm->coords;

@@ -14,7 +14,11 @@ activatable true
 //topBorder ui/border_top_4
 //rightBorder ui/border_right_4
 //topRightCorner ui/top_right_corner_8x8
-//texture 0x445566
+texture 0x334455
+
+ToggledTexture 0x11223388
+NotToggledTexture 0x33445588
+
 //highlightOnActive true
 sizeRatioXY 0.2 1
 
@@ -25,9 +29,11 @@ list lNameIconDetails
 
 parent lNameIconDetails
 
-Label WeaponName "Test"
-sizeRatioY 0.3
-hoverable true
+/*
+	Label WeaponName "Test"
+	sizeRatioY 0.3
+	hoverable true
+*/
 
 ColumnList clIconDetails
 sizeRatioY 0.7
@@ -35,24 +41,18 @@ sizeRatioY 0.7
 parent clIconDetails
 
 Element Icon
-sizeRatioX 0.3
+sizeRatioX 0.5
 hoverable false
 texture null
 padding 0.01
-retainAspectRatio true 
-
+retainAspectRatio true
+border 0xFFFFFFFF
 
 List Details
-sizeRatioX 0.7
+sizeRatioX 0.5
 
 parent Details
 defaultSizeRatioY 0.5
-
-ColumnList CooldownAmmo
-sizeRatioY 0.5
-
-parent CooldownAmmo
-defaultSizeRatioXY 0.5 1
 
 Label Cooldown "2.7"
 hoverable false
@@ -61,4 +61,9 @@ textAlignment right
 Label Ammunition "100"
 hoverable true
 textAlignment right
+
+parent Icon
+Element ReloadGreying
+sizeRatioY 0.2
+texture 0xFFFFFFAA
 

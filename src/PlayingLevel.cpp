@@ -620,7 +620,8 @@ void PlayingLevel::ProcessMessage(Message* message)
 				HUD::Get()->OpenInGameMenu();
 
 			// Re-display Level Message if one is current.
-			level.activeLevelMessage->Trigger(*this, &level);
+			if (level.activeLevelMessage)
+				level.activeLevelMessage->Trigger(*this, &level);
 		}
 		else if (msg == "ProceedMessage")
 		{
@@ -837,10 +838,18 @@ void PlayingLevel::ProcessMessage(Message* message)
 		}
 		else if (msg.StartsWith("Weapon:"))
 		{
+
 			int weaponIndex = msg.Tokenize(":")[1].ParseInt();
 			weaponIndex -= 1;
 			if (weaponIndex < 0)
 				weaponIndex = 9;
+
+			// Trigger the UI to reflect the change.
+			for (int i = 0; i < 9; ++i) {
+				QueueGraphics(new GMSetUIb("HUDWeaponStatus" + String(i), GMUI::TOGGLED, false));
+			}
+			QueueGraphics(new GMSetUIb("HUDWeaponStatus" + String(weaponIndex), GMUI::TOGGLED, true));
+
 			playerShip->SwitchToWeapon(weaponIndex);
 		}
 		else if (msg == "UpdateHUDGearedWeapons")

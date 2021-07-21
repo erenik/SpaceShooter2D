@@ -131,6 +131,7 @@ SpaceShooter2D::~SpaceShooter2D()
 void SpaceShooter2D::OnEnter(AppState * previousState)
 {
 	//SaveFile::LoadAutoSave(Application::name);
+	GameVars.CreateInt("DebugUI", 0);
 
 	// Set some default 
 	// When clicking on it.

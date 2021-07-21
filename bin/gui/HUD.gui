@@ -22,8 +22,8 @@ noBorders
 
 list BottomPart
 noBorders
-sizeRatioXY	1 0.15
-alignmentXY	0.5 0.075
+sizeRatioXY	1 0.2
+alignmentXY	0.5 0.05
 
 label	LevelMessage
 texture 	0x22AA
@@ -57,13 +57,14 @@ InputTexture null
 parent BottomPart
 
 ColumnList clHPShield
-sizeRatioXY 0.5 0.25
+sizeRatioXY 0.5 0.2
 alignmentXY 0.5 0.8
 padding 0.01
 noBorders
 
 ColumnList clWeapons
-sizeRatioXY 0.5 0.7
+texture 0x223344AA
+sizeRatioXY 0.5 0.8
 alignmentY 0.45
 padding 0.01
 onEnterScope ActiveWeaponsShown
@@ -113,11 +114,11 @@ sizeRatioX 0.2
 
 
 ///////////////////////////////////
-// Debug 
+// Debug
 
-parent HUD 
+parent HUD
 defaultTexture NULL
-defaultSizeRatioXY 1 1 
+defaultSizeRatioXY 1 1
 defaultRightBorder ui/Orange2
 defaultFont Font3
 defaultFontShader Font
@@ -125,24 +126,24 @@ defaultTextColor 0xFFFF
 defaultForceUpperCase false
 
 element Debug
-sizeRatioXY 1 1  
+sizeRatioXY 1 1
 noBorders
 
 parent Debug
-list DebugRight 
+list DebugRight
 noBorders
 sizeRatioXY 0.3 1
 alignmentXY 0.85 0.5
 
-parent DebugRight 
+parent DebugRight
 
 defaultSizeRatioXY 1 0.04
-StringLabel LevelTime "Level time" 
+StringLabel LevelTime "Level time"
 
-IntegerLabel SpawnGroupsRemaining "Spawngroups remaining" 
-IntegerLabel SpawnGroupsActive "Spawngroups active" 
-StringLabel NextSpawnGroupTime "Next spawn group at" 
-IntegerLabel NextSpawnGroupLine "Line in level file" 
+IntegerLabel SpawnGroupsRemaining "Spawngroups remaining"
+IntegerLabel SpawnGroupsActive "Spawngroups active"
+StringLabel NextSpawnGroupTime "Next spawn group at"
+IntegerLabel NextSpawnGroupLine "Line in level file"
 
 defaultSizeRatioXY 1 0.03
 StringLabel EnemyProjectilesDodged "Enemy projectiles dodged"
